@@ -4,13 +4,14 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use SoftDeletes, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -43,6 +44,21 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'status' => 'boolean',
         ];
+    }
+    public function userProfile()
+    {
+        return $this->hasOne(UserProfile::class);
+    }
+    protected static function booted()
+    {
+        // Xử lý khi xóa mềm User
+        static::deleting(function ($user) {
+            if ($user->isSoftDeleting()) {
+                // Xóa mềm user_profiles tương ứng
+                $user->userProfile()->delete();
+            }
+        });
     }
 }

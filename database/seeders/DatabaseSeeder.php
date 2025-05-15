@@ -2,22 +2,33 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+
+use App\Models\User;
+use App\Models\UserProfile;
+use App\Models\Category;
+use App\Models\Brand;
+use App\Models\Product;
+use App\Models\ProductVariant;
+use App\Models\ProductVariantValue;
+use App\Models\Attribute;
+use App\Models\AttributeValue;
+use App\Models\Cart;
+use App\Models\CartItem;
+use App\Models\Comment;
+use App\Models\Discount;
+use App\Models\DiscountProduct;
+use App\Models\DiscountUsage;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\OrderStatus;
+use App\Models\Review;
+use App\Models\WishList;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
-    public function run(): void
+    public function run()
     {
-        // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
     }
 }
