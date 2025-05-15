@@ -7,7 +7,7 @@
     @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
-    {{-- Form lọc --}}
+    {{-- Form tìm kiếm --}}
     <form method="GET" action="{{ route('admin.account.listAdmins') }}" class="mb-4">
         <div class="row">
             <div class="col">
