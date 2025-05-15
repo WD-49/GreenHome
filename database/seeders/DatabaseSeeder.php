@@ -29,6 +29,6 @@ class DatabaseSeeder extends Seeder
 {
     public function run()
     {
-
+          Category::factory()->count(20)->create();
     }
 }

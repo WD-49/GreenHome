@@ -21,14 +21,14 @@ class Category extends Model
         return $this->hasMany(Product::class);
     }
     protected static function booted()
-    {
-        // Xử lý khi xóa mềm category
-        static::deleting(function ($category) {
-            if ($category->isSoftDeleting()) {
-                $category->products()->each(function ($product) {
-                    $product->delete(); // Kích hoạt deleting trong Product
-                });
-            }
-        });
-    }
+{
+    static::deleting(function ($category) {
+        if (! $category->isForceDeleting()) {
+            $category->products()->each(function ($product) {
+                $product->delete();
+            });
+        }
+    });
+}
+
 }
