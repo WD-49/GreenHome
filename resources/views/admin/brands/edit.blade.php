@@ -2,7 +2,7 @@
 
 @section('content')
 <h3>Sửa thương hiệu</h3>
-<form method="POST" action="{{ route('brands.update', $brand) }}">
+<form method="POST" action="{{ route('admin.brands.update', $brand) }}">
     @csrf @method('PUT')
     <div class="mb-3">
         <label>Tên thương hiệu</label>
