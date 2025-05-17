@@ -21,15 +21,14 @@ class Attribute extends Model
     }
 
     protected static function booted()
-    {
-        // Xử lý khi xóa mềm Attribute
-        static::deleting(function ($attribute) {
-            if ($attribute->isSoftDeleting()) {
-                // Xóa mềm tất cả attribute_values liên quan
-                $attribute->attributeValues()->each(function ($attributeValues) {
-                    $attributeValues->delete(); // Kích hoạt deleting trong attributeValues
-                });
-            }
-        });
-    }
+{
+    static::deleting(function ($attribute) {
+        // Kiểm tra đây là xóa mềm không
+        if (! $attribute->forceDeleting) {
+            $attribute->attributeValues->each(function ($attributeValue) {
+                $attributeValue->delete();
+            });
+        }
+    });
+}
 }
