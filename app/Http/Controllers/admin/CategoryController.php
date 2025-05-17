@@ -20,8 +20,7 @@ class CategoryController extends Controller
             $query->whereNull('deleted_at'); // Trạng thái chỉ hiện các bản ghi chưa bị xóa mềm
         }
 
-        $categories = $query->orderBy('created_at', 'DESC')
-                            ->paginate(10);
+        $categories = $query->orderBy('created_at', 'DESC')->paginate(10);
 
         return view('admin.categories.index', compact('categories'));
     }
@@ -43,25 +42,28 @@ class CategoryController extends Controller
         return redirect()->route('admin.categories.index');
     }
 
-    public function edit(Category $category)
+    public function edit($id)
     {
+        $category = Category::findOrFail($id);
         return view('admin.categories.edit', compact('category'));
     }
 
-    public function update(Request $request, Category $category)
+    public function update(Request $request, $id)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
         ]);
 
+        $category = Category::findOrFail($id);
         $category->update($request->all());
 
         return redirect()->route('admin.categories.index');
     }
 
-    public function destroy(Category $category)
+    public function destroy($id)
     {
+        $category = Category::findOrFail($id);
         $category->delete(); // Xóa mềm
         return redirect()->route('admin.categories.index');
     }
