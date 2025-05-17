@@ -13,7 +13,9 @@ class Brand extends Model
     protected $fillable = [
         'name',
         'description',
+
     ];
+    protected $dates = ['deleted_at'];
 
     // Quan hệ với products (1-nhiều)
     public function products()
@@ -21,15 +23,23 @@ class Brand extends Model
         return $this->hasMany(Product::class);
     }
 
-    protected static function booted()
+ protected static function booted()
     {
-        // Xử lý khi xóa mềm Brand
+        // Khi xóa mềm brand → xóa mềm các sản phẩm
         static::deleting(function ($brand) {
-            if ($brand->isSoftDeleting()) {
+            // Chỉ xử lý nếu là soft delete, không phải force delete
+            if (method_exists($brand, 'trashed') && !$brand->trashed()) {
                 $brand->products()->each(function ($product) {
-                    $product->delete(); // Kích hoạt deleting trong Product
+                    $product->delete(); // soft delete
                 });
             }
+        });
+
+        // Khi khôi phục brand → khôi phục sản phẩm
+        static::restoring(function ($brand) {
+            $brand->products()->onlyTrashed()->each(function ($product) {
+                $product->restore();
+            });
         });
     }
 }

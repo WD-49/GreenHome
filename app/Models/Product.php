@@ -51,16 +51,5 @@ class Product extends Model
         return $this->hasMany(ProductVariant::class);
     }
 
-    protected static function booted()
-    {
-        // Xử lý khi xóa mềm Product
-        static::deleting(function ($product) {
-            if ($product->isSoftDeleting()) {
-                // Xóa mềm tất cả product_variants liên quan
-                $product->productVariants()->each(function ($productVariants) {
-                    $productVariants->delete();
-                });
-            }
-        });
-    }
+  
 }
