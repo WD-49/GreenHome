@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\admin\AttributeController;
+use App\Http\Controllers\admin\AttributeValueController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProductController;
@@ -11,7 +13,6 @@ use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\admin\CategoryController;  // Tham chiếu đúng
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -91,5 +92,24 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/banners/{banner}/edit', [BannerController::class, 'edit'])->name('banners.edit');
     Route::put('/banners/{banner}', [BannerController::class, 'update'])->name('banners.update');
     Route::delete('/banners/{banner}', [BannerController::class, 'destroy'])->name('banners.destroy');
+  
+  Route::get('/attribute', [AttributeController::class, 'index'])->name('attribute.index');
+    Route::get('/attribute/trash', [AttributeController::class, 'trash'])->name('attribute.trash');
+    Route::get('/attribute/show/{id}', [AttributeController::class, 'show'])->name('attribute.show');
+    Route::get('/attribute/create', [AttributeController::class, 'create'])->name('attribute.create');
+    Route::post('/attribute/store', [AttributeController::class, 'store'])->name('attribute.store');
+    Route::get('/attribute/{id}/edit', [AttributeController::class, 'edit'])->name('attribute.edit');
+    Route::put('/attribute/{id}/update/', [AttributeController::class, 'update'])->name('attribute.update');
+    Route::delete('/attribute/{id}/destroy/', [AttributeController::class, 'destroy'])->name('attribute.destroy');
+    Route::patch('/attribute/{id}/restore/', [AttributeController::class, 'restore'])->name('attribute.restore');
+    // Attribute Value
+    Route::get('/attribute/value/create/', [AttributeValueController::class, 'create'])->name('attribute.value.create');
+    Route::get('/attribute/value/', [AttributeValueController::class, 'index'])->name('attribute.value.index');
+    Route::post('/attribute/value/store', [AttributeValueController::class, 'store'])->name('attribute.value.store');
+    Route::get('/attribute/value/{id}/edit/', [AttributeValueController::class, 'edit'])->name('attribute.value.edit');
+    Route::put('/attribute/value/{id}/update/', [AttributeValueController::class, 'update'])->name('attribute.value.update');
+    Route::delete('/attribute/value/{id}/destroy/', [AttributeValueController::class, 'destroy'])->name('attribute.value.destroy');
+    Route::get('/attribute/value/trash', [AttributeValueController::class, 'trash'])->name('attribute.value.trash');
+    Route::patch('/attribute/value/{id}/restore/', [AttributeValueController::class, 'restore'])->name('attribute.value.restore');
 });
 
