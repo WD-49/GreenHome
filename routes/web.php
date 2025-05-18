@@ -1,19 +1,21 @@
 <?php
 
+use App\Http\Controllers\admin\AttributeController;
+use App\Http\Controllers\admin\AttributeValueController;
+use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\Account\AccountAdminController;
 use App\Http\Controllers\Admin\Account\AccountUsersController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\client\HomeController;
+use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\admin\CategoryController;  // Tham chiếu đúng
-
-
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::prefix('/categories')->name('categories.')->group(function () {
         Route::get('/', [CategoryController::class, 'index'])->name('index');
@@ -25,7 +27,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/trash', [CategoryController::class, 'trash'])->name('trash');
         Route::post('/{id}/restore', [CategoryController::class, 'restore'])->name('restore');
     });
- 
+
     Route::prefix('/products')->name('products.')->group(function () {
         Route::get('/list', [ProductController::class, 'index'])->name('index');
         Route::get('/create-new', [ProductController::class, 'create'])->name('create');
@@ -67,5 +69,45 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/forceDeleteAdmin/{id}', [AccountAdminController::class, 'forceDeleteAdmin'])->name('forceDeleteAdmin');
         Route::post('/resetPassword/{id}', [AccountAdminController::class, 'resetPassword'])->name('resetPassword');
     });
+
+    Route::prefix('/brands')->name('brands.')->group(function () {
+        Route::get('/list', [BrandController::class, 'index'])->name('index');
+        Route::get('/create-new', [BrandController::class, 'create'])->name('create');
+        Route::post('/store-new', [BrandController::class, 'store'])->name('store');
+        Route::get('/{id}/detail', [BrandController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [BrandController::class, 'edit'])->name('edit');
+        Route::put('/{id}/update', [BrandController::class, 'update'])->name('update');
+        Route::delete('/{id}/destroy', [BrandController::class, 'destroy'])->name('destroy');
+
+        // Thùng rác
+        Route::get('/trashed', [BrandController::class, 'trash'])->name('trashed');
+        Route::get('/{id}/restore', [BrandController::class, 'restore'])->name('restore');
+        Route::delete('/{id}/forceDelete', [BrandController::class, 'forceDelete'])->name('forceDelete');
+    });
+    Route::get('/banners', [BannerController::class, 'index'])->name('banners.index');
+    Route::get('/banners/create', [BannerController::class, 'create'])->name('banners.create');
+    Route::post('/banners', [BannerController::class, 'store'])->name('banners.store');
+    Route::get('/banners/{banner}/edit', [BannerController::class, 'edit'])->name('banners.edit');
+    Route::put('/banners/{banner}', [BannerController::class, 'update'])->name('banners.update');
+    Route::delete('/banners/{banner}', [BannerController::class, 'destroy'])->name('banners.destroy');
+
+    Route::get('/attribute', [AttributeController::class, 'index'])->name('attribute.index');
+    Route::get('/attribute/trash', [AttributeController::class, 'trash'])->name('attribute.trash');
+    Route::get('/attribute/show/{id}', [AttributeController::class, 'show'])->name('attribute.show');
+    Route::get('/attribute/create', [AttributeController::class, 'create'])->name('attribute.create');
+    Route::post('/attribute/store', [AttributeController::class, 'store'])->name('attribute.store');
+    Route::get('/attribute/{id}/edit', [AttributeController::class, 'edit'])->name('attribute.edit');
+    Route::put('/attribute/{id}/update/', [AttributeController::class, 'update'])->name('attribute.update');
+    Route::delete('/attribute/{id}/destroy/', [AttributeController::class, 'destroy'])->name('attribute.destroy');
+    Route::patch('/attribute/{id}/restore/', [AttributeController::class, 'restore'])->name('attribute.restore');
+    // Attribute Value
+    Route::get('/attribute/value/create/', [AttributeValueController::class, 'create'])->name('attribute.value.create');
+    Route::get('/attribute/value/', [AttributeValueController::class, 'index'])->name('attribute.value.index');
+    Route::post('/attribute/value/store', [AttributeValueController::class, 'store'])->name('attribute.value.store');
+    Route::get('/attribute/value/{id}/edit/', [AttributeValueController::class, 'edit'])->name('attribute.value.edit');
+    Route::put('/attribute/value/{id}/update/', [AttributeValueController::class, 'update'])->name('attribute.value.update');
+    Route::delete('/attribute/value/{id}/destroy/', [AttributeValueController::class, 'destroy'])->name('attribute.value.destroy');
+    Route::get('/attribute/value/trash', [AttributeValueController::class, 'trash'])->name('attribute.value.trash');
+    Route::patch('/attribute/value/{id}/restore/', [AttributeValueController::class, 'restore'])->name('attribute.value.restore');
 });
 

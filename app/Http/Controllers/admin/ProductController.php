@@ -194,7 +194,7 @@ class ProductController extends Controller
 
         // Xử lý hình ảnh nếu có upload mới
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('image/products', 'public');
+            $imagePath = $request->file('image')->store('images/products', 'public');
             $dataValidate['image'] = $imagePath;
 
             if ($product->image) {

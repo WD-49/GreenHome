@@ -32,13 +32,14 @@
 
 <body>
     @if (session('success'))
-        <div class="alert alert-success custom-toast-alert-center" role="alert">
+        <div class="alert alert-success custom-toast-alert-center" role="alert" id="success-alert">
             <div class="flex-grow-1">
                 <strong><i>{{ session('success') }}</i></strong>
             </div>
             <button type="button" class="btn-close ms-3" data-bs-dismiss="alert" aria-label="Đóng"></button>
         </div>
     @endif
+
 
 
 
