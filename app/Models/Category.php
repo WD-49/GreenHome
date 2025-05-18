@@ -20,6 +20,7 @@ class Category extends Model
     {
         return $this->hasMany(Product::class);
     }
+  
     protected static function booted()
 {
     static::deleting(function ($category) {
@@ -30,5 +31,4 @@ class Category extends Model
         }
     });
 }
-
 }

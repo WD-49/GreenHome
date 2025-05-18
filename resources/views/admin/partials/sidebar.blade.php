@@ -55,7 +55,7 @@
                 </a>
             </li>
             <li class="nav-item  active ">
-                <a href="" class="nav-link">
+                <a href="{{ route('admin.products.index') }}" class="nav-link">
                     <span class="sidebar-icon">
                         <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
                             xmlns="http://www.w3.org/2000/svg">
@@ -65,6 +65,26 @@
                     </span>
                     <span class="sidebar-text">products</span>
                 </a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse"
+                    href="#productMenu" role="button" aria-expanded="false" aria-controls="productMenu">
+                    <span>
+                        <i class="fas fa-user icon icon-xs me-2"></i>
+                        Account
+                    </span>
+                    <i class="fas fa-chevron-down"></i>
+                </a>
+                <div class="collapse" id="productMenu">
+                    <ul class="nav flex-column ps-3">
+                        <li class="nav-item">
+                            <a href="{{ route('admin.account.listUsers') }}" class="nav-link">User</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.account.listAdmins') }}" class="nav-link">Admin</a>
+                        </li>
+                    </ul>
+                </div>
             </li>
             <li class="nav-item  active ">
                 <a href="{{ route('admin.categories.index') }}" class="nav-link">
