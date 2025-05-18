@@ -42,4 +42,5 @@ class Brand extends Model
             });
         });
     }
+
 }
