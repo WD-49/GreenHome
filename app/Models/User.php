@@ -51,14 +51,14 @@ class User extends Authenticatable
     {
         return $this->hasOne(UserProfile::class);
     }
-    protected static function booted()
-    {
-        // Xử lý khi xóa mềm User
-        static::deleting(function ($user) {
-            if ($user->isSoftDeleting()) {
-                // Xóa mềm user_profiles tương ứng
-                $user->userProfile()->delete();
-            }
-        });
-    }
+    // protected static function booted()
+    // {
+    //     // Xử lý khi xóa mềm User
+    //     static::deleting(function ($user) {
+    //         if ($user->isSoftDeleting()) {
+    //             // Xóa mềm user_profiles tương ứng
+    //             $user->userProfile()->delete();
+    //         }
+    //     });
+    // }
 }

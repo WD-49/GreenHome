@@ -55,7 +55,7 @@
                 </a>
             </li>
             <li class="nav-item  active ">
-                <a href="" class="nav-link">
+                <a href="{{ route('admin.products.index') }}" class="nav-link">
                     <span class="sidebar-icon">
                         <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
                             xmlns="http://www.w3.org/2000/svg">

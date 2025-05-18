@@ -1,0 +1,54 @@
+/* alert căn giữa */
+.custom-toast-alert-center {
+    position: fixed;
+    top: 1rem;
+    /* tương đương mt-3 */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1055;
+    width: 90%;
+    max-width: 600px;
+    border-radius: 12px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+    /* giống shadow của Bootstrap */
+    opacity: 1;
+    transition: opacity 0.15s linear;
+}
+
+/* alert lệch trái */
+.custom-toast-alert-left {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1055;
+    width: auto;
+    max-width: 600px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: left;
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+}
+
+/* alert lệch phải */
+.custom-toast-alert-right {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1055;
+    width: auto;
+    max-width: 600px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: left;
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+}
