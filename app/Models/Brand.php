@@ -21,15 +21,15 @@ class Brand extends Model
         return $this->hasMany(Product::class);
     }
 
-    protected static function booted()
-    {
-        // Xử lý khi xóa mềm Brand
-        static::deleting(function ($brand) {
-            if ($brand->isSoftDeleting()) {
-                $brand->products()->each(function ($product) {
-                    $product->delete(); // Kích hoạt deleting trong Product
-                });
-            }
-        });
-    }
+    // protected static function booted()
+    // {
+    //     // Xử lý khi xóa mềm Brand
+    //     static::deleting(function ($brand) {
+    //         if ($brand->isSoftDeleting()) {
+    //             $brand->products()->each(function ($product) {
+    //                 $product->delete(); // Kích hoạt deleting trong Product
+    //             });
+    //         }
+    //     });
+    // }
 }
