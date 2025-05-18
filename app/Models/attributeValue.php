@@ -27,6 +27,7 @@ class attributeValue extends Model
         return $this->hasMany(ProductVariantValue::class);
     }
 
+
     protected static function booted()
 {
     static::deleting(function ($attributeValue) {
@@ -36,4 +37,5 @@ class attributeValue extends Model
         }
     });
 }
+
 }
