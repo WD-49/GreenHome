@@ -29,13 +29,6 @@ class DatabaseSeeder extends Seeder
 {
     public function run()
     {
-        $products = Product::inRandomOrder()->take(2)->get();
 
-        foreach ($products as $product) {
-            // mỗi product sẽ có vài variant (2-3 mỗi cái)
-            ProductVariant::factory()->count(2)->create([
-                'product_id' => $product->id
-            ]);
-        }
     }
 }
