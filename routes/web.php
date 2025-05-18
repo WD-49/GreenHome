@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\Account\AccountAdminController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\admin\CategoryController;  // Tham chiếu đúng
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -83,5 +85,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/{id}/restore', [BrandController::class, 'restore'])->name('restore');
         Route::delete('/{id}/forceDelete', [BrandController::class, 'forceDelete'])->name('forceDelete');
     });
+  Route::get('/banners', [BannerController::class, 'index'])->name('banners.index');
+    Route::get('/banners/create', [BannerController::class, 'create'])->name('banners.create');
+    Route::post('/banners', [BannerController::class, 'store'])->name('banners.store');
+    Route::get('/banners/{banner}/edit', [BannerController::class, 'edit'])->name('banners.edit');
+    Route::put('/banners/{banner}', [BannerController::class, 'update'])->name('banners.update');
+    Route::delete('/banners/{banner}', [BannerController::class, 'destroy'])->name('banners.destroy');
 });
 
