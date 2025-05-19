@@ -19,15 +19,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::prefix('/categories')->name('categories.')->group(function () {
-        Route::get('/', [CategoryController::class, 'index'])->name('index');
-        Route::get('/create', [CategoryController::class, 'create'])->name('create');
-        Route::post('/store', [CategoryController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [CategoryController::class, 'edit'])->name('edit');
-        Route::put('/{id}/update', [CategoryController::class, 'update'])->name('update');
-        Route::delete('/{id}/destroy', [CategoryController::class, 'destroy'])->name('destroy');
-        Route::get('/trash', [CategoryController::class, 'trash'])->name('trash');
-        Route::post('/{id}/restore', [CategoryController::class, 'restore'])->name('restore');
-    });
+    Route::get('/', [CategoryController::class, 'index'])->name('index');
+    Route::get('/create', [CategoryController::class, 'create'])->name('create');
+    Route::post('/store', [CategoryController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [CategoryController::class, 'edit'])->name('edit');
+    Route::put('/{id}/update', [CategoryController::class, 'update'])->name('update');
+    Route::delete('/{id}/destroy', [CategoryController::class, 'destroy'])->name('destroy');
+    Route::get('/trash', [CategoryController::class, 'trash'])->name('trash');
+    Route::post('/{id}/restore', [CategoryController::class, 'restore'])->name('restore');
+    Route::delete('/{id}/force-delete', [CategoryController::class, 'forceDelete'])->name('forceDelete'); // ✅ THÊM DÒNG NÀY
+});
+
 
     Route::prefix('/products')->name('products.')->group(function () {
         Route::get('/list', [ProductController::class, 'index'])->name('index');
