@@ -76,7 +76,15 @@ class ProductController extends Controller
         $categories = Category::get();
         $brands = Brand::get();
 
-        $query = Product::onlyTrashed()->with(['category', 'brand']);
+        $query = Product::onlyTrashed()->with([
+            'category' => function ($query) {
+                $query->withTrashed();
+            },
+            'brand' => function ($query) {
+                $query->withTrashed();
+            },
+        ]);
+
 
 
         if ($request->filled('name')) {

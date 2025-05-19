@@ -87,7 +87,7 @@
                         <button type="submit" class="btn btn-primary btn-lg">
                             <i class="fas fa-search me-2"></i> Tìm kiếm
                         </button>
-                        <a href="{{ route('admin.products.index') }}" class="btn btn-secondary btn-lg">
+                        <a href="{{ route('admin.products.trashed') }}" class="btn btn-secondary btn-lg">
                             <i class="fas fa-sync me-2"></i> Làm mới
                         </a>
                     </div>
