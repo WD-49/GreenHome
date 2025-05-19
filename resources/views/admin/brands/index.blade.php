@@ -2,8 +2,18 @@
 
 @section('content')
 <h3>Danh sách thương hiệu</h3>
+
 <a href="{{ route('admin.brands.create') }}" class="btn btn-primary mb-2">Thêm thương hiệu</a>
 <a href="{{ route('admin.brands.trashed') }}" class="btn btn-secondary mb-2">Thùng rác</a>
+
+{{-- Form tìm kiếm --}}
+<div class="d-flex justify-content-end mb-3">
+    <form method="GET" action="{{ route('admin.brands.index') }}" class="d-flex" style="max-width: 400px;">
+        <input type="text" name="keyword" value="{{ request('keyword') }}" class="form-control me-2" placeholder="Tìm theo tên...">
+        <button class="btn btn-outline-primary">Tìm</button>
+    </form>
+</div>
+
 
 @if(session('success'))
     <div class="alert alert-success">{{ session('success') }}</div>
@@ -18,7 +28,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach($brands as $brand)
+        @forelse($brands as $brand)
         <tr>
             <td>{{ $brand->name }}</td>
             <td>{{ $brand->description }}</td>
@@ -31,9 +41,14 @@
                 </form>
             </td>
         </tr>
-        @endforeach
+        @empty
+        <tr>
+            <td colspan="3" class="text-center">Không tìm thấy thương hiệu nào.</td>
+        </tr>
+        @endforelse
     </tbody>
 </table>
 
-{{ $brands->links() }}
+{{-- Giữ lại keyword khi phân trang --}}
+{{ $brands->appends(['keyword' => request('keyword')])->links() }}
 @endsection

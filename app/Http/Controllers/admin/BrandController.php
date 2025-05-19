@@ -9,16 +9,21 @@ use App\Http\Requests\admin\attribute\BrandRequest;
 
 class BrandController extends Controller
 {
-    public function index()
-    {
-        $brands = Brand::latest()->paginate(10);
-        return view('admin.brands.index', compact('brands'));
+    public function index(Request $request)
+{
+    // Tạo query ban đầu
+    $query = Brand::query();
+
+    // Thêm điều kiện tìm kiếm nếu có
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
     }
 
-    public function create()
-    {
-        return view('admin.brands.create');
-    }
+    // Sắp xếp mới nhất và phân trang
+    $brands = $query->orderBy('created_at', 'desc')->paginate(10);
+
+    return view('admin.brands.index', compact('brands'));
+}
 
     public function store( BrandRequest $request)
     {
