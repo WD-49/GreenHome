@@ -21,7 +21,7 @@ class UserProfileFactory extends Factory
             'user_id' => User::factory(), // tạo user tương ứng (hoặc thay bằng ID có sẵn)
             'phone' => $this->faker->phoneNumber(),
             'address' => $this->faker->address(),
-            'gender' => $this->faker->randomElement(['male', 'female', 'others']),
+            'gender' => $this->faker->randomElement(['nam', 'nu', 'khac']),
             'birth_date' => $this->faker->date('Y-m-d', '-18 years'), // ít nhất 18 tuổi
             'user_image' => $this->faker->imageUrl(200, 200, 'people', true, 'User'), // ảnh giả
         ];

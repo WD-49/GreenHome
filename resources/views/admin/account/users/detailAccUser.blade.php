@@ -29,8 +29,9 @@
 
                     @if ($user->profile->user_image)
                         <p><strong>Ảnh đại diện:</strong></p>
-                        <img src="{{ asset($user->profile->user_image) }}" alt="Ảnh đại diện" class="img-thumbnail"
+                        <img src="{{ asset('storage/' . $user->profile->user_image) }}" alt="Ảnh đại diện" class="img-thumbnail"
                             style="max-width: 200px;">
+                            
                     @endif
                 </div>
             @else

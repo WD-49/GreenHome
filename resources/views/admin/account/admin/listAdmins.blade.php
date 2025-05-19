@@ -79,6 +79,6 @@
 
     {{-- Phân trang --}}
     <div class="d-flex justify-content-center">
-        {{ $admins->appends(request()->query())->links() }}
+        {{ $admins->appends(request()->query())->links('pagination::bootstrap-5') }}
     </div>
 @endsection

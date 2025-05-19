@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run()
     {
-        // User::factory(5)->create();
-        UserProfile::factory(5)->create();
+        // User::factory(10)->create();
+        UserProfile::factory(10)->create();
     }
 }
