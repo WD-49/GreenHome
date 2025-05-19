@@ -25,18 +25,54 @@
             <input type="text" name="code" class="form-control" value="{{ old('code', $discount->code) }}" required>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Loại giảm giá</label>
-            <select name="discount_type" class="form-control" required>
-                <option value="percentage" {{ old('discount_type', $discount->discount_type) == 'percentage' ? 'selected' : '' }}>Phần trăm</option>
-                <option value="fixed" {{ old('discount_type', $discount->discount_type) == 'fixed' ? 'selected' : '' }}>Cố định</option>
-            </select>
-        </div>
+     <div class="mb-3">
+    <label class="form-label">Loại giảm giá</label>
+    <select name="discount_type" id="discount_type" class="form-control" required>
+        <option value="percentage" {{ old('discount_type', $discount->discount_type) == 'percentage' ? 'selected' : '' }}>Phần trăm</option>
+        <option value="fixed" {{ old('discount_type', $discount->discount_type) == 'fixed' ? 'selected' : '' }}>Cố định</option>
+    </select>
+</div>
 
-        <div class="mb-3">
-            <label class="form-label">Giá trị giảm</label>
-            <input type="number" name="discount_value" class="form-control" value="{{ old('discount_value', $discount->discount_value) }}" required>
-        </div>
+<div class="mb-3">
+    <label class="form-label">Giá trị giảm</label>
+    <div style="display: flex; align-items: center;">
+        <input 
+            type="number" 
+            name="discount_value" 
+            class="form-control" 
+            value="{{ old('discount_value', $discount->discount_value ?? '') }}" 
+            required 
+            style="flex: 1;"
+        >
+        <span id="unit_label" style="margin-left: 10px; font-weight: bold;">
+            @php
+                $type = old('discount_type', $discount->discount_type ?? 'percentage');
+                echo $type === 'fixed' ? 'VND' : '%';
+            @endphp
+        </span>
+    </div>
+    @error('discount_value')
+        <div class="text-danger">{{ $message }}</div>
+    @enderror
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const discountType = document.getElementById('discount_type');
+        const unitLabel = document.getElementById('unit_label');
+
+        if (discountType && unitLabel) {
+            function updateLabel() {
+                unitLabel.textContent = discountType.value === 'fixed' ? 'VND' : '%';
+            }
+
+            discountType.addEventListener('change', updateLabel);
+        }
+    });
+</script>
+
+
+        
 
      <div class="mb-3">
     <label class="form-label">Ngày bắt đầu</label>
