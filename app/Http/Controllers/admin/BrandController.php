@@ -9,7 +9,7 @@ use App\Http\Requests\admin\attribute\BrandRequest;
 
 class BrandController extends Controller
 {
-    // Hiển thị danh sách thương hiệu + tìm kiếm
+    // Danh sách thương hiệu + tìm kiếm
     public function index(Request $request)
     {
         $query = Brand::query();
@@ -23,13 +23,13 @@ class BrandController extends Controller
         return view('admin.brands.index', compact('brands'));
     }
 
-    // Hiển thị form thêm mới thương hiệu
+    // Form thêm thương hiệu
     public function create()
     {
         return view('admin.brands.create');
     }
 
-    // Xử lý lưu thương hiệu mới
+    // Xử lý thêm mới thương hiệu
     public function store(BrandRequest $request)
     {
         $request->validate([
@@ -37,22 +37,19 @@ class BrandController extends Controller
             'description' => 'required|string',
         ]);
 
-        Brand::create([
-            'name' => $request->name,
-            'description' => $request->description,
-        ]);
+        Brand::create($request->only(['name', 'description']));
 
-        return redirect()->route('admin.brands.index')->with('success', 'Thêm thương hiệu thành công!');
+        return redirect()->route('admin.brands.index')->with('success', '✅ Thêm thương hiệu thành công!');
     }
 
-    // Hiển thị form chỉnh sửa thương hiệu
+    // Form chỉnh sửa thương hiệu
     public function edit($id)
     {
         $brand = Brand::findOrFail($id);
         return view('admin.brands.edit', compact('brand'));
     }
 
-    // Xử lý cập nhật thương hiệu
+    // Cập nhật thương hiệu
     public function update(BrandRequest $request, $id)
     {
         $request->validate([
@@ -61,45 +58,46 @@ class BrandController extends Controller
         ]);
 
         $brand = Brand::findOrFail($id);
-        $brand->update([
-            'name' => $request->name,
-            'description' => $request->description,
-        ]);
+        $brand->update($request->only(['name', 'description']));
 
-        return redirect()->route('admin.brands.index')->with('success', 'Cập nhật thương hiệu thành công!');
+        return redirect()->route('admin.brands.index')->with('success', '✏️ Cập nhật thương hiệu thành công!');
     }
 
-    // Xóa mềm (chuyển vào thùng rác)
+    // Xóa mềm thương hiệu
     public function destroy($id)
     {
         $brand = Brand::findOrFail($id);
         $brand->delete();
 
-        return redirect()->route('admin.brands.index')->with('success', 'Đã chuyển vào thùng rác!');
+        return redirect()->route('admin.brands.index')->with('success', '🗑️ Đã chuyển thương hiệu vào thùng rác!');
     }
 
-    // Hiển thị danh sách thương hiệu đã bị xóa (thùng rác)
+    // Danh sách thương hiệu trong thùng rác
     public function trash()
     {
-        $brands = Brand::onlyTrashed()->paginate(10);
+        $brands = Brand::onlyTrashed()->orderBy('deleted_at', 'desc')->paginate(10);
         return view('admin.brands.trash', compact('brands'));
     }
 
-    // Khôi phục thương hiệu từ thùng rác
+    // Khôi phục thương hiệu
     public function restore($id)
     {
-        Brand::onlyTrashed()->findOrFail($id)->restore();
-        return redirect()->route('admin.brands.trash')->with('success', 'Khôi phục thành công!');
+        $brand = Brand::onlyTrashed()->findOrFail($id);
+        $brand->restore();
+
+        return redirect()->route('admin.brands.trash')->with('success', '♻️ Khôi phục thương hiệu thành công!');
     }
 
     // Xóa vĩnh viễn thương hiệu
     public function forceDelete($id)
     {
-        Brand::onlyTrashed()->findOrFail($id)->forceDelete();
-        return redirect()->route('admin.brands.trash')->with('success', 'Đã xóa vĩnh viễn!');
+        $brand = Brand::onlyTrashed()->findOrFail($id);
+        $brand->forceDelete();
+
+        return redirect()->route('admin.brands.trash')->with('success', '❌ Đã xóa thương hiệu vĩnh viễn!');
     }
 
-    // Hiển thị chi tiết thương hiệu (có thể cả bản đã xóa)
+    // Hiển thị chi tiết thương hiệu
     public function show($id)
     {
         $brand = Brand::withTrashed()->findOrFail($id);
