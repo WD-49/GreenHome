@@ -135,9 +135,9 @@
                             </td>
 
                             <td>
-                                <a href="{{ route('admin.products.show', $product->id) }}" class="btn btn-info btn-sm"
+                                {{-- <a href="{{ route('admin.products.show', $product->id) }}" class="btn btn-info btn-sm"
                                     title="xem chi tiết"><i class="fa-solid fa-eye"></i>
-                                </a>
+                                </a> --}}
                                 <a href="{{ route('admin.products.edit', $product->id) }}" class="btn btn-warning btn-sm"
                                     title="chỉnh sửa"><i class="fa-solid fa-pen"></i>
                                 </a>

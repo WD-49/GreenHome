@@ -34,7 +34,7 @@ class BrandController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:20|unique:brands,name',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
         ]);
 
         Brand::create($request->only(['name', 'description']));
@@ -85,7 +85,7 @@ class BrandController extends Controller
         $brand = Brand::onlyTrashed()->findOrFail($id);
         $brand->restore();
 
-        return redirect()->route('admin.brands.trash')->with('success', '♻️ Khôi phục thương hiệu thành công!');
+        return redirect()->route('admin.brands.trashed')->with('success', '♻️ Khôi phục thương hiệu thành công!');
     }
 
     // Xóa vĩnh viễn thương hiệu

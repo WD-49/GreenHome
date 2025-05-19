@@ -7,10 +7,6 @@
 @section('content')
     <h1 class="text-center">Quản lý Danh mục</h1>
 
-    @if (session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-
     <!-- Bộ lọc -->
     <div class="card-header bg-primary text-white">
         <h5 class="mb-0"><i class="fas fa-filter"></i> Lọc danh mục</h5>
@@ -74,7 +70,7 @@
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger btn-sm btn-confirm" title="xóa"
-                                        data-confirm-message="Bạn có chắc chắn muốn bỏ sản phẩm này vào thùng rác không?"><i
+                                        data-confirm-message="Bạn có chắc chắn muốn bỏ danh mục này vào thùng rác không?"><i
                                             class="fa-solid fa-trash"></i></button>
                                 </form>
                             </td>

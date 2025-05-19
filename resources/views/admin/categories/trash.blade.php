@@ -47,8 +47,8 @@
                                 class="d-inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm btn-confirm" title="xóa"
-                                    data-confirm-message="Bạn có chắc chắn muốn xóa vĩnh viễn?"><i
+                                <button type="submit" class="btn btn-danger btn-sm btn-confirm" title="xóa vĩnh viễn"
+                                    data-confirm-message="Bạn có chắc chắn muốn xóa vĩnh viễn danh mục này không?"><i
                                         class="fa-solid fa-trash"></i></button>
                             </form>
                         </td>

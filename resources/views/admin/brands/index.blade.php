@@ -6,12 +6,6 @@
 
 @section('content')
     <h1 class="text-center">Danh sách thương hiệu</h1>
-
-    {{-- Thông báo thành công --}}
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-
     {{-- Form tìm kiếm --}}
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-primary text-white">
@@ -61,16 +55,18 @@
                             <td>{{ $brand->name }}</td>
                             <td>{{ $brand->description }}</td>
                             <td>
-                                <a href="{{ route('admin.brands.edit', $brand) }}" class="btn btn-warning btn-sm" title="Chỉnh sửa">
+                                <a href="{{ route('admin.brands.edit', $brand) }}" class="btn btn-warning btn-sm"
+                                    title="Chỉnh sửa">
                                     <i class="fas fa-pen"></i>
                                 </a>
-                               <form action="{{ route('admin.brands.destroy', $brand->id) }}" method="POST" class="d-inline delete-form">
-    @csrf
-    @method('DELETE')
-    <button type="submit" class="btn btn-danger btn-sm btn-delete">
-        <i class="fas fa-trash-alt"></i> 
-    </button>
-</form>
+                                <form action="{{ route('admin.brands.destroy', $brand->id) }}" method="POST"
+                                    class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm btn-confirm" title="xóa"
+                                        data-confirm-message="Bạn có chắc chắn muốn bỏ thương hiệu này vào thùng rác không?"><i
+                                            class="fa-solid fa-trash"></i></button>
+                                </form>
                             </td>
                         </tr>
                     @empty
@@ -104,38 +100,3 @@
         @endif
     </div>
 @endsection
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const deleteForms = document.querySelectorAll('.delete-form');
-
-        deleteForms.forEach(form => {
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
-
-              Swal.fire({
-    title: 'Xác nhận',
-    text: 'Bạn có chắc chắn muốn bỏ thương hiệu này vào thùng rác không?',
-    icon: 'success', // icon màu xanh lá giống sản phẩm
-    showCancelButton: true,
-    confirmButtonText: 'Xác nhận',
-    cancelButtonText: 'Huỷ',
-    reverseButtons: true,
-    customClass: {
-        popup: 'rounded-3',
-        title: 'fw-bold text-success',
-        confirmButton: 'btn btn-success px-4',
-        cancelButton: 'btn btn-dark px-4'
-    },
-    buttonsStyling: false
-}).then((result) => {
-    if (result.isConfirmed) {
-        form.submit();
-    }
-});
-
-            });
-        });
-    });
-</script>

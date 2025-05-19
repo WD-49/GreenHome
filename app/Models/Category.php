@@ -24,9 +24,18 @@ class Category extends Model
     // Khôi phục danh mục sẽ khôi phục các sản phẩm đã xóa mềm trong danh mục
     protected static function booted()
     {
+        static::deleting(function ($category) {
+            if (!$category->isForceDeleting()) {
+                // Xóa mềm tất cả category_variants liên quan
+                $category->products()->each(function ($products) {
+                    $products->delete();
+                });
+            }
+        });
+
         static::restoring(function ($category) {
             $category->products()->onlyTrashed()->restore();
         });
     }
-    
+
 }

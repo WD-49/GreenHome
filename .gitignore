@@ -6,6 +6,9 @@
 /storage/*.key
 /storage/pail
 /vendor
+/storage/app/public/images
+/storage/logs/*
+
 
 
 .env
@@ -23,3 +26,6 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+/bootstrap/cache/*.php
+/storage/logs
+/storage/framework

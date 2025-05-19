@@ -4,9 +4,7 @@
     <h1>Quản lý tài khoản admin</h1>
     {{-- <a href="{{ route('admin.account.createAdmin') }}" class="btn btn-primary mb-3">Thêm admin</a> --}}
     <h3>Tìm kiếm thông tin</h3>
-    @if (session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
+    
     {{-- Form tìm kiếm thông tin --}}
     <form method="GET" action="{{ route('admin.account.listAdmins') }}" class="mb-4">
         <div class="row">
