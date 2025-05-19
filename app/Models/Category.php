@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Category extends Model
 {
-    /** @use HasFactory<\Database\Factories\CategoryFactory> */
-    use SoftDeletes, HasFactory;
+    use HasFactory, SoftDeletes;
+
     protected $fillable = [
         'name',
         'description',
@@ -20,15 +20,13 @@ class Category extends Model
     {
         return $this->hasMany(Product::class);
     }
-  
+
+    // Khôi phục danh mục sẽ khôi phục các sản phẩm đã xóa mềm trong danh mục
     protected static function booted()
-{
-    static::deleting(function ($category) {
-        if (! $category->isForceDeleting()) {
-            $category->products()->each(function ($product) {
-                $product->delete();
-            });
-        }
-    });
-}
+    {
+        static::restoring(function ($category) {
+            $category->products()->onlyTrashed()->restore();
+        });
+    }
+    
 }

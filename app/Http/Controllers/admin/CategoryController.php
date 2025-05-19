@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Category;
@@ -16,12 +15,11 @@ class CategoryController extends Controller
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-        if ($request->has('status')) {
-            $query->whereNull('deleted_at'); // Trạng thái chỉ hiện các bản ghi chưa bị xóa mềm
+        if ($request->has('status') && $request->status == 'active') {
+            $query->whereNull('deleted_at'); // Chỉ bản ghi chưa bị xóa
         }
 
         $categories = $query->orderBy('created_at', 'DESC')->paginate(10);
-
         return view('admin.categories.index', compact('categories'));
     }
 
@@ -33,13 +31,16 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+        ], [
+            'name.required' => 'Tên danh mục là bắt buộc.',
+            'name.max' => 'Tên danh mục không được vượt quá 255 ký tự.',
         ]);
 
         Category::create($request->all());
 
-        return redirect()->route('admin.categories.index');
+        return redirect()->route('admin.categories.index')->with('success', 'Thêm danh mục thành công.');
     }
 
     public function edit($id)
@@ -51,33 +52,53 @@ class CategoryController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+        ], [
+            'name.required' => 'Tên danh mục là bắt buộc.',
+            'name.max' => 'Tên danh mục không được vượt quá 255 ký tự.',
         ]);
 
         $category = Category::findOrFail($id);
         $category->update($request->all());
 
-        return redirect()->route('admin.categories.index');
+        return redirect()->route('admin.categories.index')->with('success', 'Cập nhật danh mục thành công.');
     }
 
     public function destroy($id)
     {
         $category = Category::findOrFail($id);
-        $category->delete(); // Xóa mềm
-        return redirect()->route('admin.categories.index');
+        $category->delete();
+        return redirect()->route('admin.categories.index')->with('success', 'Đã chuyển danh mục vào thùng rác.');
     }
 
-    public function trash()
+    public function trash(Request $request)
     {
-        $categories = Category::onlyTrashed()->paginate(10);
+        $query = Category::onlyTrashed();
+
+        if ($request->has('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        $categories = $query->paginate(10);
         return view('admin.categories.trash', compact('categories'));
     }
 
     public function restore($id)
     {
         $category = Category::onlyTrashed()->findOrFail($id);
-        $category->restore(); // Khôi phục
-        return redirect()->route('admin.categories.trash');
+        $category->restore();
+
+        // Khôi phục các sản phẩm liên kết (logic trong model)
+        $category->products()->onlyTrashed()->restore();
+
+        return redirect()->route('admin.categories.trash')->with('success', 'Đã khôi phục danh mục.');
+    }
+
+    public function forceDelete($id)
+    {
+        $category = Category::onlyTrashed()->findOrFail($id);
+        $category->forceDelete();
+        return redirect()->route('admin.categories.trash')->with('success', 'Đã xóa vĩnh viễn danh mục.');
     }
 }
