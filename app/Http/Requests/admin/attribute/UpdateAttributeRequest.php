@@ -22,7 +22,7 @@ class UpdateAttributeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'=> 'required|string|max:50|unique:attributes,name'
+            'name'=> 'required|string|max:50|'
         ];
     }
     public function messages()
@@ -30,7 +30,7 @@ class UpdateAttributeRequest extends FormRequest
         return [
             'name.required'=> "Không được bỏ trống",
             'name.max'=> "Vượt quá độ dài cho phép",
-            'name.unique'=> "Thuộc tính đã tồn tại"
+            // 'name.unique'=> "Thuộc tính đã tồn tại"
         ];
     }
 }

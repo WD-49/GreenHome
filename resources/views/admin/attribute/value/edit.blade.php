@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="container mt-4">
+<div class="mt-4 bg-white shadow-sm rounded p-3">
     <h4>Cập nhật giá trị thuộc tính</h4>
 
     @if(session('success'))

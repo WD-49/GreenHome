@@ -44,7 +44,7 @@ class AttributeController extends Controller
         $attribute = Attribute::findOrFail($id);
         $attributeValues = attributeValue::where('attribute_id', $id)->get();
 
-        return view('admin.attribute.value.show', compact('attribute', 'attributeValues'));
+        return view('admin.attribute.show', compact('attribute', 'attributeValues'));
      }
      public function destroy($id)
         {

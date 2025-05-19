@@ -1,25 +1,10 @@
 @extends('layouts.admin')
 @section('content')
-<div class="container mt-4">
-    <h1>{{ $title }}</h1>
+<h2 class="text-center">{{ $title }}</h2>
+<div class="mt-4 bg-white shadow-sm rounded p-3">
     <form action="{{route('admin.attribute.value.store')}}" method="post">
         @csrf
-
-        <div class="mb-3">
-        <label for="attribute_id" class="form-label">Chọn thuộc tính</label>
-        <select name="attribute_id" id="attribute_id" class="form-select @error('attribute_id') is-invalid @enderror">
-            <option value="">-- Chọn thuộc tính --</option>
-            @foreach ($attributes as $attribute)
-                <option value="{{ $attribute->id }}" {{ old('attribute_id') == $attribute->id ? 'selected' : '' }}>
-                    {{ $attribute->name }}
-                </option>
-            @endforeach
-        </select>
-        @error('attribute_id')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-
+        <input type="hidden" name="attribute_id" value="{{$attribute->id}}" id="">
         <div class="mb-3">
             <label for="name" class="form-label">Tên Giá trị</label>
             <input type="text" class="form-control @error('name') is-invalid @enderror"

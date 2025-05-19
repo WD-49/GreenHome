@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="container my-4">
+<div class="mt-4 bg-white shadow-sm rounded p-3">
     <h3 class="mb-4">Thùng rác - Các thuộc tính đã xóa</h3>
 
     @if(session('success'))

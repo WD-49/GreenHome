@@ -2,9 +2,9 @@
 
 
 @section('content')
-  <div class="container mt-4">
-    <h1>{{ $title }}</h1>
-    <a href="{{route('admin.attribute.create')}}" class="btn btn-warning">Thêm thuộc tính mới</a>
+  <h2 class="text-center">{{ $title }}</h2>
+  <div class=" mt-4 bg-white shadow-sm rounded p-3 ">
+    <a href="{{route('admin.attribute.create')}}" class="btn btn-warning"><i class="fas fa-plus me-2"></i>Thêm thuộc tính mới</a>
     @if (count($attributes) <= 0)
     <div>
     <p class="text-center text-muted">Không có thuộc tính nào</p>
@@ -28,7 +28,7 @@
       <td>{{ $attribute->attributeValues->count() ?? 0 }}</td>
       <td class="d-flex gap-1">
       <a href="{{ route('admin.attribute.show', $attribute->id) }}" class="btn btn-sm btn-info">Chi tiết</a>
-
+      <a href="{{ route('admin.attribute.value.create', $attribute->id) }}" class="btn btn-sm btn-info">Thêm giá trị</a>
       <a href="{{ route('admin.attribute.edit', $attribute->id) }}" class="btn btn-sm btn-warning">Sửa</a>
 
       <form action="{{ route('admin.attribute.destroy', $attribute->id) }}" method="POST"
@@ -47,8 +47,8 @@
     </tbody>
     </table>
     @endif
-<a href="{{ route('admin.attribute.trash') }}" class="btn btn-primary btn-sm" title="Xem thùng rác">
+    <a href="{{ route('admin.attribute.trash') }}" class="btn btn-primary btn-sm" title="Xem thùng rác">
     <i class="fas fa-trash-alt"></i> Thùng rác
-</a>
+    </a>
   </div>
 @endsection

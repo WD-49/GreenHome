@@ -91,25 +91,29 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/banners/{banner}/edit', [BannerController::class, 'edit'])->name('banners.edit');
     Route::put('/banners/{banner}', [BannerController::class, 'update'])->name('banners.update');
     Route::delete('/banners/{banner}', [BannerController::class, 'destroy'])->name('banners.destroy');
-
-    Route::get('/attribute', [AttributeController::class, 'index'])->name('attribute.index');
-    Route::get('/attribute/trash', [AttributeController::class, 'trash'])->name('attribute.trash');
-    Route::get('/attribute/show/{id}', [AttributeController::class, 'show'])->name('attribute.show');
-    Route::get('/attribute/create', [AttributeController::class, 'create'])->name('attribute.create');
-    Route::post('/attribute/store', [AttributeController::class, 'store'])->name('attribute.store');
-    Route::get('/attribute/{id}/edit', [AttributeController::class, 'edit'])->name('attribute.edit');
-    Route::put('/attribute/{id}/update/', [AttributeController::class, 'update'])->name('attribute.update');
-    Route::delete('/attribute/{id}/destroy/', [AttributeController::class, 'destroy'])->name('attribute.destroy');
-    Route::patch('/attribute/{id}/restore/', [AttributeController::class, 'restore'])->name('attribute.restore');
+    // Attribute
+    Route::prefix('/attribute')->name('attribute.')->group(function() {
+    Route::get('/', [AttributeController::class, 'index'])->name('index');
+    Route::get('/trash', [AttributeController::class, 'trash'])->name('trash');
+    Route::get('/show/{id}', [AttributeController::class, 'show'])->name('show');
+    Route::get('/create', [AttributeController::class, 'create'])->name('create');
+    Route::post('/store', [AttributeController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [AttributeController::class, 'edit'])->name('edit');
+    Route::put('/{id}/update/', [AttributeController::class, 'update'])->name('update');
+    Route::delete('/{id}/destroy/', [AttributeController::class, 'destroy'])->name('destroy');
+    Route::patch('/{id}/restore/', [AttributeController::class, 'restore'])->name('restore');
     // Attribute Value
-    Route::get('/attribute/value/create/', [AttributeValueController::class, 'create'])->name('attribute.value.create');
-    Route::get('/attribute/value/', [AttributeValueController::class, 'index'])->name('attribute.value.index');
-    Route::post('/attribute/value/store', [AttributeValueController::class, 'store'])->name('attribute.value.store');
-    Route::get('/attribute/value/{id}/edit/', [AttributeValueController::class, 'edit'])->name('attribute.value.edit');
-    Route::put('/attribute/value/{id}/update/', [AttributeValueController::class, 'update'])->name('attribute.value.update');
-    Route::delete('/attribute/value/{id}/destroy/', [AttributeValueController::class, 'destroy'])->name('attribute.value.destroy');
-    Route::get('/attribute/value/trash', [AttributeValueController::class, 'trash'])->name('attribute.value.trash');
-    Route::patch('/attribute/value/{id}/restore/', [AttributeValueController::class, 'restore'])->name('attribute.value.restore');
+    Route::prefix('/value')->name('value.')->group(function () {
+    Route::get('/', [AttributeValueController::class, 'index'])->name('index');
+    Route::get('/{id}/create/', [AttributeValueController::class, 'create'])->name('create');
+    Route::post('/store', [AttributeValueController::class, 'store'])->name('store');
+    Route::get('/{id}/edit/', [AttributeValueController::class, 'edit'])->name('edit');
+    Route::put('/{id}/update/', [AttributeValueController::class, 'update'])->name('update');
+    Route::delete('/{id}/destroy/', [AttributeValueController::class, 'destroy'])->name('destroy');
+    Route::get('/{id}/trash', [AttributeValueController::class, 'trash'])->name('trash');
+    Route::patch('/{id}/restore/', [AttributeValueController::class, 'restore'])->name('restore');
+    });
+    });
 
     // discount
     Route::get('/discount', [DiscountController::class, 'index'])->name('discount.index');
