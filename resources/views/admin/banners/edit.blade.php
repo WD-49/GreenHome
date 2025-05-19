@@ -4,12 +4,23 @@
 <div class="container mt-4">
     <h1 class="mb-4">Sửa Banner</h1>
 
+    {{-- Hiển thị lỗi chung --}}
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form action="{{ route('admin.banners.update', $banner) }}" method="POST" enctype="multipart/form-data">
         @csrf @method('PUT')
 
         <div class="mb-3">
             <label class="form-label">Tên banner</label>
-            <input type="text" name="name" class="form-control" value="{{ old('name', $banner->name) }}" required>
+            <input type="text" name="name" class="form-control" value="{{ old('name', $banner->name) }}" >
         </div>
 
         <div class="mb-3">
