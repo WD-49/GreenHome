@@ -73,11 +73,11 @@ class AccountUsersController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6|confirmed',
-            'role' => 'required|in:admin,user',
+            'role' => 'required|in:admin,client',
             'status' => 'required|boolean',
             'phone' => 'nullable|string',
             'address' => 'nullable|string',
-            'gender' => 'required|in:male,female',
+            'gender' => 'required|in:nam,nu,khac',
             'user_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
@@ -98,10 +98,15 @@ class AccountUsersController extends Controller
         $profile->gender = $request->gender;
 
         if ($request->hasFile('user_image')) {
+
             $image = $request->file('user_image');
             $filename = time() . '_' . Str::slug($user->name) . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('uploads/avatars'), $filename);
-            $profile->user_image = 'uploads/avatars/' . $filename;
+
+            // Lưu ảnh mới
+            $path = $image->storeAs('images/users', $filename, 'public');
+
+            // Gán đường dẫn vào DB
+            $profile->user_image = $path;
         }
 
         $profile->save();
@@ -114,60 +119,6 @@ class AccountUsersController extends Controller
         $user = User::with('profile')->findOrFail($id);
         return view('admin.account.users.editUser', compact('user'));
     }
-
-    // public function updateUser(Request $request, $id)
-    // {
-    //     // dd($request->all());
-    //     $request->validate([
-    //         'name' => 'required|string|max:255',
-    //         'email' => 'required|email|unique:users,email,' . $id,
-    //         'role' => 'required|in:client,admin',
-    //         'status' => 'required|in:0,1',
-    //         'phone' => 'nullable|string|max:20',
-    //         'address' => 'nullable|string|max:255',
-    //         'gender' => 'required|in:nam,nu,khac',
-    //         'user_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    //     ]);
-
-    //     $user = User::findOrFail($id);
-    //     $user->name = $request->name;
-    //     $user->email = $request->email;
-    //     $user->role = $request->role;
-    //     $user->status = $request->status;
-    //     $user->save();
-
-    //     $profile = $user->profile ?? new UserProfile();
-    //     $profile->user_id = $user->id;
-    //     $profile->phone = $request->phone;
-    //     $profile->address = $request->address;
-    //     $profile->gender = $request->gender;
-
-    //     if ($request->hasFile('user_image')) {
-    //         $image = $request->file('user_image');
-    //         $filename = time() . '_' . Str::slug($user->name) . '.' . $image->getClientOriginalExtension();
-
-    //         // Lưu vào storage/app/public/images/users
-    //         $path = $image->storeAs('public/images/users', $filename);
-
-    //         // Lưu đường dẫn public (đã liên kết với storage)
-    //         $profile->user_image = 'storage/images/users/' . $filename;
-    //     }
-    //     // dd($filename);
-
-    //     // phần code cũ
-    //     if ($request->hasFile('user_image')) {
-    //         $image = $request->file('user_image');
-    //         $filename = time() . '_' . Str::slug($user->name) . '.' . $image->getClientOriginalExtension();
-    //         $image->move(public_path('uploads/avatars'), $filename);
-    //         $profile->user_image = 'uploads/avatars/' . $filename;
-    //     }
-
-    //     $profile->save();
-
-    //     return redirect()->route('admin.account.listUsers')->with('success', 'Cập nhật người dùng thành công.');
-    // }
-
-
 
     public function updateUser(Request $request, $id)
     {
@@ -244,15 +195,27 @@ class AccountUsersController extends Controller
     {
         $user = User::withTrashed()->findOrFail($id);
 
-        // Nếu bạn muốn xóa luôn profile liên quan (nếu có)
+        // Nếu có profile
         if ($user->profile) {
-            $user->profile->delete();
+            $profile = $user->profile;
+
+            // Xóa ảnh cũ nếu có
+            if ($profile->user_image && Storage::disk('public')->exists($profile->user_image)) {
+                Storage::disk('public')->delete($profile->user_image);
+            }
+            dd($profile->user_image);
+
+            // Xóa luôn profile (có thể dùng forceDelete nếu có soft deletes)
+            $profile->delete(); // hoặc $profile->forceDelete(); nếu model có SoftDeletes
         }
 
+        // Xóa user vĩnh viễn
         $user->forceDelete();
 
         return redirect()->back()->with('success', 'Xóa người dùng vĩnh viễn thành công.');
     }
+
+
 
     public function resetPassword($id)
     {

@@ -54,7 +54,7 @@
         <div class="form-group">
             <label>Vai trò</label>
             <select name="role" class="form-control">
-                <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>Người dùng</option>
+                <option value="client" {{ old('role') == 'client' ? 'selected' : '' }}>Người dùng</option>
                 <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Quản trị viên</option>
             </select>
             @error('role')
@@ -97,8 +97,9 @@
             <label>Giới tính</label>
             <select name="gender" class="form-control">
                 <option value="">-- Chọn giới tính --</option>
-                <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Nam</option>
-                <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Nữ</option>
+                <option value="nam" {{ old('gender') == 'nam' ? 'selected' : '' }}>Nam</option>
+                <option value="nu" {{ old('gender') == 'nu' ? 'selected' : '' }}>Nữ</option>
+                <option value="khac" {{ old('gender') == 'khac' ? 'selected' : '' }}>Khác</option>
             </select>
             @error('gender')
                 <small class="text-danger">{{ $message }}</small>

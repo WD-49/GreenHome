@@ -79,6 +79,6 @@
     </table>
 
     <div class="d-flex justify-content-center">
-        {{ $users->appends(request()->query())->links() }}
+        {{ $users->appends(request()->query())->links('pagination::bootstrap-4') }}
     </div>
 @endsection

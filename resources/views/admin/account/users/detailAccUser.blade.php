@@ -25,7 +25,7 @@
                 <div class="card-body">
                     <p><strong>Số điện thoại:</strong> {{ $user->profile->phone }}</p>
                     <p><strong>Địa chỉ:</strong> {{ $user->profile->address }}</p>
-                    <p><strong>Giới tính:</strong> {{ $user->profile->gender == 'male' ? 'Nam' : 'Nữ' }}</p>
+                    <p><strong>Giới tính:</strong> {{ $user->profile->gender == 'nam' ? 'Nam' : ($user->profile->gender == 'nu' ? 'Nữ' : 'Khác') }}</p>
 
                     @if ($user->profile->user_image)
                         <p><strong>Ảnh đại diện:</strong></p>
