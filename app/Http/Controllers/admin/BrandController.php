@@ -5,13 +5,14 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use Illuminate\Http\Request;
+use App\Http\Requests\admin\attribute\BrandRequest;
 
 class BrandController extends Controller
 {
     public function index()
     {
         $brands = Brand::latest()->paginate(10);
-        return view('admin.brands.index', compact('brands')); // ✅ Đúng đường dẫn view
+        return view('admin.brands.index', compact('brands'));
     }
 
     public function create()
@@ -19,13 +20,18 @@ class BrandController extends Controller
         return view('admin.brands.create');
     }
 
-    public function store(Request $request)
+    public function store( BrandRequest $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255'
+            'name' => 'required|string|max:20|unique:brands,name',
+            'description' => 'required|string',
+            
         ]);
 
-        Brand::create($request->all());
+        Brand::create([
+            'name' => $request->name,
+            'description' => $request->description
+        ]);
 
         return redirect()->route('admin.brands.index')->with('success', 'Thêm thương hiệu thành công!');
     }
@@ -36,14 +42,18 @@ class BrandController extends Controller
         return view('admin.brands.edit', compact('brand'));
     }
 
-    public function update(Request $request, $id)
+    public function update( BrandRequest $request, $id)
     {
         $request->validate([
-            'name' => 'required|string|max:255'
+            'name' => 'required|string|max:20|unique:brands,name,' . $id,
+            'description' => 'required|string',
         ]);
 
         $brand = Brand::findOrFail($id);
-        $brand->update($request->all());
+        $brand->update([
+            'name' => $request->name,
+            'description' => $request->description
+        ]);
 
         return redirect()->route('admin.brands.index')->with('success', 'Cập nhật thương hiệu thành công!');
     }
