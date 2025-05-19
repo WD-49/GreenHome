@@ -56,7 +56,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/trashedUsers', [AccountUsersController::class, 'trashedUsers'])->name('trashedUsers');
         Route::post('/restoreUser/{id}', [AccountUsersController::class, 'restoreUser'])->name('restoreUser');
         Route::delete('/forceDeleteUser/{id}', [AccountUsersController::class, 'forceDeleteUser'])->name('forceDeleteUser');
-        Route::post('/resetPassword/{id}', [AccountUsersController::class, 'resetPassword'])->name('resetPassword');
+        Route::post('/resetPassUser/{id}', [AccountUsersController::class, 'resetPassUser'])->name('resetPassUser');
         // Admins
         Route::get('/listAdmins', [AccountAdminController::class, 'listAdmins'])->name('listAdmins');
         Route::get('/detailAccAdmin/{id}', [AccountAdminController::class, 'detailAccAdmin'])->name('detailAccAdmin');
@@ -68,7 +68,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/trashedAdmins', [AccountAdminController::class, 'trashedAdmins'])->name('trashedAdmins');
         Route::post('/restoreAdmin/{id}', [AccountAdminController::class, 'restoreAdmin'])->name('restoreAdmin');
         Route::delete('/forceDeleteAdmin/{id}', [AccountAdminController::class, 'forceDeleteAdmin'])->name('forceDeleteAdmin');
-        Route::post('/resetPassword/{id}', [AccountAdminController::class, 'resetPassword'])->name('resetPassword');
+        Route::post('/resetPassAdmin/{id}', [AccountAdminController::class, 'resetPassAdmin'])->name('resetPassAdmin');
     });
 
     Route::prefix('/brands')->name('brands.')->group(function () {

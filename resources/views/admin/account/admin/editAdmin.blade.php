@@ -29,7 +29,7 @@
     <div class="form-group">
         <label>Vai trò</label>
         <select name="role" class="form-control">
-            <option value="user" {{ (old('role', $admins->role) == 'user') ? 'selected' : '' }}>Người dùng</option>
+            <option value="client" {{ (old('role', $admins->role) == 'client') ? 'selected' : '' }}>Khách hàng</option>
             <option value="admin" {{ (old('role', $admins->role) == 'admin') ? 'selected' : '' }}>Quản trị viên</option>
         </select>
     </div>
@@ -55,16 +55,17 @@
     <div class="form-group">
         <label>Giới tính</label>
         <select name="gender" class="form-control">
-            <option value="">-- Chọn giới tính --</option>
-            <option value="male" {{ (old('gender', $admins->profile->gender ?? '') == 'male') ? 'selected' : '' }}>Nam</option>
-            <option value="female" {{ (old('gender', $admins->profile->gender ?? '') == 'female') ? 'selected' : '' }}>Nữ</option>
+           <option value="">-- Chọn giới tính --</option>
+            <option value="nam" {{ (old('gender', $admins->profile->gender ?? '') == 'nam') ? 'selected' : '' }}>Nam</option>
+            <option value="nu" {{ (old('gender', $admins->profile->gender ?? '') == 'nu') ? 'selected' : '' }}>Nữ</option>
+            <option value="khac" {{ (old('gender', $admins->profile->gender ?? '') == 'khac') ? 'selected' : '' }}>Khác</option>
         </select>
     </div>
 
     <div class="form-group">
         <label>Ảnh đại diện</label><br>
-        @if (!empty($admins->profile->user_image))
-            <img src="{{ asset($admins->profile->user_image) }}" alt="Ảnh đại diện" class="img-thumbnail" style="max-width: 200px;">
+        @if (!empty($profile->user_image))
+            <img src="{{ asset($profile->user_image) }}" alt="Ảnh đại diện" class="img-thumbnail" style="max-width: 200px;">
         @endif
         <input type="file" name="user_image" class="form-control-file mt-2">
     </div>

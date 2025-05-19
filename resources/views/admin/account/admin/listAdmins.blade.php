@@ -33,6 +33,7 @@
             </div>
             <div class="col">
                 <button type="submit" class="btn btn-primary">Lọc</button>
+                <button type="reset" class="btn btn-secondary">Reset</button>
             </div>
         </div>
     </form>
@@ -67,6 +68,12 @@
                             <button type="submit" class="btn btn-danger"
                                 onclick="return confirm('Bạn có chắc chắn muốn xóa admin này không?')">Xóa</button>
                         </form>
+                        <form action="{{ route('admin.account.resetPassAdmin', $admin->id) }}" method="POST"
+                            class="d-inline"
+                            onsubmit="return confirm('Bạn có chắc muốn đặt lại mật khẩu người dùng này không?')">
+                            @csrf
+                            <button type="submit" class="btn btn-secondary btn-sm">Reset mật khẩu</button>
+                        </form>
                     </td>
                 </tr>
             @empty
@@ -79,6 +86,6 @@
 
     {{-- Phân trang --}}
     <div class="d-flex justify-content-center">
-        {{ $admins->appends(request()->query())->links() }}
+        {{ $admins->appends(request()->query())->links('pagination::bootstrap-5') }}
     </div>
 @endsection
