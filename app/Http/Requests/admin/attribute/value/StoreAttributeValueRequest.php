@@ -30,8 +30,6 @@ class StoreAttributeValueRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'attribute_id.required' => 'Vui lòng chọn thuộc tính.',
-            'attribute_id.exists' => 'Thuộc tính không tồn tại.',
             'name.required' => 'Vui lòng nhập giá trị.',
             'name.string' => 'Giá trị phải là chuỗi.',
             'name.max' => 'Giá trị tối đa 255 ký tự.',

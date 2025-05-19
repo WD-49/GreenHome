@@ -17,11 +17,11 @@ class AttributeValueController extends Controller
         $title = "Quản lý giá trị thuộc tính";
         return view('admin.attribute.value.index', compact('title', 'attributeValues'));
     }
-    public function create()
+    public function create($id)
     {
-        $title = "Thêm giá trị";
-        $attributes = Attribute::all();
-        return view('admin.attribute.value.create', compact('title', 'attributes'));
+        $attribute = Attribute::findOrFail($id);
+        $title = "Thêm giá trị thuộc tính: ".$attribute->name;
+        return view('admin.attribute.value.create', compact('title', 'attribute'));
     }
     public function store(StoreAttributeValueRequest $request)
     {
@@ -30,7 +30,7 @@ class AttributeValueController extends Controller
             'attribute_id' => $data['attribute_id'],
             'value' => $data['name'],
         ]);
-        return redirect()->route('admin.attribute.value.index')
+        return redirect()->route('admin.attribute.index')
             ->with('success', 'Thêm giá trị thuộc tính thành công!');
     }
     public function edit($id)
@@ -46,18 +46,19 @@ class AttributeValueController extends Controller
         $value->update([
             'value' => $data['value']
         ]);
-        return redirect()->route('admin.attribute.value.index')->with('success', 'Thêm giá trị thuộc tính thành công!');
+        return redirect()->route('admin.attribute.index')->with('success', 'Thêm giá trị thuộc tính thành công!');
     }
-    public function trash()
-    {
-        $values = AttributeValue::onlyTrashed()->with('attribute')->get();
+    public function trash($id)
+    {   $attribute = Attribute::findOrFail($id);
+        $values = AttributeValue::onlyTrashed()->with('attribute')->where('attribute_id', '=', $id)->get();
+        $title = "Giá trị ".$attribute->name." đã xóa";
         return view('admin.attribute.value.trash', compact('values'));
     }
     public function restore($id)
     {
         $value = AttributeValue::onlyTrashed()->findOrFail($id);
         $value->restore();
-        return redirect()->route('admin.attribute.value.trash')->with('success', 'Khôi phục thành công!');
+        return redirect()->route('admin.attribute.index')->with('success', 'Khôi phục thành công!');
     }
     public function destroy($id)
         {

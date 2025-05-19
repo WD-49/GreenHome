@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 @section('content')
-<div class="container mt-4">
-    <h1>{{$title}}</h1>
+<h2 class="text-center">{{$title}}</h2>
+<div class="mt-4 bg-white shadow-sm rounded p-3">
     {{-- Form --}}
     <form action="{{ route('admin.attribute.update', $id = $attribute->id) }}" method="POST">
         @csrf
