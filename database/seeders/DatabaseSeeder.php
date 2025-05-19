@@ -27,9 +27,7 @@ use App\Models\WishList;
 
 class DatabaseSeeder extends Seeder
 {
-    public function run()
-    {
-        // User::factory(10)->create();
-        UserProfile::factory(10)->create();
-    }
+    public function run(): void
+{   
+}
 }

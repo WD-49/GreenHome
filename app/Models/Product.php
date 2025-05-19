@@ -55,7 +55,7 @@ class Product extends Model
     {
         // Xử lý khi xóa mềm Product
         static::deleting(function ($product) {
-            if ($product->isSoftDeleting()) {
+            if (!$product->isForceDeleting()) {
                 // Xóa mềm tất cả product_variants liên quan
                 $product->productVariants()->each(function ($productVariants) {
                     $productVariants->delete();

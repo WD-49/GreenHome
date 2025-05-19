@@ -1,0 +1,36 @@
+<?php
+
+namespace App\Http\Requests\admin\attribute;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class UpdateAttributeRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [
+            'name'=> 'required|string|max:50|unique:attributes,name'
+        ];
+    }
+    public function messages()
+    {
+        return [
+            'name.required'=> "Không được bỏ trống",
+            'name.max'=> "Vượt quá độ dài cho phép",
+            'name.unique'=> "Thuộc tính đã tồn tại"
+        ];
+    }
+}

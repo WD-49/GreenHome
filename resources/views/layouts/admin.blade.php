@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Volt - Free Bootstrap 5 Dashboard</title>
+    <title>@yield('title')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Favicon -->
@@ -18,14 +18,30 @@
     <!-- Sweet Alert -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/sweetalert2/dist/sweetalert2.min.css') }}">
 
+    <!-- Font Awesome 6 - CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+
     <!-- Notyf -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/notyf/notyf.min.css') }}">
 
     <!-- Volt CSS -->
     <link rel="stylesheet" href="{{ asset('assets/css/volt.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
 </head>
 
 <body>
+    @if (session('success'))
+        <div class="alert alert-success custom-toast-alert-center" role="alert" id="success-alert">
+            <div class="flex-grow-1">
+                <strong><i>{{ session('success') }}</i></strong>
+            </div>
+            <button type="button" class="btn-close ms-3" data-bs-dismiss="alert" aria-label="Đóng"></button>
+        </div>
+    @endif
+
+
+
 
     @include('admin.partials.sidebar')
     <main class="content">
@@ -57,6 +73,17 @@
 
     <!-- Volt JS -->
     <script src="{{ asset('assets/js/volt.js') }}"></script>
+    <script src="{{ asset('assets/js/custom.js') }}"></script>
+    {{-- <script>
+        setTimeout(function() {
+            let alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alertEl) {
+                let alert = new bootstrap.Alert(alertEl);
+                alert.close();
+            });
+        }, 2000);
+    </script> --}}
+
 </body>
 
 </html>
