@@ -5,6 +5,7 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDiscountRequest;
 use App\Models\Discount;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -63,7 +64,7 @@ public function index(Request $request)
 
     $discounts = $query->orderBy('id', 'desc')->paginate(20);
  $notFound = $discounts->isEmpty(); 
-    return view('admin.discount', [
+    return view('admin.discount.index', [
         'title' => 'Discounts',
         'discounts' => $discounts,
         'notFound' => $notFound,
@@ -77,11 +78,13 @@ public function index(Request $request)
      */
     public function create()
     {
-        //
-        $discounts = Discount::all();
-        return view('admin.discount.create', [
-            'title' => 'Create Discount',
-        ]);
+        // //
+        // $discounts = Discount::all();
+        // return view('admin.discount.create', [
+        //     'title' => 'Create Discount',
+        // ]);
+          $products = Product::whereNull('deleted_at')->get();
+    return view('admin.discount.create', compact('products'));
     }
 
     /**
@@ -173,26 +176,53 @@ public function store(Request $request)
     ];
 
     // Tạo Validator
-    $validator = Validator::make($request->all(), $rules, $messages);
+//     $validator = Validator::make($request->all(), $rules, $messages);
+
+//     if ($validator->fails()) {
+//         // Trả về lại form với lỗi và dữ liệu cũ
+//         return redirect()->route('admin.discount.create')
+//             ->withErrors($validator)
+//             ->withInput();
+//     }
+
+//     // Lấy dữ liệu hợp lệ
+//     $data = $validator->validated();
+
+//     // Tạo mã giảm giá mới
+//     Discount::create($data);
+
+//     // Flash thông báo thành công
+//     session()->flash('success', 'Mã giảm giá đã được tạo thành công');
+//  $discount = Discount::create([
+//             'discount_type' => $request->discount_type,
+//             'discount_value' => $request->discount_value,
+//         ]);
+
+//         // Gắn sản phẩm
+//         // $discount->products()->sync($request->product_ids ?? []);
+//   $products = Product::whereNull('deleted_at')->get();
+// return view('admin.discount.create', compact('products'));
+ $validator = Validator::make($request->all(), $rules, $messages);
 
     if ($validator->fails()) {
-        // Trả về lại form với lỗi và dữ liệu cũ
+        // Lấy lại danh sách sản phẩm để render lại view create
+        $products = Product::whereNull('deleted_at')->get();
+
         return redirect()->route('admin.discount.create')
             ->withErrors($validator)
-            ->withInput();
+            ->withInput()
+            ->with(compact('products'));
     }
 
-    // Lấy dữ liệu hợp lệ
-    $data = $validator->validated();
+    $discount = Discount::create($validator->validated());
 
-    // Tạo mã giảm giá mới
-    Discount::create($data);
+    // Nếu không áp dụng cho tất cả sản phẩm, thì lưu các sản phẩm được chọn
+    if (!$request->applies_to_all_products && $request->has('product_ids')) {
+        $discount->products()->sync($request->product_ids);
+    }
 
-    // Flash thông báo thành công
-    session()->flash('success', 'Mã giảm giá đã được tạo thành công');
+    return redirect()->route('admin.discount.index')->with('success', 'Mã giảm giá đã được tạo thành công');
 
-    // Chuyển hướng về trang danh sách
-    return redirect()->route('admin.discount.index');
 }
 
 

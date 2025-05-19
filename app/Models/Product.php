@@ -38,6 +38,11 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class);
     }
+    public function discounts()
+{
+    return $this->belongsToMany(Discount::class, 'discount_products');
+}
+
 
     // Quan hệ với brand (nhiều-1)
     public function brand()

@@ -3,6 +3,9 @@
 @section('title', 'Thêm mã giảm giá')
 
 @section('content')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <h1>Thêm mã giảm giá</h1>
     @if (session('test'))
        <div class="alert alert-success">{{ session('test') }}</div>
@@ -42,24 +45,40 @@
             @enderror
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Loại giảm giá</label>
-            <select name="discount_type" class="form-control" >
-                <option value="percentage" {{ old('discount_type') == 'percentage' ? 'selected' : '' }}>Phần trăm</option>
-                <option value="fixed" {{ old('discount_type') == 'fixed' ? 'selected' : '' }}>Cố định</option>
-            </select>
-            @error('discount_type')
-                <div class="text-danger">{{ $message }}</div>
-            @enderror
-        </div>
+       <div class="mb-3">
+    <label class="form-label">Loại giảm giá</label>
+    <select name="discount_type" id="discount_type" class="form-control">
+        <option value="percentage" {{ old('discount_type') == 'percentage' ? 'selected' : '' }}>Phần trăm</option>
+        <option value="fixed" {{ old('discount_type') == 'fixed' ? 'selected' : '' }}>Cố định</option>
+    </select>
+    @error('discount_type')
+        <div class="text-danger">{{ $message }}</div>
+    @enderror
+</div>
 
-        <div class="mb-3">
-            <label class="form-label">Giá trị giảm</label>
-            <input type="number" name="discount_value" class="form-control"  value="{{ old('discount_value') }}">
-            @error('discount_value')
-                <div class="text-danger">{{ $message }}</div>
-            @enderror
-        </div>
+
+<div class="mb-3">
+    <label class="form-label">Giá trị giảm giá</label>
+    <div style="display: flex; align-items: center;">
+        <input type="number" name="discount_value" value="{{ old('discount_value') }}" class="form-control" style="flex:1;">
+        <span id="unit_label" style="margin-left: 10px; font-weight: bold;">
+            {{ old('discount_type') == 'fixed' ? 'VND' : '%' }}
+        </span>
+    </div>
+    @error('discount_value')
+        <div class="text-danger">{{ $message }}</div>
+    @enderror
+</div>
+
+<script>
+    document.getElementById('discount_type').addEventListener('change', function () {
+        const unitLabel = document.getElementById('unit_label');
+        unitLabel.textContent = this.value === 'fixed' ? 'VND' : '%';
+    });
+</script>
+
+
+       
 
         <div class="mb-3">
             <label class="form-label">Ngày bắt đầu</label>
@@ -108,17 +127,73 @@
                 <div class="text-danger">{{ $message }}</div>
             @enderror
         </div>
+<div class="mb-3">
+    <label class="form-label">Áp dụng cho tất cả sản phẩm?</label>
+    <select name="applies_to_all_products" id="applies_to_all_products" class="form-control">
+        <option value="1" {{ old('applies_to_all_products') == '1' ? 'selected' : '' }}>Có</option>
+        <option value="0" {{ old('applies_to_all_products') == '0' ? 'selected' : '' }}>Không</option>
+    </select>
+    @error('applies_to_all_products')
+        <div class="text-danger">{{ $message }}</div>
+    @enderror
+</div>
+{{-- 
+<div class="mb-3" id="product-selection-box">
+    <label class="form-label">Chọn sản phẩm áp dụng</label>
+    <div class="border p-2" style="max-height: 250px; overflow-y: auto;">
+        @foreach($products as $product)
+            <div class="form-check">
+                <input 
+                    type="checkbox" 
+                    name="product_ids[]" 
+                    value="{{ $product->id }}" 
+                    class="form-check-input" 
+                    id="product_{{ $product->id }}"
+                    {{ in_array($product->id, old('product_ids', [])) ? 'checked' : '' }}
+                >
+                <label class="form-check-label" for="product_{{ $product->id }}">
+                    {{ $product->name }}
+                </label>
+            </div>
+        @endforeach
+    </div>
+</div> --}}
+<div class="mb-3" id="product-selection-box">
+    <label class="form-label">Chọn sản phẩm áp dụng</label>
+    <select name="product_ids[]" class="form-control select2" multiple>
+        @foreach($products as $product)
+            <option value="{{ $product->id }}"
+                {{ in_array($product->id, old('product_ids', [])) ? 'selected' : '' }}>
+                {{ $product->name }}
+            </option>
+        @endforeach
+    </select>
+</div>
 
-        <div class="mb-3">
-            <label class="form-label">Áp dụng cho tất cả sản phẩm?</label>
-            <select name="applies_to_all_products" class="form-control" >
-                <option value="1" {{ old('applies_to_all_products') == '1' ? 'selected' : '' }}>Có</option>
-                <option value="0" {{ old('applies_to_all_products') == '0' ? 'selected' : '' }}>Không</option>
-            </select>
-            @error('applies_to_all_products')
-                <div class="text-danger">{{ $message }}</div>
-            @enderror
-        </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const selectElement = document.getElementById("applies_to_all_products");
+        const productBox = document.getElementById("product-selection-box");
+
+        function toggleProductBox() {
+            if (selectElement.value === "0") {
+                productBox.style.display = "block";
+            } else {
+                productBox.style.display = "none";
+            }
+        }
+
+        // Gọi khi trang vừa load (nếu có old input)
+        toggleProductBox();
+
+        // Gọi khi người dùng thay đổi select
+        selectElement.addEventListener("change", toggleProductBox);
+    });
+</script>
+
+
+
 
         <div class="mb-3">
             <label class="form-label">Trạng thái</label>
