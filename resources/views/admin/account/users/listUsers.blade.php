@@ -25,7 +25,10 @@
                     <option value="female" {{ request('gender') == 'female' ? 'selected' : '' }}>Nữ</option>
                 </select>
             </div>
-            <div class="col"><button type="submit" class="btn btn-primary">Lọc</button></div>
+            <div class="col">
+                <button type="submit" class="btn btn-primary">Lọc</button>
+                <button type="reset" class="btn btn-secondary">Reset</button>
+            </div>
         </div>
     </form>
 
@@ -62,7 +65,7 @@
                             <button onclick="return confirm('Bạn có chắc muốn xóa người dùng này?');" type="submit"
                                 class="btn btn-danger btn-sm">Xóa</button>
                         </form>
-                        <form action="{{ route('admin.account.resetPassword', $user->id) }}" method="POST"
+                        <form action="{{ route('admin.account.resetPassUser', $user->id) }}" method="POST"
                             class="d-inline"
                             onsubmit="return confirm('Bạn có chắc muốn đặt lại mật khẩu người dùng này không?')">
                             @csrf

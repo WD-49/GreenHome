@@ -170,8 +170,17 @@ class AccountAdminController extends Controller
     {
         $admin = User::withTrashed()->findOrFail($id);
 
-        if ($admin->profile) {
-            $admin->profile->delete();
+       if ($admin->profile) {
+            $profile = $admin->profile;
+
+            // Xóa ảnh cũ nếu có
+            if ($profile->user_image && Storage::disk('public')->exists($profile->user_image)) {
+                Storage::disk('public')->delete($profile->user_image);
+            }
+            // dd($profile->user_image);
+
+            // Xóa luôn profile (có thể dùng forceDelete nếu có soft deletes)
+            $profile->delete(); // hoặc $profile->forceDelete(); nếu model có SoftDeletes
         }
 
         $admin->forceDelete();
@@ -179,11 +188,11 @@ class AccountAdminController extends Controller
         return redirect()->back()->with('success', 'Xóa quản trị viên vĩnh viễn thành công.');
     }
 
-    public function resetPassword($id)
+    public function resetPassAdmin($id)
     {
         $admin = User::where('role', 'admin')->findOrFail($id);
-
-        $newPassword = Str::random(8);
+        
+        $newPassword = 'greenhome';
         $admin->password = Hash::make($newPassword);
         $admin->save();
 

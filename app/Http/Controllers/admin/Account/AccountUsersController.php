@@ -203,7 +203,7 @@ class AccountUsersController extends Controller
             if ($profile->user_image && Storage::disk('public')->exists($profile->user_image)) {
                 Storage::disk('public')->delete($profile->user_image);
             }
-            dd($profile->user_image);
+            // dd($profile->user_image);
 
             // Xóa luôn profile (có thể dùng forceDelete nếu có soft deletes)
             $profile->delete(); // hoặc $profile->forceDelete(); nếu model có SoftDeletes
@@ -215,11 +215,9 @@ class AccountUsersController extends Controller
         return redirect()->back()->with('success', 'Xóa người dùng vĩnh viễn thành công.');
     }
 
-
-
-    public function resetPassword($id)
+    public function resetPassUser($id)
     {
-        $user = User::where('role', 'user')->findOrFail($id); // chỉ chọn user thường
+        $user = User::where('role', 'client')->findOrFail($id); // chỉ chọn user thường
 
         // Tạo mật khẩu random
         $newPassword = Str::random(8);
