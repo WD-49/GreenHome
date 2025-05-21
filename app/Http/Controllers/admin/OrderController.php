@@ -27,7 +27,7 @@ class OrderController extends Controller
     {
         $order = Order::with(['user', 'discount', 'items', 'status', 'paymentMethod'])->findOrFail($id);
         $statuses = OrderStatus::all();
-        return view('orders.edit', compact('order', 'statuses'));
+        return view('admin.orders.edit', compact('order', 'statuses'));
     }
 
     public function update(Request $request, $id)
@@ -37,7 +37,7 @@ class OrderController extends Controller
             'shipping_phone' => 'required|string|max:15',
             'shipping_address' => 'required|string|max:255',
             'status_id' => 'required|exists:order_statuses,id',
-            'total_amount' => 'required|numeric',
+            'total_amount' => 'required|numeric|min:0|max:99999999.99',
             'note' => 'nullable|string',
         ], [
             'shipping_name.required' => 'Tên người nhận không được để trống',
@@ -55,13 +55,13 @@ class OrderController extends Controller
         $order = Order::findOrFail($id);
         $order->update($request->only(['shipping_name', 'shipping_phone', 'shipping_address', 'status_id', 'total_amount', 'note']));
 
-        return redirect()->route('orders.index')->with('success', 'Cập nhật đơn hàng thành công!');
+        return redirect()->route('admin.orders.index')->with('success', 'Cập nhật đơn hàng thành công!');
     }
 
     public function trash()
     {
-        $orders = Order::onlyTrashed()->withDetails()->get();
-        return view('orders.trash', compact('orders'));
+        $orders = Order::onlyTrashed()->with(['user', 'discount', 'items', 'status', 'paymentMethod'])->get();
+        return view('admin.orders.trash', compact('orders'));
     }
 
     public function destroy($id)
@@ -75,7 +75,7 @@ class OrderController extends Controller
     {
         $order = Order::withTrashed()->findOrFail($id);
         $order->restore();
-        return redirect()->route('orders.trash')->with('success', 'Khôi phục đơn hàng thành công!');
+        return redirect()->route('admin.orders.trash')->with('success', 'Khôi phục đơn hàng thành công!');
     }
 
     public function forceDelete($id)

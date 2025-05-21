@@ -139,7 +139,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/show/{id}', [OrderController::class, 'show'])->name('show');
         Route::delete('/destroy/{id}', [OrderController::class, 'destroy'])->name('destroy');
         Route::get('/trash', [OrderController::class, 'trash'])->name('trash');
-        Route::put('/restore/{id}', [OrderController::class, 'restore'])->name('restore');
-        Route::delete('/force-delete/{id}', [OrderController::class, 'forceDelete'])->name('forceDelete');
+        Route::post('/restore/{id}', [OrderController::class, 'restore'])->name('restore');
     });
 });
