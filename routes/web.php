@@ -128,5 +128,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/discount/trash', [DiscountController::class, 'trash'])->name('discount.trash');
     Route::post('/discount/restore/{id}', [DiscountController::class, 'restore'])->name('discount.restore');
     Route::delete('/discount/force-delete/{id}', [DiscountController::class, 'forceDelete'])->name('discount.forceDelete');
+    Route::get('/discount/history', [DiscountController::class, 'history'])->name('discount.history');
 });
 

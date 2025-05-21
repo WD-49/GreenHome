@@ -41,6 +41,10 @@
     <div class="col">
         <a href="{{ route('admin.discount.trash') }}" class="btn btn-outline-secondary w-100">🗑️ Thùng rác</a>
     </div>
+    <div class="col ">
+        <a href="{{ route('admin.discount.history') }}" class="btn btn-outline-secondary w-100">📜 Lịch sử dùng mã</a>
+
+    </div>
     <div class="col text-end">
         <a href="{{ route('admin.discount.create') }}" class="btn btn-success">➕ Tạo mã giảm giá</a>
     </div>
