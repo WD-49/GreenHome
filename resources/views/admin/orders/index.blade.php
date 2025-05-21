@@ -3,12 +3,20 @@
 @section('content')
     <div class="container mt-5">
         <div class="card shadow">
+            {{-- Tiêu đề --}}
             <div class="card-header bg-primary text-white">
                 <h3 class="mb-0">Danh sách đơn hàng</h3>
             </div>
-            <a href="{{ route('admin.orders.trash') }}" class="btn btn-secondary mt-3">Xem thùng rác</a>
-            <div class="card-body">
-                <table class="table table-bordered table-hover">
+
+            {{-- Nút Thùng rác: nằm giữa tiêu đề và bảng --}}
+            <div class="px-4 py-3">
+                <a href="{{ route('admin.orders.trash') }}" class="btn btn-sm btn-secondary">
+                    <i class="fas fa-trash-alt"></i> Thùng rác
+                </a>
+            </div>
+
+            <div class="card-body pt-0">
+                <table class="table table-bordered table-hover align-middle">
                     <thead class="table-light">
                         <tr>
                             <th scope="col">STT</th>
@@ -36,14 +44,14 @@
                                 <td>
                                     <div class="d-flex flex-wrap gap-2">
                                         <a href="{{ route('admin.orders.edit', $order->id) }}"
-                                            class="btn btn-sm btn-warning">Sửa</a>
+                                            class="btn btn-sm btn-warning fw-semibold">Sửa</a>
                                         <a href="{{ route('admin.orders.show', $order->id) }}"
-                                            class="btn btn-sm btn-info text-white">Xem</a>
+                                            class="btn btn-sm btn-info text-white fw-semibold">Xem</a>
                                         <form action="{{ route('admin.orders.destroy', $order->id) }}" method="POST"
                                             onsubmit="return confirm('Bạn có chắc muốn xóa?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                                            <button type="submit" class="btn btn-sm btn-danger fw-semibold">Xóa</button>
                                         </form>
                                     </div>
                                 </td>
@@ -51,8 +59,6 @@
                         @endforeach
                     </tbody>
                 </table>
-
-                
             </div>
         </div>
     </div>
