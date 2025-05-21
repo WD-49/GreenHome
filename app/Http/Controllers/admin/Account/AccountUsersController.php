@@ -54,12 +54,15 @@ class AccountUsersController extends Controller
     }
 
     public function detailAccUser($id)
-    {
-        // Lấy user kèm profile
-        $user = User::with('profile')->findOrFail($id);
+{
+    // Lấy user kèm profile và comments
+    $user = User::with(['profile', 'comments' => function ($q) {
+        $q->withTrashed(); // nếu có soft deletes
+    }])->findOrFail($id);
 
-        return view('admin.account.users.detailAccUser', compact('user'));
-    }
+    return view('admin.account.users.detailAccUser', compact('user'));
+}
+
 
     public function createUser()
     {
