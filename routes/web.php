@@ -12,6 +12,7 @@ use App\Http\Controllers\admin\AttributeValueController;
 use App\Http\Controllers\Admin\Account\AccountAdminController;
 use App\Http\Controllers\Admin\Account\AccountUsersController;
 use App\Http\Controllers\admin\CategoryController;  // Tham chiếu đúng
+use App\Http\Controllers\admin\OrderStatusController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -128,5 +129,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/discount/trash', [DiscountController::class, 'trash'])->name('discount.trash');
     Route::post('/discount/restore/{id}', [DiscountController::class, 'restore'])->name('discount.restore');
     Route::delete('/discount/force-delete/{id}', [DiscountController::class, 'forceDelete'])->name('discount.forceDelete');
+
+    // Order status
+    Route::prefix('/order')->name('order.')->group(function () {
+        Route::prefix('/status')->name('status.')->group(function () {
+            Route::get('/', [OrderStatusController::class, 'index'])->name('index');
+            Route::get('/create', [OrderStatusController::class, 'create'])->name('create');
+            Route::get('/{id}/edit', [OrderStatusController::class, 'edit'])->name('edit');
+            Route::put('/{id}/update', [OrderStatusController::class, 'update'])->name('update');
+            Route::post('/store', [OrderStatusController::class, 'store'])->name('store');
+        });
+    });
 });
+
 
