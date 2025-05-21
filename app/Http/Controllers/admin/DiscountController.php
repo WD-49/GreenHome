@@ -5,6 +5,7 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDiscountRequest;
 use App\Models\Discount;
+use App\Models\DiscountUsage;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -294,5 +295,11 @@ public function forceDelete($id)
     $discount->forceDelete();
     return redirect()->route('admin.discount.trash')->with('success', 'Đã xóa vĩnh viễn!');
 }
+public function history()
+{
+  $usages = DiscountUsage::with(['discount', 'user'])->orderByDesc('used_at')->paginate(20);
 
+    return view('admin.discount.history', compact('usages'));
+
+}
 }
