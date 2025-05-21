@@ -99,6 +99,26 @@
                     </ul>
                 </div>
             </li>
+            <li class="nav-item active">
+                <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse"
+                    href="#orderMenu" role="button" aria-expanded="false" aria-controls="productMenu">
+                    <span>
+                        <i class="fas fa-user icon icon-xs me-2"></i>
+                        Đơn hàng
+                    </span>
+                    <i class="fas fa-chevron-down"></i>
+                </a>
+                <div class="collapse" id="orderMenu">
+                    <ul class="nav flex-column ps-3">
+                        <li class="nav-item">
+                            <a href="{{ route('admin.order.status.index') }}" class="nav-link">Trạng thái đơn hàng</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.account.listAdmins') }}" class="nav-link">Admin</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
             <li class="nav-item  active ">
                 <a href="{{ route('admin.categories.index') }}" class="nav-link">
                     <span class="sidebar-icon">
@@ -171,6 +191,26 @@
                             sách</a>
                     </li>
                     {{-- <li class="nav-item">
+
+                        <a href="{{ route('admin.discount.create') }}"
+                            class="nav-link {{ request()->routeIs('admin.discount.create') ? 'active' : '' }}">Tạo
+                            mã</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.discount.trash') }}"
+                            class="nav-link {{ request()->routeIs('admin.discount.trash') ? 'active' : '' }}">Thùng
+                            rác</a>
+                    </li> --}}
+                    {{-- <li class="nav-item">
+                        <a href=""
+                            class="nav-link {{ request()->routeIs('admin.discount.statistics') ? 'active' : '' }}">Thống
+                            kê</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href=""
+                            class="nav-link {{ request()->routeIs('admin.discount.statistics') ? 'active' : '' }}">Biểu
+                            đồ</a>
+                    </li> --}}
                 <a href="{{ route('admin.discount.create') }}" class="nav-link {{ request()->routeIs('admin.discount.create') ? 'active' : '' }}">Tạo mã</a>
                 </li>
                 <li class="nav-item">
