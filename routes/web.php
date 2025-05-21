@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\BrandController;
+use App\Http\Controllers\admin\OrderController;
 use App\Http\Controllers\client\HomeController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\ProductController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\Admin\Account\AccountAdminController;
 use App\Http\Controllers\Admin\Account\AccountUsersController;
 use App\Http\Controllers\admin\CategoryController;  // Tham chiếu đúng
 use App\Http\Controllers\Admin\CommentController;
+use App\Http\Controllers\admin\OrderStatusController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -139,4 +141,28 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/discount/trash', [DiscountController::class, 'trash'])->name('discount.trash');
     Route::post('/discount/restore/{id}', [DiscountController::class, 'restore'])->name('discount.restore');
     Route::delete('/discount/force-delete/{id}', [DiscountController::class, 'forceDelete'])->name('discount.forceDelete');
+
+    // Order status
+    Route::prefix('/order')->name('order.')->group(function () {
+        Route::prefix('/status')->name('status.')->group(function () {
+            Route::get('/', [OrderStatusController::class, 'index'])->name('index');
+            Route::get('/create', [OrderStatusController::class, 'create'])->name('create');
+            Route::get('/{id}/edit', [OrderStatusController::class, 'edit'])->name('edit');
+            Route::put('/{id}/update', [OrderStatusController::class, 'update'])->name('update');
+            Route::post('/store', [OrderStatusController::class, 'store'])->name('store');
+        });
+    });
+
+
+    Route::prefix('orders')->name('orders.')->group(function () {
+        Route::get('/', [OrderController::class, 'index'])->name('index');
+        Route::get('/create', [OrderController::class, 'create'])->name('create');
+        Route::post('/store', [OrderController::class, 'store'])->name('store');
+        Route::get('/edit/{id}', [OrderController::class, 'edit'])->name('edit');
+        Route::put('/update/{id}', [OrderController::class, 'update'])->name('update');
+        Route::get('/show/{id}', [OrderController::class, 'show'])->name('show');
+        Route::delete('/destroy/{id}', [OrderController::class, 'destroy'])->name('destroy');
+        Route::get('/trash', [OrderController::class, 'trash'])->name('trash');
+        Route::post('/restore/{id}', [OrderController::class, 'restore'])->name('restore');
+    });
 });
