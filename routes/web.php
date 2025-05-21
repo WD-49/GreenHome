@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\client\HomeController;
 use App\Http\Controllers\Admin\BannerController;
-use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\admin\Product\ProductController;
 use App\Http\Controllers\admin\DiscountController;
 use App\Http\Controllers\admin\AttributeController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -12,6 +12,7 @@ use App\Http\Controllers\admin\AttributeValueController;
 use App\Http\Controllers\Admin\Account\AccountAdminController;
 use App\Http\Controllers\Admin\Account\AccountUsersController;
 use App\Http\Controllers\admin\CategoryController;  // Tham chiếu đúng
+use App\Http\Controllers\admin\Product\ProductVariantController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -42,6 +43,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/{id}/destroy', [ProductController::class, 'destroy'])->name('destroy');
         Route::get('/{id}/restore', [ProductController::class, 'restore'])->name('restore');
         Route::delete('/{id}/forceDelete', [ProductController::class, 'forceDelete'])->name('forceDelete');
+        Route::prefix('/{product}/variants')->name('variants.')->group(function () {
+            Route::get('/', [ProductVariantController::class, 'index'])->name('index');
+            Route::get('/create-new', [ProductVariantController::class, 'create'])->name('create');
+            Route::post('/store-new', [ProductVariantController::class, 'store'])->name('store');
+            Route::get('/trashed', [ProductVariantController::class, 'trashed'])->name('trashed');
+            Route::get('/{productVariant}/detail', [ProductVariantController::class, 'show'])->name('show');
+            Route::get('/{productVariant}/edit', [ProductVariantController::class, 'edit'])->name('edit');
+            Route::put('/{productVariant}/update', [ProductVariantController::class, 'update'])->name('update');
+            Route::delete('/{productVariant}/destroy', [ProductVariantController::class, 'destroy'])->name('destroy');
+            Route::get('/{productVariant}/restore', [ProductVariantController::class, 'restore'])->name('restore');
+            Route::delete('/{productVariant}/forceDelete', [ProductVariantController::class, 'forceDelete'])->name('forceDelete');
+        });
     });
 
 
