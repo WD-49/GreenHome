@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\BrandController;
+use App\Http\Controllers\admin\OrderController;
 use App\Http\Controllers\client\HomeController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\ProductController;
@@ -143,3 +144,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
 });
 
 
+
+    Route::prefix('orders')->name('orders.')->group(function () {
+        Route::get('/', [OrderController::class, 'index'])->name('index');
+        Route::get('/create', [OrderController::class, 'create'])->name('create');
+        Route::post('/store', [OrderController::class, 'store'])->name('store');
+        Route::get('/edit/{id}', [OrderController::class, 'edit'])->name('edit');
+        Route::put('/update/{id}', [OrderController::class, 'update'])->name('update');
+        Route::get('/show/{id}', [OrderController::class, 'show'])->name('show');
+        Route::delete('/destroy/{id}', [OrderController::class, 'destroy'])->name('destroy');
+        Route::get('/trash', [OrderController::class, 'trash'])->name('trash');
+        Route::post('/restore/{id}', [OrderController::class, 'restore'])->name('restore');
+    });
+});

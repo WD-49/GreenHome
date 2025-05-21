@@ -191,6 +191,7 @@
                             sách</a>
                     </li>
                     {{-- <li class="nav-item">
+
                         <a href="{{ route('admin.discount.create') }}"
                             class="nav-link {{ request()->routeIs('admin.discount.create') ? 'active' : '' }}">Tạo
                             mã</a>
@@ -210,9 +211,27 @@
                             class="nav-link {{ request()->routeIs('admin.discount.statistics') ? 'active' : '' }}">Biểu
                             đồ</a>
                     </li> --}}
+                <a href="{{ route('admin.discount.create') }}" class="nav-link {{ request()->routeIs('admin.discount.create') ? 'active' : '' }}">Tạo mã</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.discount.trash') }}" class="nav-link {{ request()->routeIs('admin.discount.trash') ? 'active' : '' }}">Thùng rác</a>
+                </li> --}}
+                            {{-- <li class="nav-item">
+                    <a href="" class="nav-link {{ request()->routeIs('admin.discount.statistics') ? 'active' : '' }}">Thống kê</a>
+                </li>
+                <li class="nav-item">
+                    <a href="" class="nav-link {{ request()->routeIs('admin.discount.statistics') ? 'active' : '' }}">Biểu đồ</a>
+                </li> --}}
                 </ul>
             </li>
-
+            <li class="nav-item  active ">
+                <a href="{{ route('admin.orders.index') }}" class="nav-link">
+                    <span>
+                        <i class="fas fa-shopping-cart icon icon-xs me-2"></i>
+                        Orders
+                    </span>
+                </a>
+            </li>
         </ul>
     </div>
 </nav>

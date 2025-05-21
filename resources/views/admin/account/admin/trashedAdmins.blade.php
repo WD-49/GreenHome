@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
-    <h1>Thùng rác người dùng</h1>
+    <h1>Thùng rác admin</h1>
     @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
@@ -31,7 +31,7 @@
                         <form action="{{ route('admin.account.restoreUser', $user->id) }}" method="POST"
                             style="display:inline-block;">
                             @csrf
-                            <button onclick="return confirm('Khôi phục người dùng này?');" type="submit"
+                            <button onclick="return confirm('Khôi phục admin này?');" type="submit"
                                 class="btn btn-success btn-sm">Khôi phục</button>
                         </form>
 
