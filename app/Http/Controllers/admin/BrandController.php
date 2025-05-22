@@ -5,7 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use Illuminate\Http\Request;
-use App\Http\Requests\admin\attribute\BrandRequest;
+use App\Http\Requests\admin\brand\BrandStoreRequest;
+use App\Http\Requests\admin\brand\BrandUpdateRequest;
 
 class BrandController extends Controller
 {
@@ -29,18 +30,18 @@ class BrandController extends Controller
         return view('admin.brands.create');
     }
 
-    // Xử lý thêm mới thương hiệu
-    public function store(BrandRequest $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:20|unique:brands,name',
-            'description' => 'nullable|string',
-        ]);
+    public function store(BrandStoreRequest $request)
+{
+    $data = $request->validated();
 
-        Brand::create($request->only(['name', 'description']));
+    Brand::create([
+        'name' => $data['name'],
+        'description' => $data['description'] ?? null,
+    ]);
 
-        return redirect()->route('admin.brands.index')->with('success', '✅ Thêm thương hiệu thành công!');
-    }
+    return redirect()->route('admin.brands.index')
+                     ->with('success', '✅ Thêm thương hiệu thành công!');
+}
 
     // Form chỉnh sửa thương hiệu
     public function edit($id)
@@ -50,18 +51,19 @@ class BrandController extends Controller
     }
 
     // Cập nhật thương hiệu
-    public function update(BrandRequest $request, $id)
-    {
-        $request->validate([
-            'name' => 'required|string|max:20|unique:brands,name,' . $id,
-            'description' => 'required|string',
-        ]);
+    public function update(BrandUpdateRequest $request, $id)
+{
+    $data = $request->validated();
 
-        $brand = Brand::findOrFail($id);
-        $brand->update($request->only(['name', 'description']));
+    $brand = Brand::findOrFail($id);
+    $brand->update([
+        'name' => $data['name'],
+        'description' => $data['description'],
+    ]);
 
-        return redirect()->route('admin.brands.index')->with('success', '✏️ Cập nhật thương hiệu thành công!');
-    }
+    return redirect()->route('admin.brands.index')
+                     ->with('success', '✏️ Cập nhật thương hiệu thành công!');
+}
 
     // Xóa mềm thương hiệu
     public function destroy($id)

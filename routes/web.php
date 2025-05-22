@@ -13,6 +13,7 @@ use App\Http\Controllers\admin\AttributeValueController;
 use App\Http\Controllers\Admin\Account\AccountAdminController;
 use App\Http\Controllers\Admin\Account\AccountUsersController;
 use App\Http\Controllers\admin\CategoryController;  // Tham chiếu đúng
+use App\Http\Controllers\Admin\CommentController;
 use App\Http\Controllers\admin\Product\ProductVariantController;
 use App\Http\Controllers\admin\OrderStatusController;
 
@@ -63,6 +64,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Nhóm quản lý tài khoản
     Route::prefix('/account')->name('account.')->group(function () {
         // Users
+
+        Route::prefix('/comment')->name('comment.')->group(function () {
+            Route::get('/trashed', [CommentController::class, 'trashed'])->name('trashed');  
+            Route::post('/restore/{id}', [CommentController::class, 'restore'])->name('restore'); 
+            Route::post('/toggleStatus/{id}', [CommentController::class, 'toggleStatus'])->name('toggleStatus');
+            Route::post('/softDelete/{id}', [CommentController::class, 'softDelete'])->name('softDelete');
+            Route::delete('/forceDelete/{id}', [CommentController::class, 'forceDelete'])->name('forceDelete');
+        });
+
+
         Route::get('/listUsers', [AccountUsersController::class, 'listUsers'])->name('listUsers');
         Route::get('/detailAccUser/{id}', [AccountUsersController::class, 'detailAccUser'])->name('detailAccUser');
         Route::get('/createUser', [AccountUsersController::class, 'createUser'])->name('createUser');
@@ -155,8 +166,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/store', [OrderStatusController::class, 'store'])->name('store');
         });
     });
-
-
 
     Route::prefix('orders')->name('orders.')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('index');
