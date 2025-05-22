@@ -1,3 +1,6 @@
+<!-- Thêm CSS tùy chỉnh -->
+
+
 <nav id="sidebarMenu" class="sidebar d-lg-block bg-gray-800 text-white collapse" data-simplebar>
     <div class="sidebar-inner px-4 pt-3">
         <div
@@ -42,51 +45,40 @@
                     <span class="mt-1 ms-1 sidebar-text">GreenHome</span>
                 </a>
             </li>
-            <li class="nav-item  active ">
+            <li class="nav-item">
                 <a href="{{ route('admin.dashboard') }}" class="nav-link">
                     <span class="sidebar-icon">
-                        <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
-                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
-                        </svg>
+                        <i class="bi bi-speedometer2"></i>
                     </span>
                     <span class="sidebar-text">Dashboard</span>
                 </a>
             </li>
-            <li class="nav-item  active ">
+            <li class="nav-item">
                 <a href="{{ route('admin.products.index') }}" class="nav-link">
                     <span class="sidebar-icon">
-                        <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
-                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
-                        </svg>
+                        <i class="bi bi-box-seam"></i>
                     </span>
-                    <span class="sidebar-text">products</span>
+                    <span class="sidebar-text">Sản Phẩm</span>
                 </a>
             </li>
-
-            <li class="nav-item  active ">
+            <li class="nav-item">
                 <a href="{{ route('admin.attribute.index') }}" class="nav-link">
                     <span class="sidebar-icon">
-                        <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
-                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
-                        </svg>
+                        <i class="bi bi-gear"></i>
                     </span>
-                    <span class="sidebar-text">Quản lý thuộc tính</span>
+                    <span class="sidebar-text">Thuộc tính</span>
                 </a>
             </li>
-            <li class="nav-item active">
+            <li class="nav-item">
                 <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse"
                     href="#productMenu" role="button" aria-expanded="false" aria-controls="productMenu">
                     <span>
-                        <i class="fas fa-user icon icon-xs me-2"></i>
-                        Account
+                        <span class="sidebar-icon">
+                            <i class="bi bi-person"></i>
+                        </span>
+                        <span class="sidebar-text">Tài khoản</span>
                     </span>
-                    <i class="fas fa-chevron-down"></i>
+                    <i class="fas fa-chevron-down dropdown-toggle"></i>
                 </a>
                 <div class="collapse" id="productMenu">
                     <ul class="nav flex-column ps-3">
@@ -99,74 +91,50 @@
                     </ul>
                 </div>
             </li>
-            <li class="nav-item active">
+            <li class="nav-item">
                 <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse"
-                    href="#orderMenu" role="button" aria-expanded="false" aria-controls="productMenu">
+                    href="#orderMenu" role="button" aria-expanded="false" aria-controls="orderMenu">
                     <span>
-                        <i class="fas fa-user icon icon-xs me-2"></i>
-                        Đơn hàng
+                        <span class="sidebar-icon">
+                            <i class="bi bi-cart"></i>
+                        </span>
+                        <span class="sidebar-text">Đơn hàng</span>
                     </span>
-                    <i class="fas fa-chevron-down"></i>
+                    <i class="fas fa-chevron-down dropdown-toggle"></i>
                 </a>
                 <div class="collapse" id="orderMenu">
                     <ul class="nav flex-column ps-3">
                         <li class="nav-item">
-                            <a href="{{ route('admin.order.status.index') }}" class="nav-link">Trạng thái đơn hàng</a>
+                            <a href="{{ route('admin.orders.index') }}" class="nav-link">Danh sách đơn hàng</a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ route('admin.account.listAdmins') }}" class="nav-link">Admin</a>
+                            <a href="{{ route('admin.order.status.index') }}" class="nav-link">Trạng thái đơn hàng</a>
                         </li>
                     </ul>
                 </div>
             </li>
-            <li class="nav-item  active ">
+            <li class="nav-item">
                 <a href="{{ route('admin.categories.index') }}" class="nav-link">
                     <span class="sidebar-icon">
-                        <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
-                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
-                        </svg>
+                        <i class="bi bi-list-ul"></i>
                     </span>
-                    <span class="sidebar-text">Categories</span>
+                    <span class="sidebar-text">Danh mục</span>
                 </a>
             </li>
-            <li class="nav-item  active ">
+            <li class="nav-item">
                 <a href="{{ route('admin.brands.index') }}" class="nav-link">
                     <span class="sidebar-icon">
-                        <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
-                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
-                        </svg>
+                        <i class="bi bi-bookmark"></i>
                     </span>
-                    <span class="sidebar-text">brands</span>
+                    <span class="sidebar-text">Thương hiệu</span>
                 </a>
             </li>
-
-            <li class="nav-item  active ">
-                <a href="" class="nav-link">
-                    <span class="sidebar-icon">
-                        <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
-                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
-                        </svg>
-                    </span>
-                    <span class="sidebar-text">login</span>
-                </a>
-            </li>
-
-            <li class="nav-item  active ">
+            <li class="nav-item">
                 <a href="{{ route('admin.banners.index') }}" class="nav-link">
                     <span class="sidebar-icon">
-                        <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
-                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
-                        </svg>
+                        <i class="bi bi-image"></i>
                     </span>
-                    <span class="sidebar-text">banner</span>
+                    <span class="sidebar-text">Banner</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -174,14 +142,13 @@
                     data-bs-toggle="collapse" href="#discountSubmenu" role="button"
                     aria-expanded="{{ request()->is('admin/discount*') ? 'true' : 'false' }}"
                     aria-controls="discountSubmenu">
-                    <span class="sidebar-icon">
-                        <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
-                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
-                        </svg>
+                    <span>
+                        <span class="sidebar-icon">
+                            <i class="bi bi-ticket"></i>
+                        </span>
+                        <span class="sidebar-text">Mã Khuyến Mãi</span>
                     </span>
-                    <span class="sidebar-text">Mã Khuyến Mãi</span>
-                    <span class="sidebar-icon dropdown-toggle ms-auto"></span>
+                    <i class="fas fa-chevron-down dropdown-toggle"></i>
                 </a>
                 <ul class="collapse list-unstyled ps-3 {{ request()->is('admin/discount*') ? 'show' : '' }}"
                     id="discountSubmenu">
@@ -190,47 +157,7 @@
                             class="nav-link {{ request()->routeIs('admin.discount.index') ? 'active' : '' }}">Danh
                             sách</a>
                     </li>
-                    {{-- <li class="nav-item">
-
-                        <a href="{{ route('admin.discount.create') }}"
-                            class="nav-link {{ request()->routeIs('admin.discount.create') ? 'active' : '' }}">Tạo
-                            mã</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('admin.discount.trash') }}"
-                            class="nav-link {{ request()->routeIs('admin.discount.trash') ? 'active' : '' }}">Thùng
-                            rác</a>
-                    </li> --}}
-                    {{-- <li class="nav-item">
-                        <a href=""
-                            class="nav-link {{ request()->routeIs('admin.discount.statistics') ? 'active' : '' }}">Thống
-                            kê</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href=""
-                            class="nav-link {{ request()->routeIs('admin.discount.statistics') ? 'active' : '' }}">Biểu
-                            đồ</a>
-                    </li> --}}
-                <a href="{{ route('admin.discount.create') }}" class="nav-link {{ request()->routeIs('admin.discount.create') ? 'active' : '' }}">Tạo mã</a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('admin.discount.trash') }}" class="nav-link {{ request()->routeIs('admin.discount.trash') ? 'active' : '' }}">Thùng rác</a>
-                </li> --}}
-                            {{-- <li class="nav-item">
-                    <a href="" class="nav-link {{ request()->routeIs('admin.discount.statistics') ? 'active' : '' }}">Thống kê</a>
-                </li>
-                <li class="nav-item">
-                    <a href="" class="nav-link {{ request()->routeIs('admin.discount.statistics') ? 'active' : '' }}">Biểu đồ</a>
-                </li> --}}
                 </ul>
-            </li>
-            <li class="nav-item  active ">
-                <a href="{{ route('admin.orders.index') }}" class="nav-link">
-                    <span>
-                        <i class="fas fa-shopping-cart icon icon-xs me-2"></i>
-                        Orders
-                    </span>
-                </a>
             </li>
         </ul>
     </div>

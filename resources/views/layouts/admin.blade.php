@@ -20,6 +20,7 @@
 
     <!-- Font Awesome 6 - CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 
     <!-- Notyf -->
@@ -28,6 +29,91 @@
     <!-- Volt CSS -->
     <link rel="stylesheet" href="{{ asset('assets/css/volt.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
+    {{-- <style>
+        .sidebar {
+            background: linear-gradient(180deg, #2d3748 0%, #1a202c 100%);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .sidebar-inner {
+            padding: 1.5rem 1rem !important;
+        }
+
+        .nav-link {
+            border-radius: 8px;
+            margin: 0.25rem 0;
+            padding: 0.75rem 1rem !important;
+            transition: all 0.3s ease;
+            color: #e2e8f0 !important;
+        }
+
+        .nav-link:hover {
+            background-color: #4a5568;
+            color: #ffffff !important;
+            transform: translateX(5px);
+        }
+
+        .nav-link.active {
+            background-color: #4a5568;
+            color: #ffffff !important;
+        }
+
+        .sidebar-icon {
+            margin-right: 0.75rem;
+            font-size: 1.25rem;
+            vertical-align: middle;
+        }
+
+        .sidebar-text {
+            font-size: 0.95rem;
+            font-weight: 500;
+            vertical-align: middle;
+        }
+
+        .collapse {
+            transition: all 0.3s ease;
+        }
+
+        .nav-item .collapse .nav-link {
+            padding-left: 2.5rem !important;
+            font-size: 0.9rem;
+            color: #cbd5e0 !important;
+        }
+
+        .nav-item .collapse .nav-link:hover {
+            color: #ffffff !important;
+            background-color: #718096;
+        }
+
+        .dropdown-toggle::after {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link[aria-expanded="true"] .dropdown-toggle::after {
+            transform: rotate(180deg);
+        }
+
+        .user-card {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 1rem !important;
+        }
+
+        .user-card img {
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background-color: #4a5568;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: #718096;
+        }
+    </style> --}}
 </head>
 
 <body>
@@ -46,6 +132,7 @@
     @include('admin.partials.sidebar')
     <main class="content">
         @include('admin.partials.nav')
+
 
         @yield('content')
 
