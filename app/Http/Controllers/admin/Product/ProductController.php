@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Admin\Product;
 
 use App\Models\Brand;
 use App\Models\Product;
@@ -125,17 +125,14 @@ class ProductController extends Controller
         return view('admin.products.trashed', compact('title', 'products', 'categories', 'brands'));
     }
 
-    // public function show($id)
-    // {
-    //     // dd($id);
-    //     // lay ra du lieu chi tiet theo id
+    public function show($id)
+    {
+        $product = Product::with(['category', 'brand'])->findOrFail($id);
+        // dd($product);
+        // do du lieu thong tin chi tiet ra giao dien
+        return view('admin.products.show', compact('product'));
 
-    //     $product = Product::with('category')->findOrFail($id);
-    //     // dd($product);
-    //     // do du lieu thong tin chi tiet ra giao dien
-    //     return view('admin.products.show', compact('product'));
-
-    // }
+    }
 
     public function create()
     {

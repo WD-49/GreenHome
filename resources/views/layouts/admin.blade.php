@@ -74,15 +74,6 @@
     <!-- Volt JS -->
     <script src="{{ asset('assets/js/volt.js') }}"></script>
     <script src="{{ asset('assets/js/custom.js') }}"></script>
-    {{-- <script>
-        setTimeout(function() {
-            let alerts = document.querySelectorAll('.alert');
-            alerts.forEach(function(alertEl) {
-                let alert = new bootstrap.Alert(alertEl);
-                alert.close();
-            });
-        }, 2000);
-    </script> --}}
 
 </body>
 

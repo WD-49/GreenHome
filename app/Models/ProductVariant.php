@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ProductVariant extends Model
 {
@@ -16,6 +17,7 @@ class ProductVariant extends Model
         'sku',
         'price',
         'quantity',
+        'image',
         'status',
     ];
 
@@ -36,6 +38,15 @@ class ProductVariant extends Model
     {
         return $this->hasMany(ProductVariantValue::class);
     }
+    public static function generateUniqueSku(string $productName): string
+    {
+        do {
+            $sku = Str::slug(substr($productName, 0, 5)) . '-' . rand(1000, 9999);
+        } while (self::where('sku', $sku)->exists());
+
+        return $sku;
+    }
+
 
     // protected static function booted()
     // {
