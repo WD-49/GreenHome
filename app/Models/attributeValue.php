@@ -27,15 +27,14 @@ class attributeValue extends Model
         return $this->hasMany(ProductVariantValue::class);
     }
 
-
     protected static function booted()
-{
-    static::deleting(function ($attributeValue) {
-        if (! $attributeValue->forceDeleting) {
-            // Xóa mềm tất cả product_variant_values liên quan
-            $attributeValue->productVariantValues()->delete();
-        }
-    });
-}
-
+    {
+        // Xử lý khi xóa mềm AttributeValue
+        static::deleting(function ($attributeValue) {
+            if ($attributeValue->isSoftDeleting()) {
+                // Xóa mềm tất cả product_variant_values liên quan
+                $attributeValue->productVariantValues()->delete();
+            }
+        });
+    }
 }

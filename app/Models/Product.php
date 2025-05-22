@@ -38,11 +38,6 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class);
     }
-    public function discounts()
-{
-    return $this->belongsToMany(Discount::class, 'discount_products');
-}
-
 
     // Quan hệ với brand (nhiều-1)
     public function brand()
@@ -60,7 +55,7 @@ class Product extends Model
     {
         // Xử lý khi xóa mềm Product
         static::deleting(function ($product) {
-            if (!$product->isForceDeleting()) {
+            if ($product->isSoftDeleting()) {
                 // Xóa mềm tất cả product_variants liên quan
                 $product->productVariants()->each(function ($productVariants) {
                     $productVariants->delete();

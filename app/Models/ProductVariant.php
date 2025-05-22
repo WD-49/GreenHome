@@ -37,14 +37,14 @@ class ProductVariant extends Model
         return $this->hasMany(ProductVariantValue::class);
     }
 
-    // protected static function booted()
-    // {
-    //     // Xử lý khi xóa mềm ProductVariant
-    //     static::deleting(function ($productVariant) {
-    //         if ($productVariant->isSoftDeleting()) {
-    //             // Xóa mềm tất cả product_variant_values liên quan
-    //             $productVariant->productVariantValues()->delete();
-    //         }
-    //     });
-    // }
+    protected static function booted()
+    {
+        // Xử lý khi xóa mềm ProductVariant
+        static::deleting(function ($productVariant) {
+            if ($productVariant->isSoftDeleting()) {
+                // Xóa mềm tất cả product_variant_values liên quan
+                $productVariant->productVariantValues()->delete();
+            }
+        });
+    }
 }

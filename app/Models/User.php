@@ -13,21 +13,32 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use SoftDeletes, HasFactory, Notifiable;
 
-    protected $dates = ['deleted_at'];
-
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
     protected $fillable = [
         'name',
         'email',
         'password',
-        'role',
-        'status'
     ];
 
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var list<string>
+     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [
@@ -36,17 +47,17 @@ class User extends Authenticatable
             'status' => 'boolean',
         ];
     }
-
-    public function profile()
+    public function userProfile()
     {
         return $this->hasOne(UserProfile::class);
     }
-
     protected static function booted()
     {
+        // Xử lý khi xóa mềm User
         static::deleting(function ($user) {
-            if (!$user->forceDeleting) {
-                $user->profile()->delete();
+            if ($user->isSoftDeleting()) {
+                // Xóa mềm user_profiles tương ứng
+                $user->userProfile()->delete();
             }
         });
     }
