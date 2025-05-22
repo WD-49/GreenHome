@@ -136,7 +136,14 @@
                     <span class="sidebar-text">login</span>
                 </a>
             </li>
-
+<li class="nav-item  active ">
+                <a href="{{ route('admin.paymentMethods.index') }}" class="nav-link">
+                    <span class="sidebar-icon">
+                       <i class="fas fa-money-bill-wave"></i>
+                    </span>
+                    <span class="sidebar-text">PaymentMethods</span>
+                </a>
+            </li>
             <li class="nav-item  active ">
                 <a href="{{ route('admin.banners.index') }}" class="nav-link">
                     <span class="sidebar-icon">
@@ -182,6 +189,7 @@
         <li class="nav-item">
             <a href="" class="nav-link {{ request()->routeIs('admin.discount.statistics') ? 'active' : '' }}">Biểu đồ</a>
         </li> --}}
+
                 </ul>
             </li>
 
