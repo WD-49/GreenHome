@@ -6,7 +6,12 @@
 /storage/*.key
 /storage/pail
 /vendor
+/storage/app/public/images
+/storage/logs/*
 
+
+
+.env
 .env.backup
 .env.production
 .phpactor.json
@@ -21,3 +26,6 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+/bootstrap/cache/*.php
+/storage/logs
+/storage/framework
