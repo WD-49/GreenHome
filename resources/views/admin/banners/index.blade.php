@@ -18,14 +18,13 @@
         <tbody>
             @foreach($banners as $banner)
                 <tr>
-                  <td>
+                    <td>
                         @if($banner->img)
-                            <img src="{{ asset($banner->img) }}" alt="Banner" style="width: 120px; height: 80px; object-fit: cover; border-radius: 4px;">
+                            <img src="{{ asset($banner->img) }}" width="100" alt="Hình ảnh banner">
                         @else
                             <span class="text-muted">Chưa có ảnh</span>
                         @endif
                     </td>
-
                     <td>{{ $banner->name }}</td>
                     <td>
                         @if($banner->status)
@@ -35,10 +34,11 @@
                         @endif
                     </td>
                     <td>
-                        <a href="{{ route('admin.banners.edit', $banner) }}" class="btn btn-warning btn-sm">Sửa</a>
-                        <form action="{{ route('admin.banners.destroy', $banner) }}" method="POST" class="d-inline">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Xóa banner này?')">Xóa</button>
+                        <a href="{{ route('admin.banners.edit', $banner->id) }}" class="btn btn-warning btn-sm">Sửa</a>
+                        <form action="{{ route('admin.banners.destroy', $banner->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa banner này?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
                         </form>
                     </td>
                 </tr>
