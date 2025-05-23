@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\admin;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\admin\attribute\value\StoreAttributeValueRequest;
@@ -20,7 +20,7 @@ class AttributeValueController extends Controller
     public function create($id)
     {
         $attribute = Attribute::findOrFail($id);
-        $title = "Thêm giá trị thuộc tính: ".$attribute->name;
+        $title = "Thêm giá trị thuộc tính: " . $attribute->name;
         return view('admin.attribute.value.create', compact('title', 'attribute'));
     }
     public function store(StoreAttributeValueRequest $request)
@@ -49,9 +49,10 @@ class AttributeValueController extends Controller
         return redirect()->route('admin.attribute.index')->with('success', 'Thêm giá trị thuộc tính thành công!');
     }
     public function trash($id)
-    {   $attribute = Attribute::findOrFail($id);
+    {
+        $attribute = Attribute::findOrFail($id);
         $values = AttributeValue::onlyTrashed()->with('attribute')->where('attribute_id', '=', $id)->get();
-        $title = "Giá trị ".$attribute->name." đã xóa";
+        $title = "Giá trị " . $attribute->name . " đã xóa";
         return view('admin.attribute.value.trash', compact('values'));
     }
     public function restore($id)
@@ -61,9 +62,9 @@ class AttributeValueController extends Controller
         return redirect()->route('admin.attribute.index')->with('success', 'Khôi phục thành công!');
     }
     public function destroy($id)
-        {
-            $attribute = attributeValue::findOrFail($id);
-            $attribute->delete();
-            return redirect()->back()->with('success', 'Xóa tạm giá thành công!');
-        }
+    {
+        $attribute = attributeValue::findOrFail($id);
+        $attribute->delete();
+        return redirect()->back()->with('success', 'Xóa tạm giá thành công!');
+    }
 }

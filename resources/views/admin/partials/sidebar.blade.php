@@ -37,6 +37,7 @@
             </div>
         </div>
         <ul class="nav flex-column pt-3 pt-md-0">
+            {{-- greenHome --}}
             <li class="nav-item">
                 <a href="../../index.html" class="nav-link d-flex align-items-center">
                     <span class="sidebar-icon">
@@ -45,6 +46,7 @@
                     <span class="mt-1 ms-1 sidebar-text">GreenHome</span>
                 </a>
             </li>
+            {{-- Dashboard --}}
             <li class="nav-item">
                 <a href="{{ route('admin.dashboard') }}" class="nav-link">
                     <span class="sidebar-icon">
@@ -53,6 +55,25 @@
                     <span class="sidebar-text">Dashboard</span>
                 </a>
             </li>
+            {{-- Category --}}
+            <li class="nav-item">
+                <a href="{{ route('admin.categories.index') }}" class="nav-link">
+                    <span class="sidebar-icon">
+                        <i class="bi bi-list-ul"></i>
+                    </span>
+                    <span class="sidebar-text">Danh mục</span>
+                </a>
+            </li>
+            {{-- Brand --}}
+            <li class="nav-item">
+                <a href="{{ route('admin.brands.index') }}" class="nav-link">
+                    <span class="sidebar-icon">
+                        <i class="bi bi-bookmark"></i>
+                    </span>
+                    <span class="sidebar-text">Thương hiệu</span>
+                </a>
+            </li>
+            {{-- Product --}}
             <li class="nav-item">
                 <a href="{{ route('admin.products.index') }}" class="nav-link">
                     <span class="sidebar-icon">
@@ -61,6 +82,7 @@
                     <span class="sidebar-text">Sản Phẩm</span>
                 </a>
             </li>
+            {{-- Attribute --}}
             <li class="nav-item">
                 <a href="{{ route('admin.attribute.index') }}" class="nav-link">
                     <span class="sidebar-icon">
@@ -69,6 +91,7 @@
                     <span class="sidebar-text">Thuộc tính</span>
                 </a>
             </li>
+            {{-- User --}}
             <li class="nav-item">
                 <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse"
                     href="#productMenu" role="button" aria-expanded="false" aria-controls="productMenu">
@@ -91,6 +114,7 @@
                     </ul>
                 </div>
             </li>
+            {{-- Order --}}
             <li class="nav-item">
                 <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse"
                     href="#orderMenu" role="button" aria-expanded="false" aria-controls="orderMenu">
@@ -108,43 +132,22 @@
                             <a href="{{ route('admin.orders.index') }}" class="nav-link">Danh sách đơn hàng</a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ route('admin.order.status.index') }}" class="nav-link">Trạng thái đơn hàng</a>
+                            <a href="{{ route('admin.orders.status.index') }}" class="nav-link">Trạng thái đơn
+                                hàng</a>
                         </li>
                     </ul>
                 </div>
             </li>
+            {{-- Payment method --}}
             <li class="nav-item">
-                <a href="{{ route('admin.categories.index') }}" class="nav-link">
-                    <span class="sidebar-icon">
-                        <i class="bi bi-list-ul"></i>
-                    </span>
-                    <span class="sidebar-text">Danh mục</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('admin.brands.index') }}" class="nav-link">
-                    <span class="sidebar-icon">
-                        <i class="bi bi-bookmark"></i>
-                    </span>
-                    <span class="sidebar-text">Thương hiệu</span>
-                </a>
-            </li>
-<li class="nav-item  active ">
                 <a href="{{ route('admin.paymentMethods.index') }}" class="nav-link">
                     <span class="sidebar-icon">
-                       <i class="fas fa-money-bill-wave"></i>
+                        <i class="fas fa-money-bill-wave"></i>
                     </span>
                     <span class="sidebar-text">PaymentMethods</span>
                 </a>
             </li>
-            <li class="nav-item">
-                <a href="{{ route('admin.banners.index') }}" class="nav-link">
-                    <span class="sidebar-icon">
-                        <i class="bi bi-image"></i>
-                    </span>
-                    <span class="sidebar-text">Banner</span>
-                </a>
-            </li>
+            {{-- Discount --}}
             <li class="nav-item">
                 <a class="nav-link d-flex justify-content-between align-items-center {{ request()->is('admin/discount*') ? '' : 'collapsed' }}"
                     data-bs-toggle="collapse" href="#discountSubmenu" role="button"
@@ -165,21 +168,18 @@
                             class="nav-link {{ request()->routeIs('admin.discount.index') ? 'active' : '' }}">Danh
                             sách</a>
                     </li>
-                    {{-- <li class="nav-item">
-            <a href="{{ route('admin.discount.create') }}" class="nav-link {{ request()->routeIs('admin.discount.create') ? 'active' : '' }}">Tạo mã</a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ route('admin.discount.trash') }}" class="nav-link {{ request()->routeIs('admin.discount.trash') ? 'active' : '' }}">Thùng rác</a>
-        </li> --}}
-                    {{-- <li class="nav-item">
-            <a href="" class="nav-link {{ request()->routeIs('admin.discount.statistics') ? 'active' : '' }}">Thống kê</a>
-        </li>
-        <li class="nav-item">
-            <a href="" class="nav-link {{ request()->routeIs('admin.discount.statistics') ? 'active' : '' }}">Biểu đồ</a>
-        </li> --}}
-
                 </ul>
             </li>
+            {{-- Banner --}}
+            <li class="nav-item">
+                <a href="{{ route('admin.banners.index') }}" class="nav-link">
+                    <span class="sidebar-icon">
+                        <i class="bi bi-image"></i>
+                    </span>
+                    <span class="sidebar-text">Banner</span>
+                </a>
+            </li>
+
         </ul>
     </div>
 </nav>

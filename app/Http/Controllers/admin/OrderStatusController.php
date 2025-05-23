@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\admin;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\admin\order\status\StoreOrderStatusRequest;
@@ -14,12 +14,12 @@ class OrderStatusController extends Controller
     {
         $title = "Trạng thái đơn hàng";
         $statuses = OrderStatus::all();
-        return view('admin.order.status.index', compact('title', 'statuses'));
+        return view('admin.orders.status.index', compact('title', 'statuses'));
     }
     public function create()
     {
         $title = "Thêm mới trạng thái";
-        return view('admin.order.status.create', compact('title'));
+        return view('admin.orders.status.create', compact('title'));
     }
     public function store(StoreOrderStatusRequest $request)
     {
@@ -29,13 +29,13 @@ class OrderStatusController extends Controller
                 'name' => $data['name']
             ]
         );
-        return redirect()->route('admin.order.status.index')->with('success', 'Thêm trạng thái thành công!');
+        return redirect()->route('admin.orders.status.index')->with('success', 'Thêm trạng thái thành công!');
     }
     public function edit($id)
     {
         $status = OrderStatus::findOrFail($id);
         $title = "Sửa trạng thái đơn hàng";
-        return view('admin.order.status.edit', compact('title', 'status'));
+        return view('admin.orders.status.edit', compact('title', 'status'));
     }
     public function update($id, UpdateOrderStatusRequest $request)
     {
@@ -44,6 +44,6 @@ class OrderStatusController extends Controller
         $status->update([
             'name' => $data['name']
         ]);
-        return redirect()->route('admin.order.status.index')->with('success', 'Cập nhật trạng thái thành công!');
+        return redirect()->route('admin.orders.status.index')->with('success', 'Cập nhật trạng thái thành công!');
     }
 }

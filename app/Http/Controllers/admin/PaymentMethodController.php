@@ -8,19 +8,19 @@ use Illuminate\Http\Request;
 
 class PaymentMethodController extends Controller
 {
-   public function index(Request $request)
-{
-    $query = PaymentMethod::query();
+    public function index(Request $request)
+    {
+        $query = PaymentMethod::query();
 
-    // Lọc theo tên nếu có
-    if ($request->has('name') && $request->name !== null) {
-        $query->where('name', 'like', '%' . $request->name . '%');
+        // Lọc theo tên nếu có
+        if ($request->has('name') && $request->name !== null) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+
+        $paymentMethods = $query->orderBy('created_at', 'desc')->paginate(10);
+
+        return view('admin.payment_methods.index', compact('paymentMethods'));
     }
-
-    $paymentMethods = $query->orderBy('created_at', 'desc')->paginate(10);
-
-    return view('admin.payment_methods.index', compact('paymentMethods'));
-}
 
 
     public function create()
@@ -78,19 +78,19 @@ class PaymentMethodController extends Controller
         return redirect()->route('admin.paymentMethods.index')->with('success', 'Đã chuyển vào thùng rác!');
     }
 
-  public function trash(Request $request)
-{
-    $query = PaymentMethod::onlyTrashed();
+    public function trash(Request $request)
+    {
+        $query = PaymentMethod::onlyTrashed();
 
-    // Lọc theo tên
-    if ($request->has('name') && $request->name !== null) {
-        $query->where('name', 'like', '%' . $request->name . '%');
+        // Lọc theo tên
+        if ($request->has('name') && $request->name !== null) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+
+        $paymentMethods = $query->orderBy('deleted_at', 'desc')->paginate(10);
+
+        return view('admin.payment_methods.trash', compact('paymentMethods'));
     }
-
-    $paymentMethods = $query->orderBy('deleted_at', 'desc')->paginate(10);
-
-    return view('admin.payment_methods.trash', compact('paymentMethods'));
-}
 
 
     public function restore($id)

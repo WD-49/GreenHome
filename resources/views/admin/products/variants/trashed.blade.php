@@ -134,6 +134,10 @@
                                     {{ $variant->status == 1 ? 'Đang bán' : 'Dừng bán' }}
                                 </span>
                             </td>
+                            {{-- @php
+                                // dd($variant->product, $variant);
+
+                            @endphp --}}
 
                             <td>
                                 <a href="{{ route('admin.products.variants.restore', [$variant->product, $variant]) }}"

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\admin;
+namespace App\Http\Controllers\Admin;
 
 use App\Models\Order;
 use App\Models\OrderStatus;
@@ -20,6 +20,7 @@ class OrderController extends Controller
     public function show($id)
     {
         $order = Order::with(['user', 'discount', 'items', 'status', 'paymentMethod'])->findOrFail($id);
+        dd($order);
         return view('admin.orders.show', compact('order'));
     }
 

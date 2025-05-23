@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\admin\Product;
+namespace App\Http\Controllers\Admin\Product;
 
 use App\Models\Brand;
 use App\Models\Product;
@@ -231,7 +231,10 @@ class ProductVariantController extends Controller
 
     public function restore(Product $product, ProductVariant $productVariant)
     {
+        // dd($product, $productVariant);
+        // $productVariant = ProductVariant::withTrashed()->findOrFail($id);
         dd($productVariant);
+
         if ($product->id !== $productVariant->product_id) {
             abort(404);
         }

@@ -2,7 +2,7 @@
 @section('content')
     <h2 class="text-center">{{ $title }}</h2>
     <div class="mt-4 bg-white shadow-sm rounded p-3">
-        <a href="{{ route('admin.order.status.create') }}" class="btn btn-warning"><i class="fas fa-plus me-2"></i>Thêm mới</a>
+        <a href="{{ route('admin.orders.status.create') }}" class="btn btn-warning"><i class="fas fa-plus me-2"></i>Thêm mới</a>
         @if (count($statuses) <= 0)
             <div>
                 <p class="text-center text-muted">Trạng thái đang trống, hãy thêm trạng thái mới</p>
@@ -25,7 +25,7 @@
                             <td>{{ $status->name }}</td>
                             <td>{{ $status->created_at }}</td>
                             <td class="d-flex gap-1">
-                                <a href="{{ route('admin.order.status.edit', $id = $status->id) }}"
+                                <a href="{{ route('admin.orders.status.edit', $id = $status->id) }}"
                                     class="btn btn-sm btn-warning">Sửa</a>
 
                                 {{-- <form action="" method="POST"

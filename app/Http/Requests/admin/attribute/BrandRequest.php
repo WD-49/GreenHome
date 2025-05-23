@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class BrandRequest extends FormRequest
 {
-      public function authorize(): bool
+    public function authorize(): bool
     {
         return true;
     }
@@ -20,22 +20,23 @@ class BrandRequest extends FormRequest
 
 
 
-   public function rules(): array
-{
-    return [
-        'name' => 'required|string|max:20|unique:brands,name',
-        'description' => 'required|string',
-    ];
-}
+    public function rules(): array
+    {
+        return [
+            'name' => 'required|string|max:20|unique:brands,name',
+            'description' => 'required|string',
+        ];
+    }
 
-public function messages(): array
-{
-    return [
-        'name.required' => 'Vui lòng nhập tên thương hiệu.',
-        'name.max' => 'Tên thương hiệu không được vượt quá 20 ký tự.',
-        'name.unique' => 'Tên thương hiệu đã tồn tại.',
-        'description.required' => 'Vui lòng nhập mô tả.',
-    ];
-}
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Vui lòng nhập tên thương hiệu.',
+            'name.max' => 'Tên thương hiệu không được vượt quá 20 ký tự.',
+            'name.unique' => 'Tên thương hiệu đã tồn tại.',
+            'description.required' => 'Vui lòng nhập mô tả.',
+        ];
+    }
 
 }
+?>
