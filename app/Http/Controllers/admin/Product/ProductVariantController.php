@@ -29,79 +29,31 @@ class ProductVariantController extends Controller
     }
 
 
-    // public function trashed(Request $request)
-    // {
-    //     $title = 'Thùng rác';
-    //     $categories = Category::get();
-    //     $brands = Brand::get();
+    public function trashed(Request $request, Product $product)
+    {
+        $title = 'Thùng rác';
 
-    //     $query = Product::onlyTrashed()->with([
-    //         'category' => function ($query) {
-    //             $query->withTrashed();
-    //         },
-    //         'brand' => function ($query) {
-    //             $query->withTrashed();
-    //         },
-    //     ]);
+        $variants = $product->productVariants()
+            ->onlyTrashed()
+            ->with([
+                'product',
+                'productVariantValues' => function ($query) {
+                    $query->withTrashed(); // lấy cả bản ghi soft deleted
+                },
+                'productVariantValues.attributeValue.attribute',
+            ])
+            ->orderByDesc('id')
+            ->paginate(4)
+            ->appends($request->except('page'));
+        // dd($variants);
 
+        return view('admin.products.variants.trashed', compact('title', 'variants', 'product'));
+    }
 
-
-    //     if ($request->filled('name')) {
-    //         $query->where('name', 'LIKE', '%' . $request->name . '%');
-    //     }
-
-    //     if ($request->filled('category_id')) {
-    //         $query->where('category_id', $request->category_id);
-    //     }
-
-    //     if ($request->filled('brand_id')) {
-    //         $query->where('brand_id', $request->brand_id);
-    //     }
-
-    //     if ($request->filled('status')) {
-    //         $query->where('status', $request->status == 1 ? 1 : 0);
-    //     }
-
-    //     if ($request->filled('min_date') && $request->filled('max_date')) {
-    //         $query->whereBetween('date_of_entry', [$request->min_date, $request->max_date]);
-    //     } elseif ($request->filled('min_date')) {
-    //         $query->where('date_of_entry', '>=', $request->min_date);
-    //     } elseif ($request->filled('max_date')) {
-    //         $query->where('date_of_entry', '<=', $request->max_date);
-    //     }
-
-    //     if ($request->filled('min_price') && $request->filled('max_price')) {
-    //         $query->whereBetween('price', [$request->min_price, $request->max_price]);
-    //     } elseif ($request->filled('min_price')) {
-    //         $query->where('price', '>=', $request->min_price);
-    //     } elseif ($request->filled('max_price')) {
-    //         $query->where('price', '<=', $request->max_price);
-    //     }
-
-    //     $products = $query->orderByDesc('id')->paginate(4)->appends($request->except('page'));
-    //     // dd($products);
-
-    //     return view('admin.products.trashed', compact('title', 'products', 'categories', 'brands'));
-    // }
-
-    // // public function show($id)
-    // // {
-    // //     // dd($id);
-    // //     // lay ra du lieu chi tiet theo id
-
-    // //     $product = Product::with('category')->findOrFail($id);
-    // //     // dd($product);
-    // //     // do du lieu thong tin chi tiet ra giao dien
-    // //     return view('admin.products.show', compact('product'));
-
-    // // }
 
     public function create(Product $product)
     {
         $title = "Thêm biến thể";
-        // $categories = Category::get();
-        // $brands = Brand::get();
-        // dd($categories);
         $attributes = Attribute::with('attributeValues')->get();
         // dd($attributes);
 
@@ -264,24 +216,31 @@ class ProductVariantController extends Controller
 
 
 
-    // public function destroy($id)
-    // {
-    //     $product = Product::findOrFail($id);
+    public function destroy(Product $product, ProductVariant $productVariant)
+    {
+        // dd($productVariant);
+        if ($productVariant->product_id !== $product->id) {
+            abort(404);
+        }
 
-    //     $product->delete();
-    //     return redirect()->route('admin.products.index')->with('success', value: 'Sản phẩm đã được chuyển vào thùng rác!');
 
-    // }
+        $productVariant->delete();
+        return redirect()->route('admin.products.variants.index', $product)->with('success', 'biến thể đã được chuyển vào thùng rác!');
 
-    // public function restore($id)
-    // {
-    //     $product = Product::withTrashed()->findOrFail($id);
-    //     if ($product) {
-    //         $product->restore();
-    //         ProductVariant::where('product_id', $id)->restore(); // Khôi phục sản phẩm
-    //     }
+    }
 
-    //     return redirect()->route('admin.products.index')->with('success', 'Sản phẩm đã được khôi phục thành công');
-    // }
+    public function restore(Product $product, ProductVariant $productVariant)
+    {
+        dd($productVariant);
+        if ($product->id !== $productVariant->product_id) {
+            abort(404);
+        }
+
+        if ($productVariant) {
+            $productVariant->restore();
+        }
+
+        return redirect()->route('admin.products.variants.trashed', $product)->with('success', 'Sản phẩm đã được khôi phục thành công');
+    }
 
 }

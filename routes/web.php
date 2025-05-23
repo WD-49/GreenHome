@@ -51,12 +51,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/create-new', [ProductVariantController::class, 'create'])->name('create');
             Route::post('/store-new', [ProductVariantController::class, 'store'])->name('store');
             Route::get('/trashed', [ProductVariantController::class, 'trashed'])->name('trashed');
-            Route::get('/{productVariant}/detail', [ProductVariantController::class, 'show'])->name('show');
             Route::get('/{productVariant}/edit', [ProductVariantController::class, 'edit'])->name('edit');
             Route::put('/{productVariant}/update', [ProductVariantController::class, 'update'])->name('update');
             Route::delete('/{productVariant}/destroy', [ProductVariantController::class, 'destroy'])->name('destroy');
             Route::get('/{productVariant}/restore', [ProductVariantController::class, 'restore'])->name('restore');
-            Route::delete('/{productVariant}/forceDelete', [ProductVariantController::class, 'forceDelete'])->name('forceDelete');
         });
     });
 
@@ -66,13 +64,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Users
 
         Route::prefix('/comment')->name('comment.')->group(function () {
-            Route::get('/trashed', [CommentController::class, 'trashed'])->name('trashed');  
-            Route::post('/restore/{id}', [CommentController::class, 'restore'])->name('restore'); 
+            Route::get('/trashed', [CommentController::class, 'trashed'])->name('trashed');
+            Route::post('/restore/{id}', [CommentController::class, 'restore'])->name('restore');
             Route::post('/toggleStatus/{id}', [CommentController::class, 'toggleStatus'])->name('toggleStatus');
             Route::post('/softDelete/{id}', [CommentController::class, 'softDelete'])->name('softDelete');
             Route::delete('/forceDelete/{id}', [CommentController::class, 'forceDelete'])->name('forceDelete');
         });
-
 
         Route::get('/listUsers', [AccountUsersController::class, 'listUsers'])->name('listUsers');
         Route::get('/detailAccUser/{id}', [AccountUsersController::class, 'detailAccUser'])->name('detailAccUser');

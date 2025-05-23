@@ -123,7 +123,7 @@
                             <td> <img src="{{ asset('storage/' . $product->image) }}" width="100px"
                                     alt="Hình ảnh sản phẩm">
                             </td>
-                            <td>{{ $product->price }} đ</td>
+                            <td>{{ number_format($product->price, 0) }} đ</td>
                             <td>{{ $product->quantity }}</td>
                             <td scope="row">
                                 <span class="badge {{ $product->status == 1 ? 'bg-success' : 'bg-danger' }}">

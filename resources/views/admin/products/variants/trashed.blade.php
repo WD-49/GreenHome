@@ -92,11 +92,8 @@
         </div>
     </div> --}}
     <div class="col-12 d-flex align-center justify-content-center gap-2">
-        <a href="{{ route('admin.products.variants.create', $product) }}" class="btn btn-success align-content-center"
-            title="Thêm sản phẩm"><i class="fa-solid fa-square-plus"></i> Thêm biến thể
-        </a>
-        <a href="{{ route('admin.products.variants.trashed', $product) }}" class="btn btn-warning" title="Thùng rác"><i
-                class="fa-solid fa-dumpster"></i> Thùng rác
+        <a href="{{ route('admin.products.variants.index', $product) }}" class="btn btn-success align-content-center"
+            title="Thêm sản phẩm"> Back
         </a>
     </div>
     <div class="card shadow-sm mb-4">
@@ -117,7 +114,7 @@
                 <tbody>
                     @foreach ($variants as $index => $variant)
                         <tr>
-                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $variant->id }}</td>
                             <td>{{ $variant->sku }}</td>
                             <td>
                                 @foreach ($variant->productVariantValues as $pvv)
@@ -139,18 +136,9 @@
                             </td>
 
                             <td>
-                                <a href="{{ route('admin.products.variants.edit', [$variant->product, $variant]) }}"
-                                    class="btn btn-warning btn-sm" title="chỉnh sửa"><i class="fa-solid fa-pen"></i>
+                                <a href="{{ route('admin.products.variants.restore', [$variant->product, $variant]) }}"
+                                    class="btn btn-primary btn-sm" title="Khôi phục"><i class="fa-solid fa-rotate-left"></i>
                                 </a>
-                                <form
-                                    action="{{ route('admin.products.variants.destroy', [$variant->product, $variant]) }}"
-                                    method="POST" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm btn-confirm" title="xóa"
-                                        data-confirm-message="Bạn có chắc chắn muốn bỏ biến thể sản phẩm này vào thùng rác không?"><i
-                                            class="fa-solid fa-trash"></i></button>
-                                </form>
                             </td>
                         </tr>
                     @endforeach
