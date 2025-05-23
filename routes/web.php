@@ -1,22 +1,22 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\BrandController;
-use App\Http\Controllers\Admin\OrderController;
-use App\Http\Controllers\Client\HomeController;
-use App\Http\Controllers\Admin\BannerController;
-use App\Http\Controllers\Admin\Product\ProductController;
-use App\Http\Controllers\Admin\DiscountController;
-use App\Http\Controllers\Admin\AttributeController;
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\AttributeValueController;
-use App\Http\Controllers\Admin\Account\AccountAdminController;
-use App\Http\Controllers\Admin\Account\AccountUsersController;
-use App\Http\Controllers\Admin\CategoryController;  // Tham chiếu đúng
-use App\Http\Controllers\Admin\PaymentMethodController;
-use App\Http\Controllers\Admin\CommentController;
-use App\Http\Controllers\Admin\Product\ProductVariantController;
-use App\Http\Controllers\Admin\OrderStatusController;
+use App\Http\Controllers\admin\BrandController;
+use App\Http\Controllers\admin\OrderController;
+use App\Http\Controllers\client\HomeController;
+use App\Http\Controllers\admin\BannerController;
+use App\Http\Controllers\admin\Product\ProductController;
+use App\Http\Controllers\admin\DiscountController;
+use App\Http\Controllers\admin\AttributeController;
+use App\Http\Controllers\admin\DashboardController;
+use App\Http\Controllers\admin\AttributeValueController;
+use App\Http\Controllers\admin\Account\AccountAdminController;
+use App\Http\Controllers\admin\Account\AccountUsersController;
+use App\Http\Controllers\admin\CategoryController;  // Tham chiếu đúng
+use App\Http\Controllers\admin\PaymentMethodController;
+use App\Http\Controllers\admin\CommentController;
+use App\Http\Controllers\admin\Product\ProductVariantController;
+use App\Http\Controllers\admin\OrderStatusController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 

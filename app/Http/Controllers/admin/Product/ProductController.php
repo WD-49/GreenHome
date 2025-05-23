@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\Admin\Product;
+namespace App\Http\Controllers\admin\Product;
 
 use App\Models\Brand;
 use App\Models\Product;
