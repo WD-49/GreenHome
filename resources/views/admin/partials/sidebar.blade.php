@@ -129,6 +129,14 @@
                     <span class="sidebar-text">Thương hiệu</span>
                 </a>
             </li>
+<li class="nav-item  active ">
+                <a href="{{ route('admin.paymentMethods.index') }}" class="nav-link">
+                    <span class="sidebar-icon">
+                       <i class="fas fa-money-bill-wave"></i>
+                    </span>
+                    <span class="sidebar-text">PaymentMethods</span>
+                </a>
+            </li>
             <li class="nav-item">
                 <a href="{{ route('admin.banners.index') }}" class="nav-link">
                     <span class="sidebar-icon">
@@ -157,6 +165,19 @@
                             class="nav-link {{ request()->routeIs('admin.discount.index') ? 'active' : '' }}">Danh
                             sách</a>
                     </li>
+                    {{-- <li class="nav-item">
+            <a href="{{ route('admin.discount.create') }}" class="nav-link {{ request()->routeIs('admin.discount.create') ? 'active' : '' }}">Tạo mã</a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('admin.discount.trash') }}" class="nav-link {{ request()->routeIs('admin.discount.trash') ? 'active' : '' }}">Thùng rác</a>
+        </li> --}}
+                    {{-- <li class="nav-item">
+            <a href="" class="nav-link {{ request()->routeIs('admin.discount.statistics') ? 'active' : '' }}">Thống kê</a>
+        </li>
+        <li class="nav-item">
+            <a href="" class="nav-link {{ request()->routeIs('admin.discount.statistics') ? 'active' : '' }}">Biểu đồ</a>
+        </li> --}}
+
                 </ul>
             </li>
         </ul>

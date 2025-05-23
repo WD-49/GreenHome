@@ -13,6 +13,7 @@ use App\Http\Controllers\admin\AttributeValueController;
 use App\Http\Controllers\Admin\Account\AccountAdminController;
 use App\Http\Controllers\Admin\Account\AccountUsersController;
 use App\Http\Controllers\admin\CategoryController;  // Tham chiếu đúng
+use App\Http\Controllers\Admin\PaymentMethodController;
 use App\Http\Controllers\Admin\CommentController;
 use App\Http\Controllers\admin\Product\ProductVariantController;
 use App\Http\Controllers\admin\OrderStatusController;
@@ -151,6 +152,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/discount/trash', [DiscountController::class, 'trash'])->name('discount.trash');
     Route::post('/discount/restore/{id}', [DiscountController::class, 'restore'])->name('discount.restore');
     Route::delete('/discount/force-delete/{id}', [DiscountController::class, 'forceDelete'])->name('discount.forceDelete');
+
+      //quản lí PaymentMethod
+     Route::prefix('paymentMethods')->name('paymentMethods.')->group(function () {
+        Route::get('/list', [PaymentMethodController::class, 'index'])->name('index');
+        Route::get('/create', [PaymentMethodController::class, 'create'])->name('create');
+        Route::post('/store', [PaymentMethodController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [PaymentMethodController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [PaymentMethodController::class, 'update'])->name('update');
+        Route::delete('/{id}', [PaymentMethodController::class, 'destroy'])->name('destroy');
+        Route::get('/trash', [PaymentMethodController::class, 'trash'])->name('trash');
+        Route::post('/{id}/restore', [PaymentMethodController::class, 'restore'])->name('restore');
+        Route::delete('/{id}/force', [PaymentMethodController::class, 'forceDelete'])->name('forceDelete');
+    });
     Route::get('/discount/history', [DiscountController::class, 'history'])->name('discount.history');
 
     // Order status
