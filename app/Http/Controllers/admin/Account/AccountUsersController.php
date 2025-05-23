@@ -54,12 +54,15 @@ class AccountUsersController extends Controller
     }
 
     public function detailAccUser($id)
-    {
-        // Lấy user kèm profile
-        $user = User::with('profile')->findOrFail($id);
+{
+    // Lấy user kèm profile và comments
+    $user = User::with(['profile', 'comments' => function ($q) {
+        $q->withTrashed(); // nếu có soft deletes
+    }])->findOrFail($id);
 
-        return view('admin.account.users.detailAccUser', compact('user'));
-    }
+    return view('admin.account.users.detailAccUser', compact('user'));
+}
+
 
     public function createUser()
     {
@@ -179,8 +182,18 @@ class AccountUsersController extends Controller
 
     public function trashedUsers()
     {
-        $trashedUsers = User::onlyTrashed()->with('profile')->paginate(10);
+        $trashedUsers =  User::onlyTrashed()->where('role', 'client')->with('profile')->paginate(10);
         return view('admin.account.users.trashedUsers', compact('trashedUsers'));
+    }
+
+    public function trashedAdmins()
+    {
+        $trashedAdmins = User::onlyTrashed()
+            ->where('role', 'admin') // Chỉ lấy tài khoản admin
+            ->with('profile')
+            ->paginate(10);
+
+        return view('admin.account.admin.trashedAdmins', compact('trashedAdmins'));
     }
 
     public function restoreUser($id)

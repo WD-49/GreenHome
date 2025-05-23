@@ -88,18 +88,15 @@
                         <i class="fas fa-sync me-1"></i> Làm mới
                     </a>
                 </div>
-
-
-
             </form>
         </div>
     </div>
     <div class="col-12 d-flex align-center justify-content-center gap-2">
         <a href="{{ route('admin.products.create') }}" class="btn btn-success align-content-center"
-            title="Thêm sản phẩm"><i class="fa-solid fa-square-plus"></i>
+            title="Thêm sản phẩm"><i class="fa-solid fa-square-plus"></i> Thêm sản phẩm
         </a>
         <a href="{{ route('admin.products.trashed') }}" class="btn btn-warning" title="Thùng rác"><i
-                class="fa-solid fa-dumpster"></i>
+                class="fa-solid fa-dumpster"></i> Thùng rác
         </a>
     </div>
     <div class="card shadow-sm mb-4">
@@ -126,7 +123,7 @@
                             <td> <img src="{{ asset('storage/' . $product->image) }}" width="100px"
                                     alt="Hình ảnh sản phẩm">
                             </td>
-                            <td>{{ $product->price }} đ</td>
+                            <td>{{ number_format($product->price, 0) }} đ</td>
                             <td>{{ $product->quantity }}</td>
                             <td scope="row">
                                 <span class="badge {{ $product->status == 1 ? 'bg-success' : 'bg-danger' }}">
@@ -135,9 +132,12 @@
                             </td>
 
                             <td>
-                                {{-- <a href="{{ route('admin.products.show', $product->id) }}" class="btn btn-info btn-sm"
+                                <a href="{{ route('admin.products.variants.index', $product) }}"
+                                    class="btn btn-info btn-sm" title="">Xem biến thể</i>
+                                </a>
+                                <a href="{{ route('admin.products.show', $product->id) }}" class="btn btn-info btn-sm"
                                     title="xem chi tiết"><i class="fa-solid fa-eye"></i>
-                                </a> --}}
+                                </a>
                                 <a href="{{ route('admin.products.edit', $product->id) }}" class="btn btn-warning btn-sm"
                                     title="chỉnh sửa"><i class="fa-solid fa-pen"></i>
                                 </a>

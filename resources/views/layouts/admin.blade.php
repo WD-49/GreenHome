@@ -20,6 +20,7 @@
 
     <!-- Font Awesome 6 - CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 
     <!-- Notyf -->
@@ -28,6 +29,7 @@
     <!-- Volt CSS -->
     <link rel="stylesheet" href="{{ asset('assets/css/volt.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
+
 </head>
 
 <body>
@@ -46,6 +48,7 @@
     @include('admin.partials.sidebar')
     <main class="content">
         @include('admin.partials.nav')
+
 
         @yield('content')
 
@@ -74,15 +77,6 @@
     <!-- Volt JS -->
     <script src="{{ asset('assets/js/volt.js') }}"></script>
     <script src="{{ asset('assets/js/custom.js') }}"></script>
-    {{-- <script>
-        setTimeout(function() {
-            let alerts = document.querySelectorAll('.alert');
-            alerts.forEach(function(alertEl) {
-                let alert = new bootstrap.Alert(alertEl);
-                alert.close();
-            });
-        }, 2000);
-    </script> --}}
 
 </body>
 

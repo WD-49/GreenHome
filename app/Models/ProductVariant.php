@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\CartItem;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ProductVariant extends Model
 {
@@ -16,6 +18,7 @@ class ProductVariant extends Model
         'sku',
         'price',
         'quantity',
+        'image',
         'status',
     ];
 
@@ -37,14 +40,70 @@ class ProductVariant extends Model
         return $this->hasMany(ProductVariantValue::class);
     }
 
-    // protected static function booted()
-    // {
-    //     // Xử lý khi xóa mềm ProductVariant
-    //     static::deleting(function ($productVariant) {
-    //         if ($productVariant->isSoftDeleting()) {
-    //             // Xóa mềm tất cả product_variant_values liên quan
-    //             $productVariant->productVariantValues()->delete();
-    //         }
-    //     });
-    // }
+    public function cartItems()
+    {
+        return $this->hasMany(CartItem::class);
+    }
+    public static function generateUniqueSku(string $productName): string
+    {
+        do {
+            $sku = Str::slug(substr($productName, 0, 5)) . '-' . rand(1000, 9999);
+        } while (self::where('sku', $sku)->exists());
+
+        return $sku;
+    }
+
+
+    protected static function booted()
+    {
+        // Khi tạo mới
+        static::created(function ($productVariant) {
+            $productVariant->updateProductQuantity();
+        });
+
+        // Khi cập nhật
+        static::updated(function ($productVariant) {
+            // Kiểm tra nếu field 'quantity' có thay đổi
+            if ($productVariant->isDirty('quantity')) {
+                $productVariant->updateProductQuantity();
+            }
+        });
+
+        // Khi xóa
+        static::deleted(function ($productVariant) {
+            $productVariant->updateProductQuantity();
+        });
+        static::deleting(function ($productVariant) {
+            if (!$productVariant->isForceDeleting()) {
+                $productVariant->cartItems()->each(function ($cartItem) {
+                    $cartItem->delete();
+                });
+                $productVariant->productVariantValues()->each(function ($pvv) {
+                    $pvv->delete();
+                });
+
+            }
+        });
+        static::restored(function ($productVariant) {
+            // Khôi phục cartItems đã bị xóa mềm
+            $productVariant->cartItems()->onlyTrashed()->each(function ($cartItem) {
+                $cartItem->restore();
+            });
+
+            // Khôi phục productVariantValues đã bị xóa mềm
+            $productVariant->productVariantValues()->onlyTrashed()->each(function ($pvv) {
+                $pvv->restore();
+            });
+        });
+    }
+    public function updateProductQuantity()
+    {
+        $product = $this->product;
+
+        if ($product) {
+            $total = $product->productVariants()->withoutTrashed()->sum('quantity');
+            $product->update(['quantity' => $total]);
+        }
+    }
+
 }

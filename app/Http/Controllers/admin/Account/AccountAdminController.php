@@ -66,24 +66,29 @@ class AccountAdminController extends Controller
         ]);
 
         $admins = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
+            'name' => $request->name,
+            'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role'     => $request->role,
-            'status'   => $request->status,
+            'role' => $request->role,
+            'status' => $request->status,
         ]);
 
         $profile = new UserProfile([
-            'phone'   => $request->phone,
+            'phone' => $request->phone,
             'address' => $request->address,
-            'gender'  => $request->gender,
+            'gender' => $request->gender,
         ]);
 
         if ($request->hasFile('user_image')) {
+
             $image = $request->file('user_image');
             $filename = time() . '_' . Str::slug($admins->name) . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('uploads/avatars'), $filename);
-            $profile->user_image = 'uploads/avatars/' . $filename;
+
+            // Lưu ảnh mới
+            $path = $image->storeAs('images/users', $filename, 'public');
+
+            // Gán đường dẫn vào DB
+            $profile->user_image = $path;
         }
 
         $admins->profile()->save($profile);
@@ -112,9 +117,9 @@ class AccountAdminController extends Controller
 
         $admins = User::findOrFail($id);
         $admins->update([
-            'name'   => $request->name,
-            'email'  => $request->email,
-            'role'   => $request->role,
+            'name' => $request->name,
+            'email' => $request->email,
+            'role' => $request->role,
             'status' => $request->status,
         ]);
 
@@ -154,7 +159,11 @@ class AccountAdminController extends Controller
 
     public function trashedAdmins()
     {
-        $trashedAdmins = User::onlyTrashed()->with('profile')->paginate(10);
+        $trashedAdmins = User::onlyTrashed()
+            ->where('role', 'admin') // Chỉ lấy tài khoản admin
+            ->with('profile')
+            ->paginate(10);
+
         return view('admin.account.admin.trashedAdmins', compact('trashedAdmins'));
     }
 
@@ -170,7 +179,7 @@ class AccountAdminController extends Controller
     {
         $admin = User::withTrashed()->findOrFail($id);
 
-       if ($admin->profile) {
+        if ($admin->profile) {
             $profile = $admin->profile;
 
             // Xóa ảnh cũ nếu có
@@ -191,7 +200,7 @@ class AccountAdminController extends Controller
     public function resetPassAdmin($id)
     {
         $admin = User::where('role', 'admin')->findOrFail($id);
-        
+
         $newPassword = 'greenhome';
         $admin->password = Hash::make($newPassword);
         $admin->save();
