@@ -18,7 +18,7 @@ class Order extends Model
         'shipping_address',
         'status_id',
         'discount_id',
-        'payment_method',
+        'payment_method_id',
         'payment_status',
         'discount_amount',
         'shipping_fee',
@@ -45,5 +45,9 @@ class Order extends Model
     public function status()
     {
         return $this->belongsTo(OrderStatus::class);
+    }
+    public function paymentMethod()
+    {
+        return $this->belongsTo(PaymentMethod::class);
     }
 }

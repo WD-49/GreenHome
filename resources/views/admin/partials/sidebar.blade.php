@@ -1,3 +1,6 @@
+<!-- Thêm CSS tùy chỉnh -->
+
+
 <nav id="sidebarMenu" class="sidebar d-lg-block bg-gray-800 text-white collapse" data-simplebar>
     <div class="sidebar-inner px-4 pt-3">
         <div
@@ -34,48 +37,146 @@
             </div>
         </div>
         <ul class="nav flex-column pt-3 pt-md-0">
+            {{-- greenHome --}}
             <li class="nav-item">
                 <a href="../../index.html" class="nav-link d-flex align-items-center">
                     <span class="sidebar-icon">
                         <img src="../../assets/img/brand/light.svg" height="20" width="20" alt="Volt Logo">
                     </span>
-                    <span class="mt-1 ms-1 sidebar-text">Volt Overview</span>
+                    <span class="mt-1 ms-1 sidebar-text">GreenHome</span>
                 </a>
             </li>
-            <li class="nav-item  active ">
+            {{-- Dashboard --}}
+            <li class="nav-item">
                 <a href="{{ route('admin.dashboard') }}" class="nav-link">
                     <span class="sidebar-icon">
-                        <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
-                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
-                        </svg>
+                        <i class="bi bi-speedometer2"></i>
                     </span>
                     <span class="sidebar-text">Dashboard</span>
                 </a>
             </li>
-            <li class="nav-item  active ">
-                <a href="" class="nav-link">
+            {{-- Category --}}
+            <li class="nav-item">
+                <a href="{{ route('admin.categories.index') }}" class="nav-link">
                     <span class="sidebar-icon">
-                        <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
-                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
-                        </svg>
+                        <i class="bi bi-list-ul"></i>
                     </span>
-                    <span class="sidebar-text">products</span>
+                    <span class="sidebar-text">Danh mục</span>
                 </a>
             </li>
-            <li class="nav-item  active ">
-                <a href="" class="nav-link">
+            {{-- Brand --}}
+            <li class="nav-item">
+                <a href="{{ route('admin.brands.index') }}" class="nav-link">
                     <span class="sidebar-icon">
-                        <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
-                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
-                        </svg>
+                        <i class="bi bi-bookmark"></i>
                     </span>
-                    <span class="sidebar-text">login</span>
+                    <span class="sidebar-text">Thương hiệu</span>
+                </a>
+            </li>
+            {{-- Product --}}
+            <li class="nav-item">
+                <a href="{{ route('admin.products.index') }}" class="nav-link">
+                    <span class="sidebar-icon">
+                        <i class="bi bi-box-seam"></i>
+                    </span>
+                    <span class="sidebar-text">Sản Phẩm</span>
+                </a>
+            </li>
+            {{-- Attribute --}}
+            <li class="nav-item">
+                <a href="{{ route('admin.attribute.index') }}" class="nav-link">
+                    <span class="sidebar-icon">
+                        <i class="bi bi-gear"></i>
+                    </span>
+                    <span class="sidebar-text">Thuộc tính</span>
+                </a>
+            </li>
+            {{-- User --}}
+            <li class="nav-item">
+                <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse"
+                    href="#productMenu" role="button" aria-expanded="false" aria-controls="productMenu">
+                    <span>
+                        <span class="sidebar-icon">
+                            <i class="bi bi-person"></i>
+                        </span>
+                        <span class="sidebar-text">Tài khoản</span>
+                    </span>
+                    <i class="fas fa-chevron-down dropdown-toggle"></i>
+                </a>
+                <div class="collapse" id="productMenu">
+                    <ul class="nav flex-column ps-3">
+                        <li class="nav-item">
+                            <a href="{{ route('admin.account.listUsers') }}" class="nav-link">User</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.account.listAdmins') }}" class="nav-link">Admin</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            {{-- Order --}}
+            <li class="nav-item">
+                <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse"
+                    href="#orderMenu" role="button" aria-expanded="false" aria-controls="orderMenu">
+                    <span>
+                        <span class="sidebar-icon">
+                            <i class="bi bi-cart"></i>
+                        </span>
+                        <span class="sidebar-text">Đơn hàng</span>
+                    </span>
+                    <i class="fas fa-chevron-down dropdown-toggle"></i>
+                </a>
+                <div class="collapse" id="orderMenu">
+                    <ul class="nav flex-column ps-3">
+                        <li class="nav-item">
+                            <a href="{{ route('admin.orders.index') }}" class="nav-link">Danh sách đơn hàng</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.orders.status.index') }}" class="nav-link">Trạng thái đơn
+                                hàng</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            {{-- Payment method --}}
+            <li class="nav-item">
+                <a href="{{ route('admin.paymentMethods.index') }}" class="nav-link">
+                    <span class="sidebar-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </span>
+                    <span class="sidebar-text">PaymentMethods</span>
+                </a>
+            </li>
+            {{-- Discount --}}
+            <li class="nav-item">
+                <a class="nav-link d-flex justify-content-between align-items-center {{ request()->is('admin/discount*') ? '' : 'collapsed' }}"
+                    data-bs-toggle="collapse" href="#discountSubmenu" role="button"
+                    aria-expanded="{{ request()->is('admin/discount*') ? 'true' : 'false' }}"
+                    aria-controls="discountSubmenu">
+                    <span>
+                        <span class="sidebar-icon">
+                            <i class="bi bi-ticket"></i>
+                        </span>
+                        <span class="sidebar-text">Mã Khuyến Mãi</span>
+                    </span>
+                    <i class="fas fa-chevron-down dropdown-toggle"></i>
+                </a>
+                <ul class="collapse list-unstyled ps-3 {{ request()->is('admin/discount*') ? 'show' : '' }}"
+                    id="discountSubmenu">
+                    <li class="nav-item">
+                        <a href="{{ route('admin.discount.index') }}"
+                            class="nav-link {{ request()->routeIs('admin.discount.index') ? 'active' : '' }}">Danh
+                            sách</a>
+                    </li>
+                </ul>
+            </li>
+            {{-- Banner --}}
+            <li class="nav-item">
+                <a href="{{ route('admin.banners.index') }}" class="nav-link">
+                    <span class="sidebar-icon">
+                        <i class="bi bi-image"></i>
+                    </span>
+                    <span class="sidebar-text">Banner</span>
                 </a>
             </li>
 
