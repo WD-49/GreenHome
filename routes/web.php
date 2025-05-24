@@ -17,6 +17,7 @@ use App\Http\Controllers\admin\PaymentMethodController;
 use App\Http\Controllers\admin\CommentController;
 use App\Http\Controllers\admin\Product\ProductVariantController;
 use App\Http\Controllers\admin\OrderStatusController;
+use App\Models\OrderStatus;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -191,8 +192,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/', [OrderStatusController::class, 'index'])->name('index');
             Route::get('/create', [OrderStatusController::class, 'create'])->name('create');
             Route::get('/{id}/edit', [OrderStatusController::class, 'edit'])->name('edit');
+            Route::get('/trashed', [OrderStatusController::class, 'trashed'])->name('trashed');
             Route::put('/{id}/update', [OrderStatusController::class, 'update'])->name('update');
             Route::post('/store', [OrderStatusController::class, 'store'])->name('store');
+            Route::delete('/{id}/destroy/', [OrderStatus::class, 'destroy'])->name('destroy');
+            Route::patch('/restore/{id}', [OrderStatus::class, 'restore'])->name('restore');
         });
     });
 });

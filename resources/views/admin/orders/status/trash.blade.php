@@ -6,7 +6,7 @@
             mới</a>
         @if (count($statuses) <= 0)
             <div>
-                <p class="text-center text-muted">Trạng thái đang trống, hãy thêm trạng thái mới</p>
+                <p class="text-center text-muted">Không có dữ liệu</p>
             </div>
         @endif
         @if (count($statuses) > 0)
@@ -15,7 +15,7 @@
                     <tr>
                         <th style="width: 50px;">STT</th>
                         <th style="width: 200px;">Tên trạng thái</th>
-                        <th>Ngày tạo</th>
+                        <th>Ngày xóa</th>
                         <th style="width: 200px;">Thao tác</th>
                     </tr>
                 </thead>
@@ -24,17 +24,14 @@
                         <tr>
                             <td>{{ ( $key + 1) }}</td>
                             <td>{{ $status->name }}</td>
-                            <td>{{ $status->created_at }}</td>
+                            <td>{{ $status->deleted_at }}</td>
                             <td class="d-flex gap-1">
-                                <a href="{{ route('admin.orders.status.edit', $id = $status->id) }}"
-                                    class="btn btn-sm btn-warning">Sửa</a>
-
-                                <form action="{{route('admin.orders.status.destroy', $id = $status->id)}}" method="POST" onsubmit="return confirm('Chuyển vào thùng rác?')"
+                                <form action="{{route('admin.orders.status.restore', $status->id)}}" method="POST" onsubmit="return confirm('Khôi phục dữ liệu?')"
                                     style="display:inline">
                                     @csrf
-                                    @method('DELETE')
+                                    @method('PATCH')
                                     {{-- <input type="hidden" name="id" value="{{$status->id}}"> --}}
-                                    <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                                    <button type="submit" class="btn btn-sm btn-success"> <i class="fas fa-recycle"></i>Khôi phục</button>
                                 </form>
                             </td>
                         </tr>
@@ -46,8 +43,8 @@
                 </tbody>
             </table>
         @endif
-        <a href="{{ route('admin.orders.status.trashed') }}" class="btn btn-primary btn-sm" title="Xem thùng rác">
-            <i class="fas fa-trash-alt"></i> Dữ liệu đã xóa
+        <a href="{{ route('admin.orders.status.index') }}" class="btn btn-primary btn-sm" title="">
+            Quay lại
         </a>
     </div>
 @endsection

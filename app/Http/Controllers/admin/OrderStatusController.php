@@ -7,6 +7,7 @@ use App\Http\Requests\admin\order\status\StoreOrderStatusRequest;
 use App\Http\Requests\admin\order\status\UpdateOrderStatusRequest;
 use App\Models\OrderStatus;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redis;
 
 class OrderStatusController extends Controller
 {
@@ -45,5 +46,21 @@ class OrderStatusController extends Controller
             'name' => $data['name']
         ]);
         return redirect()->route('admin.orders.status.index')->with('success', 'Cập nhật trạng thái thành công!');
+    }
+    public function destroy($id)
+    {
+        $item = OrderStatus::findOrFail($id);
+        $item->delete();
+        return redirect()->route('admin.orders.status.index')->with('success', 'Xóa trạng thái thành công!');
+    }
+    public function trashed() {
+        $statuses = OrderStatus::onlyTrashed()->get();
+        $title = "Trạng thái đã xóa";
+        return view('admin.orders.status.trash', compact('statuses', 'title'));
+    }
+    public function restore($id) {
+        $data = OrderStatus::onlyTrashed()->findOrFail($id);
+        $data->restore();
+        return redirect()->route('admin.orders.status.index')->with('success', 'Khôi phục trạng thái thành công!');
     }
 }
