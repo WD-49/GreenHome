@@ -112,7 +112,7 @@
         </form>
     </div>
 
-    {{-- <script>
+    <script>
         document.querySelectorAll('.attribute-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', function() {
                 const select = this.closest('.form-check').querySelector('.attribute-select');
@@ -121,5 +121,5 @@
                 }
             });
         });
-    </script> --}}
+    </script>
 @endsection

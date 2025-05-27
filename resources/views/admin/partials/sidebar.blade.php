@@ -17,7 +17,7 @@
                     <span class="hide-menu">Home</span>
                 </li>
                 <li class="sidebar-item">
-                    <a class="sidebar-link" href="./index.html" aria-expanded="false">
+                    <a class="sidebar-link" href="{{ route('admin.dashboard') }}" aria-expanded="false">
                         <i class="ti ti-atom"></i>
                         <span class="hide-menu">Dashboard</span>
                     </a>
@@ -25,28 +25,6 @@
                 <!-- ---------------------------------- -->
                 <!-- Dashboard -->
                 <!-- ---------------------------------- -->
-                <li class="sidebar-item">
-                    <a class="sidebar-link justify-content-between" href="#" aria-expanded="false">
-                        <div class="d-flex align-items-center gap-3">
-                            <span class="d-flex">
-                                <i class="ti ti-aperture"></i>
-                            </span>
-                            <span class="hide-menu">Analytical</span>
-                        </div>
-
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a class="sidebar-link justify-content-between" href="#" aria-expanded="false">
-                        <div class="d-flex align-items-center gap-3">
-                            <span class="d-flex">
-                                <i class="ti ti-shopping-cart"></i>
-                            </span>
-                            <span class="hide-menu">eCommerce</span>
-                        </div>
-
-                    </a>
-                </li>
                 <li class="sidebar-item">
                     <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)"
                         aria-expanded="false">
@@ -108,6 +86,113 @@
 
                     </ul>
                 </li>
+
+                <li class="sidebar-item">
+                    <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)"
+                        aria-expanded="false">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="d-flex">
+                                <i class="ti ti-shopping-cart"></i>
+                            </span>
+                            <span class="hide-menu">Đơn hàng</span>
+                        </div>
+
+                    </a>
+                    <ul aria-expanded="false" class="collapse first-level">
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" href="{{ route('admin.orders.index') }}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                        <i class="ti ti-circle"></i>
+                                    </div>
+                                    <span class="hide-menu">đơn hàng</span>
+                                </div>
+
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between"
+                                href="{{ route('admin.orders.status.index') }}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                        <i class="ti ti-circle"></i>
+                                    </div>
+                                    <span class="hide-menu">Trạng thái thanh toán</span>
+                                </div>
+
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between"
+                                href="{{ route('admin.paymentMethods.index') }}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                        <i class="ti ti-circle"></i>
+                                    </div>
+                                    <span class="hide-menu">Phương thức thanh toán</span>
+                                </div>
+
+                            </a>
+                        </li>
+
+
+                    </ul>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)"
+                        aria-expanded="false">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="d-flex">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round"
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-rosette-discount">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M9 15l6 -6" />
+                                    <circle cx="9.5" cy="9.5" r=".5" fill="currentColor" />
+                                    <circle cx="14.5" cy="14.5" r=".5" fill="currentColor" />
+                                    <path
+                                        d="M5 7.2a2.2 2.2 0 0 1 2.2 -2.2h1a2.2 2.2 0 0 0 1.55 -.64l.7 -.7a2.2 2.2 0 0 1 3.12 0l.7 .7a2.2 2.2 0 0 0 1.55 .64h1a2.2 2.2 0 0 1 2.2 2.2v1a2.2 2.2 0 0 0 .64 1.55l.7 .7a2.2 2.2 0 0 1 0 3.12l-.7 .7a2.2 2.2 0 0 0 -.64 1.55v1a2.2 2.2 0 0 1 -2.2 2.2h-1a2.2 2.2 0 0 0 -1.55 .64l-.7 .7a2.2 2.2 0 0 1 -3.12 0l-.7 -.7a2.2 2.2 0 0 0 -1.55 -.64h-1a2.2 2.2 0 0 1 -2.2 -2.2v-1a2.2 2.2 0 0 0 -.64 -1.55l-.7 -.7a2.2 2.2 0 0 1 0 -3.12l.7 -.7a2.2 2.2 0 0 0 .64 -1.55v-1" />
+                                </svg>
+                            </span>
+                            <span class="hide-menu">Mã giảm giá</span>
+                        </div>
+
+                    </a>
+                    <ul aria-expanded="false" class="collapse first-level">
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between"
+                                href="{{ route('admin.discount.index') }}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                        <i class="ti ti-circle"></i>
+                                    </div>
+                                    <span class="hide-menu">Danh sách mã</span>
+                                </div>
+
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between"
+                                href="{{ route('admin.discount.history') }}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                        <i class="ti ti-circle"></i>
+                                    </div>
+                                    <span class="hide-menu">Lịch sử dùng mã</span>
+                                </div>
+
+                            </a>
+                        </li>
+
+
+
+                    </ul>
+                </li>
+
+
 
                 <li>
                     <span class="sidebar-divider lg"></span>
