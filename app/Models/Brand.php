@@ -13,6 +13,7 @@ class Brand extends Model
     protected $fillable = [
         'name',
         'description',
+        'slug',
 
     ];
     protected $dates = ['deleted_at'];
@@ -23,7 +24,7 @@ class Brand extends Model
         return $this->hasMany(Product::class);
     }
 
- protected static function booted()
+    protected static function booted()
     {
         // Khi xóa mềm brand → xóa mềm các sản phẩm
         static::deleting(function ($brand) {

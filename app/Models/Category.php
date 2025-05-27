@@ -13,6 +13,7 @@ class Category extends Model
     protected $fillable = [
         'name',
         'description',
+        'slug',
     ];
 
     // Quan hệ với products (1-nhiều)
@@ -36,6 +37,7 @@ class Category extends Model
         static::restoring(function ($category) {
             $category->products()->onlyTrashed()->restore();
         });
+
     }
 
 }

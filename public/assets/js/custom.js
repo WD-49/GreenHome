@@ -55,12 +55,3 @@ document.addEventListener('DOMContentLoaded', function () {
   }, 3000);
 });
 
-document.querySelectorAll('.attribute-checkbox').forEach(checkbox => {
-  checkbox.addEventListener('change', function () {
-    const select = this.closest('.form-check').querySelector('.attribute-select');
-    if (select) {
-      select.disabled = !this.checked;
-    }
-  });
-});
-

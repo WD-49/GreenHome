@@ -15,8 +15,7 @@ class Product extends Model
         'brand_id',
         'name',
         'description',
-        'price',
-        'promotional_price',
+        'slug',
         'quantity',
         'date_of_entry',
         'status',
@@ -25,8 +24,6 @@ class Product extends Model
     ];
 
     protected $casts = [
-        'price' => 'decimal:2',
-        'promotional_price' => 'decimal:2',
         'date_of_entry' => 'datetime',
         'status' => 'boolean',
         'quantity' => 'integer',
