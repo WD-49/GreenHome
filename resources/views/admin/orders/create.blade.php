@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-
+@section('title', 'Tạo đơn hàng mới')
 @section('content')
     <div class="container py-5">
         <div class="card shadow">

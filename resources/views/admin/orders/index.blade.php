@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-
+@section('title', 'Danh sách đơn hàng')
 @section('content')
     <div class="container mt-5">
         <div class="card shadow-sm border-0 rounded-4">
