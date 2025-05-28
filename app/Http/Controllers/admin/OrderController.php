@@ -16,11 +16,60 @@ use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $orders = Order::with(['user', 'discount', 'items', 'status', 'paymentMethod'])->get();
-        // dd($orders);
-        return view('admin.orders.index', compact('orders'));
+        $query = Order::with(['user', 'discount', 'items', 'status', 'paymentMethod']);
+
+        // Lọc theo mã đơn hàng
+        if ($request->filled('order_code')) {
+            $code = $request->order_code;
+            $query->where(function ($q) use ($code) {
+                $q->where('sku', 'like', "%{$code}%")
+                    ->orWhere('id', $code);
+            });
+        }
+
+        // Lọc theo tên khách hàng
+        if ($request->filled('customer_name')) {
+            $name = $request->customer_name;
+            $query->whereHas('user', function ($q) use ($name) {
+                $q->where('name', 'like', "%{$name}%");
+            });
+        }
+
+        // Lọc theo trạng thái thanh toán (giả sử là trường 'payment_status' trong bảng orders)
+        if ($request->filled('payment_status')) {
+            $query->where('payment_status', $request->payment_status);
+        }
+
+        // Lọc theo trạng thái đơn hàng (dựa vào quan hệ status)
+        if ($request->filled('order_status')) {
+            $query->whereHas('status', function ($q) use ($request) {
+                $q->where('id', $request->order_status);
+                // hoặc theo tên: $q->where('name', $request->order_status);
+            });
+        }
+
+        // Lọc theo ngày đặt (ngày bắt đầu và ngày kết thúc)
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        // Lọc theo phương thức thanh toán
+        if ($request->filled('payment_method')) {
+            $query->where('payment_method_id', $request->payment_method);
+        }
+
+        $orders = $query->paginate(20)->withQueryString(); // phân trang 20 item/trang, giữ query filter trong url
+
+        // Lấy danh sách trạng thái, phương thức thanh toán để đổ vào filter dropdown
+        $orderStatuses = \App\Models\OrderStatus::all();
+        $paymentMethods = \App\Models\PaymentMethod::all();
+
+        return view('admin.orders.index', compact('orders', 'orderStatuses', 'paymentMethods'));
     }
 
     public function create()

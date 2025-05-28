@@ -3,7 +3,7 @@
 @section('content')
     <div class="container py-5">
         <div class="card shadow">
-            <div class="card-header bg-success text-white">
+            <div class="card-header bg-primary text-white">
                 <h3 class="mb-0">Tạo đơn hàng mới</h3>
             </div>
             <div class="card-body">
