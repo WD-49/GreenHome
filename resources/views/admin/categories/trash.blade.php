@@ -4,9 +4,6 @@
     <div class="container mt-4">
         <h1 class="mb-4">Thùng rác Danh mục</h1>
 
-        @if (session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
 
         <!-- Form tìm kiếm -->
         <form method="GET" action="{{ route('admin.categories.trash') }}" class="mb-4">
@@ -34,7 +31,7 @@
                         <td>{{ $category->description }}</td>
                         <td>
                             <!-- Khôi phục -->
-                            <form action="{{ route('admin.categories.restore', $category->id) }}" method="POST"
+                            <form action="{{ route('admin.categories.restore', $category->slug) }}" method="POST"
                                 class="d-inline">
                                 @csrf
                                 <button type="submit" class="btn btn-success btn-sm">
@@ -43,7 +40,7 @@
                             </form>
 
                             <!-- Xóa vĩnh viễn -->
-                            <form action="{{ route('admin.categories.forceDelete', $category->id) }}" method="POST"
+                            <form action="{{ route('admin.categories.forceDelete', $category->slug) }}" method="POST"
                                 class="d-inline">
                                 @csrf
                                 @method('DELETE')
