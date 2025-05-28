@@ -106,7 +106,7 @@
                                     <div class="round-16 d-flex align-items-center justify-content-center">
                                         <i class="ti ti-circle"></i>
                                     </div>
-                                    <span class="hide-menu">đơn hàng</span>
+                                    <span class="hide-menu">Đơn hàng</span>
                                 </div>
 
                             </a>
@@ -191,7 +191,45 @@
 
                     </ul>
                 </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)"
+                        aria-expanded="false">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="d-flex">
+                                <i class="ti ti-user-circle"></i>
+                            </span>
+                            <span class="hide-menu">Tài khoản</span>
+                        </div>
 
+                    </a>
+                    <ul aria-expanded="false" class="collapse first-level">
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between"
+                                href="{{ route('admin.account.listUsers') }}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                        <i class="ti ti-circle"></i>
+                                    </div>
+                                    <span class="hide-menu">Người dùng</span>
+                                </div>
+
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between"
+                                href="{{ route('admin.account.listAdmins') }}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                        <i class="ti ti-circle"></i>
+                                    </div>
+                                    <span class="hide-menu">Quản trị</span>
+                                </div>
+
+                            </a>
+                        </li>
+                    </ul>
+                </li>
 
 
                 <li>
