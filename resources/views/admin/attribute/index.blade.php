@@ -3,8 +3,16 @@
 
 @section('content')
   <h2 class="text-center">{{ $title }}</h2>
+      {{-- Nút thao tác --}}
+    <div class="col-12 d-flex align-items-center justify-content-center gap-2 mb-3">
+        <a href="{{ route('admin.attribute.create') }}" class="btn btn-success" title="Thêm thuộc tính">
+            <i class="fa-solid fa-square-plus"></i>
+        </a>
+        <a href="{{ route('admin.attribute.trash') }}" class="btn btn-secondary" title="Thùng rác">
+            <i class="fa-solid fa-dumpster"></i>
+        </a>
+    </div>
   <div class=" mt-4 bg-white shadow-sm rounded p-3 ">
-    <a href="{{route('admin.attribute.create')}}" class="btn btn-warning"><i class="fas fa-plus me-2"></i>Thêm thuộc tính mới</a>
     @if (count($attributes) <= 0)
     <div>
     <p class="text-center text-muted">Không có thuộc tính nào</p>
