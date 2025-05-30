@@ -28,7 +28,7 @@
                 @forelse ($categories as $category)
                     <tr>
                         <td>{{ $category->name }}</td>
-                        <td>{{ $category->description }}</td>
+                        <td>{!! $category->description !!}</td>
                         <td>
                             <!-- Khôi phục -->
                             <form action="{{ route('admin.categories.restore', $category->slug) }}" method="POST"
@@ -65,4 +65,5 @@
             <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
         </a>
     </div>
+    
 @endsection
