@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,11 +17,7 @@ class ProductVariantFactory extends Factory
     public function definition(): array
     {
         return [
-            'product_id' => Product::inRandomOrder()->first()->id, // liên kết ngẫu nhiên với 1 product
-            'sku' => strtoupper($this->faker->unique()->bothify('SKU-####')),
-            'price' => $this->faker->randomFloat(2, 100, 1000),
-            'quantity' => $this->faker->numberBetween(10, 100),
-            'status' => $this->faker->boolean(80), // 80% là true
+            
         ];
     }
 }

@@ -25,7 +25,7 @@ return new class extends Migration {
             $table->unsignedInteger('user_usage_limit');
             $table->boolean('applies_to_all_products')->default(true);
             $table->enum('status', ['active', 'inactive', 'expired'])->default('inactive');
-            $table->foreignId('created_by')->nullable()->constrained('users')->cascadeOnDelete();
+            $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });

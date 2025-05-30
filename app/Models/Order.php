@@ -13,13 +13,12 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
-        'sku',
         'shipping_name',
         'shipping_phone',
         'shipping_address',
         'status_id',
         'discount_id',
-        'payment_method_id',
+        'payment_method',
         'payment_status',
         'discount_amount',
         'shipping_fee',
@@ -46,9 +45,5 @@ class Order extends Model
     public function status()
     {
         return $this->belongsTo(OrderStatus::class);
-    }
-    public function paymentMethod()
-    {
-        return $this->belongsTo(PaymentMethod::class);
     }
 }
