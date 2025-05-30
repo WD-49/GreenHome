@@ -8,14 +8,18 @@
     <h1 class="text-center">Quản lý Danh mục</h1>
 
     <!-- Bộ lọc -->
-    <div class="card-header bg-primary text-white">
-        <h5 class="mb-0"><i class="fas fa-filter"></i> Lọc danh mục</h5>
-    </div>
+ <div class="card-header bg-primary text-white d-flex align-items-center" style="font-family: 'EB Garamond', serif; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 8px 8px 0 0; color: #fff;">
+    <i class="fas fa-filter me-2" style="font-size: 1.3rem;"></i>
+    <h5 class="mb-0 fw-semibold" style="letter-spacing: 0.05em; color: #fff;">Lọc Danh Mục</h5>
+</div>
+
+
+
     <div class="card">
         <div class="card-body">
             <form method="GET" action="{{ route('admin.categories.index') }}" class="row g-3">
                 <div class="col-md-4">
-                    <label for="search" class="form-label">Tên danh mục</label>
+                    <label for="search" class="form-label">Tên Danh Mục</label>
                     <input type="text" name="search" id="search" class="form-control" placeholder="Nhập tên danh mục"
                         value="{{ request('search') }}">
                 </div>
