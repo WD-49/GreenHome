@@ -9,20 +9,25 @@ use Illuminate\Support\Str;
 class CategoryController extends Controller
 {
     public function index(Request $request)
-    {
-        $query = Category::query();
+{
+    $query = Category::query();
 
-        if ($request->has('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
-
-        if ($request->has('status') && $request->status == 'active') {
-            $query->whereNull('deleted_at'); // Chỉ bản ghi chưa bị xóa
-        }
-
-        $categories = $query->orderBy('created_at', 'DESC')->paginate(10);
-        return view('admin.categories.index', compact('categories'));
+    if ($request->has('search')) {
+        $search = $request->search;
+        $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', '%' . $search . '%')
+              ->orWhere('slug', 'like', '%' . $search . '%');
+        });
     }
+
+    if ($request->has('status') && $request->status == 'active') {
+        $query->whereNull('deleted_at'); // Chỉ bản ghi chưa bị xóa
+    }
+
+    $categories = $query->orderBy('created_at', 'DESC')->paginate(10);
+    return view('admin.categories.index', compact('categories'));
+}
+
 
     public function create()
     {

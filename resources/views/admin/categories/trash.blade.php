@@ -6,15 +6,28 @@
 
 
         <!-- Form tìm kiếm -->
-        <form method="GET" action="{{ route('admin.categories.trash') }}" class="mb-4">
-            <div class="input-group">
-                <input type="text" class="form-control" name="search" placeholder="Tìm kiếm theo tên"
-                    value="{{ request('search') }}">
-                <button class="btn btn-outline-secondary" type="submit">
-                    <i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm
-                </button>
-            </div>
-        </form>
+            <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="fas fa-filter"></i> Lọc danh mục</h5>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <form method="GET" action="{{ route('admin.categories.trash') }}" class="row g-3">
+                <div class="col-md-4">
+                    <label for="search" class="form-label">Tên danh mục</label>
+                    <input type="text" name="search" id="search" class="form-control" placeholder="Nhập tên danh mục"
+                        value="{{ request('search') }}">
+                </div>
+                <div class="col-md-4 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-1"></i> Tìm kiếm
+                    </button>
+                    <a href="{{ route('admin.categories.trash') }}" class="btn btn-warning w-100">
+                        <i class="fas fa-sync-alt me-1"></i> Làm mới
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
 
         <table class="table table-striped">
             <thead>
