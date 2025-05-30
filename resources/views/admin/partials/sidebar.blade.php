@@ -1,84 +1,206 @@
-<nav id="sidebarMenu" class="sidebar d-lg-block bg-gray-800 text-white collapse" data-simplebar>
-    <div class="sidebar-inner px-4 pt-3">
-        <div
-            class="user-card d-flex d-md-none align-items-center justify-content-between justify-content-md-center pb-4">
-            <div class="d-flex align-items-center">
-                <div class="avatar-lg me-4">
-                    <img src="../../assets/img/team/profile-picture-3.jpg"
-                        class="card-img-top rounded-circle border-white" alt="Bonnie Green">
-                </div>
-                <div class="d-block">
-                    <h2 class="h5 mb-3">Hi, Jane</h2>
-                    <a href="../../pages/examples/sign-in.html"
-                        class="btn btn-secondary btn-sm d-inline-flex align-items-center">
-                        <svg class="icon icon-xxs me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
-                            </path>
-                        </svg>
-                        Sign Out
-                    </a>
-                </div>
-            </div>
-            <div class="collapse-close d-md-none">
-                <a href="#sidebarMenu" data-bs-toggle="collapse" data-bs-target="#sidebarMenu"
-                    aria-controls="sidebarMenu" aria-expanded="true" aria-label="Toggle navigation">
-                    <svg class="icon icon-xs" fill="currentColor" viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd"
-                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                            clip-rule="evenodd"></path>
-                    </svg>
-                </a>
+<aside class="left-sidebar">
+    <!-- Sidebar scroll-->
+    <div>
+        <div class="brand-logo d-flex align-items-center justify-content-between">
+            <a href="./index.html" class="text-nowrap logo-img">
+                <img src="{{ asset('assets/images/logos/logo.svg') }}" alt="" />
+            </a>
+            <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
+                <i class="ti ti-x fs-6"></i>
             </div>
         </div>
-        <ul class="nav flex-column pt-3 pt-md-0">
-            <li class="nav-item">
-                <a href="../../index.html" class="nav-link d-flex align-items-center">
-                    <span class="sidebar-icon">
-                        <img src="../../assets/img/brand/light.svg" height="20" width="20" alt="Volt Logo">
-                    </span>
-                    <span class="mt-1 ms-1 sidebar-text">Volt Overview</span>
-                </a>
-            </li>
-            <li class="nav-item  active ">
-                <a href="{{ route('admin.dashboard') }}" class="nav-link">
-                    <span class="sidebar-icon">
-                        <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
-                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
-                        </svg>
-                    </span>
-                    <span class="sidebar-text">Dashboard</span>
-                </a>
-            </li>
-            <li class="nav-item  active ">
-                <a href="" class="nav-link">
-                    <span class="sidebar-icon">
-                        <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
-                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
-                        </svg>
-                    </span>
-                    <span class="sidebar-text">products</span>
-                </a>
-            </li>
-            <li class="nav-item  active ">
-                <a href="" class="nav-link">
-                    <span class="sidebar-icon">
-                        <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
-                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
-                        </svg>
-                    </span>
-                    <span class="sidebar-text">login</span>
-                </a>
-            </li>
+        <!-- Sidebar navigation-->
+        <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+            <ul id="sidebarnav">
+                <li class="nav-small-cap">
+                    <iconify-icon icon="solar:menu-dots-linear" class="nav-small-cap-icon fs-4"></iconify-icon>
+                    <span class="hide-menu">Home</span>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" href="{{ route('admin.dashboard') }}" aria-expanded="false">
+                        <i class="ti ti-atom"></i>
+                        <span class="hide-menu">Dashboard</span>
+                    </a>
+                </li>
+                <!-- ---------------------------------- -->
+                <!-- Dashboard -->
+                <!-- ---------------------------------- -->
+                <li class="sidebar-item">
+                    <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)"
+                        aria-expanded="false">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="d-flex">
+                                <i class="ti ti-layout-grid"></i>
+                            </span>
+                            <span class="hide-menu">Sản phẩm</span>
+                        </div>
 
-        </ul>
+                    </a>
+                    <ul aria-expanded="false" class="collapse first-level">
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" href="{{ route('admin.products.index') }}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                        <i class="ti ti-circle"></i>
+                                    </div>
+                                    <span class="hide-menu">Danh sách sản phẩm</span>
+                                </div>
+
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between"
+                                href="{{ route('admin.categories.index') }}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                        <i class="ti ti-circle"></i>
+                                    </div>
+                                    <span class="hide-menu">danh mục</span>
+                                </div>
+
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" href="{{ route('admin.brands.index') }}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                        <i class="ti ti-circle"></i>
+                                    </div>
+                                    <span class="hide-menu">Thương hiệu</span>
+                                </div>
+
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" href="{{ route('admin.attribute.index') }}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                        <i class="ti ti-circle"></i>
+                                    </div>
+                                    <span class="hide-menu">Thuộc tính</span>
+                                </div>
+
+                            </a>
+                        </li>
+
+                    </ul>
+                </li>
+
+                <li class="sidebar-item">
+                    <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)"
+                        aria-expanded="false">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="d-flex">
+                                <i class="ti ti-shopping-cart"></i>
+                            </span>
+                            <span class="hide-menu">Đơn hàng</span>
+                        </div>
+
+                    </a>
+                    <ul aria-expanded="false" class="collapse first-level">
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" href="{{ route('admin.orders.index') }}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                        <i class="ti ti-circle"></i>
+                                    </div>
+                                    <span class="hide-menu">đơn hàng</span>
+                                </div>
+
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between"
+                                href="{{ route('admin.orders.status.index') }}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                        <i class="ti ti-circle"></i>
+                                    </div>
+                                    <span class="hide-menu">Trạng thái thanh toán</span>
+                                </div>
+
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between"
+                                href="{{ route('admin.paymentMethods.index') }}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                        <i class="ti ti-circle"></i>
+                                    </div>
+                                    <span class="hide-menu">Phương thức thanh toán</span>
+                                </div>
+
+                            </a>
+                        </li>
+
+
+                    </ul>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)"
+                        aria-expanded="false">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="d-flex">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round"
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-rosette-discount">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M9 15l6 -6" />
+                                    <circle cx="9.5" cy="9.5" r=".5" fill="currentColor" />
+                                    <circle cx="14.5" cy="14.5" r=".5" fill="currentColor" />
+                                    <path
+                                        d="M5 7.2a2.2 2.2 0 0 1 2.2 -2.2h1a2.2 2.2 0 0 0 1.55 -.64l.7 -.7a2.2 2.2 0 0 1 3.12 0l.7 .7a2.2 2.2 0 0 0 1.55 .64h1a2.2 2.2 0 0 1 2.2 2.2v1a2.2 2.2 0 0 0 .64 1.55l.7 .7a2.2 2.2 0 0 1 0 3.12l-.7 .7a2.2 2.2 0 0 0 -.64 1.55v1a2.2 2.2 0 0 1 -2.2 2.2h-1a2.2 2.2 0 0 0 -1.55 .64l-.7 .7a2.2 2.2 0 0 1 -3.12 0l-.7 -.7a2.2 2.2 0 0 0 -1.55 -.64h-1a2.2 2.2 0 0 1 -2.2 -2.2v-1a2.2 2.2 0 0 0 -.64 -1.55l-.7 -.7a2.2 2.2 0 0 1 0 -3.12l.7 -.7a2.2 2.2 0 0 0 .64 -1.55v-1" />
+                                </svg>
+                            </span>
+                            <span class="hide-menu">Mã giảm giá</span>
+                        </div>
+
+                    </a>
+                    <ul aria-expanded="false" class="collapse first-level">
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between"
+                                href="{{ route('admin.discount.index') }}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                        <i class="ti ti-circle"></i>
+                                    </div>
+                                    <span class="hide-menu">Danh sách mã</span>
+                                </div>
+
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between"
+                                href="{{ route('admin.discount.history') }}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                        <i class="ti ti-circle"></i>
+                                    </div>
+                                    <span class="hide-menu">Lịch sử dùng mã</span>
+                                </div>
+
+                            </a>
+                        </li>
+
+
+
+                    </ul>
+                </li>
+
+
+
+                <li>
+                    <span class="sidebar-divider lg"></span>
+                </li>
+
+            </ul>
+        </nav>
+        <!-- End Sidebar navigation -->
     </div>
-</nav>
+    <!-- End Sidebar scroll-->
+</aside>
