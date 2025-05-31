@@ -25,15 +25,15 @@
                         </tr>
                         <tr>
                             <th>Ngày tạo</th>
-                            <td>{{ $category->created_at->format('d-m-Y H:i') }}</td>
+                            <td>{{ $category->created_at }}</td>
                         </tr>
                         <tr>
                             <th>Ngày cập nhật</th>
-                            <td>{{ $category->updated_at->format('d-m-Y H:i') }}</td>
+                            <td>{{ $category->updated_at }}</td>
                         </tr>
                         <tr>
                             <th>Ngày xóa</th>
-                            <td>{{ $category->deleted_at ? $category->deleted_at->format('d-m-Y H:i') : 'Chưa xóa' }}</td>
+                            <td>{{ $category->deleted_at ? $category->deleted_at : 'Chưa xóa' }}</td>
                         </tr>
                     </tbody>
                 </table>

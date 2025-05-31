@@ -138,10 +138,12 @@ class OrderController extends Controller
             $discountAmount = 0;
             if ($request->filled('discount_id')) {
                 $discount = Discount::findOrFail($request->discount_id);
+                // dd($discount->value);
                 $discountAmount = $discount->type === 'percentage'
                     ? $totalBeforeDiscount * $discount->value / 100
                     : $discount->value;
             }
+            // dd($totalBeforeDiscount, $discountAmount);
 
             $totalAmount = max(0, $totalBeforeDiscount - $discountAmount) + $request->shipping_fee;
 

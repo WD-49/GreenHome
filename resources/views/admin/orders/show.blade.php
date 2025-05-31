@@ -20,7 +20,8 @@
                         <p><strong>Họ tên:</strong> {{ $order->shipping_name }}</p>
                         <p><strong>Số điện thoại:</strong> {{ $order->shipping_phone }}</p>
                         <p><strong>Địa chỉ:</strong> {{ $order->shipping_address }}</p>
-                        <p><strong>Ngày đặt:</strong> {{ optional($order->created_at)->format('d/m/Y H:i') ?? 'Chưa xác định' }}</p>
+                        <p><strong>Ngày đặt:</strong>
+                            {{ optional($order->created_at)->format('d/m/Y H:i') ?? 'Chưa xác định' }}</p>
                     </div>
                 </div>
 
@@ -32,8 +33,9 @@
                         @method('PUT')
                         <div class="d-flex align-items-center gap-3">
                             <select name="status_id" class="form-select w-auto">
-                                @foreach($statuses as $status)
-                                    <option value="{{ $status->id }}" {{ $order->status_id == $status->id ? 'selected' : '' }}>
+                                @foreach ($statuses as $status)
+                                    <option value="{{ $status->id }}"
+                                        {{ $order->status_id == $status->id ? 'selected' : '' }}>
                                         {{ $status->name }}
                                     </option>
                                 @endforeach
@@ -71,7 +73,7 @@
                                     <td>{{ number_format($item->unit_price, 0, ',', '.') }} VND</td>
                                     <td>{{ $item->quantity }}</td>
                                     <td>
-                                        @if($item->discount_amount > 0)
+                                        @if ($item->discount_amount > 0)
                                             -{{ number_format($item->discount_amount, 0, ',', '.') }} VND
                                         @else
                                             -
@@ -98,7 +100,7 @@
                                         <th>Phí vận chuyển</th>
                                         <td>{{ number_format($order->shipping_fee, 0, ',', '.') }} VND</td>
                                     </tr>
-                                    @if($order->discount)
+                                    @if ($order->discount)
                                         <tr>
                                             <th>Mã giảm giá ({{ $order->discount->code }})</th>
                                             <td>
@@ -110,7 +112,8 @@
                                     @endif
                                     <tr class="table-success">
                                         <th>Tổng thanh toán</th>
-                                        <td><strong>{{ number_format($order->total_amount, 0, ',', '.') }} VND</strong></td>
+                                        <td><strong>{{ number_format($order->total_amount, 0, ',', '.') }} VND</strong>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -125,5 +128,4 @@
             </div>
         </div>
     </div>
-
 @endsection
