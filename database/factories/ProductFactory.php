@@ -20,11 +20,12 @@ class ProductFactory extends Factory
     {
         return [
             'category_id' => Category::inRandomOrder()->first()?->id ?? Category::factory(),
-            'brand_id' => Brand::inRandomOrder()->first()?->id ?? Brand::factory(),
-            'name' => fake()->unique()->words(3, true),
+            // 'brand_id' => Brand::inRandomOrder()->first()?->id ?? Brand::factory(),
+            'name' => fake()->word() . ' ' . fake()->word(),
+            // 'slug' => fn(array $attributes) => str($attributes['name'])->slug(),
             'description' => fake()->paragraph(),
-            'price' => $price = fake()->randomFloat(2, 50, 1000),
-            'promotional_price' => fn() => fake()->boolean(70) ? fake()->randomFloat(2, 30, $price) : null,
+            // 'price' => fake()->randomFloat(2, 50, 1000),
+            // 'promotional_price' => fn() => fake()->boolean(70) ? fake()->randomFloat(2, 30, 1000) : null,
             'quantity' => fake()->numberBetween(1, 100),
             'date_of_entry' => fake()->dateTimeBetween('-1 year', 'now'),
             'status' => fake()->boolean(),
