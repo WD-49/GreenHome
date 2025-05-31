@@ -359,7 +359,7 @@ class DiscountController extends Controller
         // return view('admin.discount.history', compact('usages', 'discounts', 'users', 'products'));
         
         $usages = DiscountUsage::with(['discount', 'user'])->orderByDesc('used_at')->paginate(20);
-$notFound = $usages->isEmpty();
+$notFound = $usages->isEmpty(); 
     
         return view('admin.discount.history', compact('usages'));
     }
