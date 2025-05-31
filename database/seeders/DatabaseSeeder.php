@@ -28,6 +28,6 @@ use App\Models\WishList;
 class DatabaseSeeder extends Seeder
 {
     public function run() {
-        OrderStatus::factory(10)->create();
+
     }
 }

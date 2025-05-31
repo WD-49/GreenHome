@@ -43,66 +43,75 @@
 
     <!-- Bảng danh sách -->
     <div class="card shadow-sm mb-4">
-        <div class="table-responsive py-3">
-            <table class="table table-striped table-hover">
-                <thead class="table-light">
+    <div class="table-responsive py-3">
+        <table class="table table-striped table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Tên danh mục</th>
+                    <th>Mô tả</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($categories as $category)
                     <tr>
-                        <th>ID</th>
-                        <th>Tên danh mục</th>
-                        <th>Mô tả</th>
-                        <th>Hành động</th>
+                        <td>{{ $category->id }}</td>
+                        <td>{{ $category->name }}</td>
+                        <td>{!! $category->description !!}</td>
+                        <td>
+                            <!-- Xem: Link đến trang chi tiết danh mục -->
+                            <a href="{{ route('admin.categories.show', $category->slug) }}" class="btn btn-info btn-sm"
+                                title="Xem chi tiết">
+                                <i class="fa-solid fa-eye"></i>
+                            </a>
+
+                            <!-- Sửa: Cập nhật đường dẫn để sử dụng slug -->
+                            <a href="{{ route('admin.categories.edit', $category->slug) }}"
+                                class="btn btn-warning btn-sm" title="Chỉnh sửa">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
+
+                            <!-- Xóa: Cập nhật form để sử dụng slug -->
+                            <form action="{{ route('admin.categories.destroy', $category->slug) }}" method="POST"
+                                class="d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm btn-confirm" title="xóa"
+                                    data-confirm-message="Bạn có chắc chắn muốn bỏ danh mục này vào thùng rác không?"><i
+                                        class="fa-solid fa-trash"></i></button>
+                            </form>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @forelse ($categories as $category)
-                        <tr>
-                            <td>{{ $category->id }}</td>
-                            <td>{{ $category->name }}</td>
-                            <td>{{ $category->description }}</td>
-                            <td>
-                                <a href="{{ route('admin.categories.edit', $category) }}" class="btn btn-warning btn-sm"
-                                    title="Chỉnh sửa">
-                                    <i class="fa-solid fa-pen"></i>
-                                </a>
-
-                                <form action="{{ route('admin.categories.destroy', $category) }}" method="POST"
-                                    class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm btn-confirm" title="xóa"
-                                        data-confirm-message="Bạn có chắc chắn muốn bỏ danh mục này vào thùng rác không?"><i
-                                            class="fa-solid fa-trash"></i></button>
-                                </form>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4">Không tìm thấy danh mục nào.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Phân trang -->
-        @if ($categories->lastPage() > 1)
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center mb-0">
-                    <li class="page-item {{ $categories->onFirstPage() ? 'disabled' : '' }}">
-                        <a class="page-link" href="{{ $categories->previousPageUrl() }}">Previous</a>
-                    </li>
-
-                    @for ($i = 1; $i <= $categories->lastPage(); $i++)
-                        <li class="page-item {{ $i == $categories->currentPage() ? 'active' : '' }}">
-                            <a class="page-link" href="{{ $categories->url($i) }}">{{ $i }}</a>
-                        </li>
-                    @endfor
-
-                    <li class="page-item {{ !$categories->hasMorePages() ? 'disabled' : '' }}">
-                        <a class="page-link" href="{{ $categories->nextPageUrl() }}">Next</a>
-                    </li>
-                </ul>
-            </nav>
-        @endif
+                @empty
+                    <tr>
+                        <td colspan="4">Không tìm thấy danh mục nào.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
+
+    <!-- Phân trang -->
+    @if ($categories->lastPage() > 1)
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center mb-0">
+                <li class="page-item {{ $categories->onFirstPage() ? 'disabled' : '' }}">
+                    <a class="page-link" href="{{ $categories->previousPageUrl() }}">Previous</a>
+                </li>
+
+                @for ($i = 1; $i <= $categories->lastPage(); $i++)
+                    <li class="page-item {{ $i == $categories->currentPage() ? 'active' : '' }}">
+                        <a class="page-link" href="{{ $categories->url($i) }}">{{ $i }}</a>
+                    </li>
+                @endfor
+
+                <li class="page-item {{ !$categories->hasMorePages() ? 'disabled' : '' }}">
+                    <a class="page-link" href="{{ $categories->nextPageUrl() }}">Next</a>
+                </li>
+            </ul>
+        </nav>
+    @endif
+</div>
+
 @endsection

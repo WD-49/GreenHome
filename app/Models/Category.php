@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
+
 
 class Category extends Model
 {
@@ -38,6 +40,16 @@ class Category extends Model
             $category->products()->onlyTrashed()->restore();
         });
 
+    }
+     public static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($category) {
+            if (empty($category->slug)) {
+                $category->slug = Str::slug($category->name);
+            }
+        });
     }
 
 }

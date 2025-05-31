@@ -2,16 +2,18 @@
 
 namespace Database\Factories;
 
+use App\Models\Category;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 class CategoryFactory extends Factory
 {
-    public function definition(): array
+    protected $model = Category::class;
+
+    public function definition()
     {
         return [
-            'name' => fake()->word() . ' ' . fake()->word(),
-            'slug' => fake()->slug(),
-            'description' => fake()->paragraph(),
+
         ];
     }
 }
