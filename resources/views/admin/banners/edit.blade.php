@@ -2,9 +2,8 @@
 
 @section('content')
 <div class="container mt-4">
-    <h1 class="mb-4">Sửa Banner</h1>
+    <h1 class="mb-4">Chỉnh sửa Banner</h1>
 
-    {{-- Hiển thị lỗi chung --}}
     @if ($errors->any())
         <div class="alert alert-danger">
             <ul class="mb-0">
@@ -15,34 +14,68 @@
         </div>
     @endif
 
-    <form action="{{ route('admin.banners.update', $banner) }}" method="POST" enctype="multipart/form-data">
-        @csrf @method('PUT')
+    <form action="{{ route('admin.banners.update', $banner->id) }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
 
         <div class="mb-3">
             <label class="form-label">Tên banner</label>
-            <input type="text" name="name" class="form-control" value="{{ old('name', $banner->name) }}" >
+            <input type="text" name="name" class="form-control" value="{{ old('name', $banner->name) }}">
+            @error('name')
+                <div class="text-danger mt-1">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Mô tả</label>
+            <textarea name="description" class="form-control">{{ old('description', $banner->description) }}</textarea>
+            @error('description')
+                <div class="text-danger mt-1">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Liên kết</label>
+            <input type="text" name="link" class="form-control" value="{{ old('link', $banner->link) }}">
+            @error('link')
+                <div class="text-danger mt-1">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Mức ưu tiên</label>
+            <input type="number" name="priority" class="form-control" value="{{ old('priority', $banner->priority) }}">
+            @error('priority')
+                <div class="text-danger mt-1">{{ $message }}</div>
+            @enderror
         </div>
 
         <div class="mb-3">
             <label class="form-label">Trạng thái</label>
             <select name="status" class="form-select">
-                <option value="1" {{ $banner->status ? 'selected' : '' }}>Hiển thị</option>
-                <option value="0" {{ !$banner->status ? 'selected' : '' }}>Ẩn</option>
+                <option value="1" {{ old('status', $banner->status) == '1' ? 'selected' : '' }}>Hiển thị</option>
+                <option value="0" {{ old('status', $banner->status) == '0' ? 'selected' : '' }}>Ẩn</option>
             </select>
+            @error('status')
+                <div class="text-danger mt-1">{{ $message }}</div>
+            @enderror
         </div>
 
         <div class="mb-3">
             <label class="form-label">Hình ảnh hiện tại</label><br>
-            @if($banner->img)
-                <img src="{{ asset($banner->img) }}" alt="Banner" style="width: 120px;">
+            @if ($banner->img)
+                <img src="{{ asset($banner->img) }}" width="150" alt="Ảnh hiện tại">
             @else
-                <p class="text-muted">Chưa có ảnh</p>
+                <span class="text-muted">Chưa có hình ảnh</span>
             @endif
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Chọn ảnh mới (nếu muốn thay)</label>
+            <label class="form-label">Thay đổi hình ảnh (nếu cần)</label>
             <input type="file" name="img" class="form-control">
+            @error('img')
+                <div class="text-danger mt-1">{{ $message }}</div>
+            @enderror
         </div>
 
         <button type="submit" class="btn btn-primary">Cập nhật</button>
