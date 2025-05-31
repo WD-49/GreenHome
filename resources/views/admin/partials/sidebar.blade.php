@@ -140,6 +140,13 @@
                     </ul>
                 </li>
                 <li class="sidebar-item">
+                    <a class="sidebar-link" href="{{ route('admin.comments.index') }}" aria-expanded="false">
+                        <i class="ti ti-message-circle"></i>
+                        <span class="hide-menu">Bình luận</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item">
                     <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)"
                         aria-expanded="false">
                         <div class="d-flex align-items-center gap-3">
