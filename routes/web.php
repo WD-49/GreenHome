@@ -184,6 +184,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/update/{id}', [OrderController::class, 'update'])->name('update');
         Route::get('/show/{id}', [OrderController::class, 'show'])->name('show');
         Route::put('/{id}/update-status', [OrderController::class, 'updateStatus'])->name('updateStatus');
+        Route::put('/{order}/updatePaymentStatus', [OrderController::class, 'updatePaymentStatus'])->name('updatePaymentStatus');
         Route::delete('/destroy/{id}', [OrderController::class, 'destroy'])->name('destroy');
         Route::get('/trash', [OrderController::class, 'trash'])->name('trash');
         Route::post('/restore/{id}', [OrderController::class, 'restore'])->name('restore');
