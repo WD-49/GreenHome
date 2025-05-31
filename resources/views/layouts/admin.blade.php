@@ -22,7 +22,7 @@
         xintegrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
-<style>
+{{-- <style>
     /* body {
         font-family: 'Inter', sans-serif !important;
         -webkit-font-smoothing: antialiased;
@@ -59,7 +59,7 @@
         z-index: 1050;
         width: 400px;
     }
-</style>
+</style> --}}
 
 <body>
     @if (session('success'))
@@ -101,13 +101,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js"></script>
 
     <!-- Khởi tạo Summernote -->
-    <script>
+    {{-- <script>
         $(document).ready(function() {
             $('#your-textarea-id').summernote({
                 height: 200
             });
         });
-    </script>
+    </script> --}}
 
     {{-- Stack scripts bổ sung từ view con --}}
     @stack('scripts')
