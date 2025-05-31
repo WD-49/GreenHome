@@ -4,7 +4,6 @@
 <div class="container mt-4">
     <h1 class="mb-4">Thêm Banner</h1>
 
-    {{-- Hiển thị lỗi chung --}}
     @if ($errors->any())
         <div class="alert alert-danger">
             <ul class="mb-0">
@@ -22,6 +21,30 @@
             <label class="form-label">Tên banner</label>
             <input type="text" name="name" class="form-control" value="{{ old('name') }}">
             @error('name')
+                <div class="text-danger mt-1">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Mô tả</label>
+            <textarea name="description" class="form-control">{{ old('description') }}</textarea>
+            @error('description')
+                <div class="text-danger mt-1">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Liên kết</label>
+            <input type="text" name="link" class="form-control" value="{{ old('link') }}">
+            @error('link')
+                <div class="text-danger mt-1">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Mức ưu tiên</label>
+            <input type="number" name="priority" class="form-control" value="{{ old('priority', 0) }}">
+            @error('priority')
                 <div class="text-danger mt-1">{{ $message }}</div>
             @enderror
         </div>

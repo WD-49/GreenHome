@@ -19,6 +19,7 @@ class CartItem extends Model
     }
     public function productVariant()
     {
-        return $this->belongsTo(ProductVariant::class);
+        // Giả sử khóa ngoại trong bảng cart_items là 'product_variant_id'
+        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
     }
 }

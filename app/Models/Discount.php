@@ -21,6 +21,7 @@ class Discount extends Model
         'end_date',
         'max_discount',
         'min_order_value',
+        'max_order_value',
         'quantity',
         'user_usage_limit',
         'applies_to_all_products',

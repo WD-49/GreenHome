@@ -4,10 +4,17 @@ namespace App\Http\Controllers\admin\Product;
 use App\Models\Brand;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Attribute;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use App\Models\attributeValue;
 use App\Models\ProductVariant;
+use Illuminate\Support\Facades\DB;
+use App\Models\ProductVariantValue;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
@@ -50,24 +57,19 @@ class ProductController extends Controller
             $query->where('date_of_entry', '<=', $request->max_date);
         }
 
-        if ($request->filled('min_price') && $request->filled('max_price')) {
-            $query->whereBetween('price', [$request->min_price, $request->max_price]);
-        } elseif ($request->filled('min_price')) {
-            $query->where('price', '>=', $request->min_price);
-        } elseif ($request->filled('max_price')) {
-            $query->where('price', '<=', $request->max_price);
-        }
 
         // if ($request->filled('ngay_nhap')) {
         //     $query->whereDate('date_of_entry', $request->ngay_nhap);
         // }
 
         $products = $query->orderByDesc('id')->paginate(4)->appends($request->except('page'));
+        $productAll = Product::whereNull('deleted_at')->get();
+        $productTrashed = Product::onlyTrashed()->get();
 
 
-        // dd($products);
+        // dd($productAll);
 
-        return view('admin.products.index', compact('title', 'products', 'categories', 'brands'));
+        return view('admin.products.index', compact('title', 'products', 'productAll', 'productTrashed', 'categories', 'brands'));
     }
 
     public function trashed(Request $request)
@@ -139,35 +141,138 @@ class ProductController extends Controller
         $title = "Thêm sản phẩm";
         $categories = Category::get();
         $brands = Brand::get();
-        // dd($categories);
+        $attributes = Attribute::with('attributeValues')->get();
+        // dd($attributes);
+        $attributeData = $attributes->map(function ($attribute) {
+            return [
+                'id' => $attribute->id,
+                'name' => $attribute->name,
+                'values' => $attribute->attributeValues->map(function ($value) {
+                    return ['id' => $value->id, 'value' => $value->value];
+                })->toArray(),
+            ];
+        })->toArray();
+        // dd($attributeData)
 
-        return view('admin.products.create', compact('categories', 'brands', 'title'));
+        return view('admin.products.create', compact('categories', 'attributes', 'attributeData', 'brands', 'title'));
     }
+
+    // public function store(Request $request)
+    // {
+    //     $dataValidate = $request->validate([
+    //         'name' => 'required|string|max:255',
+    //         'category_id' => 'required|exists:categories,id',
+    //         'brand_id' => 'required|exists:brands,id',
+    //         'image' => 'nullable|image|mimes:jpg,png,jpeg,gif,webp|max:2048',
+    //         'price' => 'required|numeric|min:0|max:99999999',
+    //         'promotional_price' => 'nullable|numeric|min:0|lt:price',
+    //         'quantity' => 'required|integer|min:1',
+    //         'date_of_entry' => 'required|date',
+    //         'description' => 'nullable|string',
+    //         'status' => 'required|boolean'
+    //     ]);
+
+    //     if ($request->hasFile('image')) {
+    //         $imagePath = $request->file('image')->store('images/products', 'public');
+    //         $dataValidate['image'] = $imagePath;
+    //     }
+
+    //     Product::create($dataValidate);
+
+    //     return redirect()->route('admin.products.index')->with('success', 'Thêm sản phẩm thành công!');
+    // }
 
     public function store(Request $request)
     {
-        $dataValidate = $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'brand_id' => 'required|exists:brands,id',
-            'image' => 'nullable|image|mimes:jpg,png,jpeg,gif,webp|max:2048',
-            'price' => 'required|numeric|min:0|max:99999999',
-            'promotional_price' => 'nullable|numeric|min:0|lt:price',
-            'quantity' => 'required|integer|min:1',
+            'status' => 'required|in:0,1',
             'date_of_entry' => 'required|date',
             'description' => 'nullable|string',
-            'status' => 'required|boolean'
+            'image' => 'nullable|image|max:2048',
+
+            // Validate biến thể
+            'variants' => 'required|array',
+            'variants.*.attributes' => 'required|array',
+            'variants.*.price' => 'required|numeric',
+            'variants.*.quantity' => 'required|integer',
+            'variants.*.sku' => 'nullable|string|max:100',
+            'variants.*.image' => 'nullable|image|max:2048',
         ]);
 
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('images/products', 'public');
-            $dataValidate['image'] = $imagePath;
+        if ($validator->fails()) {
+            return redirect()
+                ->back()
+                ->withErrors($validator)
+                ->withInput();
         }
 
-        Product::create($dataValidate);
+        try {
+            DB::transaction(function () use ($request) {
+                // Upload ảnh sản phẩm
+                $productImagePath = null;
+                if ($request->hasFile('image')) {
+                    $productImagePath = $request->file('image')->store('images/products', 'public');
+                }
 
-        return redirect()->route('admin.products.index')->with('success', 'Thêm sản phẩm thành công!');
+                // Tạo sản phẩm
+                $product = new Product();
+                $product->name = $request->input('name');
+                $product->slug = Str::slug($request->input('name'));
+                $product->quantity = 0;
+                $product->category_id = $request->input('category_id');
+                $product->brand_id = $request->input('brand_id');
+                $product->status = $request->input('status');
+                $product->date_of_entry = $request->input('date_of_entry');
+                $product->description = $request->input('description');
+                $product->image = $productImagePath;
+                $product->save();
+
+                $variants = $request->input('variants', []);
+
+                foreach ($variants as $index => $variantData) {
+                    $variant = new ProductVariant();
+                    $variant->product_id = $product->id;
+                    $variant->sku = ProductVariant::generateUniqueSku($product->name);
+                    // dd(ProductVariant::generateUniqueSku($product->name));
+                    $variant->price = $variantData['price'];
+                    $variant->quantity = $variantData['quantity'];
+                    $variant->status = true;
+
+                    // Upload ảnh biến thể nếu có
+                    if ($request->hasFile("variants.$index.image")) {
+                        $variantImage = $request->file("variants.$index.image");
+                        $variantImagePath = $variantImage->store('images/products/variants', 'public');
+                        $variant->image = $variantImagePath;
+                    }
+
+                    $variant->save();
+
+                    // Lưu các giá trị thuộc tính vào bảng trung gian
+                    if (!empty($variantData['attributes']) && is_array($variantData['attributes'])) {
+                        foreach ($variantData['attributes'] as $attributeId => $attributeValueId) {
+                            ProductVariantValue::create([
+                                'product_variant_id' => $variant->id,
+                                'attribute_value_id' => $attributeValueId,
+                            ]);
+                        }
+                    }
+                }
+            });
+
+            return redirect()
+                ->route('admin.products.index')
+                ->with('success', 'Sản phẩm đã được thêm thành công.');
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->with('error', 'Có lỗi xảy ra: ' . $e->getMessage())
+                ->withInput();
+        }
     }
+
 
     public function edit($id)
     {

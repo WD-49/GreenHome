@@ -7,7 +7,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('comments', function (Blueprint $table) {
-            $table->boolean('status')->default(true)->after('content');
+            $table->enum('status', ['chưa duyệt', 'hiển thị', 'ẩn'])->default('chưa duyệt')->after('content');
         });
     }
 

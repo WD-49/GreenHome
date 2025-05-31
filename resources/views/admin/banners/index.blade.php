@@ -11,6 +11,9 @@
             <tr>
                 <th>Hình ảnh</th>
                 <th>Tên</th>
+                <th>Mô tả</th>
+                <th>Liên kết</th>
+                <th>Ưu tiên</th>
                 <th>Trạng thái</th>
                 <th>Hành động</th>
             </tr>
@@ -26,6 +29,15 @@
                         @endif
                     </td>
                     <td>{{ $banner->name }}</td>
+                    <td>{{ $banner->description ?? '-' }}</td>
+                    <td>
+                        @if($banner->link)
+                            <a href="{{ $banner->link }}" target="_blank">Xem</a>
+                        @else
+                            <span class="text-muted">Không có</span>
+                        @endif
+                    </td>
+                    <td>{{ $banner->priority ?? 0 }}</td>
                     <td>
                         @if($banner->status)
                             <span class="badge bg-success">Hiển thị</span>

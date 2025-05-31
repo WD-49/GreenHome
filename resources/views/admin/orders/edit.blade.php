@@ -3,7 +3,7 @@
 @section('content')
     <div class="container mt-5">
         <div class="card shadow">
-            <div class="card-header bg-warning text-white">
+            <div class="card-header bg-primary text-white">
                 <h3 class="mb-0">Sửa đơn hàng #{{ $order->id }}</h3>
             </div>
             <div class="card-body">

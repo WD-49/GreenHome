@@ -15,9 +15,8 @@ return new class extends Migration {
             $table->foreignId('category_id')->constrained()->cascadeOnDelete();
             $table->foreignId('brand_id')->constrained()->cascadeOnDelete();
             $table->string('name', 255);
+            $table->string('slug')->unique();
             $table->text('description')->nullable();
-            $table->decimal('price', 10, 2);
-            $table->decimal('promotional_price', 10, 2)->nullable();
             $table->unsignedInteger('quantity');
             $table->datetime('date_of_entry')->nullable();
             $table->boolean('status');
