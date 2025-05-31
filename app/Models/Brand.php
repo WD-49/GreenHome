@@ -14,7 +14,6 @@ class Brand extends Model
         'name',
         'description',
         'slug',
-
     ];
     protected $dates = ['deleted_at'];
 
