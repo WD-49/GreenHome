@@ -13,8 +13,60 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 
     @stack('styles')
-</head>
+    <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
+    {{-- <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"> --}}
+    {{-- <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&display=swap" rel="stylesheet"> --}}
 
+{{-- <link href="https://fonts.googleapis.com/css2?family=EB+Garamond&display=swap" rel="stylesheet"> --}}
+<!-- Google Fonts: Baloo -->
+{{-- <link href="https://fonts.googleapis.com/css2?family=Baloo+2&display=swap" rel="stylesheet"> --}}
+
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2&display=swap" rel="stylesheet">
+
+    {{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" /> --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" xintegrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<style>
+   /* body {
+        font-family: 'Inter', sans-serif !important;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    .form-label,
+    .form-control,
+    .btn,
+    select,
+    textarea,
+    input {
+        font-family: 'Inter', sans-serif !important;
+    } */
+    body {
+        font-family: 'Baloo 2', cursive !important;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+    .form-label,
+    .form-control,
+    .btn,
+    select,
+    textarea,
+    input {
+        font-family: 'Baloo 2', cursive !important;
+    }
+    .custom-toast-alert-center {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1050;
+        width: 400px;
+    }
+
+
+
+</style>
 <body>
     @if (session('success'))
         <div class="alert alert-success custom-toast-alert-center" role="alert" id="success-alert">
@@ -65,6 +117,10 @@
 
     {{-- Stack scripts bổ sung từ view con --}}
     @stack('scripts')
+    <!-- solar icons -->
+    <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+  @yield('scripts')
+
 </body>
 
 </html>

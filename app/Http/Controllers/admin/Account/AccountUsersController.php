@@ -54,14 +54,25 @@ class AccountUsersController extends Controller
     }
 
     public function detailAccUser($id)
-{
-    // Lấy user kèm profile và comments
-    $user = User::with(['profile', 'comments' => function ($q) {
-        $q->withTrashed(); // nếu có soft deletes
-    }])->findOrFail($id);
-
-    return view('admin.account.users.detailAccUser', compact('user'));
-}
+    {
+        $user = User::with([
+            'profile',
+            'comments' => function ($query) {
+                $query->withTrashed()->orderBy('created_at', 'desc');
+            },
+            'orders' => function ($query) {
+                $query->with('status') // Eager load quan hệ 'status' (trỏ đến OrderStatus)
+                    ->orderBy('created_at', 'desc')
+                    ->take(10);
+            },
+            // Cập nhật ở đây:
+            'cartItems.productVariant.product' // Tải CartItem, rồi ProductVariant của nó, rồi Product của ProductVariant đó
+        ])
+            ->withCount(['orders', 'cartItems'])
+            ->findOrFail($id);
+        // dd($user);
+        return view('admin.account.users.detailAccUser', compact('user'));
+    }
 
 
     public function createUser()

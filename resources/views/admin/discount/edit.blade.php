@@ -88,8 +88,8 @@
 
 
         <div class="mb-3">
-            <label class="form-label">Giảm tối đa</label>
-            <input type="number" name="max_discount" class="form-control" value="{{ old('max_discount', $discount->max_discount) }}" required>
+            <label class="form-label">Giá trị đơn hàng tối đa</label>
+            <input type="number" name="max_order_value" class="form-control" value="{{ old('max_order_value', $discount->max_order_value) }}" required>
         </div>
 
         <div class="mb-3">
