@@ -106,8 +106,8 @@
                         <tr>
                             <th>ID</th>
                             <th>Tên sản phẩm</th>
-                            <th>danh mục</th>
-                            <th>ảnh</th>
+                            <th>Danh mục</th>
+                            <th>Ảnh</th>
                             <th>Giá</th>
                             <th>Số lượng</th>
                             <th>Trạng thái</th>
