@@ -140,7 +140,6 @@ class OrderController extends Controller
 
             if ($request->filled('discount_id')) {
                 $discount = Discount::where('id', $request->discount_id)->where('status', 'active')->where('start_date', '<=', now())->where('end_date', '>=', now())->first();
-                // dd($discount);
                 if (!$discount) {
                     return redirect()->back()->withErrors(['discount_id' => 'Mã giảm giá không hợp lệ hoặc đã hết hạn.'])->withInput();
                 }
@@ -152,8 +151,6 @@ class OrderController extends Controller
                 if ($discount->quantity <= 0) {
                     return redirect()->back()->withErrors(['discount_id' => 'Mã giảm giá đã hết lượt sử dụng.'])->withInput();
                 }
-
-                // BỎ kiểm tra lượt dùng theo user
 
                 if ($discount->discount_type === 'percentage') {
                     $rawDiscount = $totalBeforeDiscount * $discount->discount_value / 100;
@@ -171,7 +168,7 @@ class OrderController extends Controller
             } while (Order::where('sku', $sku)->exists());
 
             $order = Order::create([
-                'user_id' => $request->user_id, // Tạm thời bỏ user_id
+                'user_id' => $request->user_id,
                 'sku' => $sku,
                 'shipping_name' => $request->shipping_name,
                 'shipping_phone' => $request->shipping_phone,
@@ -187,7 +184,6 @@ class OrderController extends Controller
             ]);
 
             $order->items()->createMany($items);
-            // dd($order);
 
             return redirect()->route('admin.orders.index')->with('success', 'Tạo đơn hàng thành công!');
         });
