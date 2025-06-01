@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Http\Requests\admin\brand\BrandStoreRequest;
 use App\Http\Requests\admin\brand\BrandUpdateRequest;
@@ -105,16 +106,17 @@ class BrandController extends Controller
     }
 
     // Hiển thị chi tiết thương hiệu trong admin theo slug (có thể bao gồm thương hiệu đã xóa)
-    public function show($slug)
-    {
-        $brand = Brand::withTrashed()->where('slug', $slug)->firstOrFail();
-        return view('admin.brands.show', compact('brand'));
-    }
+  public function show($slug)
+{
+    $brand = Brand::withTrashed()->where('slug', $slug)->firstOrFail();
 
-    // Hiển thị thương hiệu ở trang public theo slug (có thể dùng chung với show)
-    public function showBySlug($slug)
-    {
-        $brand = Brand::where('slug', $slug)->firstOrFail();
-        return view('public.brands.show', compact('brand')); // Ví dụ view public khác admin
-    }
+    // Lấy danh sách sản phẩm theo brand_id, eager load category, phân trang 10 sản phẩm/trang
+    $products = Product::where('brand_id', $brand->id)
+        ->with('category')      // eager load quan hệ category
+        ->latest()
+        ->paginate(6);        // phân trang 10 bản ghi/trang
+
+    return view('admin.brands.show', compact('brand', 'products'));
+}
+    
 }

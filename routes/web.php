@@ -113,17 +113,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::delete('/{slug}/force-delete', [BrandController::class, 'forceDelete'])->name('forceDelete');
 });
  
+    //Quan_li_Comments
   Route::prefix('comments')->name('comments.')->group(function () {
     Route::get('/', [CommentController::class, 'index'])->name('index');               // Danh sách bình luận
     Route::get('/trash', [CommentController::class, 'trash'])->name('trash');          // Thùng rác bình luận
-    
     Route::post('/approve', [CommentController::class, 'approve'])->name('approve');   // Duyệt bình luận
+    Route::get('/{id}', [CommentController::class, 'show'])->name('show'); // Xem chi tiết bình luận
     Route::post('/hide', [CommentController::class, 'hide'])->name('hide');            // Ẩn bình luận
-    
     Route::delete('/delete', [CommentController::class, 'destroy'])->name('destroy');  // Xóa mềm bình luận
     Route::post('/restore/{id}', [CommentController::class, 'restore'])->name('restore');
-
-    
     Route::delete('/force-delete', [CommentController::class, 'forceDelete'])->name('forceDelete'); // Xóa vĩnh viễn
 });
 

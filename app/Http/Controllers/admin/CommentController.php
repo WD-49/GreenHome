@@ -63,7 +63,6 @@ class CommentController extends Controller
         $comment = Comment::onlyTrashed()->findOrFail($request->id);
         $comment->restore();
         return redirect()->route('admin.comments.trash')->with('success', 'Đã phục hồi bình luận.');
-
     }
 
     // Xóa vĩnh viễn bình luận (force delete)
@@ -88,5 +87,14 @@ class CommentController extends Controller
         $comment = Comment::findOrFail($request->id);
         $comment->update(['status' => 'ẩn']);
         return response()->json(['success' => true]);
+    }
+
+    // Hiển thị chi tiết bình luận
+    public function show($id)
+    {
+        $comment = Comment::with(['product', 'user'])->findOrFail($id);
+        $title = 'Chi tiết bình luận';
+
+        return view('admin.comments.show', compact('comment', 'title'));
     }
 }

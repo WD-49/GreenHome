@@ -103,6 +103,9 @@
                                             <i class="fas fa-eye-slash"></i>
                                         </button>
                                     @endif
+                                       <a href="{{ route('admin.comments.show', $comment->id) }}" class="btn btn-info btn-sm" title="Chi tiết">
+    <i class="fas fa-eye"></i>
+</a>
 
                                     <button class="btn btn-danger btn-sm btn-delete" data-id="{{ $comment->id }}"
                                         title="Xóa"
