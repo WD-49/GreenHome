@@ -4,15 +4,18 @@
     <div class="container py-5">
         <div class="card shadow">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h3 class="mb-0">Chi tiết đơn hàng #{{ $order->id }}</h3>
+                <h3 class="mb-0">Chi tiết đơn hàng #{{ $order->sku }}</h3>
             </div>
             <div class="card-body">
+                {{-- Mã đơn hàng --}}
+                <p><strong>Mã đơn hàng:</strong> {{ $order->sku ?? $order->id }}</p>
+
                 {{-- Thông tin người đặt & người nhận --}}
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <h5>👤 Thông tin người đặt</h5>
                         <p><strong>Họ tên:</strong> {{ $order->user->name }}</p>
-                        <p><strong>Số điện thoại:</strong> {{ $order->user->profile->phone }}</p>
+                        <p><strong>Số điện thoại:</strong> {{ $order->user->profile->phone ?? 'Chưa có số điện thoại' }}</p>
                         <p><strong>Email:</strong> {{ $order->user->email }}</p>
                     </div>
                     <div class="col-md-6">
@@ -25,29 +28,67 @@
                     </div>
                 </div>
 
-                {{-- Trạng thái đơn hàng và lý do huỷ nếu có --}}
-                <div class="mb-4">
-                    <h5>📌 Trạng thái đơn hàng</h5>
-                    <form method="POST" action="{{ route('admin.orders.updateStatus', $order->id) }}">
-                        @csrf
-                        @method('PUT')
-                        <div class="d-flex align-items-center gap-3">
-                            <select name="status_id" class="form-select w-auto">
-                                @foreach ($statuses as $status)
-                                    <option value="{{ $status->id }}"
-                                        {{ $order->status_id == $status->id ? 'selected' : '' }}>
-                                        {{ $status->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <button class="btn btn-sm btn-primary">Cập nhật</button>
-                        </div>
-                    </form>
+                {{-- Trạng thái đơn hàng & Trạng thái thanh toán --}}
+                <div class="d-flex flex-wrap gap-5 mb-4">
 
-                    @if ($order->status->name === 'Đã hủy' && $order->cancel_reason)
-                        <p class="mt-2 text-danger"><strong>Lý do huỷ:</strong> {{ $order->cancel_reason }}</p>
-                    @endif
+                    {{-- Trạng thái đơn hàng --}}
+                    <div>
+                        <h5 class="mb-3">📌 Trạng thái đơn hàng</h5>
+                        <form method="POST" action="{{ route('admin.orders.updateStatus', $order->id) }}">
+                            @csrf
+                            @method('PUT')
+                            <div class="d-flex align-items-center gap-3">
+                                <select name="status_id" class="form-select w-auto">
+                                    @foreach ($statuses as $status)
+                                        <option value="{{ $status->id }}"
+                                            {{ $order->status_id == $status->id ? 'selected' : '' }}>
+                                            {{ $status->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <button class="btn btn-sm btn-primary">
+                                    <i class="bi bi-arrow-repeat me-1"></i> Cập nhật
+                                </button>
+                            </div>
+                        </form>
+
+                        @if ($order->status->name === 'Đã hủy' && $order->cancel_reason)
+                            <div class="mt-2 text-danger">
+                                <strong>❌ Lý do huỷ:</strong> {{ $order->cancel_reason }}
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Trạng thái thanh toán --}}
+                    <div>
+                        <h5 class="mb-3">💳 Trạng thái thanh toán</h5>
+                        <form method="POST" action="{{ route('admin.orders.updatePaymentStatus', $order->id) }}">
+                            @csrf
+                            @method('PUT')
+                            <div class="d-flex align-items-center gap-3">
+                                <select name="payment_status" class="form-select w-auto">
+                                    <option value="pending" {{ $order->payment_status === 'pending' ? 'selected' : '' }}>
+                                        Chờ thanh toán
+                                    </option>
+                                    <option value="paid" {{ $order->payment_status === 'paid' ? 'selected' : '' }}>
+                                        Đã thanh toán
+                                    </option>
+                                    <option value="failed" {{ $order->payment_status === 'failed' ? 'selected' : '' }}>
+                                        Thanh toán thất bại
+                                    </option>
+                                </select>
+                                <button class="btn btn-sm btn-secondary">
+                                    <i class="bi bi-arrow-repeat me-1"></i> Cập nhật
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
                 </div>
+
+                @php
+                    $totalOrderAmount = 0;
+                @endphp
 
                 {{-- Danh sách sản phẩm --}}
                 <h5 class="mb-3">🛒 Sản phẩm trong đơn hàng</h5>
@@ -73,13 +114,16 @@
                                     <td>{{ number_format($item->unit_price, 0, ',', '.') }} VND</td>
                                     <td>{{ $item->quantity }}</td>
                                     <td>
-                                        @if ($item->discount_amount > 0)
-                                            -{{ number_format($item->discount_amount, 0, ',', '.') }} VND
+                                        @if ($item->discount_id > 0)
+                                            -{{ number_format($item->discount_id, 0, ',', '.') }} VND
                                         @else
-                                            -
+                                            Không có
                                         @endif
                                     </td>
                                     <td>{{ number_format($item->total_price, 0, ',', '.') }} VND</td>
+                                    @php
+                                        $totalOrderAmount += $item->total_price;
+                                    @endphp
                                 </tr>
                             @endforeach
                         </tbody>
@@ -87,6 +131,13 @@
                 </div>
 
                 {{-- Mã giảm giá & Tổng tiền --}}
+                {{-- Mã giảm giá & Tổng tiền --}}
+                @php
+                    $discountAmount = $order->discount_amount ?? 0;
+                    $shippingFee = $order->shipping_fee ?? 0;
+                    $finalAmount = $totalOrderAmount + $shippingFee - $discountAmount;
+                @endphp
+
                 <div class="row justify-content-end">
                     <div class="col-md-6">
                         <div class="table-responsive">
@@ -94,26 +145,30 @@
                                 <tbody>
                                     <tr>
                                         <th>Tổng tiền hàng</th>
-                                        <td>{{ number_format($order->subtotal_amount, 0, ',', '.') }} VND</td>
+                                        <td>{{ number_format($totalOrderAmount, 0, ',', '.') }} VND</td>
                                     </tr>
                                     <tr>
                                         <th>Phí vận chuyển</th>
-                                        <td>{{ number_format($order->shipping_fee, 0, ',', '.') }} VND</td>
+                                        <td>{{ number_format($shippingFee, 0, ',', '.') }} VND</td>
                                     </tr>
-                                    @if ($order->discount)
-                                        <tr>
-                                            <th>Mã giảm giá ({{ $order->discount->code }})</th>
+                                    <tr>
+                                        <th>Mã giảm giá ({{ $order->discount->code ?? 'Không áp dụng' }})</th>
+                                        @if ($discountAmount > 0)
                                             <td>
-                                                -{{ number_format($order->discount->amount, 0, ',', '.') }} VND
+                                                -{{ number_format($discountAmount, 0, ',', '.') }} VND
                                                 <br>
                                                 <small>({{ $order->discount->type == 'order' ? 'Áp dụng toàn đơn' : 'Áp dụng sản phẩm' }})</small>
                                             </td>
-                                        </tr>
-                                    @endif
+                                        @endif
+                                        @if ($discountAmount <= 0)
+                                            <td>Không áp dụng</td>
+                                        @endif
+                                    </tr>
+
+
                                     <tr class="table-success">
                                         <th>Tổng thanh toán</th>
-                                        <td><strong>{{ number_format($order->total_amount, 0, ',', '.') }} VND</strong>
-                                        </td>
+                                        <td><strong>{{ number_format($finalAmount, 0, ',', '.') }} VND</strong></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -129,3 +184,4 @@
         </div>
     </div>
 @endsection
+

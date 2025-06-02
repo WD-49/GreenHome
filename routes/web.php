@@ -44,12 +44,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/create-new', [ProductController::class, 'create'])->name('create');
         Route::post('/store-new', [ProductController::class, 'store'])->name('store');
         Route::get('/trashed', [ProductController::class, 'trashed'])->name('trashed');
-        Route::get('/{id}/detail', [ProductController::class, 'show'])->name('show');
-        Route::get('/{id}/edit', [ProductController::class, 'edit'])->name('edit');
-        Route::put('/{id}/update', [ProductController::class, 'update'])->name('update');
-        Route::delete('/{id}/destroy', [ProductController::class, 'destroy'])->name('destroy');
-        Route::get('/{id}/restore', [ProductController::class, 'restore'])->name('restore');
-        Route::delete('/{id}/forceDelete', [ProductController::class, 'forceDelete'])->name('forceDelete');
+        Route::get('/{slug}/detail', [ProductController::class, 'show'])->name('show');
+        Route::get('/{slug}/edit', [ProductController::class, 'edit'])->name('edit');
+        Route::put('/{slug}/update', [ProductController::class, 'update'])->name('update');
+        Route::delete('/{slug}/destroy', [ProductController::class, 'destroy'])->name('destroy');
+        Route::get('/{slug}/restore', [ProductController::class, 'restore'])->name('restore');
+        Route::delete('/{slug}/forceDelete', [ProductController::class, 'forceDelete'])->name('forceDelete');
         // Quản lý biến thể sản phẩm
         Route::prefix('/{product}/variants')->name('variants.')->group(function () {
             Route::get('/', [ProductVariantController::class, 'index'])->name('index');
@@ -125,8 +125,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/show-again', [CommentController::class, 'showAgain'])->name('showAgain');
     });
 
-
-
     // Quản lý banner
     Route::prefix('/banners')->name('banners.')->group(function () {
         Route::get('', [BannerController::class, 'index'])->name('index');
@@ -187,6 +185,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/trash', [PaymentMethodController::class, 'trash'])->name('trash');
         Route::post('/{id}/restore', [PaymentMethodController::class, 'restore'])->name('restore');
         Route::delete('/{id}/force', [PaymentMethodController::class, 'forceDelete'])->name('forceDelete');
+        Route::get('/{id}/show', [PaymentMethodController::class, 'show'])->name('show');
+
     });
 
 
@@ -199,16 +199,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/update/{id}', [OrderController::class, 'update'])->name('update');
         Route::get('/show/{id}', [OrderController::class, 'show'])->name('show');
         Route::put('/{id}/update-status', [OrderController::class, 'updateStatus'])->name('updateStatus');
+        Route::put('/{order}/updatePaymentStatus', [OrderController::class, 'updatePaymentStatus'])->name('updatePaymentStatus');
         Route::delete('/destroy/{id}', [OrderController::class, 'destroy'])->name('destroy');
         Route::get('/trash', [OrderController::class, 'trash'])->name('trash');
         Route::post('/restore/{id}', [OrderController::class, 'restore'])->name('restore');
+        Route::patch('{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
 
         Route::prefix('/status')->name('status.')->group(function () {
             Route::get('/', [OrderStatusController::class, 'index'])->name('index');
             Route::get('/create', [OrderStatusController::class, 'create'])->name('create');
             Route::get('/{id}/edit', [OrderStatusController::class, 'edit'])->name('edit');
+            Route::get('/trashed', [OrderStatusController::class, 'trashed'])->name('trashed');
             Route::put('/{id}/update', [OrderStatusController::class, 'update'])->name('update');
+            Route::put('/{id}/restore', [OrderStatusController::class, 'restore'])->name('restore');
             Route::post('/store', [OrderStatusController::class, 'store'])->name('store');
+            Route::delete('/destroy/{id}', [OrderStatusController::class, 'destroy'])->name('destroy');
         });
     });
 });

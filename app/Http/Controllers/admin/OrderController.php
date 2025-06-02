@@ -78,14 +78,14 @@ class OrderController extends Controller
         $productVariants = ProductVariant::with('product')->get();
         $discounts = Discount::all();
         $payMethods = PaymentMethod::all();
-
+        // dd($discounts);
         return view('admin.orders.create', compact('users', 'productVariants', 'discounts', 'payMethods'));
     }
 
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,id',
+            'user_id' => 'required|exists:users,id', // Tạm bỏ qua kiểm tra user
             'shipping_name' => 'required|string|max:255',
             'shipping_phone' => 'required|string|max:15',
             'shipping_address' => 'required|string|max:255',
@@ -108,7 +108,7 @@ class OrderController extends Controller
             'payment_method_id.required' => 'Vui lòng chọn phương thức thanh toán',
             'shipping_fee.required' => 'Vui lòng nhập phí vận chuyển',
         ]);
-        // dd($validator);
+
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
@@ -136,23 +136,43 @@ class OrderController extends Controller
             }
 
             $discountAmount = 0;
+            $discount = null;
+
             if ($request->filled('discount_id')) {
-                $discount = Discount::findOrFail($request->discount_id);
-                // dd($discount->value);
-                $discountAmount = $discount->type === 'percentage'
-                    ? $totalBeforeDiscount * $discount->value / 100
-                    : $discount->value;
+                $discount = Discount::where('id', $request->discount_id)->where('status', 'active')->where('start_date', '<=', now())->where('end_date', '>=', now())->first();
+
+                if (!$discount) {
+                    return redirect()->back()->withErrors(['discount_id' => 'Mã giảm giá không hợp lệ hoặc đã hết hạn.'])->withInput();
+                }
+
+                if ($totalBeforeDiscount < $discount->min_order_value) {
+                    return redirect()->back()->withErrors(['discount_id' => 'Đơn hàng chưa đủ điều kiện để áp dụng mã giảm giá.'])->withInput();
+                }
+
+                if ($discount->quantity <= 0) {
+                    return redirect()->back()->withErrors(['discount_id' => 'Mã giảm giá đã hết lượt sử dụng.'])->withInput();
+                }
+
+                // BỎ kiểm tra lượt dùng theo user
+                if ($discount->discount_type === 'percentage') {
+                    $rawDiscount = $totalBeforeDiscount * $discount->discount_value / 100;
+                    $discountAmount = min($rawDiscount, $discount->max_discount);
+                } elseif ($discount->discount_type === 'fixed') {
+                    $discountAmount = min($discount->discount_value, $totalBeforeDiscount);
+                }
+
             }
             // dd($totalBeforeDiscount, $discountAmount);
 
-            $totalAmount = max(0, $totalBeforeDiscount - $discountAmount) + $request->shipping_fee;
+            $discountedTotal = max(0, $totalBeforeDiscount - $discountAmount);
+            $totalAmount = $discountedTotal + $request->shipping_fee;
 
             do {
-                $sku = 'DH' . rand(100, 999) . '-' . rand(1000, 9999);
+                $sku = 'DH-' . rand(1000, 9999);
             } while (Order::where('sku', $sku)->exists());
 
             $order = Order::create([
-                'user_id' => $request->user_id,
+                'user_id' => $request->user_id, // Tạm thời bỏ user_id
                 'sku' => $sku,
                 'shipping_name' => $request->shipping_name,
                 'shipping_phone' => $request->shipping_phone,
@@ -167,14 +187,12 @@ class OrderController extends Controller
                 'note' => $request->note,
             ]);
 
-            // Tạo nhiều order items cùng lúc thông qua quan hệ
             $order->items()->createMany($items);
+            // dd($order);
 
             return redirect()->route('admin.orders.index')->with('success', 'Tạo đơn hàng thành công!');
         });
     }
-
-
 
     public function show($id)
     {
@@ -187,7 +205,7 @@ class OrderController extends Controller
         ])->findOrFail($id);
         // dd($order);
         $statuses = OrderStatus::all();
-
+        // dd($order);
         return view('admin.orders.show', compact('order', 'statuses'));
     }
 
@@ -207,6 +225,19 @@ class OrderController extends Controller
         $order->save();
 
         return redirect()->back()->with('success', 'Cập nhật trạng thái thành công!');
+    }
+
+    public function updatePaymentStatus(Request $request, $id)
+    {
+        $request->validate([
+            'payment_status' => 'required|in:pending,paid,failed',
+        ]);
+
+        $order = Order::findOrFail($id);
+        $order->payment_status = $request->payment_status;
+        $order->save();
+
+        return redirect()->back()->with('success', 'Cập nhật trạng thái thanh toán thành công!');
     }
 
     public function edit($id)
@@ -269,5 +300,42 @@ class OrderController extends Controller
         $order = Order::withTrashed()->findOrFail($id);
         $order->forceDelete();
         return redirect()->route('orders.trash')->with('success', 'Đã xóa vĩnh viễn đơn hàng!');
+    }
+
+    public function cancel(Request $request, Order $order)
+    {
+        // Validate lý do hủy
+        $validatedData = $request->validate([
+            'cancel_reason' => 'required|string|min:10|max:1000', // << SỬA Ở ĐÂY (tên key)
+        ], [
+            'cancel_reason.required' => 'Vui lòng nhập lý do hủy đơn hàng.', // << SỬA Ở ĐÂY (tên key)
+            'cancel_reason.min' => 'Lý do hủy phải có ít nhất :min ký tự.',    // << SỬA Ở ĐÂY (tên key)
+            'cancel_reason.max' => 'Lý do hủy không được vượt quá :max ký tự.', // << SỬA Ở ĐÂY (tên key)
+        ]);
+
+        // Kiểm tra xem đơn hàng có thể hủy không
+        if (method_exists($order, 'canBeCancelled') && !$order->canBeCancelled()) {
+            return redirect()->route('admin.orders.index')->with('error', 'Đơn hàng này không thể hủy.');
+        }
+
+        $cancelledStatus = OrderStatus::where('name', 'Đã hủy')->first();
+
+        if (!$cancelledStatus) {
+            return redirect()->route('admin.orders.index')->with('error', 'Không tìm thấy trạng thái "Đã hủy". Vui lòng cấu hình.');
+        }
+
+        if ($order->status_id == $cancelledStatus->id) {
+            return redirect()->route('admin.orders.index')->with('warning', 'Đơn hàng này đã được hủy trước đó.');
+        }
+
+        $order->status_id = $cancelledStatus->id;
+        $order->cancel_reason = $validatedData['cancel_reason']; // << SỬA Ở ĐÂY (tên thuộc tính và key)
+        // $order->cancelled_at = now();
+        // $order->cancelled_by = auth()->id();
+        $order->save();
+
+        // ... (Logic hoàn kho, gửi thông báo nếu có) ...
+
+        return redirect()->route('admin.orders.index')->with('success', 'Đơn hàng #' . ($order->sku ?? $order->id) . ' đã được hủy thành công.');
     }
 }

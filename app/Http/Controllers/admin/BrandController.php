@@ -44,7 +44,7 @@ class BrandController extends Controller
         ]);
 
         return redirect()->route('admin.brands.index')
-                         ->with('success', '✅ Thêm thương hiệu thành công!');
+            ->with('success', '✅ Thêm thương hiệu thành công!');
     }
 
     // Form chỉnh sửa thương hiệu theo slug
@@ -67,7 +67,7 @@ class BrandController extends Controller
         ]);
 
         return redirect()->route('admin.brands.index')
-                         ->with('success', '✏️ Cập nhật thương hiệu thành công!');
+            ->with('success', '✏️ Cập nhật thương hiệu thành công!');
     }
 
     // Xóa mềm thương hiệu theo slug
