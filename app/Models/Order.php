@@ -51,4 +51,14 @@ class Order extends Model
     {
         return $this->belongsTo(PaymentMethod::class);
     }
+
+    public function canBeCancelled()
+    {
+        // Ví dụ: Đơn hàng không thể hủy nếu đã "Hoàn tất", "Đã giao hàng" hoặc "Đã hủy"
+        if ($this->status) { // Đảm bảo $this->status tồn tại và đã được load
+            $nonCancellableStatuses = ['Hoàn tất', 'Đã giao hàng', 'Đã hủy']; // Các trạng thái không cho phép hủy
+            return !in_array($this->status->name, $nonCancellableStatuses);
+        }
+        return false; // Mặc định không cho hủy nếu không có status hoặc status không được load
+    }
 }

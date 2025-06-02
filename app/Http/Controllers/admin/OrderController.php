@@ -140,6 +140,7 @@ class OrderController extends Controller
 
             if ($request->filled('discount_id')) {
                 $discount = Discount::where('id', $request->discount_id)->where('status', 'active')->where('start_date', '<=', now())->where('end_date', '>=', now())->first();
+
                 if (!$discount) {
                     return redirect()->back()->withErrors(['discount_id' => 'Mã giảm giá không hợp lệ hoặc đã hết hạn.'])->withInput();
                 }
@@ -152,6 +153,7 @@ class OrderController extends Controller
                     return redirect()->back()->withErrors(['discount_id' => 'Mã giảm giá đã hết lượt sử dụng.'])->withInput();
                 }
 
+                // BỎ kiểm tra lượt dùng theo user
                 if ($discount->discount_type === 'percentage') {
                     $rawDiscount = $totalBeforeDiscount * $discount->discount_value / 100;
                     $discountAmount = min($rawDiscount, $discount->max_discount);
@@ -170,7 +172,7 @@ class OrderController extends Controller
             } while (Order::where('sku', $sku)->exists());
 
             $order = Order::create([
-                'user_id' => $request->user_id,
+                'user_id' => $request->user_id, // Tạm thời bỏ user_id
                 'sku' => $sku,
                 'shipping_name' => $request->shipping_name,
                 'shipping_phone' => $request->shipping_phone,
@@ -186,6 +188,7 @@ class OrderController extends Controller
             ]);
 
             $order->items()->createMany($items);
+            // dd($order);
 
             return redirect()->route('admin.orders.index')->with('success', 'Tạo đơn hàng thành công!');
         });
@@ -297,5 +300,42 @@ class OrderController extends Controller
         $order = Order::withTrashed()->findOrFail($id);
         $order->forceDelete();
         return redirect()->route('orders.trash')->with('success', 'Đã xóa vĩnh viễn đơn hàng!');
+    }
+
+    public function cancel(Request $request, Order $order)
+    {
+        // Validate lý do hủy
+        $validatedData = $request->validate([
+            'cancel_reason' => 'required|string|min:10|max:1000', // << SỬA Ở ĐÂY (tên key)
+        ], [
+            'cancel_reason.required' => 'Vui lòng nhập lý do hủy đơn hàng.', // << SỬA Ở ĐÂY (tên key)
+            'cancel_reason.min' => 'Lý do hủy phải có ít nhất :min ký tự.',    // << SỬA Ở ĐÂY (tên key)
+            'cancel_reason.max' => 'Lý do hủy không được vượt quá :max ký tự.', // << SỬA Ở ĐÂY (tên key)
+        ]);
+
+        // Kiểm tra xem đơn hàng có thể hủy không
+        if (method_exists($order, 'canBeCancelled') && !$order->canBeCancelled()) {
+            return redirect()->route('admin.orders.index')->with('error', 'Đơn hàng này không thể hủy.');
+        }
+
+        $cancelledStatus = OrderStatus::where('name', 'Đã hủy')->first();
+
+        if (!$cancelledStatus) {
+            return redirect()->route('admin.orders.index')->with('error', 'Không tìm thấy trạng thái "Đã hủy". Vui lòng cấu hình.');
+        }
+
+        if ($order->status_id == $cancelledStatus->id) {
+            return redirect()->route('admin.orders.index')->with('warning', 'Đơn hàng này đã được hủy trước đó.');
+        }
+
+        $order->status_id = $cancelledStatus->id;
+        $order->cancel_reason = $validatedData['cancel_reason']; // << SỬA Ở ĐÂY (tên thuộc tính và key)
+        // $order->cancelled_at = now();
+        // $order->cancelled_by = auth()->id();
+        $order->save();
+
+        // ... (Logic hoàn kho, gửi thông báo nếu có) ...
+
+        return redirect()->route('admin.orders.index')->with('success', 'Đơn hàng #' . ($order->sku ?? $order->id) . ' đã được hủy thành công.');
     }
 }
