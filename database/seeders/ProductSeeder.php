@@ -9,6 +9,6 @@ class ProductSeeder extends Seeder
 {
     public function run(): void
     {
-        Product::factory(50)->create(); // Tạo 50 sản phẩm
+
     }
 }

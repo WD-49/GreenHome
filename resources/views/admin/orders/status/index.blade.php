@@ -7,12 +7,12 @@
         </li>
         <li class="nav-item">
             <a class="nav-link active" href="{{ route('admin.orders.status.index', ['status' => 1]) }}">
-                Đang hoạt động ({{$statuses->count()}})
+                Đang hoạt động ({{ $statuses->count() }})
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="{{ route('admin.orders.status.trashed') }}">
-                Thùng rác ({{$deleteCount}})
+                Thùng rác ({{ $deleteCount }})
             </a>
         </li>
     </ul>
@@ -50,15 +50,15 @@
                 <tbody>
                     @forelse ($statuses as $key => $status)
                         <tr>
-                            <td>{{ $status->key + 1 }}</td>
+                            <td>{{ $key + 1 }}</td>
                             <td>{{ $status->name }}</td>
                             <td>{{ $status->created_at }}</td>
                             <td class="d-flex gap-1">
                                 <a href="{{ route('admin.orders.status.edit', $id = $status->id) }}"
                                     class="btn btn-sm btn-warning">Sửa</a>
 
-                                <form action="{{route('admin.orders.status.destroy', $id = $status->id)}}" method="POST" onsubmit="return confirm('Chuyển vào thùng rác?')"
-                                    style="display:inline">
+                                <form action="{{ route('admin.orders.status.destroy', $id = $status->id) }}" method="POST"
+                                    onsubmit="return confirm('Chuyển vào thùng rác?')" style="display:inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
