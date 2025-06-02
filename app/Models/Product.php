@@ -53,6 +53,11 @@ class Product extends Model
         return $this->hasMany(ProductVariant::class);
     }
 
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+
     protected static function booted()
     {
         // Xử lý khi xóa mềm Product
