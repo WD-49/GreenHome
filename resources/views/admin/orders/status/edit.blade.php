@@ -2,6 +2,8 @@
 @section('content')
     <h2 class="text-center">{{$title}}</h2>
     <div class="mt-4 bg-white shadow-sm rounded p-3">
+
+        
         <form action="{{route('admin.orders.status.update', $id = $status->id)}}" method="POST">
             @csrf
             @method('PUT')
