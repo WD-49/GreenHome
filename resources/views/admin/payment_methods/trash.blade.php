@@ -46,7 +46,7 @@
                                 <tr>
                                     <td>{{ $method->id }}</td>
                                     <td>{{ $method->name }}</td>
-                                    <td>{{ $method->description }}</td>
+                                    <td>{!! $method->description !!}</td>
                                     <td>
                                         <span class="badge {{ $method->status ? 'bg-success' : 'bg-danger' }}">
                                             {{ $method->status ? 'Kích hoạt' : 'Tạm tắt' }}
