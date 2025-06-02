@@ -3,90 +3,129 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Comment;
 use Illuminate\Http\Request;
+use App\Models\Comment;
+use App\Models\Product;
+use App\Models\User;
 
 class CommentController extends Controller
 {
-    // Trang danh sách bình luận, hỗ trợ filter
     public function index(Request $request)
-    {
-        $comments = Comment::with(['product', 'user'])
-            ->when($request->product_name, function ($query) use ($request) {
-                $query->whereHas('product', function ($q) use ($request) {
-                    $q->where('name', 'like', '%' . $request->product_name . '%');
-                });
-            })
-            ->when($request->user_name, function ($query) use ($request) {
-                $query->whereHas('user', function ($q) use ($request) {
-                    $q->where('name', 'like', '%' . $request->user_name . '%');
-                });
-            })
-            ->when($request->status, function ($query) use ($request) {
-                $query->where('status', $request->status);
-            })
-            ->when($request->comment_date, function ($query) use ($request) {
-                $query->whereDate('created_at', $request->comment_date);
-            })
-            ->latest()
-            ->paginate(10);
+{
+    $comments = Comment::with(['product', 'user'])->latest();
 
-        $title = 'Quản lý bình luận';
-
-        return view('admin.comments.index', compact('comments', 'title'));
+    // Lọc theo tên sản phẩm (input product_name)
+    if ($request->filled('product_name')) {
+        $comments->whereHas('product', function ($q) use ($request) {
+            $q->where('name', 'like', '%' . $request->product_name . '%');
+        });
     }
 
-    // Xóa mềm (soft delete)
-    public function destroy(Request $request)
-    {
-        $comment = Comment::findOrFail($request->id);
-        $comment->delete();
-        return response()->json(['success' => true, 'message' => 'Đã xóa bình luận (soft delete).']);
+    // Lọc theo ngày
+    if ($request->filled('min_date')) {
+        $comments->whereDate('created_at', '>=', $request->min_date);
+    }
+    if ($request->filled('max_date')) {
+        $comments->whereDate('created_at', '<=', $request->max_date);
     }
 
-    // Trang thùng rác (danh sách bình luận đã xóa mềm)
-    public function trash(Request $request)
-    {
-        $comments = Comment::onlyTrashed()
-            ->with(['product', 'user'])
-            ->latest()
-            ->paginate(10);
-
-        $title = 'Thùng rác bình luận';
-
-        return view('admin.comments.trash', compact('comments', 'title'));
+    // Lọc theo trạng thái
+    if ($request->filled('status')) {
+        $comments->where('status', $request->status);
     }
 
-    // Phục hồi bình luận từ thùng rác
-    public function restore(Request $request)
-    {
-        $comment = Comment::onlyTrashed()->findOrFail($request->id);
-        $comment->restore();
-        return redirect()->route('admin.comments.trash')->with('success', 'Đã phục hồi bình luận.');
-
+    // Lọc theo tên user
+    if ($request->filled('user_name')) {
+        $comments->whereHas('user', function ($q) use ($request) {
+            $q->where('name', 'like', '%' . $request->user_name . '%');
+        });
     }
 
-    // Xóa vĩnh viễn bình luận (force delete)
-    public function forceDelete(Request $request)
-    {
-        $comment = Comment::onlyTrashed()->findOrFail($request->id);
-        $comment->forceDelete();
-        return redirect()->route('admin.comments.trash')->with('success', 'Đã xóa vĩnh viễn bình luận.');
-    }
+    $comments = $comments->paginate(10);
 
-    // Chấp thuận bình luận (approve)
+    // Nếu bạn muốn dùng danh sách sản phẩm (ví dụ cho dropdown hoặc autocomplete), giữ lấy tất cả
+    $products = Product::all();
+
+    return view('admin.comments.index', [
+        'title' => 'Quản lý bình luận',
+        'comments' => $comments,
+        'products' => $products,
+        'request' => $request,
+    ]);
+}
+
     public function approve(Request $request)
     {
         $comment = Comment::findOrFail($request->id);
         $comment->update(['status' => 'hiển thị']);
-        return response()->json(['success' => true]);
+
+        return redirect()->back()->with('success', 'Đã duyệt bình luận.');
     }
 
-    // Ẩn bình luận
     public function hide(Request $request)
     {
         $comment = Comment::findOrFail($request->id);
         $comment->update(['status' => 'ẩn']);
-        return response()->json(['success' => true]);
+
+        return redirect()->back()->with('success', 'Đã ẩn bình luận.');
     }
+
+    public function destroy(Request $request)
+    {
+        $comment = Comment::findOrFail($request->id);
+        $comment->delete();
+
+        return redirect()->back()->with('success', 'Đã xóa (tạm thời) bình luận.');
+    }
+
+    public function trash()
+    {
+        $comments = Comment::onlyTrashed()->with(['user', 'product'])->paginate(10);
+
+        return view('admin.comments.trash', [
+            'title' => 'Thùng rác bình luận',
+            'comments' => $comments,
+        ]);
+    }
+
+    public function restore($id)
+    {
+        $comment = Comment::onlyTrashed()->findOrFail($id);
+        $comment->restore();
+
+        return redirect()->back()->with('success', 'Đã khôi phục bình luận.');
+    }
+
+    public function forceDelete(Request $request)
+    {
+        $comment = Comment::onlyTrashed()->findOrFail($request->id);
+        $comment->forceDelete();
+
+        return redirect()->back()->with('success', 'Đã xóa vĩnh viễn bình luận.');
+    }
+
+    public function show($id)
+{
+    $comment = Comment::with(['product', 'user'])->findOrFail($id);
+
+    // Lấy các comment khác cùng product_id, trừ chính comment hiện tại
+    $relatedComments = Comment::where('product_id', $comment->product_id)
+                              ->where('id', '!=', $comment->id)
+                              ->with('user')
+                              ->latest()
+                              ->get();
+
+    return view('admin.comments.show', compact('comment', 'relatedComments'));
+}
+
+    public function showAgain(Request $request)
+{
+    $comment = Comment::findOrFail($request->id);
+    if ($comment->status === 'ẩn') {
+        $comment->update(['status' => 'hiển thị']);
+        return redirect()->back()->with('success', 'Đã hiện lại bình luận.');
+    }
+    return redirect()->back()->with('error', 'Bình luận không ở trạng thái ẩn.');
+}
+
 }
