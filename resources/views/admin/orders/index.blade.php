@@ -101,10 +101,10 @@
                                     <td class="text-primary fw-bold">#{{ $order->sku ?? $order->id }}</td>
                                     <td>{{ $order->user->name ?? 'N/A' }}</td>
                                     <td>{{ $order->shipping_name }}</td>
-                                    <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
+                                    <td>{{ $order->created_at }}</td>
                                     <td class="text-end fw-semibold text-success">
                                         {{ number_format($order->total_amount, 0) }} VND</td>
-                                    <td class="text-capitalize">{{ $order->paymentMethod->name }}</td>
+                                    <td class="text-capitalize">{{ $order->paymentMethod }}</td>
                                     <td class="text-center">
                                         <span
                                             class="badge rounded-pill 

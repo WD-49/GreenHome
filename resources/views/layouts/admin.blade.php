@@ -22,44 +22,7 @@
         xintegrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
-{{-- <style>
-    /* body {
-        font-family: 'Inter', sans-serif !important;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-    }
-    .form-label,
-    .form-control,
-    .btn,
-    select,
-    textarea,
-    input {
-        font-family: 'Inter', sans-serif !important;
-    } */
-    body {
-        font-family: 'Baloo 2', cursive !important;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-    }
 
-    .form-label,
-    .form-control,
-    .btn,
-    select,
-    textarea,
-    input {
-        font-family: 'Baloo 2', cursive !important;
-    }
-
-    .custom-toast-alert-center {
-        position: fixed;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 1050;
-        width: 400px;
-    }
-</style> --}}
 
 <body>
     @if (session('success'))
