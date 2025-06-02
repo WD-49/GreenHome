@@ -22,17 +22,6 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ request('status') == '1' ? 'active' : '' }}"
-                    href="{{ route('admin.products.index', ['status' => 1]) }}">
-                    Đang hoạt động (@php
-                        if ($productAll->status = 1) {
-                            $count = count($productAll);
-                            echo $count;
-                        }
-                    @endphp)
-                </a>
-            </li>
-            <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('admin.products.trashed') ? 'active' : '' }}"
                     href="{{ route('admin.products.trashed') }}">
                     Thùng rác ({{ $productTrashed->count() }})
@@ -51,7 +40,7 @@
                     <div class="ms-auto mt-3 mt-md-0">
 
                         <div class="dropdown mb-3">
-                            <a href="{{ route('admin.products.create') }}" class="btn btn-primary">
+                            <a href="{{ route('admin.products.create') }}" class="btn btn-outline-secondary">
                                 <i class="fa-solid fa-plus me-1"></i> Thêm sản phẩm
                             </a>
                             <a class="btn btn-outline-secondary dropdown-toggle" type="button" id="filterDropdown"

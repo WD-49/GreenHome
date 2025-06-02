@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\ProductVariantValue;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Models\Comment;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -127,12 +128,29 @@ class ProductController extends Controller
         return view('admin.products.trashed', compact('title', 'products', 'categories', 'brands'));
     }
 
-    public function show($id)
+    public function show($id, Request $request)
     {
-        $product = Product::with(['category', 'brand'])->findOrFail($id);
-        // dd($product);
+        $product = Product::with(['category', 'brand'])
+            ->findOrFail($id);
+
+        $comments = $product->comments()
+            ->with('user')
+            ->when($request->name, function ($query, $name) {
+                $query->whereHas('user', function ($q) use ($name) {
+                    $q->where('name', 'like', "%$name%");
+                });
+            })
+            ->latest()
+            ->paginate(5)
+            ->appends($request->only('name')); // giữ lại query string khi phân trang
+
+        $variants = $product->productVariants()
+            ->with('productVariantValues.attributeValue.attribute')
+            ->where('deleted_at', null)
+            ->paginate(5);
+        // dd($variants);
         // do du lieu thong tin chi tiet ra giao dien
-        return view('admin.products.show', compact('product'));
+        return view('admin.products.show', compact('product', 'comments', 'variants'));
 
     }
 
@@ -157,33 +175,12 @@ class ProductController extends Controller
         return view('admin.products.create', compact('categories', 'attributes', 'attributeData', 'brands', 'title'));
     }
 
-    // public function store(Request $request)
-    // {
-    //     $dataValidate = $request->validate([
-    //         'name' => 'required|string|max:255',
-    //         'category_id' => 'required|exists:categories,id',
-    //         'brand_id' => 'required|exists:brands,id',
-    //         'image' => 'nullable|image|mimes:jpg,png,jpeg,gif,webp|max:2048',
-    //         'price' => 'required|numeric|min:0|max:99999999',
-    //         'promotional_price' => 'nullable|numeric|min:0|lt:price',
-    //         'quantity' => 'required|integer|min:1',
-    //         'date_of_entry' => 'required|date',
-    //         'description' => 'nullable|string',
-    //         'status' => 'required|boolean'
-    //     ]);
 
-    //     if ($request->hasFile('image')) {
-    //         $imagePath = $request->file('image')->store('images/products', 'public');
-    //         $dataValidate['image'] = $imagePath;
-    //     }
-
-    //     Product::create($dataValidate);
-
-    //     return redirect()->route('admin.products.index')->with('success', 'Thêm sản phẩm thành công!');
-    // }
 
     public function store(Request $request)
     {
+        // dd($request);
+        // dd($request);
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
@@ -191,17 +188,40 @@ class ProductController extends Controller
             'status' => 'required|in:0,1',
             'date_of_entry' => 'required|date',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'is_variant' => 'required|boolean',
 
-            // Validate biến thể
-            'variants' => 'required|array',
-            'variants.*.attributes' => 'required|array',
-            'variants.*.price' => 'required|numeric',
-            'variants.*.quantity' => 'required|integer',
+            // Nếu có biến thể
+            'variants' => 'required_if:is_variant,1|array',
+            'variants.*.values' => [
+                'required_if:is_variant,1',
+                'string',
+                function ($attribute, $value, $fail) {
+                    $valueIds = explode(',', $value);
+                    foreach ($valueIds as $valueId) {
+                        if (!empty($valueId) && !AttributeValue::where('id', $valueId)->exists()) {
+                            $fail("Giá trị thuộc tính $valueId trong $attribute không tồn tại.");
+                        }
+                    }
+                }
+            ],
+            'variants.*.price' => 'required_if:is_variant,1|numeric',
+            'variants.*.quantity' => 'required_if:is_variant,1|integer',
             'variants.*.sku' => 'nullable|string|max:100',
-            'variants.*.image' => 'nullable|image|max:2048',
-        ]);
+            'variants.*.image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
 
+            // Nếu là sản phẩm đơn
+            'simple_price' => 'required_unless:is_variant,1|numeric',
+            'simple_quantity' => 'required_unless:is_variant,1|integer',
+            // 'simple_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+        // if (!$request->boolean('is_variant')) {
+        //     $rules['simple_price'] = 'required|numeric';
+        //     $rules['simple_quantity'] = 'required|integer';
+        //     $rules['simple_image'] = 'nullable|image|mimes:jpeg,png,jpg|max:2048';
+        // }
+
+        // $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return redirect()
                 ->back()
@@ -221,44 +241,87 @@ class ProductController extends Controller
                 $product = new Product();
                 $product->name = $request->input('name');
                 $product->slug = Str::slug($request->input('name'));
-                $product->quantity = 0;
                 $product->category_id = $request->input('category_id');
                 $product->brand_id = $request->input('brand_id');
                 $product->status = $request->input('status');
                 $product->date_of_entry = $request->input('date_of_entry');
                 $product->description = $request->input('description');
                 $product->image = $productImagePath;
+                $product->quantity = 0;
                 $product->save();
 
-                $variants = $request->input('variants', []);
+                if ($request->boolean('is_variant') && empty($request->input('variants', []))) {
+                    throw new \Exception("Phải có ít nhất một biến thể cho sản phẩm có biến thể.");
+                }
 
-                foreach ($variants as $index => $variantData) {
-                    $variant = new ProductVariant();
-                    $variant->product_id = $product->id;
-                    $variant->sku = ProductVariant::generateUniqueSku($product->name);
-                    // dd(ProductVariant::generateUniqueSku($product->name));
-                    $variant->price = $variantData['price'];
-                    $variant->quantity = $variantData['quantity'];
-                    $variant->status = true;
+                // Nếu là sản phẩm có biến thể
+                if ($request->boolean('is_variant')) {
+                    $variants = $request->input('variants', []);
+                    // dd($variants);
+                    $seenCombinations = [];
 
-                    // Upload ảnh biến thể nếu có
-                    if ($request->hasFile("variants.$index.image")) {
-                        $variantImage = $request->file("variants.$index.image");
-                        $variantImagePath = $variantImage->store('images/products/variants', 'public');
-                        $variant->image = $variantImagePath;
-                    }
+                    foreach ($variants as $index => $variant) {
+                        // dd($variant['values']);
+                        $values = explode(',', $variant['values']);
+                        // dd($values);
+                        $attributeCombination = $values ?? [];
+                        ksort($attributeCombination);
+                        // dd(ksort($attributeCombination));
 
-                    $variant->save();
+                        $combinationKey = implode('-', array_map(function ($attrId, $valueId) {
+                            return $attrId . ':' . $valueId;
+                        }, array_keys($attributeCombination), $attributeCombination));
 
-                    // Lưu các giá trị thuộc tính vào bảng trung gian
-                    if (!empty($variantData['attributes']) && is_array($variantData['attributes'])) {
-                        foreach ($variantData['attributes'] as $attributeId => $attributeValueId) {
-                            ProductVariantValue::create([
-                                'product_variant_id' => $variant->id,
-                                'attribute_value_id' => $attributeValueId,
-                            ]);
+                        if (in_array($combinationKey, $seenCombinations)) {
+                            throw new \Exception("Biến thể thứ " . ($index + 1) . " bị trùng tổ hợp thuộc tính.");
+                        }
+                        $seenCombinations[] = $combinationKey;
+
+                        $newVariant = new ProductVariant();
+                        $newVariant->product_id = $product->id;
+                        $newVariant->sku = ProductVariant::generateUniqueSku($product->name);
+                        $newVariant->price = $variant['price'];
+                        $newVariant->quantity = $variant['quantity'];
+                        $newVariant->status = true;
+
+                        if ($request->hasFile("variants.$index.image")) {
+                            $variantImage = $request->file("variants.$index.image");
+                            $newVariant->image = $variantImage->store('images/products/variants', 'public');
+                        }
+
+                        $newVariant->save();
+
+                        // Gán thuộc tính cho biến thể
+                        if (!empty($variant['values'])) {
+                            $attributeValues = explode(',', $variant['values']);
+                            $variantValues = [];
+                            foreach ($attributeValues as $valueId) {
+                                if (!empty($valueId)) {
+                                    $variantValues[] = [
+                                        'product_variant_id' => $newVariant->id,
+                                        'attribute_value_id' => $valueId,
+                                    ];
+                                }
+                            }
+                            if (!empty($variantValues)) {
+                                ProductVariantValue::insert($variantValues);
+                            }
                         }
                     }
+
+                    $product->save();
+                } else {
+                    // Sản phẩm đơn
+                    $newVariant = new ProductVariant();
+                    if (!$request->boolean('is_variant') && $request->hasFile('image')) {
+                        $newVariant->image = $request->file('image')->store('images/products/variants', 'public');
+                    }
+                    $newVariant->product_id = $product->id;
+                    $newVariant->sku = ProductVariant::generateUniqueSku($product->name);
+                    $newVariant->price = $request->input('simple_price');
+                    $newVariant->quantity = $request->input('simple_quantity');
+                    $newVariant->status = true;
+                    $newVariant->save();
                 }
             });
 
@@ -272,6 +335,7 @@ class ProductController extends Controller
                 ->withInput();
         }
     }
+
 
 
     public function edit($id)
