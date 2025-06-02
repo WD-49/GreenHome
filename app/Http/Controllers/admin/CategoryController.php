@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Category;
@@ -9,25 +10,51 @@ use Illuminate\Support\Str;
 class CategoryController extends Controller
 {
     public function index(Request $request)
-{
-    $query = Category::query();
+    {
+        // Đếm cho tabs
+        $categoryAll = Category::withTrashed()->get();
+        $categoryActive = Category::whereNull('deleted_at')->get();
+        $categoryTrashed = Category::onlyTrashed()->get();
 
-    if ($request->has('search')) {
-        $search = $request->search;
-        $query->where(function ($q) use ($search) {
-            $q->where('name', 'like', '%' . $search . '%')
-              ->orWhere('slug', 'like', '%' . $search . '%');
-        });
+        $query = Category::query();
+
+        // Filter theo search (tên hoặc slug)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('slug', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Filter trạng thái
+        if ($request->filled('status')) {
+            if ($request->status == 'active') {
+                $query->whereNull('deleted_at');
+            }
+            if ($request->status == 'deleted') {
+                $query->onlyTrashed();
+            }
+        }
+
+        // Filter ngày tạo
+        if ($request->filled('min_date')) {
+            $query->whereDate('created_at', '>=', $request->min_date);
+        }
+        if ($request->filled('max_date')) {
+            $query->whereDate('created_at', '<=', $request->max_date);
+        }
+
+        $categories = $query->orderBy('created_at', 'DESC')->paginate(10);
+
+        return view('admin.categories.index', [
+            'categories' => $categories,
+            'categoryAll' => $categoryAll,
+            'categoryActive' => $categoryActive,
+            'categoryTrashed' => $categoryTrashed,
+            'title' => 'Danh sách danh mục',
+        ]);
     }
-
-    if ($request->has('status') && $request->status == 'active') {
-        $query->whereNull('deleted_at'); // Chỉ bản ghi chưa bị xóa
-    }
-
-    $categories = $query->orderBy('created_at', 'DESC')->paginate(10);
-    return view('admin.categories.index', compact('categories'));
-}
-
 
     public function create()
     {
@@ -36,7 +63,6 @@ class CategoryController extends Controller
 
     public function store(Request $request)
     {
-        // Validate tên danh mục và slug duy nhất
         $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:categories,name'],
             'description' => ['nullable', 'string'],
@@ -46,12 +72,11 @@ class CategoryController extends Controller
             'name.unique' => 'Tên danh mục đã tồn tại.',
         ]);
 
-        // Tạo slug tự động từ tên danh mục và đảm bảo tính duy nhất
+        // Tạo slug duy nhất
         $slug = Str::slug($request->name);
         $existingSlug = Category::where('slug', $slug)->first();
-
         if ($existingSlug) {
-            $slug = $slug . '-' . uniqid();  // Thêm hậu tố với ID ngẫu nhiên
+            $slug = $slug . '-' . uniqid();
         }
 
         $category = new Category($request->all());
@@ -63,13 +88,13 @@ class CategoryController extends Controller
 
     public function edit($slug)
     {
-        $category = Category::where('slug', $slug)->firstOrFail();  // Tìm bằng slug
+        $category = Category::where('slug', $slug)->firstOrFail();
         return view('admin.categories.edit', compact('category'));
     }
 
     public function update(Request $request, $slug)
     {
-        $category = Category::where('slug', $slug)->firstOrFail();  // Tìm bằng slug
+        $category = Category::where('slug', $slug)->firstOrFail();
 
         $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:categories,name,' . $category->id],
@@ -80,16 +105,16 @@ class CategoryController extends Controller
             'name.unique' => 'Tên danh mục đã tồn tại.',
         ]);
 
-        $slug = Str::slug($request->name);
-        $existingSlug = Category::where('slug', $slug)->where('id', '!=', $category->id)->first();
-
+        // Tạo slug duy nhất (ngoại trừ bản ghi hiện tại)
+        $slugNew = Str::slug($request->name);
+        $existingSlug = Category::where('slug', $slugNew)->where('id', '!=', $category->id)->first();
         if ($existingSlug) {
-            $slug = $slug . '-' . uniqid();
+            $slugNew = $slugNew . '-' . uniqid();
         }
 
         $category->name = $request->name;
         $category->description = $request->description;
-        $category->slug = $slug;
+        $category->slug = $slugNew;
         $category->save();
 
         return redirect()->route('admin.categories.index')->with('success', 'Cập nhật danh mục thành công.');
@@ -97,14 +122,14 @@ class CategoryController extends Controller
 
     public function destroy($slug)
     {
-        $category = Category::where('slug', $slug)->firstOrFail();  // Tìm bằng slug
+        $category = Category::where('slug', $slug)->firstOrFail();
         $category->delete();
         return redirect()->route('admin.categories.index')->with('success', 'Đã chuyển danh mục vào thùng rác.');
     }
 
     public function restore($slug)
     {
-        $category = Category::onlyTrashed()->where('slug', $slug)->firstOrFail();  // Tìm bằng slug
+        $category = Category::onlyTrashed()->where('slug', $slug)->firstOrFail();
         $category->restore();
         $category->products()->onlyTrashed()->restore();
         return redirect()->route('admin.categories.trash')->with('success', 'Đã khôi phục danh mục.');
@@ -112,30 +137,52 @@ class CategoryController extends Controller
 
     public function forceDelete($slug)
     {
-        $category = Category::onlyTrashed()->where('slug', $slug)->firstOrFail();  // Tìm bằng slug
+        $category = Category::onlyTrashed()->where('slug', $slug)->firstOrFail();
         $category->forceDelete();
         return redirect()->route('admin.categories.trash')->with('success', 'Đã xóa vĩnh viễn danh mục.');
     }
-    public function trash(Request $request)
-{
-    $query = Category::onlyTrashed();  // Retrieve only trashed categories
 
-    if ($request->has('search')) {
-        $query->where('name', 'like', '%' . $request->search . '%');
+    public function trash(Request $request)
+    {
+        // Tabs thống kê
+        $categoryAll = Category::withTrashed()->get();
+        $categoryActive = Category::whereNull('deleted_at')->get();
+        $categoryTrashed = Category::onlyTrashed()->get();
+
+        $query = Category::onlyTrashed();
+
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+        if ($request->filled('min_date')) {
+            $query->whereDate('deleted_at', '>=', $request->min_date);
+        }
+        if ($request->filled('max_date')) {
+            $query->whereDate('deleted_at', '<=', $request->max_date);
+        }
+
+        $categories = $query->orderBy('deleted_at', 'DESC')->paginate(10);
+
+        // Sử dụng lại view index cho đồng nhất tabs/filter/table
+        return view('admin.categories.trash', [
+            'categories' => $categories,
+            'categoryAll' => $categoryAll,
+            'categoryActive' => $categoryActive,
+            'categoryTrashed' => $categoryTrashed,
+            'title' => 'Thùng rác danh mục',
+        ]);
     }
 
-    // Paginate the results
-    $categories = $query->orderBy('deleted_at', 'DESC')->paginate(10);
-
-    return view('admin.categories.trash', compact('categories'));
-}
-public function show($slug)
+   public function show($slug)
 {
-    // Find the category by slug
-    $category = Category::where('slug', $slug)->firstOrFail();
+    $category = Category::with(['products' => function ($query) {
+        $query->withTrashed(); // Nếu có soft delete sản phẩm, có thể bỏ nếu không dùng
+    }])->where('slug', $slug)->firstOrFail();
 
-    // Return the view with the category data
-    return view('admin.categories.show', compact('category'));
-}
+    $products = $category->products;
+    $productCount = $products->count();
+
+    return view('admin.categories.show', compact('category', 'products', 'productCount'));
 }
 
+}

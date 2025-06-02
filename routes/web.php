@@ -187,6 +187,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/trash', [PaymentMethodController::class, 'trash'])->name('trash');
         Route::post('/{id}/restore', [PaymentMethodController::class, 'restore'])->name('restore');
         Route::delete('/{id}/force', [PaymentMethodController::class, 'forceDelete'])->name('forceDelete');
+        Route::get('/{id}/show', [PaymentMethodController::class, 'show'])->name('show');
+
     });
 
 
