@@ -30,7 +30,7 @@ class AttributeValueController extends Controller
             'attribute_id' => $data['attribute_id'],
             'value' => $data['name'],
         ]);
-        return redirect()->route('admin.attribute.index')
+        return redirect()->route('admin.attribute.show', $id = $data['attribute_id'])
             ->with('success', 'Thêm giá trị thuộc tính thành công!');
     }
     public function edit($id)

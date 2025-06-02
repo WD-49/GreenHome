@@ -18,7 +18,7 @@
         <tr>
             <td>{{ $brand->name }}</td>
             <td>
-                <form action="{{ route('admin.brands.restore', $brand->id) }}" method="POST" style="display:inline-block">
+                <form action="{{ route('admin.brands.restore', $brand->slug) }}" method="POST" style="display:inline-block">
                     @csrf
                     <button class="btn btn-sm btn-info">Khôi phục</button>
                 </form>

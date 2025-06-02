@@ -32,4 +32,29 @@
             </a>
         </form>
     </div>
+
+    <!-- Thêm script CKEditor -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/35.0.1/classic/ckeditor.js"></script>
+    <script>
+        ClassicEditor
+            .create(document.querySelector('#description'))
+            .catch(error => {
+                console.error(error);
+            });
+
+        document.getElementById('name').addEventListener('input', function() {
+            let name = this.value;
+
+            // Hàm để chuyển đổi từ có dấu sang không dấu
+            let slug = name.toLowerCase()
+                .normalize("NFD") // Tách các ký tự dấu ra khỏi ký tự
+                .replace(/[\u0300-\u036f]/g, "") // Loại bỏ các ký tự dấu
+                .replace(/\s+/g, '-') // Thay thế khoảng trắng thành dấu gạch nối
+                .replace(/[^a-z0-9\-]/g, '') // Loại bỏ các ký tự đặc biệt
+                .replace(/^-+|-+$/g, ''); // Xóa dấu gạch nối ở đầu và cuối
+
+            document.getElementById('slug').value = slug; // Đặt slug vào ô input
+        });
+    </script>
+
 @endsection

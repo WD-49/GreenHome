@@ -140,7 +140,7 @@ class OrderController extends Controller
 
             if ($request->filled('discount_id')) {
                 $discount = Discount::where('id', $request->discount_id)->where('status', 'active')->where('start_date', '<=', now())->where('end_date', '>=', now())->first();
-                // dd($discount);
+
                 if (!$discount) {
                     return redirect()->back()->withErrors(['discount_id' => 'Mã giảm giá không hợp lệ hoặc đã hết hạn.'])->withInput();
                 }
@@ -154,14 +154,15 @@ class OrderController extends Controller
                 }
 
                 // BỎ kiểm tra lượt dùng theo user
-
                 if ($discount->discount_type === 'percentage') {
                     $rawDiscount = $totalBeforeDiscount * $discount->discount_value / 100;
                     $discountAmount = min($rawDiscount, $discount->max_discount);
                 } elseif ($discount->discount_type === 'fixed') {
                     $discountAmount = min($discount->discount_value, $totalBeforeDiscount);
                 }
+
             }
+            // dd($totalBeforeDiscount, $discountAmount);
 
             $discountedTotal = max(0, $totalBeforeDiscount - $discountAmount);
             $totalAmount = $discountedTotal + $request->shipping_fee;

@@ -24,8 +24,9 @@ class ProductVariantController extends Controller
             ->paginate(4)
             ->appends($request->except('page'));
         // dd($variants);
+        $variantTrashed = $product->productVariants()->onlyTrashed()->get();
 
-        return view('admin.products.variants.index', compact('title', 'variants', 'product'));
+        return view('admin.products.variants.index', compact('title', 'variants', 'variantTrashed', 'product'));
     }
 
 
@@ -229,11 +230,11 @@ class ProductVariantController extends Controller
 
     }
 
-    public function restore(Product $product, ProductVariant $productVariant)
+    public function restore(Product $product, $id)
     {
         // dd($product, $productVariant);
-        // $productVariant = ProductVariant::withTrashed()->findOrFail($id);
-        dd($productVariant);
+        $productVariant = ProductVariant::withTrashed()->findOrFail($id);
+        // dd($productVariant);
 
         if ($product->id !== $productVariant->product_id) {
             abort(404);
