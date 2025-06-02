@@ -3,8 +3,41 @@
 
 @section('content')
   <h2 class="text-center">{{ $title }}</h2>
+
+
+  <ul class="nav nav-pills mb-3">
+    <li class="nav-item">
+
+    </li>
+    <li class="nav-item">
+    <a class="nav-link active"
+      href="{{ route('admin.products.index', ['status' => 1]) }}">
+      Đang hoạt động ({{$attributes->count()}})
+    </a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link"
+      href="{{ route('admin.attribute.trash') }}">
+      Thùng rác ({{$deleteCount}})
+    </a>
+    </li>
+  </ul>
+
+
   <div class=" mt-4 bg-white shadow-sm rounded p-3 ">
-    <a href="{{route('admin.attribute.create')}}" class="btn btn-warning"><i class="fas fa-plus me-2"></i>Thêm thuộc tính mới</a>
+    <div class="d-md-flex align-items-center">
+      <div>
+        <h4 class="card-title text-dark">Danh sách Thuộc tính</h4>
+        <p class="card-subtitle">Quản lý các thuộc tính của sản phẩm</p>
+      </div>
+      <div class="ms-auto mt-3 mt-md-0">
+
+        <a href="{{ route('admin.attribute.create') }}" class="btn btn-primary">
+        <i class="fa-solid fa-plus me-1"></i> Thêm mới
+        </a>
+        
+    </div>
+    </div>
     @if (count($attributes) <= 0)
     <div>
     <p class="text-center text-muted">Không có thuộc tính nào</p>
@@ -26,18 +59,47 @@
       <td>{{ $attribute->id }}</td>
       <td>{{ $attribute->name }}</td>
       <td>{{ $attribute->attributeValues->count() ?? 0 }}</td>
-      <td class="d-flex gap-1">
-      <a href="{{ route('admin.attribute.show', $attribute->id) }}" class="btn btn-sm btn-info">Chi tiết</a>
-      <a href="{{ route('admin.attribute.value.create', $attribute->id) }}" class="btn btn-sm btn-info">Thêm giá trị</a>
-      <a href="{{ route('admin.attribute.edit', $attribute->id) }}" class="btn btn-sm btn-warning">Sửa</a>
 
+      {{-- Action --}}
+
+
+      <td class="px-0 text-end">
+      <div class="dropdown">
+      <button class="btn btn-light btn-sm me-2" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown"
+      aria-expanded="false">
+      <i class="fas fa-ellipsis-v mx-auto"></i>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+      <li>
+      <a class="dropdown-item" href="{{ route('admin.attribute.show', $attribute->id) }}">
+      Chi tiết
+      </a>
+      </li>
+      <li>
+      <a class="dropdown-item" href="{{ route('admin.attribute.value.create', $attribute->id) }}">
+      Thêm giá trị
+      </a>
+      </li>
+      <li>
+      <a class="dropdown-item" href="{{ route('admin.attribute.edit', $attribute->id) }}">
+      Chỉnh sửa
+      </a>
+      </li>
+      <li>
       <form action="{{ route('admin.attribute.destroy', $attribute->id) }}" method="POST"
-      onsubmit="return confirm('Chuyển thuộc tính vào thùng rác?')" style="display:inline">
+      onsubmit="return confirm('Bạn có chắc chắn muốn bỏ sản phẩm này vào thùng rác không?')">
       @csrf
       @method('DELETE')
-      <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+      <button class="dropdown-item text-danger" type="submit">
+      Xóa sản phẩm
+      </button>
       </form>
+      </li>
+      </ul>
+      </div>
       </td>
+
+
       </tr>
     @empty
       <tr>
@@ -47,8 +109,5 @@
     </tbody>
     </table>
     @endif
-    <a href="{{ route('admin.attribute.trash') }}" class="btn btn-primary btn-sm" title="Xem thùng rác">
-    <i class="fas fa-trash-alt"></i> Thùng rác
-    </a>
   </div>
 @endsection

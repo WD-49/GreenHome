@@ -13,8 +13,9 @@ class OrderStatusController extends Controller
     public function index()
     {
         $title = "Trạng thái đơn hàng";
+        $deleteCount = OrderStatus::onlyTrashed()->count();
         $statuses = OrderStatus::all();
-        return view('admin.orders.status.index', compact('title', 'statuses'));
+        return view('admin.orders.status.index', compact('title', 'statuses', 'deleteCount'));
     }
     public function create()
     {
@@ -46,4 +47,21 @@ class OrderStatusController extends Controller
         ]);
         return redirect()->route('admin.orders.status.index')->with('success', 'Cập nhật trạng thái thành công!');
     }
+    public function destroy($id) {
+        $order = OrderStatus::findOrFail($id);
+        $order->delete();
+        return redirect()->route('admin.orders.status.index')->with('success', 'Xóa thành công trạng thái thành công!');
+    }
+    public function trashed() {
+        $data = OrderStatus::all();
+        $statuses = OrderStatus::onlyTrashed()->get();
+        $deleteCount = OrderStatus::onlyTrashed()->count();
+        return view('admin.orders.status.trashed', compact('statuses', 'deleteCount', 'data'));
+    }
+    public function restore($id) {
+        $status = OrderStatus::onlyTrashed()->findOrFail($id);
+        $status->restore();
+        return redirect()->route('admin.orders.status.index')->with('success', 'Khôi phục trạng thái thành công!');
+    }
+    
 }

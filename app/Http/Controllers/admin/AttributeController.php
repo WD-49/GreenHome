@@ -15,7 +15,8 @@ class AttributeController extends Controller
    {
       $title = "Quản lý thuộc tính";
       $attributes = Attribute::all();
-      return view('admin.attribute.index', compact('title', 'attributes'));
+      $deleteCount = Attribute::onlyTrashed()->count();
+      return view('admin.attribute.index', compact('title', 'attributes', 'deleteCount'));
    }
    public function create()
    {
@@ -46,11 +47,12 @@ class AttributeController extends Controller
       return redirect()->route('admin.attribute.index')->with('success', 'Sửa thuộc tính thành công!');
    }
    public function show($id)
-   {
+   {  
+      $attribute_id = $id;
       $attribute = Attribute::findOrFail($id);
       $attributeValues = attributeValue::where('attribute_id', $id)->get();
 
-      return view('admin.attribute.show', compact('attribute', 'attributeValues'));
+      return view('admin.attribute.show', compact('attribute', 'attributeValues', 'attribute_id'));
    }
    public function destroy($id)
    {
