@@ -56,7 +56,7 @@
                                     <div class="round-16 d-flex align-items-center justify-content-center">
                                         <i class="ti ti-circle"></i>
                                     </div>
-                                    <span class="hide-menu">danh mục</span>
+                                    <span class="hide-menu">Danh mục</span>
                                 </div>
 
                             </a>
@@ -140,6 +140,13 @@
                     </ul>
                 </li>
                 <li class="sidebar-item">
+                    <a class="sidebar-link" href="{{ route('admin.comments.index') }}" aria-expanded="false">
+                        <i class="ti ti-message-circle"></i>
+                        <span class="hide-menu">Bình luận</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item">
                     <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)"
                         aria-expanded="false">
                         <div class="d-flex align-items-center gap-3">
@@ -186,11 +193,29 @@
 
                             </a>
                         </li>
-
-
-
                     </ul>
                 </li>
+                {{-- banners --}}
+                <li class="sidebar-item">
+                    <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)"
+                        aria-expanded="false">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="d-flex">
+                                <!-- Icon mới -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round"
+                                    class="icon icon-tabler icon-tabler-photo">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M15 8h.01" />
+                                    <path d="M12 20h-8a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8" />
+                                    <path d="M16 20l5 -5" />
+                                    <path d="M21 20v.01" />
+                                    <path d="M16 16v.01" />
+                                </svg>
+                            </span>
+
+                            <span class="hide-menu">Banner</span>
                 <li class="sidebar-item">
                     <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)"
                         aria-expanded="false">

@@ -158,7 +158,9 @@ class OrderController extends Controller
                 } elseif ($discount->discount_type === 'fixed') {
                     $discountAmount = min($discount->discount_value, $totalBeforeDiscount);
                 }
+
             }
+            // dd($totalBeforeDiscount, $discountAmount);
 
             $discountedTotal = max(0, $totalBeforeDiscount - $discountAmount);
             $totalAmount = $discountedTotal + $request->shipping_fee;

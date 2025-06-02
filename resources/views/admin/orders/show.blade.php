@@ -69,6 +69,7 @@
                                 <select name="payment_status" class="form-select w-auto">
                                     <option value="pending" {{ $order->payment_status === 'pending' ? 'selected' : '' }}>
                                         Chờ thanh toán
+
                                     </option>
                                     <option value="paid" {{ $order->payment_status === 'paid' ? 'selected' : '' }}>
                                         Đã thanh toán
@@ -116,6 +117,7 @@
                                     <td>
                                         @if ($item->discount_id > 0)
                                             -{{ number_format($item->discount_id, 0, ',', '.') }} VND
+
                                         @else
                                             Không có
                                         @endif
@@ -154,6 +156,7 @@
                                     <tr>
                                         <th>Mã giảm giá ({{ $order->discount->code ?? 'Không áp dụng' }})</th>
                                         @if ($discountAmount > 0)
+
                                             <td>
                                                 -{{ number_format($discountAmount, 0, ',', '.') }} VND
                                                 <br>

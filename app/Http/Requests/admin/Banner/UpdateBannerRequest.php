@@ -11,14 +11,19 @@ class UpdateBannerRequest extends FormRequest
         return true;
     }
 
-    public function rules(): array
-    {
-        return [
-            'name' => 'required|string|max:255',
-            'status' => 'required|boolean',
-            'img' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
-        ];
-    }
+public function rules()
+{
+    return [
+        'name' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'link' => 'nullable|url',
+        'priority' => 'nullable|integer',
+        'status' => 'required|boolean',
+        'img' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ];
+}
+
+
 
     public function messages(): array
     {

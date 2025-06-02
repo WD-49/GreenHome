@@ -16,34 +16,49 @@ class DiscountController extends Controller
      * Display a listing of the resource.
      */
     //    public function index(Request $request)
-// {
-//     // Lấy 20 bản ghi mỗi trang, sắp xếp theo 'id' giảm dần (có thể thay bằng trường khác nếu cần)
-//     // $discounts = Discount::orderBy('id', 'desc')->paginate(20);
-//         $query = Discount::query();
+    // {
+    //     // Lấy 20 bản ghi mỗi trang, sắp xếp theo 'id' giảm dần (có thể thay bằng trường khác nếu cần)
+    //     // $discounts = Discount::orderBy('id', 'desc')->paginate(20);
+    //         $query = Discount::query();
 
     //     if ($request->filled('keyword')) {
-//         $keyword = $request->keyword;
-//         $query->where(function ($q) use ($keyword) {
-//             $q->where('title', 'like', '%' . $keyword . '%')
-//               ->orWhere('code', 'like', '%' . $keyword . '%');
-//         });
-//     }
+    //         $keyword = $request->keyword;
+    //         $query->where(function ($q) use ($keyword) {
+    //             $q->where('title', 'like', '%' . $keyword . '%')
+    //               ->orWhere('code', 'like', '%' . $keyword . '%');
+    //         });
+    //     }
 
     //     $discounts = $query->orderBy('id', 'desc')->paginate(20);
-// $notFound = $discounts->isEmpty(); 
-//     return view('admin.discount', [
+    // $notFound = $discounts->isEmpty(); 
+    //     return view('admin.discount', [
 
 
 
     //         'title' => 'Discounts',
-//         'discounts' => $discounts,
-//         'notFound' => $notFound,
-//     ]);
-// }
+    //         'discounts' => $discounts,
+    //         'notFound' => $notFound,
+    //     ]);
+    // }
     public function index(Request $request)
     {
         $query = Discount::query();
-
+        //lọc theo mã code
+        if ($request->filled('code')) {
+            $query->where('code', 'like', '%' . $request->code . '%');
+        }
+        //lọc theo ngày bắt đầu
+        if ($request->filled('start_date')) {
+            $query->whereDate('start_date', '>=', $request->start_date);
+        }
+        //lọc theo ngày kết thúc    
+        if ($request->filled('end_date')) {
+            $query->whereDate('end_date', '<=', $request->end_date);
+        }
+        //lọc theo giá trị giảm giá
+        if ($request->filled('discount_value')) {
+            $query->where('discount_value', '>=', $request->discount_value);
+        }
         // Lọc theo loại giảm giá
         if ($request->filled('type')) {
             $query->where('discount_type', $request->type);
@@ -92,14 +107,14 @@ class DiscountController extends Controller
      * Store a newly created resource in storage.
      */
     //     public function store(Request $request )
-// {
-//     $data = $request->all();
+    // {
+    //     $data = $request->all();
 
     //     $discount = Discount::query()->create($data);
-//     session()->flash('test', 'This is a test message');
-//     return redirect()->route('admin.discount.index')
-//                      ->with('success', 'Mã giảm giá đã được tạo thành công');
-// }
+    //     session()->flash('test', 'This is a test message');
+    //     return redirect()->route('admin.discount.index')
+    //                      ->with('success', 'Mã giảm giá đã được tạo thành công');
+    // }
 
 
 
@@ -119,7 +134,7 @@ class DiscountController extends Controller
             'discount_value' => 'required|numeric|min:1',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
-            'max_discount' => 'required|numeric|min:0',
+            'max_order_value' => 'required|numeric|min:0',
             'min_order_value' => 'required|numeric|min:0',
             'quantity' => 'required|integer|min:1',
             'user_usage_limit' => 'required|integer|min:1',
@@ -153,9 +168,9 @@ class DiscountController extends Controller
             'end_date.date' => 'Ngày kết thúc không hợp lệ.',
             'end_date.after' => 'Ngày kết thúc phải sau ngày bắt đầu.',
 
-            'max_discount.required' => 'Vui lòng nhập giá trị giảm tối đa.',
-            'max_discount.numeric' => 'Giá trị giảm tối đa phải là số.',
-            'max_discount.min' => 'Giá trị giảm tối đa không được nhỏ hơn 0.',
+            'max_order_value.required' => 'Vui lòng nhập giá trị đơn hàng tối đa.',
+            'max_order_value.numeric'  => 'Giá trị đơn hàng tối đa phải là số.',
+            'max_order_value.min'      => 'Giá trị đơn hàng tối đa không được nhỏ hơn 0.',
 
             'min_order_value.required' => 'Vui lòng nhập giá trị đơn hàng tối thiểu.',
             'min_order_value.numeric' => 'Giá trị đơn hàng tối thiểu phải là số.',
@@ -177,32 +192,32 @@ class DiscountController extends Controller
         ];
 
         // Tạo Validator
-//     $validator = Validator::make($request->all(), $rules, $messages);
+        //     $validator = Validator::make($request->all(), $rules, $messages);
 
         //     if ($validator->fails()) {
-//         // Trả về lại form với lỗi và dữ liệu cũ
-//         return redirect()->route('admin.discount.create')
-//             ->withErrors($validator)
-//             ->withInput();
-//     }
+        //         // Trả về lại form với lỗi và dữ liệu cũ
+        //         return redirect()->route('admin.discount.create')
+        //             ->withErrors($validator)
+        //             ->withInput();
+        //     }
 
         //     // Lấy dữ liệu hợp lệ
-//     $data = $validator->validated();
+        //     $data = $validator->validated();
 
         //     // Tạo mã giảm giá mới
-//     Discount::create($data);
+        //     Discount::create($data);
 
         //     // Flash thông báo thành công
-//     session()->flash('success', 'Mã giảm giá đã được tạo thành công');
-//  $discount = Discount::create([
-//             'discount_type' => $request->discount_type,
-//             'discount_value' => $request->discount_value,
-//         ]);
+        //     session()->flash('success', 'Mã giảm giá đã được tạo thành công');
+        //  $discount = Discount::create([
+        //             'discount_type' => $request->discount_type,
+        //             'discount_value' => $request->discount_value,
+        //         ]);
 
         //         // Gắn sản phẩm
-//         // $discount->products()->sync($request->product_ids ?? []);
-//   $products = Product::whereNull('deleted_at')->get();
-// return view('admin.discount.create', compact('products'));
+        //         // $discount->products()->sync($request->product_ids ?? []);
+        //   $products = Product::whereNull('deleted_at')->get();
+        // return view('admin.discount.create', compact('products'));
         $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
@@ -214,6 +229,14 @@ class DiscountController extends Controller
                 ->withInput()
                 ->with(compact('products'));
         }
+        $validated = $validator->validated();
+
+        // Bước 5: Validate logic: max_order_value >= min_order_value
+        if ($validated['max_order_value'] < $validated['min_order_value']) {
+            return back()
+                ->withErrors(['max_order_value' => 'Giá trị đơn hàng tối đa phải lớn hơn hoặc bằng giá trị tối thiểu.'])
+                ->withInput();
+        }
 
         $discount = Discount::create($validator->validated());
 
@@ -223,7 +246,6 @@ class DiscountController extends Controller
         }
 
         return redirect()->route('admin.discount.index')->with('success', 'Mã giảm giá đã được tạo thành công');
-
     }
 
 
@@ -236,7 +258,7 @@ class DiscountController extends Controller
 
 
         $discount = Discount::findOrFail($id); // Tự động trả về 404 nếu không tìm thấy
-//  dd($discount);
+        //  dd($discount);
         return view('admin.discount.show', compact('discount'));
     }
 
@@ -295,11 +317,50 @@ class DiscountController extends Controller
         $discount->forceDelete();
         return redirect()->route('admin.discount.trash')->with('success', 'Đã xóa vĩnh viễn!');
     }
-    public function history()
+    public function history(Request $request)
     {
+        $query = DiscountUsage::query();
+    {
+        //lọc theo mã giảm giá
+         if ($request->filled('code')) {
+            $query->where('code', 'like', '%' . $request->code . '%');
+        }
+        //lọc theo ngày sử dụng
+        if ($request->filled('used_from')) {
+            $query->whereDate('used_at', '>=', $request->used_from);
+        }
+        //lọc theo người dùng
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+        //lọc theo sản phẩm
+        if ($request->filled('product_id')) {
+            $query->whereHas('discount.products', function ($q) use ($request) {
+                $q->where('id', $request->product_id);
+            });
+        }
+        //lọc theo mã đơn hàng
+        if ($request->filled('order_id')) {
+            $query->where('order_id', $request->order_id);
+        }
+    }
+        // // Lấy 20 bản ghi mỗi trang, sắp xếp theo 'used_at' giảm dần
+        // // $usages = DiscountUsage::with(['discount', 'user'])->orderByDesc('used_at')->paginate(20);
+        // // Lấy 20 bản ghi mỗi trang, sắp xếp theo 'used_at' giảm dần
+        // $usages = $query->with(['discount', 'user'])->orderByDesc('used_at')->paginate(20);
+        // // $usages = DiscountUsage::with(['discount', 'user'])->orderByDesc('used_at')->paginate(20);
+        // // Lấy tất cả các mã giảm giá để hiển thị trong filter
+        // $discounts = Discount::all();
+        // // Lấy tất cả người dùng để hiển thị trong filter
+        // $users = \App\Models\User::all();
+        // // Lấy tất cả sản phẩm để hiển thị trong filter
+        // $products = Product::whereNull('deleted_at')->get();
+        // // Trả về view với các biến cần thiết
+        // return view('admin.discount.history', compact('usages', 'discounts', 'users', 'products'));
+        
         $usages = DiscountUsage::with(['discount', 'user'])->orderByDesc('used_at')->paginate(20);
-
+$notFound = $usages->isEmpty(); 
+    
         return view('admin.discount.history', compact('usages'));
-
     }
 }

@@ -7,6 +7,7 @@ use App\Models\Brand;
 use Illuminate\Http\Request;
 use App\Http\Requests\admin\brand\BrandStoreRequest;
 use App\Http\Requests\admin\brand\BrandUpdateRequest;
+use Illuminate\Support\Str;
 
 class BrandController extends Controller
 {
@@ -30,45 +31,48 @@ class BrandController extends Controller
         return view('admin.brands.create');
     }
 
+    // Lưu thương hiệu mới
     public function store(BrandStoreRequest $request)
-{
-    $data = $request->validated();
-
-    Brand::create([
-        'name' => $data['name'],
-        'description' => $data['description'] ?? null,
-    ]);
-
-    return redirect()->route('admin.brands.index')
-                     ->with('success', '✅ Thêm thương hiệu thành công!');
-}
-
-    // Form chỉnh sửa thương hiệu
-    public function edit($id)
     {
-        $brand = Brand::findOrFail($id);
+        $data = $request->validated();
+
+        Brand::create([
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
+            'slug' => Str::slug($data['name']),
+        ]);
+
+        return redirect()->route('admin.brands.index')
+            ->with('success', '✅ Thêm thương hiệu thành công!');
+    }
+
+    // Form chỉnh sửa thương hiệu theo slug
+    public function edit($slug)
+    {
+        $brand = Brand::where('slug', $slug)->firstOrFail();
         return view('admin.brands.edit', compact('brand'));
     }
 
-    // Cập nhật thương hiệu
-    public function update(BrandUpdateRequest $request, $id)
-{
-    $data = $request->validated();
-
-    $brand = Brand::findOrFail($id);
-    $brand->update([
-        'name' => $data['name'],
-        'description' => $data['description'],
-    ]);
-
-    return redirect()->route('admin.brands.index')
-                     ->with('success', '✏️ Cập nhật thương hiệu thành công!');
-}
-
-    // Xóa mềm thương hiệu
-    public function destroy($id)
+    // Cập nhật thương hiệu theo slug
+    public function update(BrandUpdateRequest $request, $slug)
     {
-        $brand = Brand::findOrFail($id);
+        $data = $request->validated();
+
+        $brand = Brand::where('slug', $slug)->firstOrFail();
+        $brand->update([
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
+            'slug' => Str::slug($data['name']),
+        ]);
+
+        return redirect()->route('admin.brands.index')
+            ->with('success', '✏️ Cập nhật thương hiệu thành công!');
+    }
+
+    // Xóa mềm thương hiệu theo slug
+    public function destroy($slug)
+    {
+        $brand = Brand::where('slug', $slug)->firstOrFail();
         $brand->delete();
 
         return redirect()->route('admin.brands.index')->with('success', '🗑️ Đã chuyển thương hiệu vào thùng rác!');
@@ -81,28 +85,36 @@ class BrandController extends Controller
         return view('admin.brands.trash', compact('brands'));
     }
 
-    // Khôi phục thương hiệu
-    public function restore($id)
+    // Khôi phục thương hiệu theo slug
+    public function restore($slug)
     {
-        $brand = Brand::onlyTrashed()->findOrFail($id);
+        $brand = Brand::onlyTrashed()->where('slug', $slug)->firstOrFail();
         $brand->restore();
 
-        return redirect()->route('admin.brands.trashed')->with('success', '♻️ Khôi phục thương hiệu thành công!');
+        return redirect()->route('admin.brands.trash')->with('success', '♻️ Khôi phục thương hiệu thành công!');
+
     }
 
-    // Xóa vĩnh viễn thương hiệu
-    public function forceDelete($id)
+    // Xóa vĩnh viễn thương hiệu theo slug
+    public function forceDelete($slug)
     {
-        $brand = Brand::onlyTrashed()->findOrFail($id);
+        $brand = Brand::onlyTrashed()->where('slug', $slug)->firstOrFail();
         $brand->forceDelete();
 
         return redirect()->route('admin.brands.trash')->with('success', '❌ Đã xóa thương hiệu vĩnh viễn!');
     }
 
-    // Hiển thị chi tiết thương hiệu
-    public function show($id)
+    // Hiển thị chi tiết thương hiệu trong admin theo slug (có thể bao gồm thương hiệu đã xóa)
+    public function show($slug)
     {
-        $brand = Brand::withTrashed()->findOrFail($id);
+        $brand = Brand::withTrashed()->where('slug', $slug)->firstOrFail();
         return view('admin.brands.show', compact('brand'));
+    }
+
+    // Hiển thị thương hiệu ở trang public theo slug (có thể dùng chung với show)
+    public function showBySlug($slug)
+    {
+        $brand = Brand::where('slug', $slug)->firstOrFail();
+        return view('public.brands.show', compact('brand')); // Ví dụ view public khác admin
     }
 }
