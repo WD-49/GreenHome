@@ -17,6 +17,7 @@ use App\Http\Controllers\admin\PaymentMethodController;
 use App\Http\Controllers\admin\CommentController;
 use App\Http\Controllers\admin\Product\ProductVariantController;
 use App\Http\Controllers\admin\OrderStatusController;
+use Dom\Comment;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -67,11 +68,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Nhóm quản lý tài khoản
     Route::prefix('/account')->name('account.')->group(function () {
         Route::prefix('/comment')->name('comment.')->group(function () {
-            Route::get('/trashed', [CommentController::class, 'trashed'])->name('trashed');
+            Route::get('/users/{user}/comments/trashed', [CommentController::class, 'getTrashedComments'])
+                ->name('account.trashedComments');
             Route::post('/restore/{id}', [CommentController::class, 'restore'])->name('restore');
             Route::post('/toggleStatus/{id}', [CommentController::class, 'toggleStatus'])->name('toggleStatus');
             Route::post('/softDelete/{id}', [CommentController::class, 'softDelete'])->name('softDelete');
             Route::delete('/forceDelete/{id}', [CommentController::class, 'forceDelete'])->name('forceDelete');
+            Route::get('/{comment}/details-with-product', [CommentController::class, 'getCommentDetailsWithProduct'])
+                 ->name('detailWithProduct'); // Tên đầy đủ sẽ là: admin.account.comment.detailWithProduct
+//         });
         });
         // client
         Route::get('/listUsers', [AccountUsersController::class, 'listUsers'])->name('listUsers');
@@ -186,7 +191,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/{id}/restore', [PaymentMethodController::class, 'restore'])->name('restore');
         Route::delete('/{id}/force', [PaymentMethodController::class, 'forceDelete'])->name('forceDelete');
         Route::get('/{id}/show', [PaymentMethodController::class, 'show'])->name('show');
-
     });
 
 
