@@ -173,8 +173,8 @@ class DiscountController extends Controller
             'end_date.after' => 'Ngày kết thúc phải sau ngày bắt đầu.',
 
             'max_order_value.required' => 'Vui lòng nhập giá trị đơn hàng tối đa.',
-            'max_order_value.numeric'  => 'Giá trị đơn hàng tối đa phải là số.',
-            'max_order_value.min'      => 'Giá trị đơn hàng tối đa không được nhỏ hơn 0.',
+            'max_order_value.numeric' => 'Giá trị đơn hàng tối đa phải là số.',
+            'max_order_value.min' => 'Giá trị đơn hàng tối đa không được nhỏ hơn 0.',
 
             'min_order_value.required' => 'Vui lòng nhập giá trị đơn hàng tối thiểu.',
             'min_order_value.numeric' => 'Giá trị đơn hàng tối thiểu phải là số.',
@@ -197,33 +197,7 @@ class DiscountController extends Controller
 
         ];
 
-        // Tạo Validator
-        //     $validator = Validator::make($request->all(), $rules, $messages);
 
-        //     if ($validator->fails()) {
-        //         // Trả về lại form với lỗi và dữ liệu cũ
-        //         return redirect()->route('admin.discount.create')
-        //             ->withErrors($validator)
-        //             ->withInput();
-        //     }
-
-        //     // Lấy dữ liệu hợp lệ
-        //     $data = $validator->validated();
-
-        //     // Tạo mã giảm giá mới
-        //     Discount::create($data);
-
-        //     // Flash thông báo thành công
-        //     session()->flash('success', 'Mã giảm giá đã được tạo thành công');
-        //  $discount = Discount::create([
-        //             'discount_type' => $request->discount_type,
-        //             'discount_value' => $request->discount_value,
-        //         ]);
-
-        //         // Gắn sản phẩm
-        //         // $discount->products()->sync($request->product_ids ?? []);
-        //   $products = Product::whereNull('deleted_at')->get();
-        // return view('admin.discount.create', compact('products'));
         $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
@@ -244,7 +218,17 @@ class DiscountController extends Controller
                 ->withInput();
         }
 
-        $discount = Discount::create($validator->validated());
+        // tính max_discount
+        if ($validated['discount_type'] === 'percentage') {
+            $max_discount = $validated['max_order_value'] * $validated['discount_value'] / 100;
+        } else {
+            $max_discount = $validated['discount_value'];
+        }
+        // dd($max_discount);
+        $validated['max_discount'] = $max_discount;
+        // dd($validated['max_discount']);
+
+        $discount = Discount::create($validated);
 
         // Nếu không áp dụng cho tất cả sản phẩm, thì lưu các sản phẩm được chọn
         if (!$request->applies_to_all_products && $request->has('product_ids')) {
@@ -334,8 +318,8 @@ class DiscountController extends Controller
             'end_date.after' => 'Ngày kết thúc phải sau ngày bắt đầu.',
 
             'max_order_value.required' => 'Vui lòng nhập giá trị đơn hàng tối đa.',
-            'max_order_value.numeric'  => 'Giá trị đơn hàng tối đa phải là số.',
-            'max_order_value.min'      => 'Giá trị đơn hàng tối đa không được nhỏ hơn 0.',
+            'max_order_value.numeric' => 'Giá trị đơn hàng tối đa phải là số.',
+            'max_order_value.min' => 'Giá trị đơn hàng tối đa không được nhỏ hơn 0.',
 
             'min_order_value.required' => 'Vui lòng nhập giá trị đơn hàng tối thiểu.',
             'min_order_value.numeric' => 'Giá trị đơn hàng tối thiểu phải là số.',
@@ -360,7 +344,13 @@ class DiscountController extends Controller
 
 
         $validatedData = $request->validate($rules, $messages);
-
+        // Tính max_discount
+        if ($validatedData['discount_type'] === 'percentage') {
+            $max_discount = $validatedData['max_order_value'] * $validatedData['discount_value'] / 100;
+        } else {
+            $max_discount = $validatedData['discount_value'];
+        }
+        $validatedData['max_discount'] = $max_discount;
         $discount->update($validatedData);
 
         if ($request->applies_to_all_products == 0) {
@@ -445,6 +435,7 @@ class DiscountController extends Controller
         }
 
         $usages = $query->orderByDesc('used_at')->paginate(20);
+        // dd($usages);
 
         return view('admin.discount.history', compact('usages'));
     }

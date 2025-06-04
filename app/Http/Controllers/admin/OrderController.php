@@ -84,6 +84,7 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request);
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|exists:users,id', // Tạm bỏ qua kiểm tra user
             'shipping_name' => 'required|string|max:255',
@@ -124,6 +125,7 @@ class OrderController extends Controller
                 $quantity = $quantities[$index];
                 $itemTotal = $variant->price * $quantity;
                 $totalBeforeDiscount += $itemTotal;
+                // dd($totalBeforeDiscount);
 
                 $items[] = [
                     'product_variant_id' => $variantId,
@@ -140,6 +142,9 @@ class OrderController extends Controller
 
             if ($request->filled('discount_id')) {
                 $discount = Discount::where('id', $request->discount_id)->where('status', 'active')->where('start_date', '<=', now())->where('end_date', '>=', now())->first();
+                // dd($discount);
+                // dd($date = now());
+                // dd(Discount::find($request->discount_id));
 
                 if (!$discount) {
                     return redirect()->back()->withErrors(['discount_id' => 'Mã giảm giá không hợp lệ hoặc đã hết hạn.'])->withInput();
@@ -156,6 +161,8 @@ class OrderController extends Controller
                 // BỎ kiểm tra lượt dùng theo user
                 if ($discount->discount_type === 'percentage') {
                     $rawDiscount = $totalBeforeDiscount * $discount->discount_value / 100;
+                    // dd($rawDiscount);
+                    // dd($discount->max_discount);
                     $discountAmount = min($rawDiscount, $discount->max_discount);
                 } elseif ($discount->discount_type === 'fixed') {
                     $discountAmount = min($discount->discount_value, $totalBeforeDiscount);

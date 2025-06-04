@@ -193,7 +193,7 @@ class AccountUsersController extends Controller
 
     public function trashedUsers()
     {
-        $trashedUsers =  User::onlyTrashed()->where('role', 'client')->with('profile')->paginate(10);
+        $trashedUsers = User::onlyTrashed()->where('role', 'client')->with('profile')->paginate(10);
         return view('admin.account.users.trashedUsers', compact('trashedUsers'));
     }
 

@@ -5,22 +5,26 @@
     <form action="" method="GET" class="mb-4 row g-3">
         <div class="col-md-3">
             <label for="code" class="form-label">Mã code</label>
-            <input type="text" name="code" id="code" value="{{ request('code') }}" class="form-control" placeholder="Nhập mã code">
+            <input type="text" name="code" id="code" value="{{ request('code') }}" class="form-control"
+                placeholder="Nhập mã code">
         </div>
 
         <div class="col-md-3">
             <label for="user" class="form-label">Người sử dụng</label>
-            <input type="text" name="user" id="user" value="{{ request('user') }}" class="form-control" placeholder="Tên hoặc email">
+            <input type="text" name="user" id="user" value="{{ request('user') }}" class="form-control"
+                placeholder="Tên hoặc email">
         </div>
 
         <div class="col-md-3">
             <label for="product" class="form-label">Sản phẩm</label>
-            <input type="text" name="product" id="product" value="{{ request('product') }}" class="form-control" placeholder="Tên sản phẩm">
+            <input type="text" name="product" id="product" value="{{ request('product') }}" class="form-control"
+                placeholder="Tên sản phẩm">
         </div>
 
         <div class="col-md-3">
             <label for="order" class="form-label">Đơn hàng</label>
-            <input type="text" name="order" id="order" value="{{ request('order') }}" class="form-control" placeholder="Mã đơn hàng">
+            <input type="text" name="order" id="order" value="{{ request('order') }}" class="form-control"
+                placeholder="Mã đơn hàng">
         </div>
 
         <div class="col-md-3">

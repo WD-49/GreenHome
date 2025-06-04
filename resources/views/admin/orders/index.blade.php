@@ -106,7 +106,7 @@
                                     <td>{{ $order->created_at }}</td>
                                     <td class="text-end fw-semibold text-success">
                                         {{ number_format($order->total_amount, 0) }} VND</td>
-                                    <td class="text-capitalize">{{ $order->paymentMethod }}</td>
+                                    <td class="text-capitalize">{{ $order->paymentMethod->name }}</td>
                                     <td class="text-center">
                                         <span
                                             class="badge rounded-pill
