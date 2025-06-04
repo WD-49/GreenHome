@@ -128,7 +128,7 @@
                                             <tbody>
                                                 @foreach ($user->orders as $order)
                                                     <tr>
-                                                        <td>#{{ $order->id }}</td>
+                                                        <td>#{{ $order->sku }}</td>
                                                         <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
                                                         <td>{{ number_format($order->total_amount, 0, ',', '.') }} VNĐ</td>
                                                         <td>
