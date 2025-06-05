@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\admin\attribute\StoreAttributeRequest;
 use App\Http\Requests\admin\attribute\UpdateAttributeRequest;
 use App\Models\Attribute;
+use App\Models\Product;
 use App\Models\attributeValue;
 use Illuminate\Http\Request;
 
@@ -45,13 +46,32 @@ class AttributeController extends Controller
       ]);
       return redirect()->route('admin.attribute.index')->with('success', 'Sửa thuộc tính thành công!');
    }
-   public function show($id)
-   {
-      $attribute = Attribute::findOrFail($id);
-      $attributeValues = attributeValue::where('attribute_id', $id)->get();
+  public function show($id)
+{
+    $product = Product::findOrFail($id);
 
-      return view('admin.attribute.show', compact('attribute', 'attributeValues'));
-   }
+    $query = $product->comments(); // Quan hệ comments trong model Product
+
+    if (request()->filled('username')) {
+        $query->whereHas('user', function ($q) {
+            $q->where('name', 'like', '%' . request('username') . '%');
+        });
+    }
+
+    if (request()->filled('date')) {
+        $query->whereDate('created_at', request('date'));
+    }
+
+    if (request()->filled('status')) {
+        $query->where('status', request('status'));
+    }
+
+    $comments = $query->get();
+
+    return view('admin.products.show', compact('product', 'comments'));
+}
+
+
    public function destroy($id)
    {
       $attribute = Attribute::findOrFail($id);
