@@ -17,6 +17,8 @@ use App\Http\Controllers\admin\PaymentMethodController;
 use App\Http\Controllers\admin\CommentController;
 use App\Http\Controllers\admin\Product\ProductVariantController;
 use App\Http\Controllers\admin\OrderStatusController;
+use App\Http\Controllers\Admin\BlogCategoryController;
+
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -36,6 +38,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/{slug}/force-delete', [CategoryController::class, 'forceDelete'])->name('forceDelete'); // Sử dụng slug
         Route::get('/{slug}', [CategoryController::class, 'show'])->name('show'); // Show category details by slug
     });
+
+    // quản lý blog_categiry
+    Route::prefix('/blog-categories')->name('blog_categories.')->group(function () {
+    Route::get('/list', [BlogCategoryController::class, 'index'])->name('index');
+    Route::get('/create', [BlogCategoryController::class, 'create'])->name('create');
+    Route::post('/store', [BlogCategoryController::class, 'store'])->name('store');
+    Route::get('/{slug}/edit', [BlogCategoryController::class, 'edit'])->name('edit');
+    Route::put('/{slug}/update', [BlogCategoryController::class, 'update'])->name('update');
+    Route::delete('/{slug}/destroy', [BlogCategoryController::class, 'destroy'])->name('destroy');
+    Route::get('/trash', [BlogCategoryController::class, 'trash'])->name('trash');
+    Route::post('/{slug}/restore', [BlogCategoryController::class, 'restore'])->name('restore');
+    Route::delete('/{slug}/force_delete', [BlogCategoryController::class, 'forceDelete'])->name('forceDelete');
+    Route::get('/{slug}', [BlogCategoryController::class, 'show'])->name('show');
+});
 
 
     // Quản lý sản phẩm
