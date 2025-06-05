@@ -80,8 +80,35 @@ class OrderController extends Controller
         $productVariants = ProductVariant::with('product')->get();
         $discounts = Discount::all();
         $payMethods = PaymentMethod::all();
-        // dd($discounts);
-        return view('admin.orders.create', compact('users', 'productVariants', 'discounts', 'payMethods'));
+        $productVariants = ProductVariant::with('product:id,name')->where('status', 1)->get();
+        $discounts = Discount::where('status', 'active') /* ... các điều kiện khác ... */->get();
+
+        $productVariantsForJs = $productVariants->mapWithKeys(function ($variant) {
+            return [$variant->id => [
+                'price' => (float) $variant->price,
+                'name' => $variant->product->name, // Để hiển thị nếu cần
+                'sku' => $variant->sku
+            ]];
+        });
+
+        $discountsForJs = $discounts->mapWithKeys(function ($discount) {
+            return [$discount->id => [
+                'type' => $discount->discount_type,
+                'value' => (float) $discount->discount_value,
+                'maxValue' => (float) ($discount->max_discount ?? 0),
+                'minValue' => (float) ($discount->min_order_value ?? 0),
+                'code' => $discount->code // Có thể hữu ích để hiển thị
+            ]];
+        });
+
+        return view('admin.orders.create', compact(
+            'users',
+            'productVariants', // Vẫn truyền productVariants cho vòng lặp select HTML
+            'discounts',       // Vẫn truyền discounts cho vòng lặp select HTML
+            'payMethods',
+            'productVariantsForJs', // Dữ liệu cho JS
+            'discountsForJs'        // Dữ liệu cho JS
+        ));
     }
 
     /**
