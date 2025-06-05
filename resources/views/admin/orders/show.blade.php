@@ -146,12 +146,16 @@
                     </table>
                 </div>
 
-                {{-- Mã giảm giá & Tổng tiền --}}
-                {{-- Mã giảm giá & Tổng tiền --}}
                 @php
-                    $discountAmount = $order->discount_amount ?? 0;
-                    $shippingFee = $order->shipping_fee ?? 0;
-                    $finalAmount = $totalOrderAmount + $shippingFee - $discountAmount;
+                    $discountAmount = $order->discount_amount ?? 0; // Số tiền giảm giá của toàn đơn hàng
+                    $shippingFee = $order->shipping_fee ?? 0; // Phí vận chuyển
+
+                    // Tính toán lại finalAmount theo logic mới
+                    $subtotalAfterDiscount = $totalOrderAmount - $discountAmount; // Tiền hàng sau khi trừ mã giảm giá
+                    $finalAmount = $subtotalAfterDiscount + $shippingFee; // Cộng thêm phí ship
+
+                    // Đảm bảo tổng cuối cùng không âm (trường hợp hiếm khi giảm giá > tiền hàng)
+                    $finalAmount = max(0, $finalAmount);
                 @endphp
 
                 <div class="row justify-content-end">
@@ -164,11 +168,7 @@
                                         <td>{{ number_format($totalOrderAmount, 0, ',', '.') }} VND</td>
                                     </tr>
                                     <tr>
-                                        <th>Phí vận chuyển</th>
-                                        <td>{{ number_format($shippingFee, 0, ',', '.') }} VND</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Mã giảm giá ({{ $order->discount->code ?? 'Không áp dụng' }})</th>
+                                        <th>Mã giảm giá ({{ optional($order->discount)->code ?? 'Không áp dụng' }}). <br> {{ optional($order->discount)->description }}</th>
                                         @if ($discountAmount > 0)
                                             <td>
                                                 -{{ number_format($discountAmount, 0, ',', '.') }} VND
@@ -179,6 +179,10 @@
                                         @if ($discountAmount <= 0)
                                             <td>Không áp dụng</td>
                                         @endif
+                                    </tr>
+                                    <tr>
+                                        <th>Phí vận chuyển</th>
+                                        <td>{{ number_format($shippingFee, 0, ',', '.') }} VND</td>
                                     </tr>
 
 
@@ -257,7 +261,7 @@
             if (!configCancelledStatusId) {
                 console.warn(
                     "JS - Cảnh báo: Không thể xác định ID của trạng thái 'Đã hủy' từ data attribute. Chức năng yêu cầu lý do hủy có thể không hoạt động chính xác."
-                    );
+                );
             }
 
             updateOrderStatusForm.on('submit', function(e) {
@@ -302,7 +306,7 @@
                 } else {
                     console.log(
                         ">>> Điều kiện hiển thị modal KHÔNG được đáp ứng hoặc lý do đã có. Cho phép submit trực tiếp."
-                        );
+                    );
                 }
                 // Cho phép submit nếu không phải là hủy hoặc nếu hủy nhưng đã có lý do
                 return true;
