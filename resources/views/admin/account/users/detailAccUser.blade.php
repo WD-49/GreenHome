@@ -256,9 +256,7 @@
 
                             {{-- Tab Bình luận --}}
                             <div class="tab-pane fade" id="comments-pane" role="tabpanel"
-                                aria-labelledby="comments-tab"> {{-- Sửa ID và labelledby cho khớp --}}
-                                {{-- <h1>NỘI DUNG TAB BÌNH LUẬN</h1> --}}
-                                {{-- Nội dung thật của tab bình luận --}}
+                                aria-labelledby="comments-tab">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <h5>Danh sách Bình luận</h5>
                                     <button id="toggleTrashedCommentsBtn" class="btn btn-sm btn-outline-danger"
@@ -274,42 +272,80 @@
                                         });
                                     @endphp
                                     @if ($activeComments->count() > 0)
-                                        {{-- ... (Bảng bình luận active của bạn giữ nguyên) ... --}}
                                         <table class="table table-sm table-bordered table-hover">
-                                            {{-- ... thead ... --}}
                                             <tbody>
                                                 @foreach ($activeComments as $comment)
-                                                    <tr>
+                                                    @php
+                                                        // Tái tạo logic tạo trạng thái và nút bấm như trong controller helper getCommentUIData
+                                                        // Hoặc truyền dữ liệu này từ controller chính (detailAccUser) nếu bạn có thể
+                                                        $statusText = '';
+                                                        $statusClassBadge = '';
+                                                        $currentActionsHtml = '';
+
+                                                        $currentActionsHtml .=
+                                                            '<button class="btn btn-xs btn-outline-info view-comment-details-btn me-1" data-comment-id="' .
+                                                            $comment->id .
+                                                            '" title="Xem chi tiết" data-bs-toggle="tooltip"><i class="fas fa-eye"></i></button>';
+
+                                                        switch ($comment->status) {
+                                                            case 'hiển thị':
+                                                                $statusText = 'Hiển thị';
+                                                                $statusClassBadge = 'bg-success';
+                                                                $currentActionsHtml .=
+                                                                    '<button class="btn btn-xs btn-outline-secondary change-comment-status-btn me-1" data-comment-id="' .
+                                                                    $comment->id .
+                                                                    '" data-action="hide" title="Ẩn bình luận này" data-bs-toggle="tooltip"><i class="fas fa-eye-slash"></i></button>';
+                                                                break;
+                                                            case 'ẩn':
+                                                                $statusText = 'Bị ẩn';
+                                                                $statusClassBadge = 'bg-warning text-dark';
+                                                                $currentActionsHtml .=
+                                                                    '<button class="btn btn-xs btn-outline-info change-comment-status-btn me-1" data-comment-id="' .
+                                                                    $comment->id .
+                                                                    '" data-action="show_again" title="Hiện lại bình luận này" data-bs-toggle="tooltip"><i class="fas fa-redo-alt"></i></button>';
+                                                                break;
+                                                            case 'chưa duyệt':
+                                                            default:
+                                                                $statusText = 'Chưa duyệt';
+                                                                $statusClassBadge = 'bg-secondary';
+                                                                $currentActionsHtml .=
+                                                                    '<button class="btn btn-xs btn-outline-primary change-comment-status-btn me-1" data-comment-id="' .
+                                                                    $comment->id .
+                                                                    '" data-action="approve" title="Duyệt bình luận này" data-bs-toggle="tooltip"><i class="fas fa-check"></i></button>';
+                                                                // Optional: Thêm nút ẩn từ trạng thái chưa duyệt
+                                                                $currentActionsHtml .=
+                                                                    '<button class="btn btn-xs btn-outline-secondary change-comment-status-btn ms-1 me-1" data-comment-id="' .
+                                                                    $comment->id .
+                                                                    '" data-action="hide" title="Ẩn bình luận (từ chưa duyệt)" data-bs-toggle="tooltip"><i class="fas fa-eye-slash"></i></button>';
+                                                                break;
+                                                        }
+                                                        $currentActionsHtml .=
+                                                            '<button class="btn btn-xs btn-outline-danger soft-delete-comment-btn" data-comment-id="' .
+                                                            $comment->id .
+                                                            '" title="Chuyển vào thùng rác" data-bs-toggle="tooltip"><i class="fas fa-trash-alt"></i></button>';
+                                                    @endphp
+
+                                                    <tr id="active-comment-row-{{ $comment->id }}">
                                                         <td>{{ $comment->id }}</td>
-                                                        <td>{{ Str::limit($comment->content, 100) }}</td>
+                                                        <td>{{ Str::limit($comment->content, 70) }}</td>
                                                         <td>{{ $comment->created_at->format('d/m/Y H:i') }}</td>
-                                                        <td>
-                                                            <span class="badge bg-success">{{ $comment->status }}</span>
+                                                        <td class="comment-status-cell"
+                                                            id="comment-status-cell-{{ $comment->id }}">
+                                                            <span
+                                                                class="badge {{ $statusClassBadge }}">{{ $statusText }}</span>
                                                         </td>
-                                                        <td>
-                                                            <button
-                                                                class="btn btn-xs btn-outline-info view-comment-details-btn me-1"
-                                                                title="Xem chi tiết bình luận"
-                                                                data-comment-id="{{ $comment->id }}"
-                                                                data-bs-toggle="tooltip" data-bs-placement="top">
-                                                                {{-- Thêm data-bs-toggle cho tooltip nếu muốn --}}
-                                                                <i class="fas fa-eye"></i>
-                                                            </button>
-                                                            {{-- Các nút ẩn/hiện và xóa tạm thời khác (nếu có) --}}
-                                                            {{-- Ví dụ:
-                <button class="btn btn-xs btn-outline-warning toggle-comment-status-btn" data-comment-id="{{ $comment->id }}"><i class="fas fa-toggle-on"></i></button>
-                <button class="btn btn-xs btn-outline-danger soft-delete-comment-btn" data-comment-id="{{ $comment->id }}"><i class="fas fa-trash-alt"></i></button>
-                --}}
+                                                        <td class="comment-actions-cell"
+                                                            id="comment-actions-cell-{{ $comment->id }}">
+                                                            {!! $currentActionsHtml !!}
                                                         </td>
                                                     </tr>
-                                                    {{-- Hàng ẩn để hiển thị chi tiết bình luận (sẽ được AJAX tải vào) --}}
+                                                    {{-- Hàng chi tiết bình luận (đã có) --}}
                                                     <tr class="comment-detail-row"
                                                         id="comment-detail-row-{{ $comment->id }}"
                                                         style="display: none;">
-                                                        <td colspan="5"> {{-- Colspan bằng số lượng cột của bảng --}}
+                                                        <td colspan="5">
                                                             <div class="comment-detail-content p-2 border-top"
                                                                 id="comment-detail-content-{{ $comment->id }}">
-                                                                {{-- Nội dung chi tiết sẽ được tải vào đây --}}
                                                                 <p class="text-center text-muted"><i
                                                                         class="fas fa-spinner fa-spin"></i> Đang tải chi
                                                                     tiết...</p>
@@ -341,26 +377,86 @@
 @endsection
 
 @push('scripts')
-    {{-- Đẩy script của trang này vào stack 'scripts' của layout --}}
     <script>
         $(document).ready(function() {
-            // Script AJAX cho thùng rác bình luận (giữ nguyên như bạn đã sửa)
+            const csrfTokenGlobal = $('meta[name="csrf-token"]').attr('content');
+
+            // --- HÀM TIỆN ÍCH ---
+            function updateActiveCommentUIAfterAction(commentId, statusText, statusClassBadge, actionsHtml) {
+                const statusCell = $('#comment-status-cell-' + commentId);
+                const actionsCell = $('#comment-actions-cell-' + commentId);
+
+                if (statusCell.length) {
+                    statusCell.html(`<span class="badge ${statusClassBadge}">${statusText}</span>`);
+                }
+                if (actionsCell.length) {
+                    actionsCell.html(actionsHtml);
+                    actionsCell.find('[data-bs-toggle="tooltip"]').tooltip('dispose').tooltip();
+                }
+            }
+
+            function updateTotalCommentsBadgeOnTab(newCount) {
+                const badgeElement = $('#comments-tab').find('.badge.rounded-pill');
+                if (badgeElement.length) {
+                    if (newCount > 0) {
+                        badgeElement.text(newCount).show();
+                    } else {
+                        badgeElement.text('0').hide();
+                    }
+                } else {
+                    if (newCount > 0) {
+                        $('#comments-tab').append(
+                            `<span class="badge rounded-pill bg-secondary ms-1">${newCount}</span>`);
+                    }
+                }
+            }
+
+            function showTemporaryMessage(message, type = 'success', duration = 3500) {
+                let alertClass = 'alert-success';
+                if (type === 'error') alertClass = 'alert-danger';
+                if (type === 'info') alertClass = 'alert-info';
+                const messageId = 'temp-alert-' + Date.now();
+                const messageDiv = $(
+                    `<div class="alert ${alertClass} alert-dismissible fade show m-2" role="alert" id="${messageId}" style="position:fixed; top: 60px; right: 20px; z-index: 1050; min-width: 250px; max-width: 400px;">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+             </div>`
+                );
+                const container = $('#main-wrapper').length ? $('#main-wrapper') : $('body');
+                container.prepend(messageDiv);
+                setTimeout(function() {
+                    $('#' + messageId).fadeOut(500, function() {
+                        $(this).remove();
+                    });
+                }, duration);
+            }
+
+            // --- AJAX CHO NÚT "THÙNG RÁC BÌNH LUẬN" ---
             $('#toggleTrashedCommentsBtn').on('click', function() {
-                const userId = $(this).data('userId');
+                const buttonSelf = $(this);
+                const userId = buttonSelf.data('userId');
                 const trashedSection = $('#trashedCommentsSection');
                 const trashedContainer = $('#trashedCommentsContainer');
-                const button = $(this);
-                const csrfToken = $('meta[name="csrf-token"]').attr('content');
-                const urlFetchTrashedComments =
-                    `/admin/account/comment/users/${userId}/comments/trashed`; // URL này khớp với route của bạn
+
+                // Sử dụng tên route đã được xác nhận từ file routes/web.php của bạn
+                // Ví dụ: admin.account.comment.account.trashedComments (nếu có group admin)
+                // Hoặc admin.account.comment.fetchUserTrashed (nếu bạn đã đổi tên)
+                // Hoặc URL hardcoded nếu bạn chắc chắn
+                let urlFetchTrashedComments =
+                    "{{ route('admin.account.comment.account.trashedComments', ['user' => ':userId']) }}";
+                urlFetchTrashedComments = urlFetchTrashedComments.replace(':userId', userId);
+                // const urlFetchTrashedComments = `/admin/account/comment/users/${userId}/comments/trashed`;
+
+                console.log('Fetch trashed URL:', urlFetchTrashedComments);
 
                 if (trashedSection.is(':visible')) {
                     trashedSection.slideUp();
-                    button.html('<i class="fas fa-trash"></i> Thùng rác bình luận');
-                    button.removeClass('btn-danger').addClass('btn-outline-danger');
+                    buttonSelf.html('<i class="fas fa-trash"></i> Thùng rác bình luận');
+                    buttonSelf.removeClass('btn-danger').addClass('btn-outline-danger');
                 } else {
                     trashedContainer.html(
-                        '<p class="text-center"><i class="fas fa-spinner fa-spin"></i> Đang tải...</p>');
+                        '<p class="text-center my-3"><i class="fas fa-spinner fa-spin"></i> Đang tải...</p>'
+                    );
                     trashedSection.slideDown();
                     $.ajax({
                         url: urlFetchTrashedComments,
@@ -372,21 +468,17 @@
                                 html +=
                                     '<table class="table table-sm table-hover table-bordered">';
                                 html +=
-                                    `<thead class="table-light"><tr><th>ID</th><th>Nội dung</th><th>Ngày xóa</th><th>Hành động</th></tr></thead><tbody>`;
+                                    `<thead class="table-light"><tr><th>ID</th><th>Người gửi</th><th>Nội dung</th><th>Ngày xóa</th><th style="width: 10%;">Hành động</th></tr></thead><tbody>`;
                                 response.comments.forEach(function(comment) {
-                                    html += `<tr>
+                                    html += `<tr id="trashed-comment-row-${comment.id}">
                                         <td>${comment.id}</td>
+                                        <td>${comment.user_name || 'N/A'}</td>
                                         <td>${comment.content}</td>
                                         <td>${comment.deleted_at}</td>
                                         <td>
-                                            <form action="${comment.restore_url}" method="POST" style="display:inline-block;" onsubmit="return confirm('Khôi phục bình luận này?')">
-                                                <input type="hidden" name="_token" value="${csrfToken}">
-                                                <button type="submit" class="btn btn-xs btn-success" title="Khôi phục"><i class="fas fa-trash-restore"></i></button>
-                                            </form>
-                                            <form action="${comment.force_delete_url}" method="POST" style="display:inline-block;" onsubmit="return confirm('Xóa vĩnh viễn bình luận này?')">
-                                                <input type="hidden" name="_token" value="${csrfToken}">
-                                                <input type="hidden" name="_method" value="DELETE">
-                                                <button type="submit" class="btn btn-xs btn-danger" title="Xóa vĩnh viễn"><i class="fas fa-times-circle"></i></button>
+                                            <form action="${comment.restore_url}" method="POST" class="d-inline restore-comment-form">
+                                                <input type="hidden" name="_token" value="${csrfTokenGlobal}">
+                                                <button type="button" class="btn btn-xs btn-success restore-comment-btn" title="Khôi phục" data-comment-id="${comment.id}" data-bs-toggle="tooltip"><i class="fas fa-trash-restore"></i></button>
                                             </form>
                                         </td></tr>`;
                                 });
@@ -396,27 +488,291 @@
                                     '<p class="text-center text-muted">Không có bình luận nào trong thùng rác.</p>';
                             }
                             trashedContainer.html(html);
-                            button.html('<i class="fas fa-eye-slash"></i> Ẩn thùng rác');
-                            button.removeClass('btn-outline-danger').addClass('btn-danger');
+                            $('#trashedCommentsContainer [data-bs-toggle="tooltip"]').tooltip(
+                                'dispose').tooltip();
+                            buttonSelf.html('<i class="fas fa-eye-slash"></i> Ẩn thùng rác');
+                            buttonSelf.removeClass('btn-outline-danger').addClass('btn-danger');
                         },
                         error: function(xhr) {
-                            console.error("Lỗi khi lấy bình luận đã xóa:", xhr.responseText);
+                            console.error("Lỗi khi lấy thùng rác bình luận:", xhr.responseText);
                             trashedContainer.html(
-                                '<p class="text-center text-danger">Lỗi khi tải bình luận. Vui lòng thử lại.</p>'
+                                '<p class="text-center text-danger">Lỗi tải thùng rác. Vui lòng thử lại.</p>'
                             );
+                            buttonSelf.html('<i class="fas fa-trash"></i> Thùng rác bình luận')
+                                .removeClass('btn-danger').addClass('btn-outline-danger');
                         }
                     });
                 }
             });
 
-            // Test thử xem tab có được Bootstrap khởi tạo không
-            var firstTabEl = document.querySelector('#userTabs button[data-bs-toggle="tab"]')
-            if (firstTabEl) {
-                var tab = new bootstrap.Tab(firstTabEl) // Chỉ để test, không nhất thiết phải .show()
-                console.log('Bootstrap Tab instance created for the first tab trigger:', tab);
-            } else {
-                console.error('Could not find any tab triggers to test Bootstrap Tab initialization.');
-            }
+            // --- AJAX CHO NÚT "XEM CHI TIẾT BÌNH LUẬN" ---
+            $('#activeCommentsContainer').on('click', '.view-comment-details-btn', function() {
+                const button = $(this);
+                const commentId = button.data('commentId');
+                const detailRow = $('#comment-detail-row-' + commentId);
+                const detailContentDiv = $('#comment-detail-content-' + commentId);
+
+                $('.comment-detail-row').not(detailRow).slideUp();
+                $('.view-comment-details-btn').not(button).html('<i class="fas fa-eye"></i>').attr('title',
+                    'Xem chi tiết bình luận');
+
+                if (detailRow.is(':visible')) {
+                    detailRow.slideUp();
+                    button.html('<i class="fas fa-eye"></i>').attr('title', 'Xem chi tiết bình luận');
+                } else {
+                    detailContentDiv.html(
+                        '<p class="text-center my-3"><i class="fas fa-spinner fa-spin"></i> Đang tải chi tiết...</p>'
+                    );
+                    detailRow.slideDown();
+                    // Route name: admin.account.comment.detailWithProduct
+                    let fetchDetailUrl =
+                        "{{ route('admin.account.comment.detailWithProduct', ['comment' => ':commentId']) }}";
+                    fetchDetailUrl = fetchDetailUrl.replace(':commentId', commentId);
+                    console.log('Fetching comment detail from:', fetchDetailUrl);
+                    $.ajax({
+                        url: fetchDetailUrl,
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.success) {
+                                let html = '<div class="container-fluid"><div class="row">';
+                                html += '<div class="col-md-12 mb-3">';
+                                html +=
+                                    '<h6><i class="fas fa-comment-dots text-primary me-2"></i>Chi tiết Bình luận:</h6>';
+                                html +=
+                                    `<p class="mb-1"><small><strong>Người gửi:</strong> ${response.comment.user_name}</small></p>`;
+                                html +=
+                                    `<p class="mb-1"><small><strong>Ngày gửi:</strong> ${response.comment.created_at_formatted}</small></p>`;
+                                html +=
+                                    `<div class="comment-full-content border p-2 bg-light rounded small" style="white-space: pre-wrap;">${response.comment.content_full}</div>`;
+                                html += '</div>';
+                                if (response.product) {
+                                    const productNameDisplay = response.product.name;
+                                    html += '<div class="col-md-12">';
+                                    html +=
+                                        '<h6><i class="fas fa-box-open text-success me-2"></i>Sản phẩm được bình luận:</h6>';
+                                    html += '<div class="d-flex align-items-center">';
+                                    html +=
+                                        `<img src="${response.product.image_url}" alt="${response.product.name}" class="img-thumbnail me-3" style="width: 70px; height: 70px; object-fit: cover;">`;
+                                    html +=
+                                        `<div><p class="mb-1"><strong>Tên Sản phẩm:</strong> ${productNameDisplay}</p></div></div></div>`;
+                                } else {
+                                    html +=
+                                        '<div class="col-md-12"><p class="text-muted small">Không tìm thấy thông tin sản phẩm.</p></div>';
+                                }
+                                html += '</div></div>';
+                                detailContentDiv.html(html);
+                                button.html('<i class="fas fa-eye-slash"></i>').attr('title',
+                                    'Ẩn chi tiết');
+                            } else {
+                                detailContentDiv.html(
+                                    '<p class="text-danger small">Không thể tải chi tiết.</p>'
+                                );
+                                button.html('<i class="fas fa-eye"></i>').attr('title',
+                                    'Xem chi tiết');
+                            }
+                        },
+                        error: function(xhr) {
+                            /* ... */
+                        }
+                    });
+                }
+            });
+
+            // ---- XỬ LÝ CHO CÁC NÚT THAY ĐỔI TRẠNG THÁI ----
+            $('#activeCommentsContainer').on('click', '.change-comment-status-btn', function() {
+                const button = $(this);
+                const commentId = button.data('commentId');
+                const actionType = button.data('action');
+
+                let actionUrl = '';
+                let buttonTitleText = button.data('original-title') || button.attr('title') ||
+                    "thực hiện hành động";
+
+                if (typeof buttonTitleText === 'undefined' || buttonTitleText === null || buttonTitleText
+                    .trim() === '') {
+                    buttonTitleText = "thực hiện hành động này";
+                }
+
+                // Xác định URL dựa trên actionType và tên route tương ứng
+                if (actionType === 'approve') {
+                    actionUrl =
+                        "{{ route('admin.account.comment.approveComment', ['comment' => ':commentId']) }}"
+                        .replace(':commentId', commentId);
+                } else if (actionType === 'hide') {
+                    actionUrl =
+                        "{{ route('admin.account.comment.hideComment', ['comment' => ':commentId']) }}"
+                        .replace(':commentId', commentId);
+                } else if (actionType === 'show_again') {
+                    actionUrl =
+                        "{{ route('admin.account.comment.showAgainComment', ['comment' => ':commentId']) }}"
+                        .replace(':commentId', commentId);
+                } else {
+                    console.error('Hành động không xác định cho change-status:', actionType);
+                    showTemporaryMessage('Hành động không hợp lệ.', 'error');
+                    return;
+                }
+
+                let confirmMessage = `Bạn có chắc muốn ${buttonTitleText.toLowerCase()}?`;
+                if (!confirm(confirmMessage)) return;
+
+                const originalActionsCellHtml = button.closest('.comment-actions-cell').html();
+                button.closest('.comment-actions-cell').html(
+                    '<i class="fas fa-spinner fa-spin text-primary"></i>');
+
+                $.ajax({
+                    url: actionUrl,
+                    type: 'POST',
+                    data: {
+                        _token: csrfTokenGlobal
+                    }, // action_type đã được xác định qua URL route
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            // response.new_actions_html phải chứa các nút mới với đúng class và data-action
+                            updateActiveCommentUIAfterAction(response.comment_id, response
+                                .new_status_text, response.new_status_class_badge, response
+                                .new_actions_html);
+                            showTemporaryMessage(response.message, 'success');
+                        } else {
+                            showTemporaryMessage(response.message || 'Hành động thất bại.',
+                                'error');
+                            $('#comment-actions-cell-' + commentId).html(
+                                originalActionsCellHtml);
+                            $(`#comment-actions-cell-${commentId} [data-bs-toggle="tooltip"]`)
+                                .tooltip('dispose').tooltip();
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error("Lỗi AJAX khi thay đổi trạng thái:", xhr.responseText);
+                        showTemporaryMessage('Lỗi hệ thống khi thay đổi trạng thái.', 'error');
+                        $('#comment-actions-cell-' + commentId).html(originalActionsCellHtml);
+                        $(`#comment-actions-cell-${commentId} [data-bs-toggle="tooltip"]`)
+                            .tooltip('dispose').tooltip();
+                    }
+                });
+            });
+
+            // ---- AJAX CHO XÓA MỀM BÌNH LUẬN ----
+            $('#activeCommentsContainer').on('click', '.soft-delete-comment-btn', function() {
+                const button = $(this);
+                const commentId = button.data('commentId');
+                // Route name: admin.account.comment.softDeleteComment (nếu route dùng {comment})
+                // hoặc admin.account.comment.softDelete (nếu route dùng {id})
+                let deleteUrl =
+                    "{{ route('admin.account.comment.softDeleteComment', ['comment' => ':commentId']) }}";
+                deleteUrl = deleteUrl.replace(':commentId', commentId);
+
+                if (!confirm('Bạn có chắc muốn chuyển bình luận này vào thùng rác?')) return;
+
+                const originalActionsCellHtml = button.closest('.comment-actions-cell').html();
+                button.closest('.comment-actions-cell').html(
+                    '<i class="fas fa-spinner fa-spin text-danger"></i>');
+
+                $.ajax({
+                    url: deleteUrl,
+                    type: 'POST', // Hoặc DELETE nếu route là DELETE và bạn gửi _method
+                    data: {
+                        _token: csrfTokenGlobal
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            $('#active-comment-row-' + response.comment_id).fadeOut(500,
+                                function() {
+                                    $(this).remove();
+                                });
+                            $('#comment-detail-row-' + response.comment_id).fadeOut(500,
+                                function() {
+                                    $(this).remove();
+                                });
+                            showTemporaryMessage(response.message, 'info');
+                            if (response.new_total_comment_count !== undefined) {
+                                updateTotalCommentsBadgeOnTab(response.new_total_comment_count);
+                            }
+                            if ($('#trashedCommentsSection').is(':visible')) {
+                                $('#toggleTrashedCommentsBtn').click(); // Đóng
+                                setTimeout(function() {
+                                    $('#toggleTrashedCommentsBtn').click();
+                                }, 250); // Mở lại để tải mới
+                            }
+                        } else {
+                            showTemporaryMessage(response.message || 'Lỗi khi xóa.', 'error');
+                            $('#comment-actions-cell-' + commentId).html(
+                                originalActionsCellHtml);
+                            $(`#comment-actions-cell-${commentId} [data-bs-toggle="tooltip"]`)
+                                .tooltip('dispose').tooltip();
+                        }
+                    },
+                    error: function(xhr) {
+                        showTemporaryMessage('Lỗi hệ thống khi xóa bình luận.', 'error');
+                        $('#comment-actions-cell-' + commentId).html(originalActionsCellHtml);
+                        $(`#comment-actions-cell-${commentId} [data-bs-toggle="tooltip"]`)
+                            .tooltip('dispose').tooltip();
+                    }
+                });
+            });
+
+            // ---- AJAX CHO KHÔI PHỤC BÌNH LUẬN TỪ THÙNG RÁC ----
+            $('#trashedCommentsContainer').on('click', '.restore-comment-btn', function() {
+                const button = $(this);
+                const commentId = button.data('commentId');
+                const form = button.closest('form');
+                const restoreUrl = form.attr('action');
+
+                if (!confirm('Bạn có chắc muốn khôi phục bình luận này?')) return;
+
+                const originalButtonHtml = button.html();
+                button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+
+                $.ajax({
+                    url: restoreUrl,
+                    type: 'POST',
+                    data: form.serialize(),
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            $('#trashed-comment-row-' + response.comment_id).fadeOut(500,
+                                function() {
+                                    $(this).remove();
+                                });
+                            showTemporaryMessage(response.message, 'success');
+
+                            if (response.new_total_comment_count !== undefined) {
+                                updateTotalCommentsBadgeOnTab(response.new_total_comment_count);
+                            }
+
+                            if (response
+                                .restored_comment_html
+                            ) { // Nếu controller trả về HTML render sẵn
+                                $('#activeCommentsContainer table tbody').prepend(response
+                                    .restored_comment_html);
+                                $('#activeCommentsContainer [data-bs-toggle="tooltip"]')
+                                    .tooltip('dispose').tooltip();
+                            }
+
+                            if ($('#trashedCommentsContainer table tbody tr').length === 0) {
+                                $('#trashedCommentsContainer').html(
+                                    '<p class="text-center text-muted">Không có bình luận nào trong thùng rác.</p>'
+                                );
+                            }
+                        } else {
+                            showTemporaryMessage(response.message || 'Lỗi khi khôi phục.',
+                                'error');
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error("Lỗi AJAX khi khôi phục:", xhr.responseText);
+                        showTemporaryMessage('Lỗi hệ thống khi khôi phục.', 'error');
+                    },
+                    complete: function() {
+                        button.prop('disabled', false).html(originalButtonHtml);
+                    }
+                });
+            });
+
+            // Khởi tạo tooltip cho các nút ban đầu
+            $('[data-bs-toggle="tooltip"]').tooltip();
         });
     </script>
 @endpush

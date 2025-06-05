@@ -70,13 +70,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('/comment')->name('comment.')->group(function () {
             Route::get('/users/{user}/comments/trashed', [CommentController::class, 'getTrashedComments'])
                 ->name('account.trashedComments');
-            Route::post('/restore/{id}', [CommentController::class, 'restore'])->name('restore');
+            Route::post('/restore/{comment}', [CommentController::class, 'restoreCommentAjax'])->name('restoreComment');
             Route::post('/toggleStatus/{id}', [CommentController::class, 'toggleStatus'])->name('toggleStatus');
-            Route::post('/softDelete/{id}', [CommentController::class, 'softDelete'])->name('softDelete');
             Route::delete('/forceDelete/{id}', [CommentController::class, 'forceDelete'])->name('forceDelete');
             Route::get('/{comment}/details-with-product', [CommentController::class, 'getCommentDetailsWithProduct'])
-                 ->name('detailWithProduct'); // Tên đầy đủ sẽ là: admin.account.comment.detailWithProduct
-//         });
+                ->name('detailWithProduct');
+            Route::post('/soft-delete/{comment}', [CommentController::class, 'softDeleteCommentAjax'])->name('softDeleteComment');
+
+            Route::post('/approve/{comment}', [CommentController::class, 'approveCommentAjax'])->name('approveComment');
+            Route::post('/hide/{comment}', [CommentController::class, 'hideCommentAjax'])->name('hideComment');
+            Route::post('/show-again/{comment}', [CommentController::class, 'showAgainCommentAjax'])->name('showAgainComment');
         });
         // client
         Route::get('/listUsers', [AccountUsersController::class, 'listUsers'])->name('listUsers');
