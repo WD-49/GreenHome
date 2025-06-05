@@ -145,36 +145,43 @@
                                             {{-- ... thead ... --}}
                                             <tbody>
                                                 @foreach ($user->orders as $order)
-                                                    <tr>
+                                                    <tr id="order-summary-row-{{ $order->id }}"> {{-- ID cho hàng tóm tắt --}}
                                                         <td>#{{ $order->sku ?? $order->id }}</td>
                                                         <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
                                                         <td>{{ number_format($order->total_amount, 0, ',', '.') }} VNĐ</td>
                                                         <td>
-                                                            @if (
-                                                                $order->status == 'completed' ||
-                                                                    optional($order->status)->name == 'Hoàn thành' ||
-                                                                    optional($order->status)->name == 'Đã giao hàng')
-                                                                <span class="badge bg-success">Hoàn thành</span>
-                                                            @elseif(
-                                                                $order->status == 'pending' ||
-                                                                    optional($order->status)->name == 'Chờ xử lý' ||
-                                                                    optional($order->status)->name == 'Chờ xác nhận')
-                                                                <span class="badge bg-warning text-dark">Chờ xử lý</span>
-                                                            @elseif($order->status == 'processing' || optional($order->status)->name == 'Đang xử lý')
-                                                                <span class="badge bg-info">Đang xử lý</span>
-                                                            @elseif($order->status == 'cancelled' || optional($order->status)->name == 'Đã hủy')
-                                                                <span class="badge bg-danger">Đã hủy</span>
-                                                            @else
+                                                            {{-- Thêm badge cho trạng thái --}}
+                                                            @if ($order->status)
                                                                 <span
-                                                                    class="badge bg-secondary">{{ is_object($order->status) ? $order->status->name : ucfirst($order->status ?? 'N/A') }}</span>
+                                                                    class="badge {{ $order->status->color_class ?? 'bg-secondary' }}">
+                                                                    {{ $order->status->name }}
+                                                                </span>
+                                                            @else
+                                                                <span class="badge bg-secondary">Chưa xác định</span>
                                                             @endif
                                                         </td>
                                                         <td>
-                                                            <button class="btn btn-outline-primary btn-sm"
-                                                                onclick="alert('Chức năng xem chi tiết đơn hàng #{{ $order->id }} chưa được triển khai.')"
-                                                                title="Xem chi tiết">
+                                                            {{-- NÚT XEM CHI TIẾT ĐƠN HÀNG MỚI --}}
+                                                            <button
+                                                                class="btn btn-xs btn-outline-primary view-order-details-btn"
+                                                                data-order-id="{{ $order->id }}"
+                                                                title="Xem chi tiết đơn hàng" data-bs-toggle="tooltip"
+                                                                data-bs-placement="top">
                                                                 <i class="fas fa-eye"></i>
                                                             </button>
+                                                            {{-- Bạn có thể thêm các nút khác ở đây nếu cần, ví dụ nút hủy đơn hàng nếu trạng thái cho phép --}}
+                                                        </td>
+                                                    </tr>
+                                                    {{-- HÀNG ẨN ĐỂ HIỂN THỊ CHI TIẾT ĐƠN HÀNG --}}
+                                                    <tr class="order-detail-row" id="order-detail-row-{{ $order->id }}"
+                                                        style="display: none;">
+                                                        <td colspan="5"> {{-- Colspan bằng số lượng cột của bảng --}}
+                                                            <div class="order-detail-content p-3 border-top bg-light"
+                                                                id="order-detail-content-{{ $order->id }}">
+                                                                <p class="text-center text-muted mb-0"><i
+                                                                        class="fas fa-spinner fa-spin"></i> Đang tải chi
+                                                                    tiết đơn hàng...</p>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 @endforeach
@@ -430,6 +437,170 @@
                     });
                 }, duration);
             }
+
+            // ++++ AJAX CHO NÚT "XEM CHI TIẾT ĐƠN HÀNG" ++++
+            $('#orders-pane').on('click', '.view-order-details-btn', function() {
+                const button = $(this);
+                const orderId = button.data('orderId');
+                const detailRow = $('#order-detail-row-' + orderId);
+                const detailContentDiv = $('#order-detail-content-' + orderId);
+
+                // Đóng các chi tiết đơn hàng khác đang mở
+                $('.order-detail-row').not(detailRow).slideUp();
+                $('.view-order-details-btn').not(button).html('<i class="fas fa-eye"></i>').attr('title',
+                    'Xem chi tiết đơn hàng');
+
+                if (detailRow.is(':visible')) {
+                    detailRow.slideUp();
+                    button.html('<i class="fas fa-eye"></i>').attr('title', 'Xem chi tiết đơn hàng');
+                } else {
+                    detailContentDiv.html(
+                        '<p class="text-center my-3"><i class="fas fa-spinner fa-spin"></i> Đang tải chi tiết đơn hàng...</p>'
+                    );
+                    detailRow.slideDown();
+
+                    // Đảm bảo tên route này đúng và đã được định nghĩa trong web.php
+                    // Ví dụ: 'admin.account.order.ajaxDetails'
+                    let fetchOrderDetailUrl =
+                        "{{ route('admin.account.order.ajaxDetails', ['order' => ':orderId']) }}";
+                    fetchOrderDetailUrl = fetchOrderDetailUrl.replace(':orderId', orderId);
+
+                    console.log('Fetching order detail from:', fetchOrderDetailUrl);
+
+                    $.ajax({
+                        url: fetchOrderDetailUrl,
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.success && response.order) {
+                                const order = response.order;
+                                const items = response.order_items;
+                                const shipping = response.shipping_address;
+                                const customer = response.customer;
+
+                                let html = `<div class="p-md-3 p-2">`; // Thêm padding
+                                html += `<div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0">Chi tiết Đơn Hàng #${order.sku}</h5>
+                                    <button type="button" class="btn-close" aria-label="Đóng chi tiết" onclick="$(this).closest('.order-detail-row').slideUp(); $('.view-order-details-btn[data-order-id=${order.id}]').html('<i class=\\'fas fa-eye\\'></i>').attr('title', 'Xem chi tiết đơn hàng');"></button>
+                                 </div>`;
+
+                                html +=
+                                    '<div class="card mb-3"><div class="card-body py-2 px-3"><div class="row">';
+                                html +=
+                                    `<div class="col-md-6 mb-2 mb-md-0"><small><strong>Ngày đặt:</strong> ${order.created_at_formatted}</small></div>`;
+                                html +=
+                                    `<div class="col-md-6"><small><strong>Trạng thái:</strong> <span class="badge ${order.status_color_class || 'bg-secondary'}">${order.status_name}</span></small></div>`;
+                                html +=
+                                    `<div class="col-md-6 mb-2 mb-md-0"><small><strong>PT Thanh toán:</strong> ${order.payment_method}</small></div>`;
+                                html +=
+                                    `<div class="col-md-6"><small><strong>TT Thanh toán:</strong> <span class="badge ${order.payment_status_class}">${order.payment_status_display}</span></small></div>`;
+                                html += '</div></div></div>'; // End row, card-body, card
+
+                                html += '<div class="row mb-3">';
+                                html +=
+                                    '<div class="col-md-6 mb-3 mb-md-0"><div class="card h-100"><div class="card-body py-2 px-3">';
+                                html +=
+                                    '<h6><i class="fas fa-user me-2"></i>Thông tin người đặt</h6>';
+                                html +=
+                                    `<p class="mb-1 small"><strong>Tên:</strong> ${customer.name}</p>`;
+                                html +=
+                                    `<p class="mb-0 small"><strong>Email:</strong> ${customer.email}</p>`;
+                                html += '</div></div></div>';
+
+                                html +=
+                                    '<div class="col-md-6"><div class="card h-100"><div class="card-body py-2 px-3">';
+                                html +=
+                                    '<h6><i class="fas fa-shipping-fast me-2"></i>Thông tin giao hàng</h6>';
+                                if (shipping) {
+                                    html +=
+                                        `<p class="mb-1 small"><strong>Người nhận:</strong> ${shipping.name}</p>`;
+                                    html +=
+                                        `<p class="mb-1 small"><strong>Điện thoại:</strong> ${shipping.phone}</p>`;
+                                    let fullAddress = shipping.address_line1;
+                                    if (shipping.ward) fullAddress += ', ' + shipping.ward;
+                                    if (shipping.district) fullAddress += ', ' + shipping
+                                        .district;
+                                    if (shipping.city) fullAddress += ', ' + shipping.city;
+                                    html +=
+                                        `<p class="mb-0 small"><strong>Địa chỉ:</strong> ${fullAddress}</p>`;
+                                } else {
+                                    html +=
+                                        '<p class="small text-muted">Không có thông tin giao hàng chi tiết.</p>';
+                                }
+                                html += '</div></div></div>';
+                                html += '</div>'; // End row for customer & shipping
+
+                                html +=
+                                    '<h6><i class="fas fa-boxes me-2"></i>Sản phẩm trong đơn:</h6>';
+                                if (items && items.length > 0) {
+                                    html +=
+                                        '<div class="table-responsive"><table class="table table-sm table-bordered table-striped mt-2">';
+                                    html +=
+                                        '<thead class="table-light"><tr><th style="width:60px;">Ảnh</th><th>Sản phẩm</th><th>SL</th><th>Đơn giá</th><th>Thành tiền</th></tr></thead><tbody>';
+                                    items.forEach(function(item) {
+                                        html += `<tr>
+                                            <td><img src="${item.image_url}" alt="" style="width:50px; height:50px; object-fit:cover;" class="rounded"></td>
+                                            <td class="small">${item.product_name}</td>
+                                            <td class="small text-center">${item.quantity}</td>
+                                            <td class="small text-end">${item.unit_price}</td>
+                                            <td class="small text-end">${item.sub_total}</td>
+                                         </tr>`;
+                                    });
+                                    html += '</tbody></table></div>';
+                                } else {
+                                    html +=
+                                        '<p class="small text-muted">Đơn hàng không có sản phẩm.</p>';
+                                }
+
+                                html += '<div class="row justify-content-end mt-3">';
+                                html += '<div class="col-md-6 col-lg-5">';
+                                html +=
+                                    '<table class="table table-sm table-borderless table-striped">'; // Thêm table-striped
+                                html +=
+                                    `<tr><td class="small">Phí vận chuyển:</td><td class="text-end small">${order.shipping_fee}</td></tr>`;
+                                if (parseFloat((order.discount_amount || "0 VNĐ").replace(/\D/g,
+                                        '')) > 0) {
+                                    html +=
+                                        `<tr><td class="small">Giảm giá:</td><td class="text-end small text-danger">-${order.discount_amount}</td></tr>`;
+                                }
+                                html +=
+                                    `<tr><td class="fw-bold small">TỔNG CỘNG:</td><td class="text-end fw-bold small">${order.total_amount}</td></tr>`;
+                                html += '</table>';
+                                html += '</div></div>';
+
+                                if (order.notes) {
+                                    html += '<h6 class="mt-3">Ghi chú đơn hàng:</h6>';
+                                    html +=
+                                        `<p class="small border p-2 bg-white rounded"><em>${order.notes || 'Không có ghi chú.'}</em></p>`;
+                                }
+
+                                html += `</div>`; // end p-2
+                                detailContentDiv.html(html);
+                                button.html('<i class="fas fa-eye-slash"></i>').attr('title',
+                                    'Ẩn chi tiết đơn hàng');
+                            } else {
+                                detailContentDiv.html(
+                                    '<p class="text-danger small">Không thể tải chi tiết đơn hàng hoặc đơn hàng không tồn tại.</p>'
+                                );
+                                button.html('<i class="fas fa-eye"></i>').attr('title',
+                                    'Xem chi tiết đơn hàng');
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error("Lỗi AJAX khi lấy chi tiết đơn hàng:", xhr
+                                .responseText);
+                            detailContentDiv.html(
+                                '<p class="text-danger small">Lỗi khi tải chi tiết đơn hàng. Vui lòng thử lại.</p>'
+                            );
+                            button.html('<i class="fas fa-eye"></i>').attr('title',
+                                'Xem chi tiết đơn hàng');
+                            setTimeout(function() {
+                                detailRow.slideUp();
+                            }, 3000);
+                        }
+                    });
+                }
+            });
 
             // --- AJAX CHO NÚT "THÙNG RÁC BÌNH LUẬN" ---
             $('#toggleTrashedCommentsBtn').on('click', function() {
