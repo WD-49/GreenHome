@@ -24,7 +24,7 @@
                     <!-- Người đặt hàng -->
                     <div class="mb-3">
                         <label for="user_id" class="form-label">Người đặt hàng</label>
-                        <select name="user_id" class="form-select" >
+                        <select name="user_id" class="form-select">
                             <option value="">-- Chọn người dùng --</option>
                             @foreach ($users as $user)
                                 <option value="{{ $user->id }}">{{ $user->name }} - {{ $user->email }}</option>
@@ -36,15 +36,15 @@
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label for="shipping_name" class="form-label">Tên người nhận</label>
-                            <input type="text" name="shipping_name" class="form-control" >
+                            <input type="text" name="shipping_name" class="form-control">
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="shipping_phone" class="form-label">Số điện thoại</label>
-                            <input type="text" name="shipping_phone" class="form-control" >
+                            <input type="text" name="shipping_phone" class="form-control">
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="shipping_address" class="form-label">Địa chỉ</label>
-                            <input type="text" name="shipping_address" class="form-control" >
+                            <input type="text" name="shipping_address" class="form-control">
                         </div>
                     </div>
 
@@ -64,7 +64,7 @@
                                 </div>
                                 <div class="col-md-3">
                                     <input type="number" name="quantities[]" class="form-control" placeholder="Số lượng"
-                                        min="1" >
+                                        min="1">
                                 </div>
                             </div>
                         </div>
@@ -78,7 +78,17 @@
                         <select name="discount_id" class="form-select">
                             <option value="">-- Không áp dụng --</option>
                             @foreach ($discounts as $discount)
-                                <option value="{{ $discount->id }}">{{ $discount->code }} ({{ $discount->description }})
+                                <option value="{{ $discount->id }}"
+                                    {{ old('discount_id') == $discount->id ? 'selected' : '' }}>
+                                    {{ $discount->code }}
+                                    (@if ($discount->discount_type == 'percentage')
+                                        Giảm {{ $discount->discount_value }}% (tối đa
+                                        {{ number_format($discount->max_discount) }}đ)
+                                    @else
+                                        Giảm {{ number_format($discount->discount_value) }}đ
+                                    @endif
+                                    - Tối thiểu: {{ number_format($discount->min_order_value) }}đ
+                                    - Còn lại: {{ $discount->quantity }} lượt)
                                 </option>
                             @endforeach
                         </select>
@@ -88,7 +98,7 @@
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label for="payment_method_id" class="form-label">Phương thức thanh toán</label>
-                            <select name="payment_method_id" class="form-select" >
+                            <select name="payment_method_id" class="form-select">
                                 @foreach ($payMethods as $item)
                                     <option value="{{ $item->id }}">{{ $item->name }}</option>
                                 @endforeach
@@ -96,7 +106,7 @@
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="shipping_fee" class="form-label">Phí vận chuyển</label>
-                            <input type="number" name="shipping_fee" class="form-control"  min="0">
+                            <input type="number" name="shipping_fee" class="form-control" min="0">
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="note" class="form-label">Ghi chú</label>
