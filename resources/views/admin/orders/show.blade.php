@@ -34,11 +34,27 @@
                     {{-- Trạng thái đơn hàng --}}
                     <div>
                         <h5 class="mb-3">📌 Trạng thái đơn hàng</h5>
-                        <form method="POST" action="{{ route('admin.orders.updateStatus', $order->id) }}">
+                        {{-- Đặt ID cho form và select --}}
+                        <form method="POST" action="{{ route('admin.orders.updateStatus', $order->id) }}"
+                            id="updateOrderStatusForm">
                             @csrf
                             @method('PUT')
-                            <div class="d-flex align-items-center gap-3">
-                                <select name="status_id" class="form-select w-auto">
+                            {{-- Trường ẩn để chứa lý do hủy --}}
+                            <input type="hidden" name="cancel_reason" id="hidden_cancel_reason">
+
+                            <div class="d-flex align-items-center gap-2"> {{-- Giảm gap --}}
+                                @php
+                                    $cancelledStatusId = null;
+                                    foreach ($statuses as $statusLoop) {
+                                        if (trim(strtolower($statusLoop->name)) === 'Đã hủy') {
+                                            $cancelledStatusId = $statusLoop->id;
+                                            break;
+                                        }
+                                    }
+                                @endphp
+                                <select name="status_id" id="order_status_select" class="form-select form-select-sm w-auto"
+                                    data-current-status-id="{{ $order->status_id }}"
+                                    data-cancelled-status-id="{{ $cancelledStatusId }}">
                                     @foreach ($statuses as $status)
                                         <option value="{{ $status->id }}"
                                             {{ $order->status_id == $status->id ? 'selected' : '' }}>
@@ -46,14 +62,14 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <button class="btn btn-sm btn-primary">
+                                <button type="submit" class="btn btn-sm btn-primary">
                                     <i class="bi bi-arrow-repeat me-1"></i> Cập nhật
                                 </button>
                             </div>
                         </form>
 
-                        @if ($order->status->name === 'Đã hủy' && $order->cancel_reason)
-                            <div class="mt-2 text-danger">
+                        @if (optional($order->status)->name === 'Đã hủy' && $order->cancel_reason)
+                            <div class="mt-2 text-danger small">
                                 <strong>❌ Lý do huỷ:</strong> {{ $order->cancel_reason }}
                             </div>
                         @endif
@@ -183,5 +199,153 @@
             </div>
         </div>
     </div>
+    <!-- Modal Lý do Hủy Đơn Hàng -->
+    <div class="modal fade" id="cancelReasonModal" tabindex="-1" aria-labelledby="cancelReasonModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cancelReasonModalLabel">Xác nhận Hủy Đơn Hàng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn đang chọn hủy đơn hàng này. Vui lòng nhập lý do hủy:</p>
+                    <textarea class="form-control" id="cancel_reason_text" rows="3" placeholder="Nhập lý do hủy đơn hàng..."></textarea>
+                    <small id="cancelReasonError" class="text-danger d-none">Vui lòng nhập lý do hủy.</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-danger" id="confirmCancelOrderBtn">Xác nhận và Hủy Đơn</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
+@push('scripts')
+    <script>
+        $(document).ready(function() {
+            const csrfToken = $('meta[name="csrf-token"]').attr('content');
+            const updateOrderStatusForm = $('#updateOrderStatusForm');
+            const orderStatusSelect = $('#order_status_select');
+            const cancelReasonModalElement = document.getElementById('cancelReasonModal');
+            const cancelReasonTextarea = $('#cancel_reason_text');
+            const hiddenCancelReasonInput = $('#hidden_cancel_reason');
+            const confirmCancelOrderBtn = $('#confirmCancelOrderBtn');
+            const cancelReasonError = $('#cancelReasonError');
+
+            let cancelReasonModalInstance;
+            if (cancelReasonModalElement) {
+                cancelReasonModalInstance = new bootstrap.Modal(cancelReasonModalElement);
+            } else {
+                console.error('Lỗi: Không tìm thấy phần tử modal #cancelReasonModal!');
+                // Bạn có thể alert ở đây nếu muốn người dùng biết ngay
+                // alert('Lỗi cấu hình: Modal lý do hủy không tồn tại.');
+            }
+
+            // Lấy ID từ data attributes và đảm bảo chúng là chuỗi để so sánh
+            const configCancelledStatusId = orderStatusSelect.data('cancelled-status-id') ? String(orderStatusSelect
+                .data('cancelled-status-id')) : null;
+            const initialPageLoadOrderStatusId = orderStatusSelect.data('current-status-id') ? String(
+                orderStatusSelect.data('current-status-id')) : null;
+
+            console.log("JS - ID Trạng Thái Hủy (từ data-attr):", configCancelledStatusId,
+                typeof configCancelledStatusId);
+            console.log("JS - ID Trạng Thái Ban Đầu Của Đơn Hàng (từ data-attr):", initialPageLoadOrderStatusId,
+                typeof initialPageLoadOrderStatusId);
+
+            if (!configCancelledStatusId) {
+                console.warn(
+                    "JS - Cảnh báo: Không thể xác định ID của trạng thái 'Đã hủy' từ data attribute. Chức năng yêu cầu lý do hủy có thể không hoạt động chính xác."
+                    );
+            }
+
+            updateOrderStatusForm.on('submit', function(e) {
+                const selectedStatusId = orderStatusSelect.val(); // Đây là string
+
+                console.log("--- Form Submit Event ---");
+                console.log("Trạng thái được chọn (select.val):", selectedStatusId,
+                    `(Kiểu: ${typeof selectedStatusId})`);
+                console.log("ID trạng thái hủy đã định nghĩa:", configCancelledStatusId,
+                    `(Kiểu: ${typeof configCancelledStatusId})`);
+                console.log("Trạng thái ban đầu của đơn hàng:", initialPageLoadOrderStatusId,
+                    `(Kiểu: ${typeof initialPageLoadOrderStatusId})`);
+                console.log("Giá trị trường ẩn lý do hủy:", `"${hiddenCancelReasonInput.val()}"`);
+
+                // Điều kiện 1: Người dùng có chọn trạng thái "Đã hủy" không?
+                const isCancelling = (selectedStatusId === configCancelledStatusId);
+                console.log("Đang chọn hủy?", isCancelling);
+
+                // Điều kiện 2: Đơn hàng có đang ở trạng thái khác "Đã hủy" không?
+                // (Nghĩa là đây là lần đầu tiên chuyển sang hủy, chứ không phải submit lại khi đã hủy)
+                const isNotAlreadyCancelled = (initialPageLoadOrderStatusId !== configCancelledStatusId);
+                // Lưu ý: Nếu bạn muốn cho phép nhập lại lý do nếu đơn hàng đã hủy và người dùng lại chọn "Đã hủy",
+                // thì điều kiện này có thể cần điều chỉnh. Hiện tại nó chỉ kích hoạt modal nếu chuyển TỪ trạng thái KHÁC sang "Đã hủy".
+                console.log("Đơn hàng chưa bị hủy trước đó?", isNotAlreadyCancelled);
+
+                // Điều kiện 3: Lý do hủy đã được điền vào trường ẩn chưa (nghĩa là modal đã được xác nhận chưa)
+                const reasonNotYetProvidedViaModal = (hiddenCancelReasonInput.val().trim() === '');
+                console.log("Lý do chưa được cung cấp qua modal?", reasonNotYetProvidedViaModal);
+
+
+                if (isCancelling && isNotAlreadyCancelled && reasonNotYetProvidedViaModal) {
+                    e.preventDefault(); // Ngăn form submit ngay
+                    console.log(">>> ĐIỀU KIỆN HIỂN THỊ MODAL ĐƯỢC ĐÁP ỨNG. Ngăn submit, hiển thị modal.");
+                    cancelReasonError.addClass('d-none');
+                    cancelReasonTextarea.val('');
+                    if (cancelReasonModalInstance) {
+                        cancelReasonModalInstance.show();
+                    } else {
+                        alert("Lỗi: Không thể khởi tạo modal lý do hủy.");
+                    }
+                    return false;
+                } else {
+                    console.log(
+                        ">>> Điều kiện hiển thị modal KHÔNG được đáp ứng hoặc lý do đã có. Cho phép submit trực tiếp."
+                        );
+                }
+                // Cho phép submit nếu không phải là hủy hoặc nếu hủy nhưng đã có lý do
+                return true;
+            });
+
+            confirmCancelOrderBtn.on('click', function() {
+                const reason = cancelReasonTextarea.val().trim();
+                console.log("Nút 'Xác nhận và Hủy Đơn' trong modal được click. Lý do nhập:", `"${reason}"`);
+                if (reason === '') {
+                    cancelReasonError.removeClass('d-none');
+                    return;
+                }
+                cancelReasonError.addClass('d-none');
+                hiddenCancelReasonInput.val(reason); // Gán lý do vào trường ẩn
+
+                if (cancelReasonModalInstance) {
+                    cancelReasonModalInstance.hide();
+                }
+
+                console.log("Đã gán lý do vào trường ẩn. Tiến hành submit form chính...");
+                // Quan trọng: Submit form chính sau khi đã có lý do
+                updateOrderStatusForm.off('submit').submit();
+            });
+
+            if (cancelReasonModalElement) {
+                cancelReasonModalElement.addEventListener('hidden.bs.modal', function() {
+                    console.log("Modal lý do hủy đã đóng.");
+                    // Nếu modal đóng mà trường lý do ẩn vẫn rỗng (nghĩa là người dùng không click "Xác nhận và Hủy Đơn")
+                    // và trạng thái đang được chọn là "Đã hủy"
+                    if (hiddenCancelReasonInput.val().trim() === '' && orderStatusSelect.val() ===
+                        configCancelledStatusId) {
+                        console.log("Modal đóng không xác nhận. Reset select về trạng thái ban đầu:",
+                            initialPageLoadOrderStatusId);
+                        orderStatusSelect.val(initialPageLoadOrderStatusId);
+                    }
+                    cancelReasonTextarea.val('');
+                    cancelReasonError.addClass('d-none');
+                });
+            }
+
+            // Khởi tạo tooltip
+            $('[data-bs-toggle="tooltip"]').tooltip();
+
+        });
+    </script>
+@endpush

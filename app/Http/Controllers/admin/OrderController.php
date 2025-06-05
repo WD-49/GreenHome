@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Models\PaymentMethod;
 use App\Models\ProductVariant;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 
@@ -167,7 +168,6 @@ class OrderController extends Controller
                 } elseif ($discount->discount_type === 'fixed') {
                     $discountAmount = min($discount->discount_value, $totalBeforeDiscount);
                 }
-
             }
             // dd($totalBeforeDiscount, $discountAmount);
 
@@ -218,20 +218,51 @@ class OrderController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
-        $order = Order::findOrFail($id);
-        $order->status_id = $request->input('status_id');
+        Log::info('--- Order Update Status Attempt ---');
+        Log::info('Order ID: ' . $id);
+        Log::info('Request Data: ', $request->all()); // Log tất cả dữ liệu request
 
-        // Nếu cập nhật về trạng thái huỷ, yêu cầu lý do
-        if ($request->input('status_id') == config('order.statuses.cancelled')) {
+        $order = Order::findOrFail($id);
+        $newStatusId = $request->input('status_id');
+
+        // Lấy thông tin model của trạng thái mới và trạng thái cũ
+        $newStatusModel = OrderStatus::find($newStatusId);
+        $oldStatusModel = $order->status; // Giả sử $order->status là relationship
+
+        $newStatusName = $newStatusModel ? trim(mb_strtolower($newStatusModel->name, 'UTF-8')) : null;
+        $oldStatusName = $oldStatusModel ? trim(mb_strtolower($oldStatusModel->name, 'UTF-8')) : null;
+
+        Log::info("Old Status: ID={$order->status_id}, Name='{$oldStatusName}'");
+        Log::info("New Status: ID={$newStatusId}, Name='{$newStatusName}'");
+        Log::info("Cancel Reason from Request: " . $request->input('cancel_reason'));
+
+        $order->status_id = $newStatusId;
+
+        // 1. Nếu trạng thái mới là "Đã hủy"
+        if ($newStatusName === 'đã hủy') {
+            Log::info('Condition MET: New status IS "đã hủy".');
             $request->validate([
-                'cancel_reason' => 'required|string|max:255',
+                'cancel_reason' => 'required|string|min:5|max:500', // Giảm min để dễ test, tăng max
+            ], [
+                'cancel_reason.required' => 'Vui lòng nhập lý do hủy đơn hàng.',
+                'cancel_reason.min' => 'Lý do hủy phải có ít nhất :min ký tự.',
+                'cancel_reason.max' => 'Lý do hủy không được vượt quá :max ký tự.',
             ]);
             $order->cancel_reason = $request->input('cancel_reason');
+            Log::info('Cancel reason to be saved: ' . $order->cancel_reason);
+        }
+        // 2. Nếu trạng thái cũ là "Đã hủy" VÀ trạng thái mới KHÁC "Đã hủy"
+        elseif ($oldStatusName === 'đã hủy' && $newStatusName !== 'đã hủy') {
+            Log::info('Condition MET: Old status WAS "đã hủy" and new status IS NOT "đã hủy". Clearing cancel_reason.');
+            $order->cancel_reason = null;
+        } else {
+            Log::info('Condition for cancel_reason NOT MET or no change needed.');
         }
 
         $order->save();
+        Log::info('Order status updated successfully in DB.');
 
-        return redirect()->back()->with('success', 'Cập nhật trạng thái thành công!');
+        return redirect()->back()->with('success', 'Cập nhật trạng thái đơn hàng thành công!');
     }
 
     public function updatePaymentStatus(Request $request, $id)
