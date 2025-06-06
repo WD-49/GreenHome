@@ -46,8 +46,12 @@ class Discount extends Model
         return $this->hasMany(DiscountUsage::class);
     }
     public function orders()
-{
-    return $this->hasMany(Order::class);
-}
+    {
+        return $this->hasMany(Order::class);
+    }
 
+    public function applicableProductVariants()
+    {
+        return $this->belongsToMany(ProductVariant::class, 'discount_product_variants', 'discount_id', 'product_variant_id');
+    }
 }

@@ -18,6 +18,8 @@ use App\Http\Controllers\admin\Product\ProductController;
 use App\Http\Controllers\admin\Account\AccountAdminController;
 use App\Http\Controllers\admin\Account\AccountUsersController;
 use App\Http\Controllers\admin\Product\ProductVariantController;
+use App\Http\Controllers\admin\OrderStatusController;
+use Dom\Comment;
 use App\Http\Controllers\admin\CategoryController;  // Tham chiếu đúng
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -71,40 +73,50 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
 
-        // Nhóm quản lý tài khoản
-        Route::prefix('/account')->name('account.')->group(function () {
-            Route::prefix('/comment')->name('comment.')->group(function () {
-                Route::get('/trashed', [CommentController::class, 'trashed'])->name('trashed');
-                Route::post('/restore/{id}', [CommentController::class, 'restore'])->name('restore');
-                Route::post('/toggleStatus/{id}', [CommentController::class, 'toggleStatus'])->name('toggleStatus');
-                Route::post('/softDelete/{id}', [CommentController::class, 'softDelete'])->name('softDelete');
-                Route::delete('/forceDelete/{id}', [CommentController::class, 'forceDelete'])->name('forceDelete');
-            });
-            // client
-            Route::get('/listUsers', [AccountUsersController::class, 'listUsers'])->name('listUsers');
-            Route::get('/detailAccUser/{id}', [AccountUsersController::class, 'detailAccUser'])->name('detailAccUser');
-            Route::get('/createUser', [AccountUsersController::class, 'createUser'])->name('createUser');
-            Route::post('/storeUser', [AccountUsersController::class, 'storeUser'])->name('storeUser');
-            Route::get('/editUser/{id}', [AccountUsersController::class, 'editUser'])->name('editUser');
-            Route::post('/updateUser/{id}', [AccountUsersController::class, 'updateUser'])->name('updateUser');
-            Route::post('/softDeleteUser/{id}', [AccountUsersController::class, 'softDeleteUser'])->name('softDeleteUser');
-            Route::get('/trashedUsers', [AccountUsersController::class, 'trashedUsers'])->name('trashedUsers');
-            Route::post('/restoreUser/{id}', [AccountUsersController::class, 'restoreUser'])->name('restoreUser');
-            Route::delete('/forceDeleteUser/{id}', [AccountUsersController::class, 'forceDeleteUser'])->name('forceDeleteUser');
-            Route::post('/resetPassUser/{id}', [AccountUsersController::class, 'resetPassUser'])->name('resetPassUser');
-            // Admins
-            Route::get('/listAdmins', [AccountAdminController::class, 'listAdmins'])->name('listAdmins');
-            Route::get('/detailAccAdmin/{id}', [AccountAdminController::class, 'detailAccAdmin'])->name('detailAccAdmin');
-            Route::get('/createAdmin', [AccountAdminController::class, 'createAdmin'])->name('createAdmin');
-            Route::post('/storeAdmin', [AccountAdminController::class, 'storeAdmin'])->name('storeAdmin');
-            Route::get('/editAdmin/{id}', [AccountAdminController::class, 'editAdmin'])->name('editAdmin');
-            Route::post('/updateAdmin/{id}', [AccountAdminController::class, 'updateAdmin'])->name('updateAdmin');
-            Route::post('/softDeleteAdmin/{id}', [AccountAdminController::class, 'softDeleteAdmin'])->name('softDeleteAdmin');
-            Route::get('/trashedAdmins', [AccountAdminController::class, 'trashedAdmins'])->name('trashedAdmins');
-            Route::post('/restoreAdmin/{id}', [AccountAdminController::class, 'restoreAdmin'])->name('restoreAdmin');
-            Route::delete('/forceDeleteAdmin/{id}', [AccountAdminController::class, 'forceDeleteAdmin'])->name('forceDeleteAdmin');
-            Route::post('/resetPassAdmin/{id}', [AccountAdminController::class, 'resetPassAdmin'])->name('resetPassAdmin');
+    // Nhóm quản lý tài khoản
+    Route::prefix('/account')->name('account.')->group(function () {
+        Route::prefix('/comment')->name('comment.')->group(function () {
+            Route::get('/users/{user}/comments/trashed', [CommentController::class, 'getTrashedComments'])
+                ->name('account.trashedComments');
+            Route::post('/restore/{comment}', [CommentController::class, 'restoreCommentAjax'])->name('restoreComment');
+            Route::post('/toggleStatus/{id}', [CommentController::class, 'toggleStatus'])->name('toggleStatus');
+            Route::delete('/forceDelete/{id}', [CommentController::class, 'forceDelete'])->name('forceDelete');
+            Route::get('/{comment}/details-with-product', [CommentController::class, 'getCommentDetailsWithProduct'])
+                ->name('detailWithProduct');
+            Route::post('/soft-delete/{comment}', [CommentController::class, 'softDeleteCommentAjax'])->name('softDeleteComment');
+
+            Route::post('/approve/{comment}', [CommentController::class, 'approveCommentAjax'])->name('approveComment');
+            Route::post('/hide/{comment}', [CommentController::class, 'hideCommentAjax'])->name('hideComment');
+            Route::post('/show-again/{comment}', [CommentController::class, 'showAgainCommentAjax'])->name('showAgainComment');
         });
+        // client
+        Route::get('/listUsers', [AccountUsersController::class, 'listUsers'])->name('listUsers');
+        Route::get('/detailAccUser/{id}', [AccountUsersController::class, 'detailAccUser'])->name('detailAccUser');
+        Route::get('/createUser', [AccountUsersController::class, 'createUser'])->name('createUser');
+        Route::post('/storeUser', [AccountUsersController::class, 'storeUser'])->name('storeUser');
+        Route::get('/editUser/{id}', [AccountUsersController::class, 'editUser'])->name('editUser');
+        Route::post('/updateUser/{id}', [AccountUsersController::class, 'updateUser'])->name('updateUser');
+        Route::post('/softDeleteUser/{id}', [AccountUsersController::class, 'softDeleteUser'])->name('softDeleteUser');
+        Route::get('/trashedUsers', [AccountUsersController::class, 'trashedUsers'])->name('trashedUsers');
+        Route::post('/restoreUser/{id}', [AccountUsersController::class, 'restoreUser'])->name('restoreUser');
+        Route::delete('/forceDeleteUser/{id}', [AccountUsersController::class, 'forceDeleteUser'])->name('forceDeleteUser');
+        Route::post('/resetPassUser/{id}', [AccountUsersController::class, 'resetPassUser'])->name('resetPassUser');
+        Route::get('/orders/{order}/ajax-details', [AccountUsersController::class, 'getAjaxOrderDetails'])
+         ->name('order.ajaxDetails');
+        // Admins
+        Route::get('/listAdmins', [AccountAdminController::class, 'listAdmins'])->name('listAdmins');
+        Route::get('/detailAccAdmin/{id}', [AccountAdminController::class, 'detailAccAdmin'])->name('detailAccAdmin');
+        Route::get('/createAdmin', [AccountAdminController::class, 'createAdmin'])->name('createAdmin');
+        Route::post('/storeAdmin', [AccountAdminController::class, 'storeAdmin'])->name('storeAdmin');
+        Route::get('/editAdmin/{id}', [AccountAdminController::class, 'editAdmin'])->name('editAdmin');
+        Route::post('/updateAdmin/{id}', [AccountAdminController::class, 'updateAdmin'])->name('updateAdmin');
+        Route::post('/softDeleteAdmin/{id}', [AccountAdminController::class, 'softDeleteAdmin'])->name('softDeleteAdmin');
+        Route::get('/trashedAdmins', [AccountAdminController::class, 'trashedAdmins'])->name('trashedAdmins');
+        Route::post('/restoreAdmin/{id}', [AccountAdminController::class, 'restoreAdmin'])->name('restoreAdmin');
+        Route::delete('/forceDeleteAdmin/{id}', [AccountAdminController::class, 'forceDeleteAdmin'])->name('forceDeleteAdmin');
+        Route::post('/resetPassAdmin/{id}', [AccountAdminController::class, 'resetPassAdmin'])->name('resetPassAdmin');
+    });
+
 
         // Quản lý brands
         Route::prefix('brands')->name('brands.')->group(function () {
@@ -181,23 +193,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/history', [DiscountController::class, 'history'])->name('history');
         });
 
-        //quản lí phương thức thanh toán
-        Route::prefix('paymentMethods')->name('paymentMethods.')->group(function () {
-            Route::get('/list', [PaymentMethodController::class, 'index'])->name('index');
-            Route::get('/create', [PaymentMethodController::class, 'create'])->name('create');
-            Route::post('/store', [PaymentMethodController::class, 'store'])->name('store');
-            Route::get('/{id}/edit', [PaymentMethodController::class, 'edit'])->name('edit');
-            Route::put('/{id}', [PaymentMethodController::class, 'update'])->name('update');
-            Route::delete('/{id}', [PaymentMethodController::class, 'destroy'])->name('destroy');
-            Route::get('/trash', [PaymentMethodController::class, 'trash'])->name('trash');
-            Route::post('/{id}/restore', [PaymentMethodController::class, 'restore'])->name('restore');
-            Route::delete('/{id}/force', [PaymentMethodController::class, 'forceDelete'])->name('forceDelete');
-            Route::get('/{id}/show', [PaymentMethodController::class, 'show'])->name('show');
-
-        });
-
-
-
+    //quản lí phương thức thanh toán
+    Route::prefix('paymentMethods')->name('paymentMethods.')->group(function () {
+        Route::get('/list', [PaymentMethodController::class, 'index'])->name('index');
+        Route::get('/create', [PaymentMethodController::class, 'create'])->name('create');
+        Route::post('/store', [PaymentMethodController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [PaymentMethodController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [PaymentMethodController::class, 'update'])->name('update');
+        Route::delete('/{id}', [PaymentMethodController::class, 'destroy'])->name('destroy');
+        Route::get('/trash', [PaymentMethodController::class, 'trash'])->name('trash');
+        Route::post('/{id}/restore', [PaymentMethodController::class, 'restore'])->name('restore');
+        Route::delete('/{id}/force', [PaymentMethodController::class, 'forceDelete'])->name('forceDelete');
+        Route::get('/{id}/show', [PaymentMethodController::class, 'show'])->name('show');
+    });
+      
         Route::prefix('orders')->name('orders.')->group(function () {
             Route::get('/', [OrderController::class, 'index'])->name('index');
             Route::get('/create', [OrderController::class, 'create'])->name('create');
