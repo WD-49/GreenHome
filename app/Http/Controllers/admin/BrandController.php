@@ -56,6 +56,7 @@ class BrandController extends Controller
             'created_at' => now(),
             'updated_at' => now(),
         ];
+
     }
 
     // Lưu tất cả cùng lúc
@@ -85,7 +86,7 @@ class BrandController extends Controller
         ]);
 
         return redirect()->route('admin.brands.index')
-                         ->with('success', '✏️ Cập nhật thương hiệu thành công!');
+            ->with('success', '✏️ Cập nhật thương hiệu thành công!');
     }
 
     // Xóa mềm thương hiệu theo slug

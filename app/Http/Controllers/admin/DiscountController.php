@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDiscountRequest;
 use App\Models\Discount;
 use App\Models\DiscountUsage;
+use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class DiscountController extends Controller
 {
@@ -99,7 +101,9 @@ class DiscountController extends Controller
         // return view('admin.discount.create', [
         //     'title' => 'Create Discount',
         // ]);
-        $products = Product::whereNull('deleted_at')->get();
+        // $products = Product::whereNull('deleted_at')->get();
+        $products = Product::all();
+
         return view('admin.discount.create', compact('products'));
     }
 
@@ -134,8 +138,8 @@ class DiscountController extends Controller
             'discount_value' => 'required|numeric|min:1',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
-            'max_order_value' => 'required|numeric|min:0',
             'min_order_value' => 'required|numeric|min:0',
+            'max_order_value' => 'required|numeric|min:0|gt:min_order_value',
             'quantity' => 'required|integer|min:1',
             'user_usage_limit' => 'required|integer|min:1',
             'applies_to_all_products' => 'required|boolean',
@@ -169,8 +173,8 @@ class DiscountController extends Controller
             'end_date.after' => 'Ngày kết thúc phải sau ngày bắt đầu.',
 
             'max_order_value.required' => 'Vui lòng nhập giá trị đơn hàng tối đa.',
-            'max_order_value.numeric'  => 'Giá trị đơn hàng tối đa phải là số.',
-            'max_order_value.min'      => 'Giá trị đơn hàng tối đa không được nhỏ hơn 0.',
+            'max_order_value.numeric' => 'Giá trị đơn hàng tối đa phải là số.',
+            'max_order_value.min' => 'Giá trị đơn hàng tối đa không được nhỏ hơn 0.',
 
             'min_order_value.required' => 'Vui lòng nhập giá trị đơn hàng tối thiểu.',
             'min_order_value.numeric' => 'Giá trị đơn hàng tối thiểu phải là số.',
@@ -189,35 +193,11 @@ class DiscountController extends Controller
 
             'status.required' => 'Vui lòng chọn trạng thái.',
             'status.in' => 'Trạng thái không hợp lệ.',
+            'max_order_value.gt' => 'Giá trị đơn hàng tối đa phải lớn hơn giá trị đơn hàng tối thiểu.',
+
         ];
 
-        // Tạo Validator
-        //     $validator = Validator::make($request->all(), $rules, $messages);
 
-        //     if ($validator->fails()) {
-        //         // Trả về lại form với lỗi và dữ liệu cũ
-        //         return redirect()->route('admin.discount.create')
-        //             ->withErrors($validator)
-        //             ->withInput();
-        //     }
-
-        //     // Lấy dữ liệu hợp lệ
-        //     $data = $validator->validated();
-
-        //     // Tạo mã giảm giá mới
-        //     Discount::create($data);
-
-        //     // Flash thông báo thành công
-        //     session()->flash('success', 'Mã giảm giá đã được tạo thành công');
-        //  $discount = Discount::create([
-        //             'discount_type' => $request->discount_type,
-        //             'discount_value' => $request->discount_value,
-        //         ]);
-
-        //         // Gắn sản phẩm
-        //         // $discount->products()->sync($request->product_ids ?? []);
-        //   $products = Product::whereNull('deleted_at')->get();
-        // return view('admin.discount.create', compact('products'));
         $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
@@ -238,7 +218,17 @@ class DiscountController extends Controller
                 ->withInput();
         }
 
-        $discount = Discount::create($validator->validated());
+        // tính max_discount
+        if ($validated['discount_type'] === 'percentage') {
+            $max_discount = $validated['max_order_value'] * $validated['discount_value'] / 100;
+        } else {
+            $max_discount = $validated['discount_value'];
+        }
+        // dd($max_discount);
+        $validated['max_discount'] = $max_discount;
+        // dd($validated['max_discount']);
+
+        $discount = Discount::create($validated);
 
         // Nếu không áp dụng cho tất cả sản phẩm, thì lưu các sản phẩm được chọn
         if (!$request->applies_to_all_products && $request->has('product_ids')) {
@@ -256,10 +246,11 @@ class DiscountController extends Controller
     {
         //
 
-
-        $discount = Discount::findOrFail($id); // Tự động trả về 404 nếu không tìm thấy
+        $discount = Discount::with('products')->findOrFail($id); // Giả sử quan hệ là products
+        $products = $discount->applies_to_all_products ? collect() : $discount->products;
+        // $discount = Discount::findOrFail($id); // Tự động trả về 404 nếu không tìm thấy
         //  dd($discount);
-        return view('admin.discount.show', compact('discount'));
+        return view('admin.discount.show', compact('discount', 'products'));
     }
 
     /**
@@ -269,24 +260,109 @@ class DiscountController extends Controller
     {
         //
         $discount = Discount::find($id);
+        $products = Product::whereNull('deleted_at')->get();
 
         return view('admin.discount.edit', [
             'title' => 'Edit Discount',
             'discount' => $discount,
+            'products' => $products,
         ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
+
     public function update(Request $request, string $id)
     {
-        //
-        $data = $request->all();
-        $discount = Discount::find($id);
-        $discount->update($data);
+        $discount = Discount::findOrFail($id);
+
+        $rules = [
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|max:1000',
+            'code' => 'required|string|max:255|unique:discounts,code,' . $id,
+            'discount_type' => 'required|in:percentage,fixed',
+            'discount_value' => 'required|numeric|min:1',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after:start_date',
+            'min_order_value' => 'required|numeric|min:0',
+            'max_order_value' => 'required|numeric|min:0|gt:min_order_value',
+            'quantity' => 'required|integer|min:1',
+            'user_usage_limit' => 'required|integer|min:1',
+            'applies_to_all_products' => 'required|boolean',
+            'status' => 'required|in:active,inactive',
+        ];
+        $messages = [
+            'title.required' => 'Vui lòng nhập tiêu đề.',
+            'title.max' => 'Tiêu đề không được vượt quá 255 ký tự.',
+
+            'description.required' => 'Vui lòng nhập mô tả.',
+            'description.max' => 'Mô tả không được vượt quá 1000 ký tự.',
+
+            'code.required' => 'Vui lòng nhập mã giảm giá.',
+            'code.max' => 'Mã giảm giá không được vượt quá 255 ký tự.',
+            'code.unique' => 'Mã giảm giá đã tồn tại.',
+
+            'discount_type.required' => 'Vui lòng chọn loại giảm.',
+            'discount_type.in' => 'Loại giảm không hợp lệ.',
+
+            'discount_value.required' => 'Vui lòng nhập giá trị giảm.',
+            'discount_value.numeric' => 'Giá trị giảm phải là số.',
+            'discount_value.min' => 'Giá trị giảm phải lớn hơn hoặc bằng 1.',
+
+            'start_date.required' => 'Vui lòng chọn ngày bắt đầu.',
+            'start_date.date' => 'Ngày bắt đầu không hợp lệ.',
+
+            'end_date.required' => 'Vui lòng chọn ngày kết thúc.',
+            'end_date.date' => 'Ngày kết thúc không hợp lệ.',
+            'end_date.after' => 'Ngày kết thúc phải sau ngày bắt đầu.',
+
+            'max_order_value.required' => 'Vui lòng nhập giá trị đơn hàng tối đa.',
+            'max_order_value.numeric' => 'Giá trị đơn hàng tối đa phải là số.',
+            'max_order_value.min' => 'Giá trị đơn hàng tối đa không được nhỏ hơn 0.',
+
+            'min_order_value.required' => 'Vui lòng nhập giá trị đơn hàng tối thiểu.',
+            'min_order_value.numeric' => 'Giá trị đơn hàng tối thiểu phải là số.',
+            'min_order_value.min' => 'Giá trị đơn hàng tối thiểu không được nhỏ hơn 0.',
+
+            'quantity.required' => 'Vui lòng nhập số lượng mã.',
+            'quantity.integer' => 'Số lượng phải là số nguyên.',
+            'quantity.min' => 'Số lượng phải lớn hơn hoặc bằng 1.',
+
+            'user_usage_limit.required' => 'Vui lòng nhập giới hạn sử dụng cho mỗi người dùng.',
+            'user_usage_limit.integer' => 'Giới hạn sử dụng phải là số nguyên.',
+            'user_usage_limit.min' => 'Giới hạn sử dụng phải lớn hơn hoặc bằng 1.',
+
+            'applies_to_all_products.required' => 'Vui lòng chọn áp dụng cho tất cả sản phẩm hay không.',
+            'applies_to_all_products.boolean' => 'Giá trị áp dụng cho tất cả sản phẩm không hợp lệ.',
+
+            'status.required' => 'Vui lòng chọn trạng thái.',
+            'status.in' => 'Trạng thái không hợp lệ.',
+            'max_order_value.gt' => 'Giá trị đơn hàng tối đa phải lớn hơn giá trị đơn hàng tối thiểu.',
+
+        ];
+
+
+        $validatedData = $request->validate($rules, $messages);
+        // Tính max_discount
+        if ($validatedData['discount_type'] === 'percentage') {
+            $max_discount = $validatedData['max_order_value'] * $validatedData['discount_value'] / 100;
+        } else {
+            $max_discount = $validatedData['discount_value'];
+        }
+        $validatedData['max_discount'] = $max_discount;
+        $discount->update($validatedData);
+
+        if ($request->applies_to_all_products == 0) {
+            $discount->products()->sync($request->product_ids ?? []);
+        } else {
+            $discount->products()->detach();
+        }
+
         return redirect()->route('admin.discount.index')->with('success', 'Mã giảm giá đã được cập nhật thành công');
     }
+
+
 
     /**
      * Remove the specified resource from storage.
@@ -319,48 +395,48 @@ class DiscountController extends Controller
     }
     public function history(Request $request)
     {
-        $query = DiscountUsage::query();
-    {
-        //lọc theo mã giảm giá
-         if ($request->filled('code')) {
-            $query->where('code', 'like', '%' . $request->code . '%');
-        }
-        //lọc theo ngày sử dụng
-        if ($request->filled('used_from')) {
-            $query->whereDate('used_at', '>=', $request->used_from);
-        }
-        //lọc theo người dùng
-        if ($request->filled('user_id')) {
-            $query->where('user_id', $request->user_id);
-        }
-        //lọc theo sản phẩm
-        if ($request->filled('product_id')) {
-            $query->whereHas('discount.products', function ($q) use ($request) {
-                $q->where('id', $request->product_id);
+        $query = DiscountUsage::query()->with(['discount', 'user', 'product', 'order']);
+
+        // Lọc theo mã giảm giá (code)
+        if ($request->filled('code')) {
+            $query->whereHas('discount', function ($q) use ($request) {
+                $q->where('code', 'like', '%' . $request->code . '%');
             });
         }
-        //lọc theo mã đơn hàng
-        if ($request->filled('order_id')) {
-            $query->where('order_id', $request->order_id);
+
+        // Lọc theo ngày sử dụng
+        if ($request->filled('date_used')) {
+            $query->whereDate('used_at', $request->date_used);
         }
-    }
-        // // Lấy 20 bản ghi mỗi trang, sắp xếp theo 'used_at' giảm dần
-        // // $usages = DiscountUsage::with(['discount', 'user'])->orderByDesc('used_at')->paginate(20);
-        // // Lấy 20 bản ghi mỗi trang, sắp xếp theo 'used_at' giảm dần
-        // $usages = $query->with(['discount', 'user'])->orderByDesc('used_at')->paginate(20);
-        // // $usages = DiscountUsage::with(['discount', 'user'])->orderByDesc('used_at')->paginate(20);
-        // // Lấy tất cả các mã giảm giá để hiển thị trong filter
-        // $discounts = Discount::all();
-        // // Lấy tất cả người dùng để hiển thị trong filter
-        // $users = \App\Models\User::all();
-        // // Lấy tất cả sản phẩm để hiển thị trong filter
-        // $products = Product::whereNull('deleted_at')->get();
-        // // Trả về view với các biến cần thiết
-        // return view('admin.discount.history', compact('usages', 'discounts', 'users', 'products'));
-        
-        $usages = DiscountUsage::with(['discount', 'user'])->orderByDesc('used_at')->paginate(20);
-$notFound = $usages->isEmpty(); 
-    
+
+        // Lọc theo người dùng (theo name hoặc email)
+        if ($request->filled('user')) {
+            $userSearch = $request->user;
+            $query->whereHas('user', function ($q) use ($userSearch) {
+                $q->where('name', 'like', '%' . $userSearch . '%')
+                    ->orWhere('email', 'like', '%' . $userSearch . '%');
+            });
+        }
+
+        // Lọc theo sản phẩm (theo tên sản phẩm)
+        if ($request->filled('product')) {
+            $productSearch = $request->product;
+            $query->whereHas('product', function ($q) use ($productSearch) {
+                $q->where('name', 'like', '%' . $productSearch . '%');
+            });
+        }
+
+        // Lọc theo mã đơn hàng (theo sku)
+        if ($request->filled('order')) {
+            $orderSearch = $request->order;
+            $query->whereHas('order', function ($q) use ($orderSearch) {
+                $q->where('sku', 'like', '%' . $orderSearch . '%');
+            });
+        }
+
+        $usages = $query->orderByDesc('used_at')->paginate(20);
+        // dd($usages);
+
         return view('admin.discount.history', compact('usages'));
     }
 }

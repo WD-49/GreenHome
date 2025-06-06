@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\admin;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\PaymentMethod;
@@ -10,18 +10,37 @@ class PaymentMethodController extends Controller
 {
     public function index(Request $request)
     {
+        // Đếm cho tabs
+        $paymentAll = PaymentMethod::withTrashed()->get();
+        $paymentActive = PaymentMethod::where('status', 1)->get();
+        $paymentInactive = PaymentMethod::where('status', 0)->get();
+        $paymentTrashed = PaymentMethod::onlyTrashed()->get();
+
+        // Query filter
         $query = PaymentMethod::query();
 
-        // Lọc theo tên nếu có
-        if ($request->has('name') && $request->name !== null) {
+        if ($request->filled('name')) {
             $query->where('name', 'like', '%' . $request->name . '%');
+        }
+        if ($request->filled('status')) {
+            if ($request->status == 'active') {
+                $query->where('status', 1);
+            }
+            if ($request->status == 'inactive') {
+                $query->where('status', 0);
+            }
         }
 
         $paymentMethods = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        return view('admin.payment_methods.index', compact('paymentMethods'));
+        return view('admin.payment_methods.index', [
+            'paymentMethods' => $paymentMethods,
+            'paymentAll' => $paymentAll,
+            'paymentActive' => $paymentActive,
+            'paymentInactive' => $paymentInactive,
+            'paymentTrashed' => $paymentTrashed,
+        ]);
     }
-
 
     public function create()
     {
@@ -80,18 +99,38 @@ class PaymentMethodController extends Controller
 
     public function trash(Request $request)
     {
+        // Đếm tabs cho thùng rác
+        $paymentAll = PaymentMethod::withTrashed()->get();
+        $paymentActive = PaymentMethod::where('status', 1)->get();
+        $paymentInactive = PaymentMethod::where('status', 0)->get();
+        $paymentTrashed = PaymentMethod::onlyTrashed()->get();
+
         $query = PaymentMethod::onlyTrashed();
 
-        // Lọc theo tên
-        if ($request->has('name') && $request->name !== null) {
+        if ($request->filled('name')) {
             $query->where('name', 'like', '%' . $request->name . '%');
+        }
+        if ($request->filled('status')) {
+            if ($request->status == 'active') {
+                $query->where('status', 1);
+            }
+            if ($request->status == 'inactive') {
+                $query->where('status', 0);
+            }
         }
 
         $paymentMethods = $query->orderBy('deleted_at', 'desc')->paginate(10);
 
-        return view('admin.payment_methods.trash', compact('paymentMethods'));
-    }
+        // Dùng lại view index cho đồng bộ tabs, table, filter
+     return view('admin.payment_methods.trash', [
+    'paymentMethods' => $paymentMethods,
+    'methodAll' => $paymentAll,
+    'methodActive' => $paymentActive,
+    'methodInactive' => $paymentInactive,
+    'methodTrashed' => $paymentTrashed,
+]);
 
+    }
 
     public function restore($id)
     {
@@ -106,4 +145,10 @@ class PaymentMethodController extends Controller
         $paymentMethod->forceDelete();
         return redirect()->route('admin.paymentMethods.trash')->with('success', 'Xóa vĩnh viễn thành công!');
     }
+    public function show($id)
+{
+    $paymentMethod = PaymentMethod::withTrashed()->findOrFail($id);
+    return view('admin.payment_methods.show', compact('paymentMethod'));
+}
+
 }

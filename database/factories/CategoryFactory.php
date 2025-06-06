@@ -10,10 +10,11 @@ class CategoryFactory extends Factory
 {
     protected $model = Category::class;
 
-    public function definition()
-    {
-        return [
+  public function definition()
+{
+    return [
+       
+    ];
+}
 
-        ];
-    }
 }

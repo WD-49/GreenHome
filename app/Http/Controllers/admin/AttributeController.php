@@ -16,7 +16,8 @@ class AttributeController extends Controller
    {
       $title = "Quản lý thuộc tính";
       $attributes = Attribute::all();
-      return view('admin.attribute.index', compact('title', 'attributes'));
+      $deleteCount = Attribute::onlyTrashed()->count();
+      return view('admin.attribute.index', compact('title', 'attributes', 'deleteCount'));
    }
    public function create()
    {
@@ -46,32 +47,15 @@ class AttributeController extends Controller
       ]);
       return redirect()->route('admin.attribute.index')->with('success', 'Sửa thuộc tính thành công!');
    }
-  public function show($id)
-{
-    $product = Product::findOrFail($id);
 
-    $query = $product->comments(); // Quan hệ comments trong model Product
+   public function show($id)
+   {  
+      $attribute_id = $id;
+      $attribute = Attribute::findOrFail($id);
+      $attributeValues = attributeValue::where('attribute_id', $id)->get();
 
-    if (request()->filled('username')) {
-        $query->whereHas('user', function ($q) {
-            $q->where('name', 'like', '%' . request('username') . '%');
-        });
-    }
-
-    if (request()->filled('date')) {
-        $query->whereDate('created_at', request('date'));
-    }
-
-    if (request()->filled('status')) {
-        $query->where('status', request('status'));
-    }
-
-    $comments = $query->get();
-
-    return view('admin.products.show', compact('product', 'comments'));
-}
-
-
+      return view('admin.attribute.show', compact('attribute', 'attributeValues', 'attribute_id'));
+   }
    public function destroy($id)
    {
       $attribute = Attribute::findOrFail($id);

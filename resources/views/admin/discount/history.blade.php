@@ -3,7 +3,6 @@
 @section('content')
     <h1>Lịch sử dùng mã giảm giá</h1>
     <form action="" method="GET" class="mb-4 row g-3">
-
         <div class="col-md-3">
             <label for="code" class="form-label">Mã code</label>
             <input type="text" name="code" id="code" value="{{ request('code') }}" class="form-control"
@@ -35,11 +34,9 @@
 
         <div class="col-md-12 mt-2">
             <button type="submit" class="btn btn-primary">Tìm kiếm</button>
-            <button type="reset" class="btn btn-secondary">Xóa filter</button>
-            {{-- <a href="" class="btn btn-secondary">Xóa filter</a> --}}
+            <a href="{{ url()->current() }}" class="btn btn-secondary">Xóa filter</a>
         </div>
     </form>
-
 
     <table class="table table-bordered">
         <thead>
@@ -53,19 +50,22 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($usages as $index => $usage)
+            @forelse ($usages as $index => $usage)
                 <tr>
-                    <td>{{ $index + 1 }}</td>
+                    <td>{{ $usages->firstItem() + $index }}</td>
                     <td>{{ $usage->discount->code ?? 'N/A' }}</td>
                     <td>{{ $usage->user->name ?? 'N/A' }}</td>
-                    <td>{{ $usage->used_at }}</td>
+                    <td>{{ $usage->used_at ?? 'N/A' }}</td>
                     <td>{{ $usage->product->name ?? 'N/A' }}</td>
-                    <td>{{ $usage->order->name ?? 'N/A' }}</td>
-                    {{-- <td>{{ $usage->updated_at }}</td> --}}
-                    {{-- <td>{{ $usage->created_at }}</td>
-            <td>{{ $usage->deleted_at ?? 'Chưa xóa' }}</td> --}}
+                    <td>{{ $usage->order->sku ?? 'N/A' }}</td>
                 </tr>
-            @endforeach
+            @empty
+                <tr>
+                    <td colspan="6" class="text-center">Không có dữ liệu</td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
+
+    {{ $usages->links() }} {{-- Phân trang --}}
 @endsection
