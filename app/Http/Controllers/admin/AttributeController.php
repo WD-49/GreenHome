@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\admin\attribute\StoreAttributeRequest;
 use App\Http\Requests\admin\attribute\UpdateAttributeRequest;
 use App\Models\Attribute;
+use App\Models\Product;
 use App\Models\attributeValue;
 use Illuminate\Http\Request;
 
@@ -46,6 +47,7 @@ class AttributeController extends Controller
       ]);
       return redirect()->route('admin.attribute.index')->with('success', 'Sửa thuộc tính thành công!');
    }
+
    public function show($id)
    {  
       $attribute_id = $id;

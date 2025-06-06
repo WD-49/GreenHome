@@ -5,6 +5,7 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Http\Requests\admin\brand\BrandStoreRequest;
 use App\Http\Requests\admin\brand\BrandUpdateRequest;
@@ -21,7 +22,7 @@ class BrandController extends Controller
             $query->where('name', 'like', '%' . $request->keyword . '%');
         }
 
-        $brands = $query->orderBy('created_at', 'desc')->paginate(10);
+        $brands = $query->orderBy('created_at', 'desc')->paginate(6);
 
         return view('admin.brands.index', compact('brands'));
     }
@@ -33,19 +34,37 @@ class BrandController extends Controller
     }
 
     // Lưu thương hiệu mới
-    public function store(BrandStoreRequest $request)
-    {
-        $data = $request->validated();
+   public function store(BrandStoreRequest $request)
+{
+    $brands = $request->validated()['brands'];
+    $insertData = [];
 
-        Brand::create([
-            'name' => $data['name'],
-            'description' => $data['description'] ?? null,
-            'slug' => Str::slug($data['name']),
-        ]);
+    foreach ($brands as $index => $brand) {
+        $slug = Str::slug($brand['name']);
 
-        return redirect()->route('admin.brands.index')
-            ->with('success', '✅ Thêm thương hiệu thành công!');
+        // Kiểm tra trùng slug
+        if (Brand::withTrashed()->where('slug', $slug)->exists()) {
+            return back()->withErrors([
+                "brands.$index.name" => "❌ Slug của '{$brand['name']}' đã tồn tại.",
+            ])->withInput();
+        }
+
+        $insertData[] = [
+            'name' => $brand['name'],
+            'description' => $brand['description'] ?? null,
+            'slug' => $slug,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
     }
+
+    // Lưu tất cả cùng lúc
+    Brand::insert($insertData);
+
+    return redirect()->route('admin.brands.index')
+                     ->with('success', '✅ Đã thêm ' . count($insertData) . ' thương hiệu thành công!');
+}
 
     // Form chỉnh sửa thương hiệu theo slug
     public function edit($slug)
@@ -106,17 +125,29 @@ class BrandController extends Controller
     }
 
     // Hiển thị chi tiết thương hiệu trong admin theo slug (có thể bao gồm thương hiệu đã xóa)
-  public function show($slug)
+ public function show(Request $request, $slug)
 {
     $brand = Brand::withTrashed()->where('slug', $slug)->firstOrFail();
 
-    // Lấy danh sách sản phẩm theo brand_id, eager load category, phân trang 10 sản phẩm/trang
-    $products = Product::where('brand_id', $brand->id)
-        ->with('category')      // eager load quan hệ category
-        ->latest()
-        ->paginate(6);        // phân trang 10 bản ghi/trang
+    $query = Product::where('brand_id', $brand->id)->with('category');
 
-    return view('admin.brands.show', compact('brand', 'products'));
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+    if ($request->filled('category_id')) {
+        $query->where('category_id', $request->category_id);
+    }
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+    if ($request->filled('min_quantity')) {
+        $query->where('quantity', '>=', $request->min_quantity);
+    }
+    $products = $query->latest()->paginate(6)->appends($request->all());
+    $categories = Category::all();
+    return view('admin.brands.show', compact('brand', 'products', 'categories'));
 }
+
+
     
 }
