@@ -1,68 +1,76 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Request;
 use App\Http\Controllers\admin\BrandController;
 use App\Http\Controllers\admin\OrderController;
 use App\Http\Controllers\client\HomeController;
 use App\Http\Controllers\admin\BannerController;
-use App\Http\Controllers\admin\Product\ProductController;
+use App\Http\Controllers\admin\CommentController;
 use App\Http\Controllers\admin\DiscountController;
+use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\admin\AttributeController;
 use App\Http\Controllers\admin\DashboardController;
+use App\Http\Controllers\admin\OrderStatusController;
+use App\Http\Controllers\admin\PaymentMethodController;
 use App\Http\Controllers\admin\AttributeValueController;
+use App\Http\Controllers\admin\Product\ProductController;
 use App\Http\Controllers\admin\Account\AccountAdminController;
 use App\Http\Controllers\admin\Account\AccountUsersController;
-use App\Http\Controllers\admin\CategoryController;  // Tham chiếu đúng
-use App\Http\Controllers\admin\PaymentMethodController;
-use App\Http\Controllers\admin\CommentController;
 use App\Http\Controllers\admin\Product\ProductVariantController;
 use App\Http\Controllers\admin\OrderStatusController;
 use Dom\Comment;
+use App\Http\Controllers\admin\CategoryController;  // Tham chiếu đúng
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Quản lý danh mục
-    Route::prefix('/categories')->name('categories.')->group(function () {
-        Route::get('/list', [CategoryController::class, 'index'])->name('index');
-        Route::get('/create', [CategoryController::class, 'create'])->name('create');
-        Route::post('/store', [CategoryController::class, 'store'])->name('store');
-        Route::get('/{slug}/edit', [CategoryController::class, 'edit'])->name('edit'); // Sử dụng slug
-        Route::put('/{slug}/update', [CategoryController::class, 'update'])->name('update'); // Sử dụng slug
-        Route::delete('/{slug}/destroy', [CategoryController::class, 'destroy'])->name('destroy'); // Sử dụng slug
-        Route::get('/trash', [CategoryController::class, 'trash'])->name('trash');
-        Route::post('/{slug}/restore', [CategoryController::class, 'restore'])->name('restore'); // Sử dụng slug
-        Route::delete('/{slug}/force-delete', [CategoryController::class, 'forceDelete'])->name('forceDelete'); // Sử dụng slug
-        Route::get('/{slug}', [CategoryController::class, 'show'])->name('show'); // Show category details by slug
-    });
+    Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login-submit', [AdminAuthController::class, 'login'])->name('login.submit');
+    Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+    Route::middleware(['admin'])->group(function () {
+        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-
-    // Quản lý sản phẩm
-    Route::prefix('/products')->name('products.')->group(function () {
-        Route::get('/list', [ProductController::class, 'index'])->name('index');
-        Route::get('/create-new', [ProductController::class, 'create'])->name('create');
-        Route::post('/store-new', [ProductController::class, 'store'])->name('store');
-        Route::get('/trashed', [ProductController::class, 'trashed'])->name('trashed');
-        Route::get('/{slug}/detail', [ProductController::class, 'show'])->name('show');
-        Route::get('/{slug}/edit', [ProductController::class, 'edit'])->name('edit');
-        Route::put('/{slug}/update', [ProductController::class, 'update'])->name('update');
-        Route::delete('/{slug}/destroy', [ProductController::class, 'destroy'])->name('destroy');
-        Route::get('/{slug}/restore', [ProductController::class, 'restore'])->name('restore');
-        Route::delete('/{slug}/forceDelete', [ProductController::class, 'forceDelete'])->name('forceDelete');
-        // Quản lý biến thể sản phẩm
-        Route::prefix('/{product}/variants')->name('variants.')->group(function () {
-            Route::get('/', [ProductVariantController::class, 'index'])->name('index');
-            Route::get('/create-new', [ProductVariantController::class, 'create'])->name('create');
-            Route::post('/store-new', [ProductVariantController::class, 'store'])->name('store');
-            Route::get('/trashed', [ProductVariantController::class, 'trashed'])->name('trashed');
-            Route::get('/{productVariant}/edit', [ProductVariantController::class, 'edit'])->name('edit');
-            Route::put('/{productVariant}/update', [ProductVariantController::class, 'update'])->name('update');
-            Route::delete('/{productVariant}/destroy', [ProductVariantController::class, 'destroy'])->name('destroy');
-            Route::get('/{id}/restore', [ProductVariantController::class, 'restore'])->name('restore');
+        // Quản lý danh mục
+        Route::prefix('/categories')->name('categories.')->group(function () {
+            Route::get('/list', [CategoryController::class, 'index'])->name('index');
+            Route::get('/create', [CategoryController::class, 'create'])->name('create');
+            Route::post('/store', [CategoryController::class, 'store'])->name('store');
+            Route::get('/{slug}/edit', [CategoryController::class, 'edit'])->name('edit'); // Sử dụng slug
+            Route::put('/{slug}/update', [CategoryController::class, 'update'])->name('update'); // Sử dụng slug
+            Route::delete('/{slug}/destroy', [CategoryController::class, 'destroy'])->name('destroy'); // Sử dụng slug
+            Route::get('/trash', [CategoryController::class, 'trash'])->name('trash');
+            Route::post('/{slug}/restore', [CategoryController::class, 'restore'])->name('restore'); // Sử dụng slug
+            Route::delete('/{slug}/force-delete', [CategoryController::class, 'forceDelete'])->name('forceDelete'); // Sử dụng slug
+            Route::get('/{slug}', [CategoryController::class, 'show'])->name('show'); // Show category details by slug
         });
-    });
+
+
+        // Quản lý sản phẩm
+        Route::prefix('/products')->name('products.')->group(function () {
+            Route::get('/list', [ProductController::class, 'index'])->name('index');
+            Route::get('/create-new', [ProductController::class, 'create'])->name('create');
+            Route::post('/store-new', [ProductController::class, 'store'])->name('store');
+            Route::get('/trashed', [ProductController::class, 'trashed'])->name('trashed');
+            Route::get('/{slug}/detail', [ProductController::class, 'show'])->name('show');
+            Route::get('/{slug}/edit', [ProductController::class, 'edit'])->name('edit');
+            Route::put('/{slug}/update', [ProductController::class, 'update'])->name('update');
+            Route::delete('/{slug}/destroy', [ProductController::class, 'destroy'])->name('destroy');
+            Route::get('/{slug}/restore', [ProductController::class, 'restore'])->name('restore');
+            Route::delete('/{slug}/forceDelete', [ProductController::class, 'forceDelete'])->name('forceDelete');
+            // Quản lý biến thể sản phẩm
+            Route::prefix('/{product}/variants')->name('variants.')->group(function () {
+                Route::get('/', [ProductVariantController::class, 'index'])->name('index');
+                Route::get('/create-new', [ProductVariantController::class, 'create'])->name('create');
+                Route::post('/store-new', [ProductVariantController::class, 'store'])->name('store');
+                Route::get('/trashed', [ProductVariantController::class, 'trashed'])->name('trashed');
+                Route::get('/{productVariant}/edit', [ProductVariantController::class, 'edit'])->name('edit');
+                Route::put('/{productVariant}/update', [ProductVariantController::class, 'update'])->name('update');
+                Route::delete('/{productVariant}/destroy', [ProductVariantController::class, 'destroy'])->name('destroy');
+                Route::get('/{id}/restore', [ProductVariantController::class, 'restore'])->name('restore');
+            });
+        });
 
 
     // Nhóm quản lý tài khoản
@@ -109,80 +117,81 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/resetPassAdmin/{id}', [AccountAdminController::class, 'resetPassAdmin'])->name('resetPassAdmin');
     });
 
-    // Quản lý brands
-    Route::prefix('brands')->name('brands.')->group(function () {
-        Route::get('/', [BrandController::class, 'index'])->name('index');
-        Route::get('/create', [BrandController::class, 'create'])->name('create');
-        Route::post('/', [BrandController::class, 'store'])->name('store');
-        Route::get('/trashed', [BrandController::class, 'trash'])->name('trash');
-        Route::get('/{slug}', [BrandController::class, 'show'])->name('show');
-        Route::get('/{slug}/edit', [BrandController::class, 'edit'])->name('edit');
-        Route::put('/{slug}', [BrandController::class, 'update'])->name('update');
-        Route::delete('/{slug}', [BrandController::class, 'destroy'])->name('destroy');
-        Route::post('/{slug}/restore', [BrandController::class, 'restore'])->name('restore');
-        Route::delete('/{slug}/force-delete', [BrandController::class, 'forceDelete'])->name('forceDelete');
-    });
 
-    Route::prefix('comments')->name('comments.')->group(function () {
-        Route::get('/', [CommentController::class, 'index'])->name('index');
-        Route::get('/trash', [CommentController::class, 'trash'])->name('trash');  // <-- đây
-        Route::post('/approve', [CommentController::class, 'approve'])->name('approve');
-        Route::post('/hide', [CommentController::class, 'hide'])->name('hide');
-        Route::get('/{id}', [CommentController::class, 'show'])->name('show');
-        Route::delete('/delete', [CommentController::class, 'destroy'])->name('destroy');
-        Route::post('/restore/{id}', [CommentController::class, 'restore'])->name('restore');
-        Route::delete('/force-delete', [CommentController::class, 'forceDelete'])->name('forceDelete');
-        Route::post('/show-again', [CommentController::class, 'showAgain'])->name('showAgain');
-    });
-
-    // Quản lý banner
-    Route::prefix('/banners')->name('banners.')->group(function () {
-        Route::get('/', [BannerController::class, 'index'])->name('index');
-        Route::get('/create', [BannerController::class, 'create'])->name('create');
-        Route::post('/store', [BannerController::class, 'store'])->name('store');
-        Route::get('/{banner}/edit', [BannerController::class, 'edit'])->name('edit');
-        Route::put('/{banner}/update', [BannerController::class, 'update'])->name('update');
-        Route::delete('/{banner}/destroy', [BannerController::class, 'destroy'])->name('destroy');
-    });
-    // Quản lý thuộc tính sản phẩm
-    Route::prefix('/attribute')->name('attribute.')->group(function () {
-        Route::get('/', [AttributeController::class, 'index'])->name('index');
-        Route::get('/trash', [AttributeController::class, 'trash'])->name('trash');
-        Route::get('/show/{id}', [AttributeController::class, 'show'])->name('show');
-        Route::get('/create', [AttributeController::class, 'create'])->name('create');
-        Route::post('/store', [AttributeController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [AttributeController::class, 'edit'])->name('edit');
-        Route::put('/{id}/update/', [AttributeController::class, 'update'])->name('update');
-        Route::delete('/{id}/destroy/', [AttributeController::class, 'destroy'])->name('destroy');
-        Route::patch('/{id}/restore/', [AttributeController::class, 'restore'])->name('restore');
-
-        // quản lý giá trị thuộc tính
-        Route::prefix('/value')->name('value.')->group(function () {
-            Route::get('/', [AttributeValueController::class, 'index'])->name('index');
-            Route::get('/{id}/create/', [AttributeValueController::class, 'create'])->name('create');
-            Route::post('/store', [AttributeValueController::class, 'store'])->name('store');
-            Route::get('/{id}/edit/', [AttributeValueController::class, 'edit'])->name('edit');
-            Route::put('/{id}/update/', [AttributeValueController::class, 'update'])->name('update');
-            Route::delete('/{id}/destroy/', [AttributeValueController::class, 'destroy'])->name('destroy');
-            Route::get('/{id}/trash', [AttributeValueController::class, 'trash'])->name('trash');
-            Route::patch('/{id}/restore/', [AttributeValueController::class, 'restore'])->name('restore');
+        // Quản lý brands
+        Route::prefix('brands')->name('brands.')->group(function () {
+            Route::get('/', [BrandController::class, 'index'])->name('index');
+            Route::get('/create', [BrandController::class, 'create'])->name('create');
+            Route::post('/', [BrandController::class, 'store'])->name('store');
+            Route::get('/trashed', [BrandController::class, 'trash'])->name('trash');
+            Route::get('/{slug}', [BrandController::class, 'show'])->name('show');
+            Route::get('/{slug}/edit', [BrandController::class, 'edit'])->name('edit');
+            Route::put('/{slug}', [BrandController::class, 'update'])->name('update');
+            Route::delete('/{slug}', [BrandController::class, 'destroy'])->name('destroy');
+            Route::post('/{slug}/restore', [BrandController::class, 'restore'])->name('restore');
+            Route::delete('/{slug}/force-delete', [BrandController::class, 'forceDelete'])->name('forceDelete');
         });
-    });
 
-    // Quản lý mã giảm giá
-    Route::prefix('/discount')->name('discount.')->group(function () {
-        Route::get('/', [DiscountController::class, 'index'])->name('index');
-        Route::get('/create', [DiscountController::class, 'create'])->name('create');
-        Route::get('/show/{id}', [DiscountController::class, 'show'])->name('show');
-        Route::post('/store', [DiscountController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [DiscountController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [DiscountController::class, 'update'])->name('update');
-        Route::delete('/delete/{id}', [DiscountController::class, 'destroy'])->name('delete');
-        Route::get('/trash', [DiscountController::class, 'trash'])->name('trash');
-        Route::post('/restore/{id}', [DiscountController::class, 'restore'])->name('restore');
-        Route::delete('/force-delete/{id}', [DiscountController::class, 'forceDelete'])->name('forceDelete');
-        Route::get('/history', [DiscountController::class, 'history'])->name('history');
-    });
+        Route::prefix('comments')->name('comments.')->group(function () {
+            Route::get('/', [CommentController::class, 'index'])->name('index');
+            Route::get('/trash', [CommentController::class, 'trash'])->name('trash');  // <-- đây
+            Route::post('/approve', [CommentController::class, 'approve'])->name('approve');
+            Route::post('/hide', [CommentController::class, 'hide'])->name('hide');
+            Route::get('/{id}', [CommentController::class, 'show'])->name('show');
+            Route::delete('/delete', [CommentController::class, 'destroy'])->name('destroy');
+            Route::post('/restore/{id}', [CommentController::class, 'restore'])->name('restore');
+            Route::delete('/force-delete', [CommentController::class, 'forceDelete'])->name('forceDelete');
+            Route::post('/show-again', [CommentController::class, 'showAgain'])->name('showAgain');
+        });
+
+        // Quản lý banner
+        Route::prefix('/banners')->name('banners.')->group(function () {
+            Route::get('/', [BannerController::class, 'index'])->name('index');
+            Route::get('/create', [BannerController::class, 'create'])->name('create');
+            Route::post('/store', [BannerController::class, 'store'])->name('store');
+            Route::get('/{banner}/edit', [BannerController::class, 'edit'])->name('edit');
+            Route::put('/{banner}/update', [BannerController::class, 'update'])->name('update');
+            Route::delete('/{banner}/destroy', [BannerController::class, 'destroy'])->name('destroy');
+        });
+        // Quản lý thuộc tính sản phẩm
+        Route::prefix('/attribute')->name('attribute.')->group(function () {
+            Route::get('/', [AttributeController::class, 'index'])->name('index');
+            Route::get('/trash', [AttributeController::class, 'trash'])->name('trash');
+            Route::get('/show/{id}', [AttributeController::class, 'show'])->name('show');
+            Route::get('/create', [AttributeController::class, 'create'])->name('create');
+            Route::post('/store', [AttributeController::class, 'store'])->name('store');
+            Route::get('/{id}/edit', [AttributeController::class, 'edit'])->name('edit');
+            Route::put('/{id}/update/', [AttributeController::class, 'update'])->name('update');
+            Route::delete('/{id}/destroy/', [AttributeController::class, 'destroy'])->name('destroy');
+            Route::patch('/{id}/restore/', [AttributeController::class, 'restore'])->name('restore');
+
+            // quản lý giá trị thuộc tính
+            Route::prefix('/value')->name('value.')->group(function () {
+                Route::get('/', [AttributeValueController::class, 'index'])->name('index');
+                Route::get('/{id}/create/', [AttributeValueController::class, 'create'])->name('create');
+                Route::post('/store', [AttributeValueController::class, 'store'])->name('store');
+                Route::get('/{id}/edit/', [AttributeValueController::class, 'edit'])->name('edit');
+                Route::put('/{id}/update/', [AttributeValueController::class, 'update'])->name('update');
+                Route::delete('/{id}/destroy/', [AttributeValueController::class, 'destroy'])->name('destroy');
+                Route::get('/{id}/trash', [AttributeValueController::class, 'trash'])->name('trash');
+                Route::patch('/{id}/restore/', [AttributeValueController::class, 'restore'])->name('restore');
+            });
+        });
+
+        // Quản lý mã giảm giá
+        Route::prefix('/discount')->name('discount.')->group(function () {
+            Route::get('/', [DiscountController::class, 'index'])->name('index');
+            Route::get('/create', [DiscountController::class, 'create'])->name('create');
+            Route::get('/show/{id}', [DiscountController::class, 'show'])->name('show');
+            Route::post('/store', [DiscountController::class, 'store'])->name('store');
+            Route::get('/{id}/edit', [DiscountController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [DiscountController::class, 'update'])->name('update');
+            Route::delete('/delete/{id}', [DiscountController::class, 'destroy'])->name('delete');
+            Route::get('/trash', [DiscountController::class, 'trash'])->name('trash');
+            Route::post('/restore/{id}', [DiscountController::class, 'restore'])->name('restore');
+            Route::delete('/force-delete/{id}', [DiscountController::class, 'forceDelete'])->name('forceDelete');
+            Route::get('/history', [DiscountController::class, 'history'])->name('history');
+        });
 
     //quản lí phương thức thanh toán
     Route::prefix('paymentMethods')->name('paymentMethods.')->group(function () {
@@ -197,32 +206,36 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/{id}/force', [PaymentMethodController::class, 'forceDelete'])->name('forceDelete');
         Route::get('/{id}/show', [PaymentMethodController::class, 'show'])->name('show');
     });
+      
+        Route::prefix('orders')->name('orders.')->group(function () {
+            Route::get('/', [OrderController::class, 'index'])->name('index');
+            Route::get('/create', [OrderController::class, 'create'])->name('create');
+            Route::post('/store', [OrderController::class, 'store'])->name('store');
+            Route::get('/edit/{id}', [OrderController::class, 'edit'])->name('edit');
+            Route::put('/update/{id}', [OrderController::class, 'update'])->name('update');
+            Route::get('/show/{id}', [OrderController::class, 'show'])->name('show');
+            Route::put('/{id}/update-status', [OrderController::class, 'updateStatus'])->name('updateStatus');
+            Route::put('/{order}/updatePaymentStatus', [OrderController::class, 'updatePaymentStatus'])->name('updatePaymentStatus');
+            Route::delete('/destroy/{id}', [OrderController::class, 'destroy'])->name('destroy');
+            Route::get('/trash', [OrderController::class, 'trash'])->name('trash');
+            Route::post('/restore/{id}', [OrderController::class, 'restore'])->name('restore');
+            Route::patch('{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
 
-
-
-    Route::prefix('orders')->name('orders.')->group(function () {
-        Route::get('/', [OrderController::class, 'index'])->name('index');
-        Route::get('/create', [OrderController::class, 'create'])->name('create');
-        Route::post('/store', [OrderController::class, 'store'])->name('store');
-        Route::get('/edit/{id}', [OrderController::class, 'edit'])->name('edit');
-        Route::put('/update/{id}', [OrderController::class, 'update'])->name('update');
-        Route::get('/show/{id}', [OrderController::class, 'show'])->name('show');
-        Route::put('/{id}/update-status', [OrderController::class, 'updateStatus'])->name('updateStatus');
-        Route::put('/{order}/updatePaymentStatus', [OrderController::class, 'updatePaymentStatus'])->name('updatePaymentStatus');
-        Route::delete('/destroy/{id}', [OrderController::class, 'destroy'])->name('destroy');
-        Route::get('/trash', [OrderController::class, 'trash'])->name('trash');
-        Route::post('/restore/{id}', [OrderController::class, 'restore'])->name('restore');
-        Route::patch('{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
-
-        Route::prefix('/status')->name('status.')->group(function () {
-            Route::get('/', [OrderStatusController::class, 'index'])->name('index');
-            Route::get('/create', [OrderStatusController::class, 'create'])->name('create');
-            Route::get('/{id}/edit', [OrderStatusController::class, 'edit'])->name('edit');
-            Route::get('/trashed', [OrderStatusController::class, 'trashed'])->name('trashed');
-            Route::put('/{id}/update', [OrderStatusController::class, 'update'])->name('update');
-            Route::put('/{id}/restore', [OrderStatusController::class, 'restore'])->name('restore');
-            Route::post('/store', [OrderStatusController::class, 'store'])->name('store');
-            Route::delete('/destroy/{id}', [OrderStatusController::class, 'destroy'])->name('destroy');
+            Route::prefix('/status')->name('status.')->group(function () {
+                Route::get('/', [OrderStatusController::class, 'index'])->name('index');
+                Route::get('/create', [OrderStatusController::class, 'create'])->name('create');
+                Route::get('/{id}/edit', [OrderStatusController::class, 'edit'])->name('edit');
+                Route::get('/trashed', [OrderStatusController::class, 'trashed'])->name('trashed');
+                Route::put('/{id}/update', [OrderStatusController::class, 'update'])->name('update');
+                Route::put('/{id}/restore', [OrderStatusController::class, 'restore'])->name('restore');
+                Route::post('/store', [OrderStatusController::class, 'store'])->name('store');
+                Route::delete('/destroy/{id}', [OrderStatusController::class, 'destroy'])->name('destroy');
+            });
         });
     });
 });
+
+
+
+
+

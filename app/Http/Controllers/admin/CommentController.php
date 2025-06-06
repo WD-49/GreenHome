@@ -121,6 +121,69 @@ class CommentController extends Controller
         return view('admin.comments.show', compact('comment', 'relatedComments'));
     }
 
+
+public function show(Request $request, $id)
+{
+    $comment = Comment::with(['product.category', 'user.profile'])->findOrFail($id);
+
+    // Query khởi tạo với comment cùng sản phẩm
+    $relatedComments = Comment::where('product_id', $comment->product_id)
+                              ->where('id', '!=', $comment->id)
+                              ->with(['user.profile', 'product.category', 'product.brand']);
+
+    // Lọc theo tên user
+    if ($request->filled('user_name')) {
+        $relatedComments->whereHas('user', function ($q) use ($request) {
+            $q->where('name', 'like', '%' . $request->user_name . '%');
+        });
+    }
+
+    // Lọc theo trạng thái
+    if ($request->filled('status')) {
+        $relatedComments->where('status', $request->status);
+    }
+
+    // Lọc theo ngày
+    if ($request->filled('min_date')) {
+        $relatedComments->whereDate('created_at', '>=', $request->min_date);
+    }
+    if ($request->filled('max_date')) {
+        $relatedComments->whereDate('created_at', '<=', $request->max_date);
+    }
+
+    // Lọc theo thương hiệu
+    if ($request->filled('brand_id')) {
+        $relatedComments->whereHas('product.brand', function ($q) use ($request) {
+            $q->where('id', $request->brand_id);
+        });
+    }
+
+    // Lọc theo danh mục
+    if ($request->filled('category_id')) {
+        $relatedComments->whereHas('product.category', function ($q) use ($request) {
+            $q->where('id', $request->category_id);
+        });
+    }
+
+    $relatedComments = $relatedComments->latest()->paginate(5)->appends($request->query());
+
+    // Lấy danh sách danh mục, thương hiệu để hiển thị form lọc
+    $brands = \App\Models\Brand::all();
+    $categories = \App\Models\Category::all();
+
+    return view('admin.comments.show', compact(
+        'comment',
+        'relatedComments',
+        'brands',
+        'categories',
+        'request'
+    ));
+}
+
+
+
+
+
     public function showAgain(Request $request)
     {
         $comment = Comment::findOrFail($request->id);
