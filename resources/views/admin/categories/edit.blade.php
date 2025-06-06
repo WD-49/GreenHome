@@ -37,7 +37,7 @@
     </div>
 
     <!-- Thêm CKEditor -->
-    <script src="https://cdn.ckeditor.com/ckeditor5/35.0.1/classic/ckeditor.js"></script>
+    {{-- <script src="https://cdn.ckeditor.com/ckeditor5/35.0.1/classic/ckeditor.js"></script> --}}
     <script>
         ClassicEditor
             .create(document.querySelector('#description'))

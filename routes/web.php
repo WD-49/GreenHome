@@ -35,11 +35,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/{slug}/restore', [CategoryController::class, 'restore'])->name('restore'); // Sử dụng slug
         Route::delete('/{slug}/force-delete', [CategoryController::class, 'forceDelete'])->name('forceDelete'); // Sử dụng slug
         Route::get('/{slug}', [CategoryController::class, 'show'])->name('show'); // Show category details by slug
+        // Route::get('products/{product}/variants', [ProductController::class, 'variants'])->name('products.variants');
     });
 
 
     // Quản lý sản phẩm
     Route::prefix('/products')->name('products.')->group(function () {
+   
         Route::get('/list', [ProductController::class, 'index'])->name('index');
         Route::get('/create-new', [ProductController::class, 'create'])->name('create');
         Route::post('/store-new', [ProductController::class, 'store'])->name('store');
