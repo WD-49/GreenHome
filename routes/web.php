@@ -12,6 +12,7 @@ use App\Http\Controllers\admin\DashboardController;
 use App\Http\Controllers\admin\AttributeValueController;
 use App\Http\Controllers\admin\Account\AccountAdminController;
 use App\Http\Controllers\admin\Account\AccountUsersController;
+use App\Http\Controllers\admin\BlogController;
 use App\Http\Controllers\admin\CategoryController;  // Tham chiếu đúng
 use App\Http\Controllers\admin\PaymentMethodController;
 use App\Http\Controllers\admin\CommentController;
@@ -21,7 +22,20 @@ use App\Http\Controllers\admin\OrderStatusController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::prefix('admin')->name('admin.')->group(function () {
+
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    // bai viet
+    Route::prefix('/blogs')->name('blogs.')->group(function () {
+        Route::get('/', [BlogController::class, 'index'])->name('index');
+        Route::get('/show/{id}', [BlogController::class, 'show'])->name('show');
+        Route::get('/create', [BlogController::class, 'create'])->name(name: 'create');
+        Route::get('/edit/{id}', action: [BlogController::class, 'edit'])->name('edit');
+        Route::post('/store', [BlogController::class, 'store'])->name('store');
+        Route::put('/store/{id}', [BlogController::class, 'update'])->name('update');
+        Route::delete('/destroy', [BlogController::class, 'destroy'])->name('destroy');
+    });
+
 
     // Quản lý danh mục
     Route::prefix('/categories')->name('categories.')->group(function () {
