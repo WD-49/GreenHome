@@ -23,7 +23,7 @@ return new class extends Migration {
             $table->string('thumbnail')->nullable(); // URL ảnh
 
             // Trạng thái
-            $table->enum('status', ['draft', 'published', 'rejected'])->default('draft');
+            $table->boolean('status');
 
             // Tác giả
             $table->foreignId('author_id')
