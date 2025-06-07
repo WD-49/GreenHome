@@ -103,20 +103,21 @@
 
                     @if (!empty($product->image))
                         <div class="mt-2">
-                            <img src="{{ asset('storage/' . $product->image) }}" width="100" alt="Ảnh sản phẩm">
+                            <img src="{{ asset('storage/' . $product->image) }}" width="200" alt="Ảnh sản phẩm">
                         </div>
                     @endif
                 </div>
 
-                {{-- Mô tả --}}
-                <div class="mb-3">
-                    <label for="description" class="form-label">Mô tả</label>
-                    <textarea class="form-control @error('description') is-invalid @enderror" name="description" id="description"
-                        rows="3">{!! old('description', $product->description) !!}</textarea>
-                    @error('description')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+
+            </div>
+            {{-- Mô tả --}}
+            <div class="mb-3">
+                <label for="description" class="form-label">Mô tả</label>
+                <textarea class="form-control @error('description') is-invalid @enderror" name="description" id="description"
+                    rows="3">{!! old('description', $product->description) !!}</textarea>
+                @error('description')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
             </div>
         </div>
 
@@ -126,3 +127,27 @@
         </div>
     </form>
 @endsection
+
+@push('scripts')
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const editorElement = document.querySelector('#description');
+            if (editorElement) {
+                ClassicEditor.create(editorElement)
+                    .then(editor => {
+                        // chỉnh chiều cao vùng editable
+                        editor.editing.view.change(writer => {
+                            writer.setStyle('height', '300px', editor.editing.view.document.getRoot());
+                        });
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    });
+            } else {
+                console.error('Phần tử #description không tồn tại trong DOM');
+            }
+        });
+    </script>
+@endpush

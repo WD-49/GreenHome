@@ -22,13 +22,13 @@ class StoreBlogRequest extends FormRequest
     public function rules(): array
     {
         return [
-        'title' => 'required|string|max:255',
-        'slug' => 'nullable|string|max:255|unique:blogs,slug',
-        'summary' => 'required|string',
-        'content' => 'required|string',
-        'thumbnail' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
-        'status' => 'required|boolean',
-        'blog_category_id' => 'required|exists:blog_categories,id',
+            'title' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255|unique:blogs,slug',
+            'summary' => 'required|string',
+            'content' => 'required|string',
+            'thumbnail' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'status' => 'required|boolean',
+            'blog_category_id' => 'required|exists:blog_categories,id',
         ];
     }
 }

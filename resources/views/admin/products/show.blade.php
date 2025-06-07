@@ -3,137 +3,146 @@
 @section('title', 'Chi tiết sản phẩm - ' . $product->name)
 
 @section('content')
-    <style>
-        .product-detail-container {
-            max-width: 1200px;
-            margin: 40px auto;
-            background: #fff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-            font-family: 'Arial', sans-serif;
-        }
+    @push('styles')
+        <style>
+            .product-detail-container {
+                max-width: 1200px;
+                margin: 40px auto;
+                background: #fff;
+                padding: 30px;
+                border-radius: 12px;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+                font-family: 'Arial', sans-serif;
+            }
 
-        .product-main-image {
-            width: 100%;
-            border-radius: 10px;
-            object-fit: contain;
-            background-color: #f5f5f5;
-        }
+            .product-main-image {
+                width: 100%;
+                border-radius: 10px;
+                object-fit: contain;
+                background-color: #f5f5f5;
+            }
 
-        .product-thumbnails img {
-            width: 70px;
-            height: 70px;
-            object-fit: cover;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-right: 10px;
-            transition: border-color 0.3s ease;
-        }
+            .product-thumbnails img {
+                width: 70px;
+                height: 70px;
+                object-fit: cover;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                cursor: pointer;
+                margin-right: 10px;
+                transition: border-color 0.3s ease;
+            }
 
-        .product-thumbnails img:hover {
-            border-color: #007bff;
-        }
+            .product-thumbnails img:hover {
+                border-color: #007bff;
+            }
 
-        .product-title {
-            font-size: 28px;
-            font-weight: 700;
-            color: #1a1a1a;
-            margin-bottom: 20px;
-        }
+            .product-title {
+                font-size: 28px;
+                font-weight: 700;
+                color: #1a1a1a;
+                margin-bottom: 20px;
+            }
 
-        .detail-label {
-            font-weight: 600;
-            color: #555;
-            font-size: 16px;
-            width: 150px;
-            display: inline-block;
-        }
+            .detail-label {
+                font-weight: 600;
+                color: #555;
+                font-size: 16px;
+                width: 150px;
+                display: inline-block;
+            }
 
-        .detail-value {
-            font-size: 16px;
-            color: #333;
-            font-weight: 500;
-        }
+            .detail-value {
+                font-size: 16px;
+                color: #333;
+                font-weight: 500;
+            }
 
-        .price {
-            font-size: 24px;
-            font-weight: 700;
-            color: #e74c3c;
-            background: #f1f1f1;
-            padding: 8px 16px;
-            border-radius: 6px;
-            display: inline-block;
-        }
+            .price {
+                font-size: 24px;
+                font-weight: 700;
+                color: #e74c3c;
+                background: #f1f1f1;
+                padding: 8px 16px;
+                border-radius: 6px;
+                display: inline-block;
+            }
 
-        .promotional-price {
-            font-size: 20px;
-            font-weight: 600;
-            color: #27ae60;
-            background: #e8f5e9;
-            padding: 8px 16px;
-            border-radius: 6px;
-            display: inline-block;
-        }
+            .promotional-price {
+                font-size: 20px;
+                font-weight: 600;
+                color: #27ae60;
+                background: #e8f5e9;
+                padding: 8px 16px;
+                border-radius: 6px;
+                display: inline-block;
+            }
 
-        .status-active {
-            color: #27ae60;
-            font-weight: 600;
-            background: #e8f5e9;
-            padding: 5px 10px;
-            border-radius: 6px;
-        }
+            .status-active {
+                color: #27ae60;
+                font-weight: 600;
+                background: #e8f5e9;
+                padding: 5px 10px;
+                border-radius: 6px;
+            }
 
-        .status-inactive {
-            color: #e74c3c;
-            font-weight: 600;
-            background: #fce4e4;
-            padding: 5px 10px;
-            border-radius: 6px;
-        }
+            .status-inactive {
+                color: #e74c3c;
+                font-weight: 600;
+                background: #fce4e4;
+                padding: 5px 10px;
+                border-radius: 6px;
+            }
 
-        .tabs-section {
-            margin-top: 40px;
-        }
+            .tabs-section {
+                margin-top: 40px;
+            }
 
-        .tab-content {
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
-            font-size: 16px;
-            color: #333;
-        }
+            .tab-content {
+                background: #f9f9f9;
+                padding: 20px;
+                border-radius: 8px;
+                font-size: 16px;
+                color: #333;
+            }
 
-        .nav-tabs .nav-link {
-            font-size: 16px;
-            font-weight: 600;
-            color: #555;
-        }
+            .nav-tabs .nav-link {
+                font-size: 16px;
+                font-weight: 600;
+                color: #555;
+            }
 
-        .nav-tabs .nav-link.active {
-            color: #007bff;
-            border-color: #007bff;
-        }
+            .nav-tabs .nav-link.active {
+                color: #007bff;
+                border-color: #007bff;
+            }
 
-        .btn-info,
-        .btn-outline-secondary {
-            font-size: 14px;
-            font-weight: 600;
-            padding: 10px 20px;
-            border-radius: 6px;
-        }
+            .btn-info,
+            .btn-outline-secondary {
+                font-size: 14px;
+                font-weight: 600;
+                padding: 10px 20px;
+                border-radius: 6px;
+            }
 
-        .btn-info {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
+            .btn-info {
+                background-color: #007bff;
+                border-color: #007bff;
+            }
 
-        .btn-outline-secondary {
-            border-color: #6c757d;
-            color: #6c757d;
-        }
-    </style>
+            .btn-outline-secondary {
+                border-color: #6c757d;
+                color: #6c757d;
+            }
+
+            .tab-content img {
+                max-width: 1.2em;
+                max-height: 1.2em;
+                vertical-align: middle;
+            }
+        </style>
+    @endpush
+
 
     <div class="container product-detail-container">
         <div class="row">
@@ -182,6 +191,11 @@
                 <div class="mb-3">
                     <span class="detail-label">Số lượng:</span>
                     <span class="detail-value">{{ $product->quantity }}</span>
+                </div>
+
+                <div class="mb-3">
+                    <span class="detail-label">Slug:</span>
+                    <span class="detail-value">{{ $product->slug }}</span>
                 </div>
 
                 <!-- Category -->
@@ -256,13 +270,13 @@
 
                         <div class="col-md-4 d-flex justify-content-end gap-1 align-items-end">
                             <div class="col">
-                                <button type="submit" class="btn btn-primary w-100">
+                                <button type="submit" class="btn btn-outline-primary w-100">
                                     <i class="fas fa-search me-1"></i> Tìm kiếm
                                 </button>
                             </div>
                             <div class="col">
                                 <a href="{{ route('admin.products.show', $product) }}#comments"
-                                    class="btn btn-warning w-100">
+                                    class="btn btn-outline-primary w-100">
                                     <i class="fas fa-sync me-1"></i> Làm mới
                                 </a>
                             </div>
@@ -303,18 +317,28 @@
                                             <ul class="dropdown-menu dropdown-menu-end"
                                                 aria-labelledby="dropdownMenuButton{{ $comment->id }}">
                                                 <li>
-                                                    @if ($comment->status !== 'hiển thị')
-                                                        <a class="dropdown-item"
-                                                            href="{{ route('admin.comments.approve', $comment) }}">
-                                                            Xem biến thể
-                                                        </a>
+                                                    @if ($comment->status == 'chưa duyệt' || $comment->status == 'ẩn')
+                                                        <form method="POST"
+                                                            action="{{ route('admin.comments.approve') }}#comments"
+                                                            class="d-inline">
+                                                            @csrf
+                                                            <input type="hidden" name="id"
+                                                                value="{{ $comment->id }}">
+                                                            <button class="dropdown-item text-success" type="submit">
+                                                                Duyệt </button>
+                                                        </form>
                                                     @endif
 
-                                                    @if ($comment->status === 'hiển thị')
-                                                        <a class="dropdown-item"
-                                                            href="{{ route('admin.products.variants.index', $product) }}">
-                                                            Xem biến thể
-                                                        </a>
+                                                    @if ($comment->status == 'hiển thị')
+                                                        <form method="POST"
+                                                            action="{{ route('admin.comments.hide') }}#comments"
+                                                            class="d-inline">
+                                                            @csrf
+                                                            <input type="hidden" name="id"
+                                                                value="{{ $comment->id }}">
+                                                            <button class="dropdown-item text-warning" type="submit">
+                                                                Ẩn </button>
+                                                        </form>
                                                     @endif
                                                 </li>
                                                 <li>
@@ -343,7 +367,6 @@
                     </table>
                     <div class="mt-3">
                         {{ $comments->withQueryString()->fragment('comments')->links() }}
-
                     </div>
                 </div>
                 <div class="tab-pane fade" id="variants" role="tabpanel">
@@ -387,21 +410,34 @@
                                             </span>
                                         </td>
                                         <td class="text-end">
-                                            <a href="{{ route('admin.products.variants.edit', [$variant->product, $variant]) }}"
-                                                class="btn btn-warning btn-sm">
-                                                <i class="fa-solid fa-pen"></i>
-                                            </a>
-                                            <form
-                                                action="{{ route('admin.products.variants.destroy', [$variant->product, $variant]) }}"
-                                                method="POST" class="d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm btn-confirm"
-                                                    title="Xóa"
-                                                    data-confirm-message="Bạn có chắc chắn muốn bỏ biến thể này vào thùng rác không?">
-                                                    <i class="fa-solid fa-trash"></i>
+                                            <div class="dropdown">
+                                                <button class="btn btn-light btn-sm" type="button"
+                                                    id="dropdownMenuButton{{ $product->id }}" data-bs-toggle="dropdown"
+                                                    aria-expanded="false">
+                                                    <i class="fas fa-ellipsis-v"></i>
                                                 </button>
-                                            </form>
+                                                <ul class="dropdown-menu dropdown-menu-end"
+                                                    aria-labelledby="dropdownMenuButton{{ $product->id }}">
+                                                    <li>
+                                                        <a class="dropdown-item"
+                                                            href="{{ route('admin.products.variants.edit', [$variant->product, $variant]) }}">
+                                                            Chỉnh sửa
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <form
+                                                            action="{{ route('admin.products.variants.destroy', [$variant->product, $variant]) }}"
+                                                            method="POST"
+                                                            onsubmit="return confirm('Bạn có chắc chắn muốn bỏ sản phẩm này vào thùng rác không?')">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button class="dropdown-item text-danger" type="submit">
+                                                                Xóa sản phẩm
+                                                            </button>
+                                                        </form>
+                                                    </li>
+                                                </ul>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -427,7 +463,8 @@
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
     <script>
         // console.log("hi");
         document.addEventListener('DOMContentLoaded', function() {

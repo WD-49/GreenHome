@@ -8,6 +8,7 @@ use App\Http\Requests\admin\blog\UpdateBlogRequest;
 use App\Models\Blog;
 use App\Models\BlogCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class BlogController extends Controller
@@ -35,9 +36,12 @@ class BlogController extends Controller
             return back()->withErrors(['slug' => 'Slug đã tồn tại.'])->withInput();
         }
         if ($request->hasFile('thumbnail')) {
-            $data['thumbnail'] = $request->file('thumbnail')->store('thumbnails', 'public');
+            $data['thumbnail'] = $request->file('thumbnail')->store('images/blogs/thumbnail', 'public');
         }
-        $data['author_id'] = 1;
+        if (Auth::user()) {
+            $data['author_id'] = Auth::user()->id;
+            // dd($data['author_id']);
+        }
         Blog::create($data);
         return redirect()->route('admin.blogs.index')->with('success', 'Tạo bài viết thành công!');
     }
@@ -63,14 +67,18 @@ class BlogController extends Controller
         $blog = Blog::findOrFail($id);
         if ($request->hasFile('thumbnail')) {
             $file = $request->file('thumbnail');
-            $path = $file->store('thumbnails', 'public');
+            // Lưu vào thư mục public/images/blogs/thumbnail
+            $path = $file->store('images/blogs/thumbnail', 'public');
             $validatedData['thumbnail'] = $path;
+        } else {
+            // Giữ lại ảnh cũ nếu không upload mới
+            $validatedData['thumbnail'] = $blog->thumbnail ?? null;
         }
-        $data['author_id'] = 1;
         $blog->update($data);
         return redirect()->route('admin.blogs.index')->with('success', 'Cập nhật bài viết thành công!');
     }
-    public function destroy(Request $request) {
+    public function destroy(Request $request)
+    {
         $id = $request->input('id');
         $blog = Blog::findOrFail($id);
         $blog->delete();

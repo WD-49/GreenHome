@@ -147,20 +147,34 @@
                                         </span>
                                     </td>
                                     <td class="text-end">
-                                        <a href="{{ route('admin.products.variants.edit', [$variant->product, $variant]) }}"
-                                            class="btn btn-warning btn-sm">
-                                            <i class="fa-solid fa-pen"></i>
-                                        </a>
-                                        <form
-                                            action="{{ route('admin.products.variants.destroy', [$variant->product, $variant]) }}"
-                                            method="POST" class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm btn-confirm" title="Xóa"
-                                                data-confirm-message="Bạn có chắc chắn muốn bỏ biến thể này vào thùng rác không?">
-                                                <i class="fa-solid fa-trash"></i>
+                                        <div class="dropdown">
+                                            <button class="btn btn-light btn-sm" type="button"
+                                                id="dropdownMenuButton{{ $product->id }}" data-bs-toggle="dropdown"
+                                                aria-expanded="false">
+                                                <i class="fas fa-ellipsis-v"></i>
                                             </button>
-                                        </form>
+                                            <ul class="dropdown-menu dropdown-menu-end"
+                                                aria-labelledby="dropdownMenuButton{{ $product->id }}">
+                                                <li>
+                                                    <a class="dropdown-item"
+                                                        href="{{ route('admin.products.variants.edit', [$variant->product, $variant]) }}">
+                                                        Chỉnh sửa
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <form
+                                                        action="{{ route('admin.products.variants.destroy', [$variant->product, $variant]) }}"
+                                                        method="POST"
+                                                        onsubmit="return confirm('Bạn có chắc chắn muốn bỏ sản phẩm này vào thùng rác không?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button class="dropdown-item text-danger" type="submit">
+                                                            Xóa sản phẩm
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach

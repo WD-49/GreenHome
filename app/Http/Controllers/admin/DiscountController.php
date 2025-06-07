@@ -9,6 +9,7 @@ use App\Models\DiscountUsage;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -227,6 +228,10 @@ class DiscountController extends Controller
         // dd($max_discount);
         $validated['max_discount'] = $max_discount;
         // dd($validated['max_discount']);
+
+        if (Auth::user()) {
+            $validated['created_by'] = Auth::user()->id;
+        }
 
         $discount = Discount::create($validated);
 

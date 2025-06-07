@@ -23,7 +23,7 @@
                 <p class="card-subtitle">Quản lý các bài viết trên blog</p>
             </div>
             <div class="ms-auto mt-3 mt-md-0">
-                <a href="" class="btn btn-primary">
+                <a href="{{ route('admin.blogs.create') }}" class="btn btn-primary">
                     <i class="fa-solid fa-plus me-1"></i> Thêm mới
                 </a>
             </div>
@@ -34,13 +34,12 @@
                 <p class="text-center text-muted">Chưa có bài viết nào.</p>
             </div>
         @else
-            <table class="table table-bordered mt-4 table-striped">
+            <table class="table table-bordered mt-4">
                 <thead class="thead-dark">
                     <tr>
                         <th>STT</th>
                         <th>Tiêu đề</th>
                         <th>Slug</th>
-                        <th>Tóm tắt</th>
                         <th>Trạng thái</th>
                         <th>Thể loại</th>
                         <th>Thumbnail</th>
@@ -54,7 +53,6 @@
                             <td>{{ $key + 1 }}</td>
                             <td>{{ $blog->title }}</td>
                             <td>{{ $blog->slug }}</td>
-                            <td>{{ \Illuminate\Support\Str::limit($blog->summary, 50) }}</td>
                             <td>
                                 @if ($blog->status == 1)
                                     <span class="badge bg-success">Hiển thị</span>
@@ -71,7 +69,7 @@
                                 @endif
                             </td>
                             <td>{{ $blog->created_at->format('d/m/Y') }}</td>
-                            <td class="d-flex gap-1">
+                            <td class="d-flex">
                                 <div class="dropdown">
                                     <button class="btn btn-light btn-sm me-2" type="button" id="dropdownMenuButton"
                                         data-bs-toggle="dropdown" aria-expanded="false">
@@ -79,21 +77,23 @@
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
                                         <li>
-                                            <a class="dropdown-item" href="{{route('admin.blogs.show', $id = $blog->id)}}">
+                                            <a class="dropdown-item"
+                                                href="{{ route('admin.blogs.show', $id = $blog->id) }}">
                                                 Chi tiết
                                             </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item" href="{{route('admin.blogs.edit', $id = $blog->id)}}">
+                                            <a class="dropdown-item"
+                                                href="{{ route('admin.blogs.edit', $id = $blog->id) }}">
                                                 Chỉnh sửa
                                             </a>
                                         </li>
                                         <li>
-                                            <form action="{{route('admin.blogs.destroy')}}" method="POST"
+                                            <form action="{{ route('admin.blogs.destroy') }}" method="POST"
                                                 onsubmit="return confirm('Bạn có chắc chắn xóa vĩnh viễn bài viết này?')">
                                                 @csrf
                                                 @method('DELETE')
-                                                <input type="hidden" name="id" value="{{$blog->id}}">
+                                                <input type="hidden" name="id" value="{{ $blog->id }}">
                                                 <button class="dropdown-item text-danger" type="submit">
                                                     Xóa bài viết
                                                 </button>

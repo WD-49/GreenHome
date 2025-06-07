@@ -81,7 +81,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/{slug}', [CategoryController::class, 'show'])->name('show'); // Show category details by slug
         });
 
-        // quản lý blog_categiry
+        // quản lý blog_category
         Route::prefix('/blog-categories')->name('blog_categories.')->group(function () {
             Route::get('/list', [BlogCategoryController::class, 'index'])->name('index');
             Route::get('/create', [BlogCategoryController::class, 'create'])->name('create');
@@ -104,8 +104,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/store/{id}', [BlogController::class, 'update'])->name('update');
             Route::delete('/destroy', [BlogController::class, 'destroy'])->name('destroy');
         });
-
-
         // Quản lý sản phẩm
         Route::prefix('/products')->name('products.')->group(function () {
             Route::get('/list', [ProductController::class, 'index'])->name('index');
@@ -192,9 +190,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/{id}/show', [ReviewController::class, 'show'])->name('show');
             Route::patch('/{id}/status', [ReviewController::class, 'updateStatus'])->name('updateStatus');
             Route::get('/trash', [ReviewController::class, 'trash'])->name('trash');
-            Route::post('/{id}/restore', [ReviewController::class, 'restore'])->name('restore');
-
-
         });
 
         //quản lí phương thức thanh toán

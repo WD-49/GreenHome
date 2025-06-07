@@ -374,6 +374,7 @@ class ProductController extends Controller
             }
         }
 
+        $product->slug = Str::slug($request->input('name'));
         $product->update($dataValidate);
 
         return redirect()->route('admin.products.index')->with('success', 'Cập nhật sản phẩm thành công!');

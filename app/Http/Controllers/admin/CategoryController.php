@@ -188,35 +188,35 @@ class CategoryController extends Controller
         ]);
     }
 
-  public function show($slug, Request $request)
-{
-    $category = Category::where('slug', $slug)->firstOrFail();
+    public function show($slug, Request $request)
+    {
+        $category = Category::where('slug', $slug)->firstOrFail();
 
-    $productsQuery = $category->products()
-        ->with(['productVariants.productVariantValues'])
-        ->withTrashed();
+        $productsQuery = $category->products()
+            ->with(['productVariants.productVariantValues'])
+            ->withTrashed();
 
-    if ($request->filled('product_name')) {
-        $productsQuery->where('name', 'like', '%' . $request->product_name . '%');
+        if ($request->filled('product_name')) {
+            $productsQuery->where('name', 'like', '%' . $request->product_name . '%');
+        }
+
+        // Lọc giá dựa trên biến thể sản phẩm
+        if ($request->filled('min_price') || $request->filled('max_price')) {
+            $minPrice = $request->input('min_price', 0);
+            $maxPrice = $request->input('max_price', PHP_INT_MAX);
+
+            // Lấy danh sách product_id có biến thể nằm trong khoảng giá
+            $productIds = \App\Models\ProductVariant::whereBetween('price', [$minPrice, $maxPrice])
+                ->pluck('product_id')
+                ->unique();
+
+            // Lọc products theo danh sách product_id trên
+            $productsQuery->whereIn('id', $productIds);
+        }
+
+        $products = $productsQuery->paginate(5);
+
+        return view('admin.categories.show', compact('category', 'products'));
     }
-
-    // Lọc giá dựa trên biến thể sản phẩm
-    if ($request->filled('min_price') || $request->filled('max_price')) {
-        $minPrice = $request->input('min_price', 0);
-        $maxPrice = $request->input('max_price', PHP_INT_MAX);
-
-        // Lấy danh sách product_id có biến thể nằm trong khoảng giá
-        $productIds = \App\Models\ProductVariant::whereBetween('price', [$minPrice, $maxPrice])
-            ->pluck('product_id')
-            ->unique();
-
-        // Lọc products theo danh sách product_id trên
-        $productsQuery->whereIn('id', $productIds);
-    }
-
-    $products = $productsQuery->paginate(5);
-
-    return view('admin.categories.show', compact('category', 'products'));
-}
 
 }

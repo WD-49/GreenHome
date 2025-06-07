@@ -127,9 +127,8 @@
                     <table class="table mb-0 text-nowrap varient-table align-middle fs-3">
                         <thead>
                             <tr>
-                                <th class="px-0 text-muted">ID</th>
+                                <th class="px-0 text-muted">STT</th>
                                 <th class="px-0 text-muted">Tên sản phẩm</th>
-                                <th class="px-0 text-muted">Slug</th>
                                 <th class="px-0 text-muted">Danh mục</th>
                                 <th class="px-0 text-muted">Ảnh</th>
                                 <th class="px-0 text-muted">Số lượng</th>
@@ -142,7 +141,6 @@
                                 <tr>
                                     <td class="px-0">{{ $product->id }}</td>
                                     <td class="px-0">{{ $product->name }}</td>
-                                    <td class="px-0">{{ $product->slug }}</td>
                                     <td class="px-0">{{ $product->category->name }}</td>
                                     <td class="px-0">
                                         <img src="{{ asset('storage/' . $product->image) }}" width="60"

@@ -56,9 +56,8 @@ class ProductVariant extends Model
     public static function generateUniqueSku(string $productName): string
     {
         do {
-            $sku = Str::slug(substr($productName, 0, 5)) . '-' . rand(1000, 9999);
+            $sku = 'SP' . rand(1000, 9999);
         } while (self::where('sku', $sku)->exists());
-
         return $sku;
     }
 

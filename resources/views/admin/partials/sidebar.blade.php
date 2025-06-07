@@ -83,7 +83,6 @@
 
                             </a>
                         </li>
-
                     </ul>
                 </li>
 
@@ -118,7 +117,7 @@
                                     <div class="round-16 d-flex align-items-center justify-content-center">
                                         <i class="ti ti-circle"></i>
                                     </div>
-                                    <span class="hide-menu">Trạng thái thanh toán</span>
+                                    <span class="hide-menu">Trạng thái đơn hàng</span>
                                 </div>
 
                             </a>
@@ -185,20 +184,51 @@
                         <span class="hide-menu">Bình luận</span>
                     </a>
                 </li>
-            <li class="sidebar-item">
-    <a class="sidebar-link" href="{{ route('admin.reviews.index') }}" aria-expanded="false">
-        <i class="ti ti-star"></i> 
-        <span class="hide-menu">Đánh giá</span>
-    </a>
-</li>
-
-
-                 <li class="sidebar-item">
-                    <a class="sidebar-link" href="{{ route('admin.blogs.index') }}" aria-expanded="false">
-                        <i class="ti ti-book"></i>
-                        <span class="hide-menu">Bài viết</span>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" href="{{ route('admin.reviews.index') }}" aria-expanded="false">
+                        <i class="ti ti-star"></i>
+                        <span class="hide-menu">Đánh giá</span>
                     </a>
                 </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)"
+                        aria-expanded="false">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="d-flex">
+                                <i class="ti ti-book"></i>
+                            </span>
+                            <span class="hide-menu">Bài Viết</span>
+                        </div>
+
+                    </a>
+                    <ul aria-expanded="false" class="collapse first-level">
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between" href="{{ route('admin.blogs.index') }}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                        <i class="ti ti-circle"></i>
+                                    </div>
+                                    <span class="hide-menu">Bài viết</span>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link justify-content-between"
+                                href="{{ route('admin.blog_categories.index') }}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="round-16 d-flex align-items-center justify-content-center">
+                                        <i class="ti ti-circle"></i>
+                                    </div>
+                                    <span class="hide-menu">Danh mục</span>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+
+
 
                 <li class="sidebar-item">
                     <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)"

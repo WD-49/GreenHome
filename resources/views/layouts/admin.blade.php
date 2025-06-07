@@ -16,19 +16,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2&display=swap" rel="stylesheet">
 
     @stack('styles') {{-- Cho CSS tùy chỉnh từ các trang con --}}
+    @stack('scripts') {{-- Nơi các script từ trang con sẽ được đẩy vào --}}
+
 </head>
 
 <body>
     @if (session('success'))
-    <div class="alert alert-success custom-toast-alert-center" role="alert" id="success-alert" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; min-width: 300px;">
-        <div class="d-flex align-items-center">
-            <i class="fas fa-check-circle me-2"></i>
-            <div class="flex-grow-1">
-                <strong><i>{{ session('success') }}</i></strong>
+        <div class="alert alert-success custom-toast-alert-center" role="alert" id="success-alert"
+            style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; min-width: 300px;">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-check-circle me-2"></i>
+                <div class="flex-grow-1">
+                    <strong><i>{{ session('success') }}</i></strong>
+                </div>
+                <button type="button" class="btn-close ms-3" data-bs-dismiss="alert" aria-label="Đóng"></button>
             </div>
-            <button type="button" class="btn-close ms-3" data-bs-dismiss="alert" aria-label="Đóng"></button>
         </div>
-    </div>
     @endif
 
     <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full">
@@ -58,7 +61,7 @@
     {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js"></script> --}}
     {{-- <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script> --}}
 
-    @stack('scripts') {{-- Nơi các script từ trang con sẽ được đẩy vào --}}
 
 </body>
+
 </html>

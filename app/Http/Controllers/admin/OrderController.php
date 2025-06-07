@@ -81,7 +81,7 @@ class OrderController extends Controller
         $discounts = Discount::all();
         $payMethods = PaymentMethod::all();
         $productVariants = ProductVariant::with('product:id,name')->where('status', 1)->get();
-        $discounts = Discount::where('status', 'active') /* ... các điều kiện khác ... */ ->get();
+        $discounts = Discount::where('status', 'active')->get();
 
         $productVariantsForJs = $productVariants->mapWithKeys(function ($variant) {
             return [
@@ -92,6 +92,7 @@ class OrderController extends Controller
                 ]
             ];
         });
+
 
         $discountsForJs = $discounts->mapWithKeys(function ($discount) {
             return [
@@ -104,6 +105,8 @@ class OrderController extends Controller
                 ]
             ];
         });
+        // dd($productVariantsForJs, $discountsForJs);
+
 
         return view('admin.orders.create', compact(
             'users',

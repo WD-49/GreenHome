@@ -15,9 +15,9 @@ class ReviewController extends Controller
     public function index()
     {
         //
-       $reviews = Review::with(['user', 'productVariant'])->paginate(10);
+        $reviews = Review::with(['user', 'productVariant'])->paginate(10);
 
-// Test: dd($reviews->pluck('rating'));
+        // Test: dd($reviews->pluck('rating'));
 
         return view('admin.reviews.index', compact('reviews'));
     }
@@ -25,15 +25,15 @@ class ReviewController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-   public function create()
-{
-    $productVariants = ProductVariant::all();
+    public function create()
+    {
+        $productVariants = ProductVariant::all();
 
-    return view('admin.reviews.create', [
-        'productVariants' => $productVariants,
-       
-    ]);
-}
+        return view('admin.reviews.create', [
+            'productVariants' => $productVariants,
+
+        ]);
+    }
 
 
     /**
@@ -85,33 +85,33 @@ class ReviewController extends Controller
     {
         //
         $review = Review::findOrFail($id);
-        $review->delete();  
+        $review->delete();
         return redirect()->route('admin.reviews.index')->with('success', 'Review deleted successfully.');
     }
-   
-  
- 
-public function trash()
-{
-    // Lấy các review đã bị xóa mềm (soft deleted)
-    $reviews = Review::onlyTrashed()->paginate(10);
 
-    return view('admin.reviews.trash', compact('reviews'));
-}
-public function restore($id)
-{
-    $review = Review::withTrashed()->findOrFail($id);
-    $review->restore();
 
-    return redirect()->route('admin.reviews.trash')->with('success', 'Đánh giá đã được phục hồi thành công.');
-}
 
-public function forceDelete($id)
-{
-    $review = Review::withTrashed()->findOrFail($id);
-    $review->forceDelete();
+    public function trash()
+    {
+        // Lấy các review đã bị xóa mềm (soft deleted)
+        $reviews = Review::onlyTrashed()->paginate(10);
 
-    return redirect()->route('admin.reviews.trash')->with('success', 'Đánh giá đã bị xóa vĩnh viễn.');
-}
+        return view('admin.reviews.trash', compact('reviews'));
+    }
+    public function restore($id)
+    {
+        $review = Review::withTrashed()->findOrFail($id);
+        $review->restore();
+
+        return redirect()->route('admin.reviews.trash')->with('success', 'Đánh giá đã được phục hồi thành công.');
+    }
+
+    public function forceDelete($id)
+    {
+        $review = Review::withTrashed()->findOrFail($id);
+        $review->forceDelete();
+
+        return redirect()->route('admin.reviews.trash')->with('success', 'Đánh giá đã bị xóa vĩnh viễn.');
+    }
 
 }

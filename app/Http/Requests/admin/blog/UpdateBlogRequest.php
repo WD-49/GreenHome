@@ -26,7 +26,7 @@ class UpdateBlogRequest extends FormRequest
             'slug' => 'nullable|string|max:255|',
             'summary' => 'required|string',
             'content' => 'required|string',
-            'thumbnail' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'thumbnail' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'status' => 'required|boolean',
             'blog_category_id' => 'required|exists:blog_categories,id',
         ];
