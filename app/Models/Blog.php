@@ -11,6 +11,7 @@ class Blog extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+
         'title',
         'slug',
         'summary',
@@ -28,7 +29,6 @@ class Blog extends Model
     {
         return $this->belongsTo(BlogCategory::class, 'blog_category_id');
     }
-
     /**
      * Tác giả bài viết
      */
