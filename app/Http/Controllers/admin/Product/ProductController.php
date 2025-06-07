@@ -130,6 +130,7 @@ class ProductController extends Controller
 
     public function show($id, Request $request)
     {
+        // dd($id);
         $product = Product::with(['category', 'brand'])
             ->findOrFail($id);
 
@@ -358,9 +359,6 @@ class ProductController extends Controller
             'category_id' => 'required|exists:categories,id',
             'brand_id' => 'required|exists:brands,id',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
-            'price' => 'required|numeric|min:0|max:99999999',
-            'promotional_price' => 'nullable|numeric|min:0|lt:price',
-            'quantity' => 'required|integer|min:1',
             'date_of_entry' => 'required|date',
             'description' => 'nullable|string',
             'status' => 'required|in:0,1',

@@ -16,8 +16,8 @@
             <form method="GET" action="{{ route('admin.brands.index') }}" class="row g-3">
                 <div class="col-md-6">
                     <label for="keyword" class="form-label">Từ khóa</label>
-                    <input type="text" name="keyword" id="keyword" value="{{ request('keyword') }}" class="form-control"
-                        placeholder="Nhập tên thương hiệu...">
+                    <input type="text" name="keyword" id="keyword" value="{{ request('keyword') }}"
+                        class="form-control" placeholder="Nhập tên thương hiệu...">
                 </div>
                 <div class="col-md-6 d-flex align-items-end gap-2">
                     <button type="submit" class="btn btn-primary w-100">
@@ -47,24 +47,35 @@
             <table class="table table-bordered table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 30%;">Tên thương hiệu</th>
-                        <th style="width: 50%;">Mô tả</th>
-                        <th style="width: 20%;">Hành động</th>
+                        <th style="width: 5%;">ID</th>
+                        <th style="width: 10%;">Tên thương hiệu</th>
+                        <th style="width: 10%;">Slug</th>
+                        <th style="width: 30%;">Mô tả</th>
+
+                        <th style="width: 10%;">Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($brands as $brand)
                         <tr>
+                            <td>{{ $brand->id }}</td>
                             <td>{{ $brand->name }}</td>
-                            <td>{{ $brand->description }}</td>
+                            <td>{{ $brand->slug }}</td>
+                            <td>{!! $brand->description !!}</td>
+                            
+
+
                             <td class="text-center">
-                                <a href="{{ route('admin.brands.show', $brand->slug) }}" class="btn btn-info btn-sm" title="Xem chi tiết">
+                                <a href="{{ route('admin.brands.show', $brand->slug) }}" class="btn btn-info btn-sm"
+                                    title="Xem chi tiết">
                                     <i class="fa-solid fa-eye"></i>
                                 </a>
-                                <a href="{{ route('admin.brands.edit', $brand->slug) }}" class="btn btn-warning btn-sm" title="Chỉnh sửa">
+                                <a href="{{ route('admin.brands.edit', $brand->slug) }}" class="btn btn-warning btn-sm"
+                                    title="Chỉnh sửa">
                                     <i class="fas fa-pen"></i>
                                 </a>
-                                <form action="{{ route('admin.brands.destroy', $brand->slug) }}" method="POST" class="d-inline">
+                                <form action="{{ route('admin.brands.destroy', $brand->slug) }}" method="POST"
+                                    class="d-inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger btn-sm btn-confirm" title="Xóa"
@@ -107,18 +118,20 @@
 @endsection
 
 @push('scripts')
-<script>
-    // Tránh gắn sự kiện nhiều lần bằng cách dùng once
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.btn-confirm').forEach(function(button) {
-            button.addEventListener('click', function(e) {
-                const message = button.getAttribute('data-confirm-message') || 'Bạn có chắc chắn muốn xóa?';
-                if (!confirm(message)) {
-                    e.preventDefault();
-                }
-            }, { once: true }); // <- chỉ gắn 1 lần duy nhất
+    <script>
+        // Tránh gắn sự kiện nhiều lần bằng cách dùng once
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.btn-confirm').forEach(function(button) {
+                button.addEventListener('click', function(e) {
+                    const message = button.getAttribute('data-confirm-message') ||
+                        'Bạn có chắc chắn muốn xóa?';
+                    if (!confirm(message)) {
+                        e.preventDefault();
+                    }
+                }, {
+                    once: true
+                }); // <- chỉ gắn 1 lần duy nhất
+            });
         });
-    });
-</script>
+    </script>
 @endpush
-
