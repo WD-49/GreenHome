@@ -107,82 +107,78 @@ class CommentController extends Controller
         return redirect()->back()->with('success', 'Đã xóa vĩnh viễn bình luận.');
     }
 
-    public function show($id)
-    {
-        $comment = Comment::with(['product', 'user'])->findOrFail($id);
+    // public function show($id)
+    // {
+    //     $comment = Comment::with(['product', 'user'])->findOrFail($id);
 
-        // Lấy các comment khác cùng product_id, trừ chính comment hiện tại
+    //     // Lấy các comment khác cùng product_id, trừ chính comment hiện tại
+    //     $relatedComments = Comment::where('product_id', $comment->product_id)
+    //         ->where('id', '!=', $comment->id)
+    //         ->with('user')
+    //         ->latest()
+    //         ->get();
+
+    //     return view('admin.comments.show', compact('comment', 'relatedComments'));
+    // }
+
+
+    public function show(Request $request, $id)
+    {
+        $comment = Comment::with(['product.category', 'user.profile'])->findOrFail($id);
+
+        // Query khởi tạo với comment cùng sản phẩm
         $relatedComments = Comment::where('product_id', $comment->product_id)
             ->where('id', '!=', $comment->id)
-            ->with('user')
-            ->latest()
-            ->get();
+            ->with(['user.profile', 'product.category', 'product.brand']);
 
-        return view('admin.comments.show', compact('comment', 'relatedComments'));
+        // Lọc theo tên user
+        if ($request->filled('user_name')) {
+            $relatedComments->whereHas('user', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->user_name . '%');
+            });
+        }
+
+        // Lọc theo trạng thái
+        if ($request->filled('status')) {
+            $relatedComments->where('status', $request->status);
+        }
+
+        // Lọc theo ngày
+        if ($request->filled('min_date')) {
+            $relatedComments->whereDate('created_at', '>=', $request->min_date);
+        }
+        if ($request->filled('max_date')) {
+            $relatedComments->whereDate('created_at', '<=', $request->max_date);
+        }
+
+        // Lọc theo thương hiệu
+        if ($request->filled('brand_id')) {
+            $relatedComments->whereHas('product.brand', function ($q) use ($request) {
+                $q->where('id', $request->brand_id);
+            });
+        }
+
+        // Lọc theo danh mục
+        if ($request->filled('category_id')) {
+            $relatedComments->whereHas('product.category', function ($q) use ($request) {
+                $q->where('id', $request->category_id);
+            });
+        }
+
+        $relatedComments = $relatedComments->latest()->paginate(5)->appends($request->query());
+
+        // Lấy danh sách danh mục, thương hiệu để hiển thị form lọc
+        $brands = \App\Models\Brand::all();
+        $categories = \App\Models\Category::all();
+
+        return view('admin.comments.show', compact(
+            'comment',
+            'relatedComments',
+            'brands',
+            'categories',
+            'request'
+        ));
     }
-
-
-public function show(Request $request, $id)
-{
-    $comment = Comment::with(['product.category', 'user.profile'])->findOrFail($id);
-
-    // Query khởi tạo với comment cùng sản phẩm
-    $relatedComments = Comment::where('product_id', $comment->product_id)
-                              ->where('id', '!=', $comment->id)
-                              ->with(['user.profile', 'product.category', 'product.brand']);
-
-    // Lọc theo tên user
-    if ($request->filled('user_name')) {
-        $relatedComments->whereHas('user', function ($q) use ($request) {
-            $q->where('name', 'like', '%' . $request->user_name . '%');
-        });
-    }
-
-    // Lọc theo trạng thái
-    if ($request->filled('status')) {
-        $relatedComments->where('status', $request->status);
-    }
-
-    // Lọc theo ngày
-    if ($request->filled('min_date')) {
-        $relatedComments->whereDate('created_at', '>=', $request->min_date);
-    }
-    if ($request->filled('max_date')) {
-        $relatedComments->whereDate('created_at', '<=', $request->max_date);
-    }
-
-    // Lọc theo thương hiệu
-    if ($request->filled('brand_id')) {
-        $relatedComments->whereHas('product.brand', function ($q) use ($request) {
-            $q->where('id', $request->brand_id);
-        });
-    }
-
-    // Lọc theo danh mục
-    if ($request->filled('category_id')) {
-        $relatedComments->whereHas('product.category', function ($q) use ($request) {
-            $q->where('id', $request->category_id);
-        });
-    }
-
-    $relatedComments = $relatedComments->latest()->paginate(5)->appends($request->query());
-
-    // Lấy danh sách danh mục, thương hiệu để hiển thị form lọc
-    $brands = \App\Models\Brand::all();
-    $categories = \App\Models\Category::all();
-
-    return view('admin.comments.show', compact(
-        'comment',
-        'relatedComments',
-        'brands',
-        'categories',
-        'request'
-    ));
-}
-
-
-
-
 
     public function showAgain(Request $request)
     {
@@ -194,7 +190,15 @@ public function show(Request $request, $id)
         return redirect()->back()->with('error', 'Bình luận không ở trạng thái ẩn.');
     }
 
-    
+    public function trash()
+    {
+        $comments = Comment::onlyTrashed()->with(['user', 'product'])->paginate(10);
+
+        return view('admin.comments.trash', [
+            'title' => 'Thùng rác bình luận',
+            'comments' => $comments,
+        ]);
+    }
 
 
     public function getCommentDetailsWithProduct(Request $request, Comment $comment) // Sử dụng Route Model Binding
@@ -250,29 +254,29 @@ public function show(Request $request, $id)
         $actionsHtml = ''; // HTML cho các nút hành động mới
 
         // Nút xem chi tiết luôn có
-        $actionsHtml .= '<button class="btn btn-sm btn-outline-info view-comment-details-btn me-1" data-comment-id="'.$comment->id.'" title="Xem chi tiết"><i class="fas fa-eye"></i></button>';
+        $actionsHtml .= '<button class="btn btn-sm btn-outline-info view-comment-details-btn me-1" data-comment-id="' . $comment->id . '" title="Xem chi tiết"><i class="fas fa-eye"></i></button>';
 
         switch ($comment->status) {
             case 'hiển thị':
                 $statusText = 'Đang hiển thị';
                 $statusClassBadge = 'bg-success';
-                $actionsHtml .= '<button class="btn btn-sm btn-outline-secondary hide-comment-btn me-1" data-comment-id="'.$comment->id.'" title="Ẩn bình luận"><i class="fas fa-eye-slash"></i></button>';
+                $actionsHtml .= '<button class="btn btn-sm btn-outline-secondary hide-comment-btn me-1" data-comment-id="' . $comment->id . '" title="Ẩn bình luận"><i class="fas fa-eye-slash"></i></button>';
                 break;
             case 'ẩn':
                 $statusText = 'Bị ẩn';
                 $statusClassBadge = 'bg-warning text-dark';
-                $actionsHtml .= '<button class="btn btn-sm btn-outline-info show-again-comment-btn me-1" data-comment-id="'.$comment->id.'" title="Hiện lại bình luận"><i class="fas fa-redo-alt"></i></button>';
+                $actionsHtml .= '<button class="btn btn-sm btn-outline-info show-again-comment-btn me-1" data-comment-id="' . $comment->id . '" title="Hiện lại bình luận"><i class="fas fa-redo-alt"></i></button>';
                 break;
             case 'chưa duyệt':
             default:
                 $statusText = 'Chưa duyệt';
                 $statusClassBadge = 'bg-secondary';
-                $actionsHtml .= '<button class="btn btn-sm btn-outline-primary approve-comment-btn me-1" data-comment-id="'.$comment->id.'" title="Duyệt bình luận"><i class="fas fa-check"></i></button>';
+                $actionsHtml .= '<button class="btn btn-sm btn-outline-primary approve-comment-btn me-1" data-comment-id="' . $comment->id . '" title="Duyệt bình luận"><i class="fas fa-check"></i></button>';
                 break;
         }
         // Nút xóa mềm luôn có cho bình luận active
         if (!$comment->trashed()) {
-             $actionsHtml .= '<button class="btn btn-sm btn-outline-danger soft-delete-comment-btn" data-comment-id="'.$comment->id.'" title="Xóa mềm"><i class="fas fa-trash-alt"></i></button>';
+            $actionsHtml .= '<button class="btn btn-sm btn-outline-danger soft-delete-comment-btn" data-comment-id="' . $comment->id . '" title="Xóa mềm"><i class="fas fa-trash-alt"></i></button>';
         }
 
         return [
@@ -303,7 +307,7 @@ public function show(Request $request, $id)
         $comment->save();
 
         if ($request->ajax()) {
-             return response()->json(array_merge(
+            return response()->json(array_merge(
                 ['success' => true, 'message' => 'Đã ẩn bình luận.'],
                 $this->getStatusResponseData($comment)
             ));
@@ -366,7 +370,7 @@ public function show(Request $request, $id)
                 'message' => 'Đã khôi phục bình luận.',
                 'comment_id' => $comment->id, // Trả về ID để JS xóa hàng khỏi thùng rác
                 'new_total_comment_count' => $totalCommentsForUser, // Để cập nhật badge trên tab Bình luận
-                 // Bạn có thể trả thêm thông tin comment đã khôi phục nếu muốn thêm lại vào danh sách active
+                // Bạn có thể trả thêm thông tin comment đã khôi phục nếu muốn thêm lại vào danh sách active
                 'restored_comment_html' => $this->generateActiveCommentRowHtml($comment) // Hàm này bạn cần tự tạo
             ]);
         }
@@ -388,10 +392,10 @@ public function show(Request $request, $id)
     {
         if ($request->ajax()) {
             $trashedComments = $user->comments()
-                                    ->with('user:id,name')
-                                    ->onlyTrashed()
-                                    ->orderBy('deleted_at', 'desc')
-                                    ->get();
+                ->with('user:id,name')
+                ->onlyTrashed()
+                ->orderBy('deleted_at', 'desc')
+                ->get();
 
             $formattedComments = $trashedComments->map(function ($comment) {
                 // SỬA TÊN ROUTE Ở ĐÂY CHO ĐÚNG
@@ -423,7 +427,7 @@ public function show(Request $request, $id)
 
         // Nút Xem Chi Tiết (luôn có cho bình luận active)
         if (!$comment->trashed()) {
-            $actionsHtml .= '<button class="btn btn-xs btn-outline-info view-comment-details-btn me-1" data-comment-id="'.$comment->id.'" title="Xem chi tiết" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fas fa-eye"></i></button>';
+            $actionsHtml .= '<button class="btn btn-xs btn-outline-info view-comment-details-btn me-1" data-comment-id="' . $comment->id . '" title="Xem chi tiết" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fas fa-eye"></i></button>';
         }
 
         // Nút hành động dựa trên trạng thái hiện tại
@@ -431,26 +435,26 @@ public function show(Request $request, $id)
             case 'hiển thị':
                 $statusText = 'Đang hiển thị';
                 $statusClassBadge = 'bg-success';
-                $actionsHtml .= '<button class="btn btn-xs btn-outline-secondary change-comment-status-btn me-1" data-comment-id="'.$comment->id.'" data-action="hide" title="Ẩn bình luận này" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fas fa-eye-slash"></i></button>';
+                $actionsHtml .= '<button class="btn btn-xs btn-outline-secondary change-comment-status-btn me-1" data-comment-id="' . $comment->id . '" data-action="hide" title="Ẩn bình luận này" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fas fa-eye-slash"></i></button>';
                 break;
             case 'ẩn':
                 $statusText = 'Bị ẩn';
                 $statusClassBadge = 'bg-warning text-dark';
-                $actionsHtml .= '<button class="btn btn-xs btn-outline-info change-comment-status-btn me-1" data-comment-id="'.$comment->id.'" data-action="show_again" title="Hiện lại bình luận này" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fas fa-redo-alt"></i></button>';
+                $actionsHtml .= '<button class="btn btn-xs btn-outline-info change-comment-status-btn me-1" data-comment-id="' . $comment->id . '" data-action="show_again" title="Hiện lại bình luận này" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fas fa-redo-alt"></i></button>';
                 break;
             case 'chưa duyệt':
             default: // Mặc định hoặc nếu status không khớp, coi là 'chưa duyệt'
                 $statusText = 'Chưa duyệt';
                 $statusClassBadge = 'bg-secondary';
-                $actionsHtml .= '<button class="btn btn-xs btn-outline-primary change-comment-status-btn me-1" data-comment-id="'.$comment->id.'" data-action="approve" title="Duyệt bình luận này" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fas fa-check"></i></button>';
+                $actionsHtml .= '<button class="btn btn-xs btn-outline-primary change-comment-status-btn me-1" data-comment-id="' . $comment->id . '" data-action="approve" title="Duyệt bình luận này" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fas fa-check"></i></button>';
                 // Có thể thêm nút "Ẩn" trực tiếp từ trạng thái "chưa duyệt" nếu muốn
-                $actionsHtml .= '<button class="btn btn-xs btn-outline-secondary change-comment-status-btn ms-1 me-1" data-comment-id="'.$comment->id.'" data-action="hide" title="Ẩn bình luận (từ chưa duyệt)" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fas fa-eye-slash"></i></button>';
+                $actionsHtml .= '<button class="btn btn-xs btn-outline-secondary change-comment-status-btn ms-1 me-1" data-comment-id="' . $comment->id . '" data-action="hide" title="Ẩn bình luận (từ chưa duyệt)" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fas fa-eye-slash"></i></button>';
                 break;
         }
 
         // Nút Xóa Mềm (luôn có cho bình luận active)
         if (!$comment->trashed()) {
-            $actionsHtml .= '<button class="btn btn-xs btn-outline-danger soft-delete-comment-btn" data-comment-id="'.$comment->id.'" title="Chuyển vào thùng rác" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fas fa-trash-alt"></i></button>';
+            $actionsHtml .= '<button class="btn btn-xs btn-outline-danger soft-delete-comment-btn" data-comment-id="' . $comment->id . '" title="Chuyển vào thùng rác" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fas fa-trash-alt"></i></button>';
         }
 
         return [

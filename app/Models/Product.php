@@ -47,11 +47,6 @@ class Product extends Model
         return $this->belongsTo(Brand::class);
     }
 
-    public function comments()
-{
-    return $this->hasMany(Comment::class);
-}
-
 
     // Quan hệ với product_variants (1-nhiều)
     public function productVariants()

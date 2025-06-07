@@ -130,7 +130,7 @@
                                     <td>{{ number_format($item->unit_price, 0, ',', '.') }} VND</td>
                                     <td>{{ $item->quantity }}</td>
                                     <td>
-                                        @if ($item->discount_id > 0)
+                                        @if ($item->discount_id)
                                             -{{ number_format($item->discount_id, 0, ',', '.') }} VND
                                         @else
                                             Không có
@@ -168,7 +168,8 @@
                                         <td>{{ number_format($totalOrderAmount, 0, ',', '.') }} VND</td>
                                     </tr>
                                     <tr>
-                                        <th>Mã giảm giá ({{ optional($order->discount)->code ?? 'Không áp dụng' }}). <br> {{ optional($order->discount)->description }}</th>
+                                        <th>Mã giảm giá ({{ optional($order->discount)->code ?? 'Không áp dụng' }}). <br>
+                                            {{ optional($order->discount)->description }}</th>
                                         @if ($discountAmount > 0)
                                             <td>
                                                 -{{ number_format($discountAmount, 0, ',', '.') }} VND

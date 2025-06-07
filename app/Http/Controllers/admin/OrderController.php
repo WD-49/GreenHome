@@ -81,24 +81,28 @@ class OrderController extends Controller
         $discounts = Discount::all();
         $payMethods = PaymentMethod::all();
         $productVariants = ProductVariant::with('product:id,name')->where('status', 1)->get();
-        $discounts = Discount::where('status', 'active') /* ... các điều kiện khác ... */->get();
+        $discounts = Discount::where('status', 'active') /* ... các điều kiện khác ... */ ->get();
 
         $productVariantsForJs = $productVariants->mapWithKeys(function ($variant) {
-            return [$variant->id => [
-                'price' => (float) $variant->price,
-                'name' => $variant->product->name, // Để hiển thị nếu cần
-                'sku' => $variant->sku
-            ]];
+            return [
+                $variant->id => [
+                    'price' => (float) $variant->price,
+                    'name' => $variant->product->name, // Để hiển thị nếu cần
+                    'sku' => $variant->sku
+                ]
+            ];
         });
 
         $discountsForJs = $discounts->mapWithKeys(function ($discount) {
-            return [$discount->id => [
-                'type' => $discount->discount_type,
-                'value' => (float) $discount->discount_value,
-                'maxValue' => (float) ($discount->max_discount ?? 0),
-                'minValue' => (float) ($discount->min_order_value ?? 0),
-                'code' => $discount->code // Có thể hữu ích để hiển thị
-            ]];
+            return [
+                $discount->id => [
+                    'type' => $discount->discount_type,
+                    'value' => (float) $discount->discount_value,
+                    'maxValue' => (float) ($discount->max_discount ?? 0),
+                    'minValue' => (float) ($discount->min_order_value ?? 0),
+                    'code' => $discount->code // Có thể hữu ích để hiển thị
+                ]
+            ];
         });
 
         return view('admin.orders.create', compact(
@@ -172,7 +176,7 @@ class OrderController extends Controller
                     return redirect()->back()->withErrors(['products.' . $index => "Sản phẩm không tồn tại (ID: {$variantId})."])->withInput();
                 }
 
-                $quantityToOrder = (int)$requestedQuantities[$index];
+                $quantityToOrder = (int) $requestedQuantities[$index];
 
                 if ($variant->quantity < $quantityToOrder) { // Kiểm tra tồn kho bằng cột 'quantity' của product_variants
                     return redirect()->back()
