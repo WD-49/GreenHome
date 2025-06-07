@@ -41,6 +41,32 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware(['admin'])->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
+        // Quản lý sản phẩm
+        Route::prefix('/products')->name('products.')->group(function () {
+
+            Route::get('/list', [ProductController::class, 'index'])->name('index');
+            Route::get('/create-new', [ProductController::class, 'create'])->name('create');
+            Route::post('/store-new', [ProductController::class, 'store'])->name('store');
+            Route::get('/trashed', [ProductController::class, 'trashed'])->name('trashed');
+            Route::get('/{slug}/detail', [ProductController::class, 'show'])->name('show');
+            Route::get('/{slug}/edit', [ProductController::class, 'edit'])->name('edit');
+            Route::put('/{slug}/update', [ProductController::class, 'update'])->name('update');
+            Route::delete('/{slug}/destroy', [ProductController::class, 'destroy'])->name('destroy');
+            Route::get('/{slug}/restore', [ProductController::class, 'restore'])->name('restore');
+            Route::delete('/{slug}/forceDelete', [ProductController::class, 'forceDelete'])->name('forceDelete');
+            // Quản lý biến thể sản phẩm
+            Route::prefix('/{product}/variants')->name('variants.')->group(function () {
+                Route::get('/', [ProductVariantController::class, 'index'])->name('index');
+                Route::get('/create-new', [ProductVariantController::class, 'create'])->name('create');
+                Route::post('/store-new', [ProductVariantController::class, 'store'])->name('store');
+                Route::get('/trashed', [ProductVariantController::class, 'trashed'])->name('trashed');
+                Route::get('/{productVariant}/edit', [ProductVariantController::class, 'edit'])->name('edit');
+                Route::put('/{productVariant}/update', [ProductVariantController::class, 'update'])->name('update');
+                Route::delete('/{productVariant}/destroy', [ProductVariantController::class, 'destroy'])->name('destroy');
+                Route::get('/{id}/restore', [ProductVariantController::class, 'restore'])->name('restore');
+            });
+        });
+
         // Quản lý danh mục
         Route::prefix('/categories')->name('categories.')->group(function () {
             Route::get('/list', [CategoryController::class, 'index'])->name('index');
