@@ -18,18 +18,14 @@ use App\Http\Controllers\admin\Product\ProductController;
 use App\Http\Controllers\admin\Account\AccountAdminController;
 use App\Http\Controllers\admin\Account\AccountUsersController;
 use App\Http\Controllers\admin\BlogController;
-use App\Http\Controllers\admin\CategoryController;  // Tham chiếu đúng
-use App\Http\Controllers\admin\PaymentMethodController;
-use App\Http\Controllers\admin\CommentController;
+use App\Http\Controllers\admin\CategoryController;
 
 use App\Http\Controllers\admin\Product\ProductVariantController;
-use App\Http\Controllers\admin\OrderStatusController;
 use App\Http\Controllers\admin\ReviewController;
 
 use App\Http\Controllers\Admin\BlogCategoryController;
 
 use Dom\Comment;
-use App\Http\Controllers\admin\CategoryController;  // Tham chiếu đúng
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -37,31 +33,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-    // bai viet
-    Route::prefix('/blogs')->name('blogs.')->group(function () {
-        Route::get('/', [BlogController::class, 'index'])->name('index');
-        Route::get('/show/{id}', [BlogController::class, 'show'])->name('show');
-        Route::get('/create', [BlogController::class, 'create'])->name(name: 'create');
-        Route::get('/edit/{id}', action: [BlogController::class, 'edit'])->name('edit');
-        Route::post('/store', [BlogController::class, 'store'])->name('store');
-        Route::put('/store/{id}', [BlogController::class, 'update'])->name('update');
-        Route::delete('/destroy', [BlogController::class, 'destroy'])->name('destroy');
-    });
-
-
-    // Quản lý danh mục
-    Route::prefix('/categories')->name('categories.')->group(function () {
-        Route::get('/list', [CategoryController::class, 'index'])->name('index');
-        Route::get('/create', [CategoryController::class, 'create'])->name('create');
-        Route::post('/store', [CategoryController::class, 'store'])->name('store');
-        Route::get('/{slug}/edit', [CategoryController::class, 'edit'])->name('edit'); // Sử dụng slug
-        Route::put('/{slug}/update', [CategoryController::class, 'update'])->name('update'); // Sử dụng slug
-        Route::delete('/{slug}/destroy', [CategoryController::class, 'destroy'])->name('destroy'); // Sử dụng slug
-        Route::get('/trash', [CategoryController::class, 'trash'])->name('trash');
-        Route::post('/{slug}/restore', [CategoryController::class, 'restore'])->name('restore'); // Sử dụng slug
-        Route::delete('/{slug}/force-delete', [CategoryController::class, 'forceDelete'])->name('forceDelete'); // Sử dụng slug
-        Route::get('/{slug}', [CategoryController::class, 'show'])->name('show'); // Show category details by slug
-    });
     Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login-submit', [AdminAuthController::class, 'login'])->name('login.submit');
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
@@ -96,6 +67,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/{slug}/restore', [BlogCategoryController::class, 'restore'])->name('restore');
             Route::delete('/{slug}/force_delete', [BlogCategoryController::class, 'forceDelete'])->name('forceDelete');
             Route::get('/{slug}', [BlogCategoryController::class, 'show'])->name('show');
+        });
+        // bai viet
+        Route::prefix('/blogs')->name('blogs.')->group(function () {
+            Route::get('/', [BlogController::class, 'index'])->name('index');
+            Route::get('/show/{id}', [BlogController::class, 'show'])->name('show');
+            Route::get('/create', [BlogController::class, 'create'])->name(name: 'create');
+            Route::get('/edit/{id}', action: [BlogController::class, 'edit'])->name('edit');
+            Route::post('/store', [BlogController::class, 'store'])->name('store');
+            Route::put('/store/{id}', [BlogController::class, 'update'])->name('update');
+            Route::delete('/destroy', [BlogController::class, 'destroy'])->name('destroy');
         });
 
 
@@ -171,37 +152,38 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
 
- //quản lí đánh giá 
-   Route::prefix('reviews')->name('reviews.')->group(function () {
-        Route::get('/', [ReviewController::class, 'index'])->name('index');
-        Route::get('/create', [ReviewController::class, 'create'])->name('create');
-        Route::post('/store', [ReviewController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [ReviewController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [ReviewController::class, 'update'])->name('update');
-        Route::delete('/{id}', [ReviewController::class, 'destroy'])->name('destroy');
-        Route::get('/trash', [ReviewController::class, 'trash'])->name('trash');
-        Route::post('/{id}/restore', [ReviewController::class, 'restore'])->name('restore');
-        Route::delete('/{id}/force', [ReviewController::class, 'forceDelete'])->name('forceDelete');
-        Route::get('/{id}/show', [ReviewController::class, 'show'])->name('show');
-        Route::patch('/{id}/status', [ReviewController::class, 'updateStatus'])->name('updateStatus');
-        Route::get('/trash', [ReviewController::class, 'trash'])->name('trash');
-Route::post('/{id}/restore', [ReviewController::class, 'restore'])->name('restore');
+        //quản lí đánh giá 
+        Route::prefix('reviews')->name('reviews.')->group(function () {
+            Route::get('/', [ReviewController::class, 'index'])->name('index');
+            Route::get('/create', [ReviewController::class, 'create'])->name('create');
+            Route::post('/store', [ReviewController::class, 'store'])->name('store');
+            Route::get('/{id}/edit', [ReviewController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [ReviewController::class, 'update'])->name('update');
+            Route::delete('/{id}', [ReviewController::class, 'destroy'])->name('destroy');
+            Route::get('/trash', [ReviewController::class, 'trash'])->name('trash');
+            Route::post('/{id}/restore', [ReviewController::class, 'restore'])->name('restore');
+            Route::delete('/{id}/force', [ReviewController::class, 'forceDelete'])->name('forceDelete');
+            Route::get('/{id}/show', [ReviewController::class, 'show'])->name('show');
+            Route::patch('/{id}/status', [ReviewController::class, 'updateStatus'])->name('updateStatus');
+            Route::get('/trash', [ReviewController::class, 'trash'])->name('trash');
+            Route::post('/{id}/restore', [ReviewController::class, 'restore'])->name('restore');
 
 
-    });
+        });
 
-    //quản lí phương thức thanh toán
-    Route::prefix('paymentMethods')->name('paymentMethods.')->group(function () {
-        Route::get('/list', [PaymentMethodController::class, 'index'])->name('index');
-        Route::get('/create', [PaymentMethodController::class, 'create'])->name('create');
-        Route::post('/store', [PaymentMethodController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [PaymentMethodController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [PaymentMethodController::class, 'update'])->name('update');
-        Route::delete('/{id}', [PaymentMethodController::class, 'destroy'])->name('destroy');
-        Route::get('/trash', [PaymentMethodController::class, 'trash'])->name('trash');
-        Route::post('/{id}/restore', [PaymentMethodController::class, 'restore'])->name('restore');
-        Route::delete('/{id}/force', [PaymentMethodController::class, 'forceDelete'])->name('forceDelete');
-        Route::get('/{id}/show', [PaymentMethodController::class, 'show'])->name('show');
+        //quản lí phương thức thanh toán
+        Route::prefix('paymentMethods')->name('paymentMethods.')->group(function () {
+            Route::get('/list', [PaymentMethodController::class, 'index'])->name('index');
+            Route::get('/create', [PaymentMethodController::class, 'create'])->name('create');
+            Route::post('/store', [PaymentMethodController::class, 'store'])->name('store');
+            Route::get('/{id}/edit', [PaymentMethodController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [PaymentMethodController::class, 'update'])->name('update');
+            Route::delete('/{id}', [PaymentMethodController::class, 'destroy'])->name('destroy');
+            Route::get('/trash', [PaymentMethodController::class, 'trash'])->name('trash');
+            Route::post('/{id}/restore', [PaymentMethodController::class, 'restore'])->name('restore');
+            Route::delete('/{id}/force', [PaymentMethodController::class, 'forceDelete'])->name('forceDelete');
+            Route::get('/{id}/show', [PaymentMethodController::class, 'show'])->name('show');
+        });
         // Quản lý brands
         Route::prefix('brands')->name('brands.')->group(function () {
             Route::get('/', [BrandController::class, 'index'])->name('index');
