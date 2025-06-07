@@ -185,6 +185,13 @@
                         <span class="hide-menu">Bình luận</span>
                     </a>
                 </li>
+            <li class="sidebar-item">
+    <a class="sidebar-link" href="{{ route('admin.reviews.index') }}" aria-expanded="false">
+        <i class="ti ti-star"></i> 
+        <span class="hide-menu">Đánh giá</span>
+    </a>
+</li>
+
 
                 <li class="sidebar-item">
                     <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)"

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+
 class Review extends Model
 {
     /** @use HasFactory<\Database\Factories\ReviewFactory> */
@@ -17,8 +18,18 @@ class Review extends Model
     {
         return $this->belongsTo(User::class);
     }
-    public function product()
+    // public function product()
+    // {
+    //     return $this->belongsTo(Product::class);
+    // }
+
+public function productVariant()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(ProductVariant::class);
+    }
+
+    protected static function newFactory()
+    {
+        return \Database\Factories\ReviewFactory::new();
     }
 }

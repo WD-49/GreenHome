@@ -34,10 +34,19 @@ class ProductVariant extends Model
         return $this->belongsTo(Product::class);
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
     // Quan hệ với product_variant_values (1-nhiều)
     public function productVariantValues()
     {
         return $this->hasMany(ProductVariantValue::class);
+    }
+    //quan hệ với user (nhiều-nhiều)
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'product_variant_user', 'product_variant_id', 'user_id');
     }
 
     public function cartItems()
@@ -81,7 +90,6 @@ class ProductVariant extends Model
                 $productVariant->productVariantValues()->each(function ($pvv) {
                     $pvv->delete();
                 });
-
             }
         });
         static::restored(function ($productVariant) {
@@ -105,5 +113,4 @@ class ProductVariant extends Model
             $product->update(['quantity' => $total]);
         }
     }
-
 }

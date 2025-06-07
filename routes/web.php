@@ -17,6 +17,8 @@ use App\Http\Controllers\admin\PaymentMethodController;
 use App\Http\Controllers\admin\CommentController;
 use App\Http\Controllers\admin\Product\ProductVariantController;
 use App\Http\Controllers\admin\OrderStatusController;
+use App\Http\Controllers\admin\ReviewController;
+
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -172,6 +174,26 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/restore/{id}', [DiscountController::class, 'restore'])->name('restore');
         Route::delete('/force-delete/{id}', [DiscountController::class, 'forceDelete'])->name('forceDelete');
         Route::get('/history', [DiscountController::class, 'history'])->name('history');
+    });
+
+
+ //quản lí đánh giá 
+   Route::prefix('reviews')->name('reviews.')->group(function () {
+        Route::get('/', [ReviewController::class, 'index'])->name('index');
+        Route::get('/create', [ReviewController::class, 'create'])->name('create');
+        Route::post('/store', [ReviewController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [ReviewController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [ReviewController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ReviewController::class, 'destroy'])->name('destroy');
+        Route::get('/trash', [ReviewController::class, 'trash'])->name('trash');
+        Route::post('/{id}/restore', [ReviewController::class, 'restore'])->name('restore');
+        Route::delete('/{id}/force', [ReviewController::class, 'forceDelete'])->name('forceDelete');
+        Route::get('/{id}/show', [ReviewController::class, 'show'])->name('show');
+        Route::patch('/{id}/status', [ReviewController::class, 'updateStatus'])->name('updateStatus');
+        Route::get('/trash', [ReviewController::class, 'trash'])->name('trash');
+Route::post('/{id}/restore', [ReviewController::class, 'restore'])->name('restore');
+
+
     });
 
     //quản lí phương thức thanh toán
