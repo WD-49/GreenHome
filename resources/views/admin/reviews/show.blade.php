@@ -16,10 +16,10 @@
                     <p><strong>Người dùng:</strong> {{ $review->user->name ?? 'N/A' }}</p>
 
                     <p><strong>Đánh giá:</strong>
-                        @for ($i = 1; $i <= 5; $i++)
-                            <span class="{{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300' }}">★</span>
-                        @endfor
-                    </p>
+    @for ($i = 1; $i <= 5; $i++)
+        <span style="color: {{ $i <= $review->rating ? 'orange' : 'lightgray' }}">★</span>
+    @endfor
+</p>
 
                     <p><strong>Tiêu đề:</strong> {{ $review->title ?? 'N/A' }}</p>
 
