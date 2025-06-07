@@ -23,7 +23,7 @@ class CategoryController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%')
-                  ->orWhere('slug', 'like', '%' . $search . '%');
+                    ->orWhere('slug', 'like', '%' . $search . '%');
             });
         }
 
@@ -64,27 +64,42 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:categories,name'],
-            'description' => ['nullable', 'string'],
+            'name' => ['required', 'array'], // Mảng tên danh mục
+            'name.*' => ['required', 'string', 'max:255', 'distinct'], // Kiểm tra tên duy nhất
+            'description' => ['nullable', 'array'], // Mảng mô tả
+            'description.*' => ['nullable', 'string'],
         ], [
             'name.required' => 'Tên danh mục là bắt buộc.',
-            'name.max' => 'Tên danh mục không được vượt quá 255 ký tự.',
-            'name.unique' => 'Tên danh mục đã tồn tại.',
+            'name.*.required' => 'Tên danh mục không được để trống.',
+            'name.*.distinct' => 'Tên danh mục không được trùng.',
         ]);
 
-        // Tạo slug duy nhất
-        $slug = Str::slug($request->name);
-        $existingSlug = Category::where('slug', $slug)->first();
-        if ($existingSlug) {
-            $slug = $slug . '-' . uniqid();
+        // Kiểm tra xem mảng 'name' và 'description' có tồn tại và có phải là mảng không
+        if ($request->has('name') && is_array($request->name)) {
+            foreach ($request->name as $index => $name) {
+                $slug = Str::slug($name);
+
+                // Kiểm tra slug có bị trùng hay không
+                $existingSlug = Category::where('slug', $slug)->first();
+                if ($existingSlug) {
+                    $slug = $slug . '-' . uniqid();
+                }
+
+                // Tạo mới danh mục
+                $category = new Category();
+                $category->name = $name;
+                $category->slug = $slug;
+                $category->description = isset($request->description[$index]) ? $request->description[$index] : null;
+                $category->save();
+            }
+
+            return redirect()->route('admin.categories.index')->with('success', 'Thêm danh mục thành công.');
+        } else {
+            // Trường hợp không có dữ liệu 'name' hợp lệ
+            return back()->withErrors(['name' => 'Danh mục không hợp lệ.']);
         }
-
-        $category = new Category($request->all());
-        $category->slug = $slug;
-        $category->save();
-
-        return redirect()->route('admin.categories.index')->with('success', 'Thêm danh mục thành công.');
     }
+
 
     public function edit($slug)
     {
@@ -173,16 +188,35 @@ class CategoryController extends Controller
         ]);
     }
 
-   public function show($slug)
+  public function show($slug, Request $request)
 {
-    $category = Category::with(['products' => function ($query) {
-        $query->withTrashed(); // Nếu có soft delete sản phẩm, có thể bỏ nếu không dùng
-    }])->where('slug', $slug)->firstOrFail();
+    $category = Category::where('slug', $slug)->firstOrFail();
 
-    $products = $category->products;
-    $productCount = $products->count();
+    $productsQuery = $category->products()
+        ->with(['productVariants.productVariantValues'])
+        ->withTrashed();
 
-    return view('admin.categories.show', compact('category', 'products', 'productCount'));
+    if ($request->filled('product_name')) {
+        $productsQuery->where('name', 'like', '%' . $request->product_name . '%');
+    }
+
+    // Lọc giá dựa trên biến thể sản phẩm
+    if ($request->filled('min_price') || $request->filled('max_price')) {
+        $minPrice = $request->input('min_price', 0);
+        $maxPrice = $request->input('max_price', PHP_INT_MAX);
+
+        // Lấy danh sách product_id có biến thể nằm trong khoảng giá
+        $productIds = \App\Models\ProductVariant::whereBetween('price', [$minPrice, $maxPrice])
+            ->pluck('product_id')
+            ->unique();
+
+        // Lọc products theo danh sách product_id trên
+        $productsQuery->whereIn('id', $productIds);
+    }
+
+    $products = $productsQuery->paginate(5);
+
+    return view('admin.categories.show', compact('category', 'products'));
 }
 
 }
