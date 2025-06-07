@@ -1,38 +1,110 @@
 @extends('layouts.admin')
 
 @section('content')
-<h3>Thêm thương hiệu</h3>
-<a href="{{ route('admin.brands.index') }}" class="btn btn-secondary mb-3">← Quay lại danh sách</a>
-<form method="POST" action="{{ route('admin.brands.store') }}" novalidate>
-    @csrf
-    <div class="mb-3">
-        <label>Tên thương hiệu</label>
-        <input type="text" name="name" class="form-control" required>
-        @error('name')
-            <div class="text-danger mt-1">{{ $message }}</div>
-        @enderror
-    </div>
-    <div class="mb-3">
-        <label>Mô tả</label>
-        <textarea name="description" class="form-control"></textarea>
-        @error('description')
-            <div class="text-danger mt-1">{{ $message }}</div>
-        @enderror
-    </div>
-    <button class="btn btn-success">Lưu</button>
-</form>
+    <div class="container mt-4">
+        <h1 class="mb-4">Thêm Thương hiệu</h1>
 
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!-- Summernote CSS + JS -->
-<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-<script>
-  $(document).ready(function() {
-    $('textarea[name="description"]').summernote({
-      height: 200
-    });
-  });
-</script>
+        <form method="POST" action="{{ route('admin.brands.store') }}">
+            @csrf
+
+            <div id="brand-rows">
+                @php $index = 0; @endphp
+                <div class="row brand-row mb-3 g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Tên thương hiệu</label>
+                        <input type="text" class="form-control" name="brands[{{ $index }}][name]" value="{{ old("brands.$index.name") }}">
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">Mô tả</label>
+                        <textarea class="form-control ckeditor" name="brands[{{ $index }}][description]">{{ old("brands.$index.description") }}</textarea>
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button type="button" class="btn btn-danger btn-remove-row" title="Xóa dòng này">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" id="btn-add-row" class="btn btn-info mb-3">
+                <i class="fa-solid fa-plus"></i> Thêm thương hiệu
+            </button>
+
+            <div>
+                <button type="submit" class="btn btn-success">
+                    <i class="fa-solid fa-floppy-disk"></i> Lưu tất cả
+                </button>
+                <a href="{{ route('admin.brands.index') }}" class="btn btn-secondary">
+                    <i class="fa-solid fa-arrow-left"></i> Quay lại
+                </a>
+            </div>
+        </form>
+    </div>
+
+    {{-- CKEditor --}}
+    <script src="https://cdn.ckeditor.com/ckeditor5/35.0.1/classic/ckeditor.js"></script>
+    <script>
+        let index = 1; // index cho dòng mới
+        const editors = [];
+
+        function initCKEditors() {
+            document.querySelectorAll('textarea.ckeditor').forEach((textarea) => {
+                if (!textarea.classList.contains('ckeditor-initialized')) {
+                    ClassicEditor
+                        .create(textarea)
+                        .then(editor => {
+                            editors.push(editor);
+                            textarea.classList.add('ckeditor-initialized');
+                        })
+                        .catch(error => console.error(error));
+                }
+            });
+        }
+
+        // Thêm dòng mới
+        document.getElementById('btn-add-row').addEventListener('click', () => {
+            const brandRows = document.getElementById('brand-rows');
+            const row = document.createElement('div');
+            row.className = 'row brand-row mb-3 g-3';
+            row.innerHTML = `
+                <div class="col-md-6">
+                    <label class="form-label">Tên thương hiệu</label>
+                    <input type="text" class="form-control" name="brands[${index}][name]">
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label">Mô tả</label>
+                    <textarea class="form-control ckeditor" name="brands[${index}][description]"></textarea>
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="button" class="btn btn-danger btn-remove-row" title="Xóa dòng này">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            brandRows.appendChild(row);
+            index++;
+            initCKEditors();
+        });
+
+        // Xóa dòng
+        document.addEventListener('click', function (e) {
+            if (e.target.closest('.btn-remove-row')) {
+                const row = e.target.closest('.brand-row');
+                if (row) row.remove();
+            }
+        });
+
+        // Khởi tạo ban đầu
+        window.addEventListener('DOMContentLoaded', initCKEditors);
+    </script>
 @endsection

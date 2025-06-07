@@ -1,126 +1,316 @@
 @extends('layouts.admin')
 @section('title', 'Tạo đơn hàng mới')
+
 @section('content')
-    <div class="container py-5">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h3 class="mb-0">Tạo đơn hàng mới</h3>
-            </div>
-            <div class="card-body">
+<div class="container py-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Tạo đơn hàng mới</h3>
+        </div>
+        <div class="card-body">
 
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul class="mb-0">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <form action="{{ route('admin.orders.store') }}" method="POST" id="createOrderForm">
+                @csrf
+
+                <div class="mb-3">
+                    <label for="user_id" class="form-label">Người đặt hàng <span class="text-danger">*</span></label>
+                    <select name="user_id" id="user_id" class="form-select @error('user_id') is-invalid @enderror">
+                        <option value="">-- Chọn người dùng --</option>
+                        @foreach ($users as $user)
+                            <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
+                                {{ $user->name }} - {{ $user->email }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('user_id')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <h5 class="mb-3">Thông tin người nhận</h5>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="shipping_name" class="form-label">Tên người nhận <span class="text-danger">*</span></label>
+                        <input type="text" name="shipping_name" id="shipping_name" class="form-control @error('shipping_name') is-invalid @enderror" value="{{ old('shipping_name') }}">
+                        @error('shipping_name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
-                @endif
-
-                <form action="{{ route('admin.orders.store') }}" method="POST">
-                    @csrf
-
-                    <!-- Người đặt hàng -->
-                    <div class="mb-3">
-                        <label for="user_id" class="form-label">Người đặt hàng</label>
-                        <select name="user_id" class="form-select" >
-                            <option value="">-- Chọn người dùng --</option>
-                            @foreach ($users as $user)
-                                <option value="{{ $user->id }}">{{ $user->name }} - {{ $user->email }}</option>
-                            @endforeach
-                        </select>
+                    <div class="col-md-4 mb-3">
+                        <label for="shipping_phone" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                        <input type="text" name="shipping_phone" id="shipping_phone" class="form-control @error('shipping_phone') is-invalid @enderror" value="{{ old('shipping_phone') }}">
+                        @error('shipping_phone')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
-
-                    <!-- Thông tin người nhận -->
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="shipping_name" class="form-label">Tên người nhận</label>
-                            <input type="text" name="shipping_name" class="form-control" >
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="shipping_phone" class="form-label">Số điện thoại</label>
-                            <input type="text" name="shipping_phone" class="form-control" >
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="shipping_address" class="form-label">Địa chỉ</label>
-                            <input type="text" name="shipping_address" class="form-control" >
-                        </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="shipping_address" class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+                        <input type="text" name="shipping_address" id="shipping_address" class="form-control @error('shipping_address') is-invalid @enderror" value="{{ old('shipping_address') }}">
+                        @error('shipping_address')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
+                </div>
 
-                    <!-- Sản phẩm -->
-                    <div class="mb-3">
-                        <label class="form-label">Chọn sản phẩm</label>
-                        <div id="products">
-                            <div class="row product-item mb-2">
-                                <div class="col-md-6">
-                                    <select name="products[]" class="form-select">
-                                        @foreach ($productVariants as $variant)
-                                            <option value="{{ $variant->id }}">
-                                                {{ $variant->product->name }} ({{ $variant->sku }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <input type="number" name="quantities[]" class="form-control" placeholder="Số lượng"
-                                        min="1" >
-                                </div>
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addProductRow()">+ Thêm sản
-                            phẩm</button>
-                    </div>
-
-                    <!-- Giảm giá -->
-                    <div class="mb-3">
-                        <label for="discount_id" class="form-label">Mã giảm giá (nếu có)</label>
-                        <select name="discount_id" class="form-select">
-                            <option value="">-- Không áp dụng --</option>
-                            @foreach ($discounts as $discount)
-                                <option value="{{ $discount->id }}">{{ $discount->code }} ({{ $discount->description }})
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Thanh toán -->
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="payment_method_id" class="form-label">Phương thức thanh toán</label>
-                            <select name="payment_method_id" class="form-select" >
-                                @foreach ($payMethods as $item)
-                                    <option value="{{ $item->id }}">{{ $item->name }}</option>
-                                @endforeach
+                <h5 class="mb-3">Chọn sản phẩm</h5>
+                <div id="products_container" class="mb-3">
+                    {{-- Dòng sản phẩm mẫu sẽ được clone --}}
+                    <div class="row product-item mb-2 align-items-center">
+                        <div class="col-md-6">
+                            <label class="form-label visually-hidden">Sản phẩm</label>
+                            <select name="products[]" class="form-select product-variant-select">
+                                <option value="">-- Chọn biến thể sản phẩm --</option>
+                                @if(isset($productVariants))
+                                    @foreach ($productVariants as $variant)
+                                        <option value="{{ $variant->id }}" data-price="{{ $variant->price }}">
+                                            {{ $variant->product->name }} ({{ $variant->sku }}) - {{ number_format($variant->price, 0, ',', '.') }} VND
+                                        </option>
+                                    @endforeach
+                                @endif
                             </select>
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="shipping_fee" class="form-label">Phí vận chuyển</label>
-                            <input type="number" name="shipping_fee" class="form-control"  min="0">
+                        <div class="col-md-3">
+                             <label class="form-label visually-hidden">Số lượng</label>
+                            <input type="number" name="quantities[]" class="form-control product-quantity-input" placeholder="Số lượng" min="1" value="1">
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="note" class="form-label">Ghi chú</label>
-                            <textarea name="note" class="form-control" rows="1"></textarea>
+                        <div class="col-md-2">
+                            <label class="form-label visually-hidden">Thành tiền</label>
+                            <input type="text" class="form-control product-total-price" placeholder="Thành tiền" readonly>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-danger btn-sm remove-product-row" title="Xóa sản phẩm">&times;</button>
                         </div>
                     </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-success mb-3" id="addProductRowBtn">+ Thêm sản phẩm</button>
 
-                    <!-- Nút submit -->
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-primary">Tạo đơn hàng</button>
-                        <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary">Hủy</a>
+                <div class="mb-3">
+                    <label for="discount_id" class="form-label">Mã giảm giá (nếu có)</label>
+                    <select name="discount_id" id="discount_id_select" class="form-select">
+                        <option value="">-- Không áp dụng --</option>
+                        @if(isset($discounts))
+                            @foreach ($discounts as $discount)
+                                <option value="{{ $discount->id }}"
+                                    data-type="{{ $discount->discount_type }}"
+                                    data-value="{{ (float)$discount->discount_value }}"
+                                    data-max-value="{{ (float)($discount->max_discount ?? 0) }}"
+                                    data-min-value="{{ (float)($discount->min_order_value ?? 0) }}"
+                                    {{ old('discount_id') == $discount->id ? 'selected' : '' }}>
+                                    {{ $discount->code }}
+                                    (@if ($discount->discount_type == 'percentage')
+                                        Giảm {{ $discount->discount_value }}% (tối đa {{ number_format($discount->max_discount) }}đ)
+                                    @else
+                                        Giảm {{ number_format($discount->discount_value) }}đ
+                                    @endif
+                                    - ĐH tối thiểu: {{ number_format($discount->min_order_value) }}đ
+                                    - Còn: {{ $discount->quantity }} lượt)
+                                </option>
+                            @endforeach
+                        @endif
+                    </select>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="payment_method_id" class="form-label">Phương thức thanh toán <span class="text-danger">*</span></label>
+                        <select name="payment_method_id" id="payment_method_id" class="form-select @error('payment_method_id') is-invalid @enderror">
+                             @if(isset($payMethods))
+                                @foreach ($payMethods as $item)
+                                    <option value="{{ $item->id }}" {{ old('payment_method_id') == $item->id ? 'selected' : '' }}>{{ $item->name }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                         @error('payment_method_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
-                </form>
-            </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="shipping_fee" class="form-label">Phí vận chuyển <span class="text-danger">*</span></label>
+                        <input type="number" name="shipping_fee" id="shipping_fee_input" class="form-control @error('shipping_fee') is-invalid @enderror" min="0" value="{{ old('shipping_fee', 0) }}">
+                        @error('shipping_fee')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="note" class="form-label">Ghi chú</label>
+                        <textarea name="note" id="note" class="form-control" rows="1">{{ old('note') }}</textarea>
+                    </div>
+                </div>
+
+                <div class="row justify-content-end mt-4">
+                    <div class="col-md-6">
+                        <h5 class="mb-3">Tóm tắt đơn hàng</h5>
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr>
+                                    <th>Tổng tiền hàng (tạm tính)</th>
+                                    <td id="summary_subtotal" class="text-end">0 VND</td>
+                                </tr>
+                                <tr>
+                                    <th>Giảm giá (tạm tính)</th>
+                                    <td id="summary_discount" class="text-end">0 VND</td>
+                                </tr>
+                                <tr>
+                                    <th>Phí vận chuyển</th>
+                                    <td id="summary_shipping_fee" class="text-end">0 VND</td>
+                                </tr>
+                                <tr class="table-success">
+                                    <th><strong>Tổng thanh toán (tạm tính)</strong></th>
+                                    <td id="summary_grand_total" class="text-end"><strong>0 VND</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="text-end mt-4">
+                    <button type="submit" class="btn btn-primary">Tạo đơn hàng</button>
+                    <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary">Hủy</a>
+                </div>
+            </form>
         </div>
     </div>
-
-    <script>
-        function addProductRow() {
-            const productsDiv = document.getElementById('products');
-            const productItem = document.querySelector('.product-item').cloneNode(true);
-            productItem.querySelector('select').selectedIndex = 0;
-            productItem.querySelector('input[type="number"]').value = '';
-            productsDiv.appendChild(productItem);
-        }
-    </script>
+</div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Dữ liệu này cần được truyền từ Controller xuống View
+    // Ví dụ: $productVariantsForJs = $productVariants->mapWithKeys(function($v){ return [$v->id => ['price' => $v->price, 'name' => $v->product->name, 'sku' => $v->sku]]; });
+    // Và $discountsForJs = $discounts->mapWithKeys(function($d){ return [$d->id => ['type' => $d->discount_type, ...]]; });
+    // Hãy đảm bảo bạn đã truyền biến $productVariantsForJs và $discountsForJs từ controller create()
+    const productVariantsData = @json($productVariantsForJs ?? []); // Sử dụng ?? [] để tránh lỗi nếu biến không tồn tại
+    const discountDetailsData = @json($discountsForJs ?? []);
+
+    const productsContainer = document.getElementById('products_container');
+    const addProductRowBtn = document.getElementById('addProductRowBtn');
+    const discountSelectEl = document.getElementById('discount_id_select');
+    const shippingFeeInputEl = document.getElementById('shipping_fee_input');
+
+    const summarySubtotalEl = document.getElementById('summary_subtotal');
+    const summaryDiscountEl = document.getElementById('summary_discount');
+    const summaryShippingFeeEl = document.getElementById('summary_shipping_fee');
+    const summaryGrandTotalEl = document.getElementById('summary_grand_total');
+
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    }
+
+    function calculateAndUpdateSummary() {
+        let currentSubtotal = 0;
+        const productItems = productsContainer.querySelectorAll('.product-item');
+
+        productItems.forEach(itemRow => {
+            const variantSelect = itemRow.querySelector('.product-variant-select');
+            const quantityInput = itemRow.querySelector('.product-quantity-input');
+            const priceDisplay = itemRow.querySelector('.product-total-price'); // Ô hiển thị giá của dòng sản phẩm
+
+            const selectedVariantId = variantSelect.value;
+            const quantity = parseInt(quantityInput.value) || 0;
+            let itemPrice = 0;
+
+            if (selectedVariantId && productVariantsData[selectedVariantId] && quantity > 0) {
+                itemPrice = parseFloat(productVariantsData[selectedVariantId].price) * quantity;
+                currentSubtotal += itemPrice;
+            }
+            if (priceDisplay) { // Cập nhật giá của từng dòng sản phẩm
+                priceDisplay.value = formatCurrency(itemPrice);
+            }
+        });
+
+        let currentDiscountAmount = 0;
+        const selectedDiscountId = discountSelectEl.value;
+
+        if (selectedDiscountId && discountDetailsData[selectedDiscountId]) {
+            const discount = discountDetailsData[selectedDiscountId];
+            if (currentSubtotal >= parseFloat(discount.minValue)) {
+                if (discount.type === 'percentage') {
+                    let calculatedDiscount = currentSubtotal * (parseFloat(discount.value) / 100);
+                    if (parseFloat(discount.maxValue) > 0) {
+                        currentDiscountAmount = Math.min(calculatedDiscount, parseFloat(discount.maxValue));
+                    } else {
+                        currentDiscountAmount = calculatedDiscount;
+                    }
+                } else if (discount.type === 'fixed') {
+                    currentDiscountAmount = parseFloat(discount.value);
+                }
+                currentDiscountAmount = Math.min(currentDiscountAmount, currentSubtotal); // Không giảm quá tổng tiền hàng
+            }
+        }
+
+        const currentShippingFee = parseFloat(shippingFeeInputEl.value) || 0;
+        const subtotalAfterDiscount = currentSubtotal - currentDiscountAmount;
+        const grandTotal = Math.max(0, subtotalAfterDiscount) + currentShippingFee;
+
+        summarySubtotalEl.textContent = formatCurrency(currentSubtotal);
+        summaryDiscountEl.textContent = formatCurrency(currentDiscountAmount > 0 ? -currentDiscountAmount : 0);
+        summaryShippingFeeEl.textContent = formatCurrency(currentShippingFee);
+        summaryGrandTotalEl.innerHTML = `<strong>${formatCurrency(grandTotal)}</strong>`;
+    }
+
+    function addEventListenersToRow(rowElement) {
+        const variantSelect = rowElement.querySelector('.product-variant-select');
+        const quantityInput = rowElement.querySelector('.product-quantity-input');
+        const removeBtn = rowElement.querySelector('.remove-product-row');
+
+        if (variantSelect) {
+            variantSelect.addEventListener('change', calculateAndUpdateSummary);
+        }
+        if (quantityInput) {
+            quantityInput.addEventListener('input', calculateAndUpdateSummary);
+        }
+        if (removeBtn) {
+            removeBtn.addEventListener('click', function() {
+                rowElement.remove();
+                calculateAndUpdateSummary(); // Cập nhật lại tổng sau khi xóa
+            });
+        }
+    }
+
+    // Gắn event cho các dòng sản phẩm đã có sẵn (nếu có từ old input)
+    productsContainer.querySelectorAll('.product-item').forEach(addEventListenersToRow);
+
+    if (addProductRowBtn) {
+        addProductRowBtn.addEventListener('click', function() {
+            const firstProductItem = productsContainer.querySelector('.product-item');
+            if (firstProductItem) {
+                const newRow = firstProductItem.cloneNode(true);
+                // Reset giá trị cho hàng mới
+                newRow.querySelector('.product-variant-select').selectedIndex = 0;
+                newRow.querySelector('.product-quantity-input').value = '1';
+                if (newRow.querySelector('.product-total-price')) {
+                    newRow.querySelector('.product-total-price').value = '';
+                }
+                productsContainer.appendChild(newRow);
+                addEventListenersToRow(newRow); // Gắn event cho hàng mới
+                calculateAndUpdateSummary(); // Cập nhật lại tổng
+            } else {
+                // Xử lý trường hợp không có dòng mẫu nào (có thể tạo HTML từ đầu)
+                console.warn("Không tìm thấy dòng sản phẩm mẫu để clone.");
+            }
+        });
+    }
+
+    if (discountSelectEl) {
+        discountSelectEl.addEventListener('change', calculateAndUpdateSummary);
+    }
+    if (shippingFeeInputEl) {
+        shippingFeeInputEl.addEventListener('input', calculateAndUpdateSummary);
+    }
+
+    // Tính toán lần đầu khi tải trang
+    calculateAndUpdateSummary();
+});
+</script>
+@endpush

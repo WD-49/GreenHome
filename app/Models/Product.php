@@ -47,6 +47,7 @@ class Product extends Model
         return $this->belongsTo(Brand::class);
     }
 
+
     // Quan hệ với product_variants (1-nhiều)
     public function productVariants()
     {

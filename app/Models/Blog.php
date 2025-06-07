@@ -11,13 +11,27 @@ class Blog extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'title', 'slug', 'summary', 'content', 'thumbnail',
-    'status', 'blog_category_id', 'author_id'
+
+        'title',
+        'slug',
+        'summary',
+        'content',
+        'thumbnail',
+        'status',
+        'author_id',
+        'blog_category_id',
     ];
+
+    /**
+     * Danh mục của bài viết
+     */
     public function category()
     {
         return $this->belongsTo(BlogCategory::class, 'blog_category_id');
     }
+    /**
+     * Tác giả bài viết
+     */
     public function author()
     {
         return $this->belongsTo(User::class, 'author_id');
