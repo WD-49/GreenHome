@@ -79,29 +79,25 @@
                                 <label class="form-label visually-hidden">Sản phẩm</label>
                                 <select name="products[]" class="form-select product-variant-select">
                                     <option value="">-- Chọn biến thể sản phẩm --</option>
-                                    @if (isset($productVariants))
-                                        @foreach ($productVariants as $variant)
-                                            <option value="{{ $variant->id }}" data-price="{{ $variant->price }}">
-                                                {{ $variant->product->name }} ({{ $variant->sku }}) -
-                                                {{ number_format($variant->price, 0, ',', '.') }} VND
-                                            </option>
-                                        @endforeach
-                                    @endif
+                                    @foreach ($productVariants as $variant)
+                                        <option value="{{ $variant->id }}" data-price="{{ $variant->price }}">
+                                            {{ $variant->product->name }} ({{ $variant->sku }}) -
+                                            {{ number_format($variant->price, 0, ',', '.') }} VND
+                                        </option>
+                                    @endforeach
                                 </select>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label visually-hidden">Số lượng</label>
                                 <input type="number" name="quantities[]" class="form-control product-quantity-input"
-                                    placeholder="Số lượng" min="1" value="1">
+                                    min="1" value="1">
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label visually-hidden">Thành tiền</label>
-                                <input type="text" class="form-control product-total-price" placeholder="Thành tiền"
-                                    readonly>
+                                <input type="text" class="form-control product-total-price" readonly>
                             </div>
                             <div class="col-md-1">
-                                <button type="button" class="btn btn-danger btn-sm remove-product-row"
-                                    title="Xóa sản phẩm">&times;</button>
+                                <button type="button" class="btn btn-danger btn-sm remove-product-row">&times;</button>
                             </div>
                         </div>
                     </div>
@@ -233,59 +229,41 @@
             }
 
             function calculateAndUpdateSummary() {
-                let currentSubtotal = 0;
+                let subtotal = 0;
+
                 const productItems = productsContainer.querySelectorAll('.product-item');
+                productItems.forEach(row => {
+                    const variantSelect = row.querySelector('.product-variant-select');
+                    const quantityInput = row.querySelector('.product-quantity-input');
+                    const totalPriceInput = row.querySelector('.product-total-price');
 
-                productItems.forEach(itemRow => {
-                    const variantSelect = itemRow.querySelector('.product-variant-select');
-                    const quantityInput = itemRow.querySelector('.product-quantity-input');
-                    const priceDisplay = itemRow.querySelector(
-                        '.product-total-price'); // Ô hiển thị giá của dòng sản phẩm
+                    const variantId = variantSelect?.value;
+                    const quantity = parseInt(quantityInput?.value) || 0;
 
-                    const selectedVariantId = variantSelect.value;
-                    const quantity = parseInt(quantityInput.value) || 0;
-                    let itemPrice = 0;
+                    let lineTotal = 0;
 
-                    if (selectedVariantId && productVariantsData[selectedVariantId] && quantity > 0) {
-                        itemPrice = parseFloat(productVariantsData[selectedVariantId].price) * quantity;
-                        currentSubtotal += itemPrice;
+                    if (variantId && productVariantsData[variantId] && quantity > 0) {
+                        const price = parseFloat(productVariantsData[variantId].price);
+                        lineTotal = price * quantity;
+                        subtotal += lineTotal;
                     }
-                    if (priceDisplay) { // Cập nhật giá của từng dòng sản phẩm
-                        priceDisplay.value = formatCurrency(itemPrice);
+
+                    if (totalPriceInput) {
+                        totalPriceInput.value = formatCurrency(lineTotal);
                     }
                 });
 
-                let currentDiscountAmount = 0;
-                const selectedDiscountId = discountSelectEl.value;
+                // Tạm thời bỏ qua discount để hiển thị tổng đơn giản
+                const shippingFee = parseFloat(shippingFeeInputEl.value) || 0;
+                const grandTotal = subtotal + shippingFee;
 
-                if (selectedDiscountId && discountDetailsData[selectedDiscountId]) {
-                    const discount = discountDetailsData[selectedDiscountId];
-                    if (currentSubtotal >= parseFloat(discount.minValue)) {
-                        if (discount.type === 'percentage') {
-                            let calculatedDiscount = currentSubtotal * (parseFloat(discount.value) / 100);
-                            if (parseFloat(discount.maxValue) > 0) {
-                                currentDiscountAmount = Math.min(calculatedDiscount, parseFloat(discount.maxValue));
-                            } else {
-                                currentDiscountAmount = calculatedDiscount;
-                            }
-                        } else if (discount.type === 'fixed') {
-                            currentDiscountAmount = parseFloat(discount.value);
-                        }
-                        currentDiscountAmount = Math.min(currentDiscountAmount,
-                            currentSubtotal); // Không giảm quá tổng tiền hàng
-                    }
-                }
-
-                const currentShippingFee = parseFloat(shippingFeeInputEl.value) || 0;
-                const subtotalAfterDiscount = currentSubtotal - currentDiscountAmount;
-                const grandTotal = Math.max(0, subtotalAfterDiscount) + currentShippingFee;
-
-                summarySubtotalEl.textContent = formatCurrency(currentSubtotal);
-                summaryDiscountEl.textContent = formatCurrency(currentDiscountAmount > 0 ? -currentDiscountAmount :
-                    0);
-                summaryShippingFeeEl.textContent = formatCurrency(currentShippingFee);
+                summarySubtotalEl.textContent = formatCurrency(subtotal);
+                summaryDiscountEl.textContent = formatCurrency(0); // nếu chưa xử lý giảm giá
+                summaryShippingFeeEl.textContent = formatCurrency(shippingFee);
                 summaryGrandTotalEl.innerHTML = `<strong>${formatCurrency(grandTotal)}</strong>`;
             }
+
+
 
             function addEventListenersToRow(rowElement) {
                 const variantSelect = rowElement.querySelector('.product-variant-select');

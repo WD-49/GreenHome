@@ -20,14 +20,16 @@
                 <div class="row mb-3 category-row align-items-center">
                     <div class="col-md-5">
                         <label for="name" class="form-label">Tên danh mục</label>
-                        <input type="text" name="name[]" class="form-control form-control-lg" placeholder="Tên danh mục">
+                        <input type="text" name="name[]" class="form-control form-control-lg"
+                            placeholder="Tên danh mục">
                     </div>
                     <div class="col-md-5">
                         <label for="description" class="form-label">Mô tả</label>
-                        <input type="text" name="description[]" class="form-control form-control-lg" placeholder="Mô tả">
+                        <textarea name="description[]" class="form-control ckeditor" placeholder="Mô tả"></textarea>
                     </div>
                     <div class="col-md-2 text-center">
-                        <button type="button" class="btn btn-danger btn-remove" onclick="removeCategory(this)" title="Xóa danh mục"></button>
+                        <button type="button" class="btn btn-danger btn-remove" onclick="removeCategory(this)"
+                            title="Xóa danh mục"></button>
                     </div>
                 </div>
             </div>
@@ -45,18 +47,18 @@
     </div>
 
     <style>
-        /* Cải thiện thiết kế nút remove */
         .category-row {
-            display: flex; /* Dùng flexbox để các phần tử nằm ngang */
-            align-items: center; /* Căn giữa theo chiều dọc */
-            justify-content: space-between; /* Căn đều giữa các phần tử */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             padding: 10px;
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .category-row input {
+        .category-row input,
+        .category-row textarea {
             border-radius: 8px;
             border: 1px solid #ddd;
             padding: 12px;
@@ -66,20 +68,20 @@
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .category-row input:focus {
+        .category-row input:focus,
+        .category-row textarea:focus {
             border-color: #3498db;
             box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
         }
 
-        /* Nút remove */
         .category-row .btn-remove {
             font-size: 16px;
             width: 40px;
             height: 40px;
             padding: 0;
-            margin-top: 30px; /* Đảm bảo nút có khoảng cách với ô input */
-            border-radius: 8px; /* Bo góc để trông mềm mại */
-            background-color: #e74c3c; /* Màu đỏ nhẹ */
+            margin-top: 30px;
+            border-radius: 8px;
+            background-color: #e74c3c;
             border: none;
             color: white;
             display: flex;
@@ -89,19 +91,17 @@
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
-        /* Hiệu ứng hover */
         .category-row .btn-remove:hover {
-            background-color: #c0392b; /* Đổi màu khi hover */
-            transform: scale(1.1); /* Tăng kích thước khi hover để làm nổi bật */
+            background-color: #c0392b;
+            transform: scale(1.1);
         }
 
         .category-row .btn-remove::before {
-            content: '-'; /* Sử dụng dấu trừ thay vì icon */
+            content: '-';
             font-size: 22px;
             font-weight: bold;
         }
 
-        /* Nút "Thêm danh mục" */
         #add-category {
             font-weight: bold;
             padding: 12px 25px;
@@ -114,7 +114,6 @@
             color: white;
         }
 
-        /* Đảm bảo responsive */
         @media (max-width: 768px) {
             .category-row {
                 flex-direction: column;
@@ -128,7 +127,7 @@
 
             .btn-remove {
                 margin-top: 10px;
-                align-self: flex-start; /* Căn nút remove lên trên cùng */
+                align-self: flex-start;
             }
 
             #add-category {
@@ -138,8 +137,27 @@
         }
     </style>
 
+    <!-- CKEditor CDN -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+
     <script>
-        document.getElementById('add-category').addEventListener('click', function () {
+        function initializeEditors() {
+            document.querySelectorAll('.ckeditor').forEach((textarea) => {
+                if (!textarea.classList.contains('ckeditor-loaded')) {
+                    ClassicEditor.create(textarea)
+                        .then(editor => {
+                            textarea.classList.add('ckeditor-loaded');
+                        })
+                        .catch(error => {
+                            console.error(error);
+                        });
+                }
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', initializeEditors);
+
+        document.getElementById('add-category').addEventListener('click', function() {
             var container = document.getElementById('categories-container');
             var newRow = document.createElement('div');
             newRow.classList.add('row', 'mb-3', 'category-row', 'align-items-center');
@@ -150,13 +168,14 @@
                 </div>
                 <div class="col-md-5">
                     <label class="form-label">Mô tả</label>
-                    <input type="text" name="description[]" class="form-control form-control-lg" placeholder="Mô tả">
+                    <textarea name="description[]" class="form-control ckeditor" placeholder="Mô tả"></textarea>
                 </div>
                 <div class="col-md-2 text-center">
                     <button type="button" class="btn btn-danger btn-remove" onclick="removeCategory(this)" title="Xóa danh mục"></button>
                 </div>
             `;
             container.appendChild(newRow);
+            initializeEditors();
         });
 
         function removeCategory(button) {

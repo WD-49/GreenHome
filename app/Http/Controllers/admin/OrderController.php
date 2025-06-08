@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\PaymentMethod;
 use App\Models\ProductVariant;
+use App\Models\DiscountProduct;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
@@ -101,11 +102,16 @@ class OrderController extends Controller
                     'value' => (float) $discount->discount_value,
                     'maxValue' => (float) ($discount->max_discount ?? 0),
                     'minValue' => (float) ($discount->min_order_value ?? 0),
+                    'applies_to_all_products' => (int) $discount->applies_to_all_products, // ⚠️ Thêm dòng này
                     'code' => $discount->code // Có thể hữu ích để hiển thị
                 ]
             ];
         });
         // dd($productVariantsForJs, $discountsForJs);
+        $discountProductsMap = DiscountProduct::select('discount_id', 'product_id')->get()->groupBy('discount_id')->map(function ($items) {
+            return $items->pluck('product_id')->toArray();
+        });
+
 
 
         return view('admin.orders.create', compact(
@@ -114,7 +120,8 @@ class OrderController extends Controller
             'discounts',       // Vẫn truyền discounts cho vòng lặp select HTML
             'payMethods',
             'productVariantsForJs', // Dữ liệu cho JS
-            'discountsForJs'        // Dữ liệu cho JS
+            'discountsForJs',
+            'discountProductsMap'     // Dữ liệu cho JS
         ));
     }
 
@@ -126,6 +133,7 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request);
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|exists:users,id',
             'shipping_name' => 'required|string|max:255',
@@ -188,7 +196,9 @@ class OrderController extends Controller
                 }
 
                 $itemTotal = $variant->price * $quantityToOrder;
+                // dd($itemTotal);
                 $subTotal += $itemTotal;
+                // dd($subTotal);
 
                 $cartItemsDetails[] = [
                     'product_variant_id' => $variantId,
@@ -199,6 +209,7 @@ class OrderController extends Controller
                     'variant_instance' => $variant, // Giữ lại instance để cập nhật stock
                 ];
             }
+            // dd($subTotal);
 
             $discountAmount = 0;
             $appliedDiscountId = null;
@@ -210,6 +221,7 @@ class OrderController extends Controller
                     ->where('start_date', '<=', now())
                     ->where('end_date', '>=', now())
                     ->first();
+                // dd($discountModelInstance);
 
                 if (!$discountModelInstance) {
                     return redirect()->back()->withErrors(['discount_id' => 'Mã giảm giá không hợp lệ, đã hết hạn hoặc không tồn tại.'])->withInput();
@@ -225,35 +237,66 @@ class OrderController extends Controller
                         ->where('discount_id', $discountModelInstance->id)
                         // ->whereNotIn('status_id', [ID_TRANG_THAI_DA_HUY]) // Nếu có trạng thái hủy cụ thể
                         ->count();
+                    // dd($userUsesCount);
                     if ($userUsesCount >= $discountModelInstance->user_usage_limit) {
                         return redirect()->back()->withErrors(['discount_id' => 'Bạn đã sử dụng hết số lần cho phép của mã giảm giá này.'])->withInput();
                     }
                 }
 
                 $amountEligibleForDiscount = $subTotal; // Số tiền sẽ được tính giảm giá
+                $currentApplicableItemsTotal = 0;
 
                 if (!$discountModelInstance->applies_to_all_products) {
                     // Logic này dựa trên bảng discount_products (discount_id, product_id)
                     // Cần load relationship products() cho $discountModelInstance
                     // Trong Discount model: public function products() { return $this->belongsToMany(Product::class, 'discount_products'); }
                     $applicableProductIds = $discountModelInstance->products()->pluck('products.id')->toArray();
+                    // dd($applicableProductIds);
 
-                    $currentApplicableItemsTotal = 0;
                     $hasApplicableItemInCart = false;
+                    // dd($cartItemsDetails);
 
                     foreach ($cartItemsDetails as $cartItem) {
+                        // dd($cartItem);
                         if (in_array($cartItem['product_id'], $applicableProductIds)) {
-                            $currentApplicableItemsTotal += $cartItem['total_price'];
+                            // dd($discountModelInstance);
+                            // dd($cartItem);
+                            if ($discountModelInstance->discount_type == 'fixed') {
+                                // dd('check');
+                                $discountAmountItem = $discountModelInstance->value;
+
+                                $currentApplicableItemsTotal += max(0, $cartItem['total_price'] - $discountAmountItem);
+                                // dd($discountModelInstance->discount_value);
+                                // dd($discountAmount);
+
+                                // dd($currentApplicableItemsTotal);
+
+                            } else {
+                                $discountAmountItem = $cartItem['total_price'] * ($discountModelInstance->discount_value / 100);
+                                // dd($discountAmount);
+                                $currentApplicableItemsTotal += $cartItem['total_price'] - $discountAmountItem;
+                                // dd($currentApplicableItemsTotal);
+                            }
+                            $discountAmount += $discountAmountItem;
+
+
                             $hasApplicableItemInCart = true;
+                        } else {
+                            $currentApplicableItemsTotal += $cartItem['total_price'];
                         }
+
                     }
+
+                    // dd('check');
+                    // dd($currentApplicableItemsTotal);
 
                     if (!$hasApplicableItemInCart) {
                         return redirect()->back()->withErrors(['discount_id' => 'Mã giảm giá không áp dụng cho bất kỳ sản phẩm nào trong giỏ hàng.'])->withInput();
                     }
                     $amountEligibleForDiscount = $currentApplicableItemsTotal;
+                    // dd($amountEligibleForDiscount);
                 }
-
+                // dd($amountEligibleForDiscount);
                 if ($amountEligibleForDiscount < $discountModelInstance->min_order_value) {
                     $formattedMinOrderValue = number_format($discountModelInstance->min_order_value, 0, ',', '.') . 'đ';
                     $errorMessage = $discountModelInstance->applies_to_all_products ?
@@ -262,18 +305,42 @@ class OrderController extends Controller
                     return redirect()->back()->withErrors(['discount_id' => $errorMessage])->withInput();
                 }
 
-                if ($discountModelInstance->discount_type === 'percentage') {
-                    $rawDiscount = $amountEligibleForDiscount * ($discountModelInstance->discount_value / 100);
-                    $discountAmount = min($rawDiscount, $discountModelInstance->max_discount);
-                } elseif ($discountModelInstance->discount_type === 'fixed') {
-                    $discountAmount = min($discountModelInstance->discount_value, $amountEligibleForDiscount);
+                if ($discountModelInstance->applies_to_all_products == true) {
+                    if ($discountModelInstance->discount_type === 'percentage') {
+                        $rawDiscount = $amountEligibleForDiscount * ($discountModelInstance->discount_value / 100);
+                        $discountAmount = min($rawDiscount, $discountModelInstance->max_discount);
+                        $subTotal -= $discountAmount;
+                        // dd($discountAmount);
+                        // dd($subTotal);
+                    } elseif ($discountModelInstance->discount_type === 'fixed') {
+                        $discountAmount = min($discountModelInstance->discount_value, $amountEligibleForDiscount);
+                        $subTotal -= $discountAmount;
+                        // dd($discountAmount);
+                    }
+                    $discountAmount = min($discountAmount, $subTotal); // Đảm bảo giảm giá không lớn hơn tổng tiền hàng
+                    $appliedDiscountId = $discountModelInstance->id;
+
+                } else {
+                    $subTotal = $currentApplicableItemsTotal;
+                    $appliedDiscountId = $discountModelInstance->id;
+
                 }
-                $discountAmount = min($discountAmount, $subTotal); // Đảm bảo giảm giá không lớn hơn tổng tiền hàng
-                $appliedDiscountId = $discountModelInstance->id;
+
+                // dd($discountAmount);
+
             }
 
-            $totalAfterDiscount = max(0, $subTotal - $discountAmount);
+            // dd($currentApplicableItemsTotal);
+            // if ($discountModelInstance->applies_to_all_products == true) {
+            //     $totalAfterDiscount = max(0, $subTotal - $discountAmount);
+            //     $grandTotal = $totalAfterDiscount + $request->input('shipping_fee', 0);
+            // }
+
+            $totalAfterDiscount = $subTotal;
             $grandTotal = $totalAfterDiscount + $request->input('shipping_fee', 0);
+            // dd('check');
+            // dd($grandTotal);
+            // dd($appliedDiscountId);
 
             do {
                 $orderSku = 'DH-' . strtoupper(Str::random(2)) . now()->format('ymd') . rand(100, 999);
@@ -331,9 +398,14 @@ class OrderController extends Controller
             'paymentMethod'
         ])->findOrFail($id);
         // dd($order);
+        $discountProductIds = $order->discount?->products->pluck('id')->toArray() ?? [];
+        // dd($discountProductIds);
+
+
+
         $statuses = OrderStatus::all();
         // dd($order);
-        return view('admin.orders.show', compact('order', 'statuses'));
+        return view('admin.orders.show', compact('order', 'statuses', 'discountProductIds'));
     }
 
     public function updateStatus(Request $request, $id)

@@ -251,6 +251,9 @@
                 <li class="nav-item">
                     <a class="nav-link" id="variants-tab" data-bs-toggle="tab" href="#variants" role="tab">Biến thể</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="reviews-tab" data-bs-toggle="tab" href="#reviews" role="tab">Đánh giá</a>
+                </li>
             </ul>
             <div class="tab-content mt-3">
                 <div class="tab-pane fade show active" id="description" role="tabpanel">
@@ -449,6 +452,86 @@
                                     </tr>
                                 @endif
                             </tbody>
+                        </table>
+                        <div class="mt-3">
+                            {{ $variants->withQueryString()->fragment('variants')->links() }}
+
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="reviews" role="tabpanel">
+                    <div class="table-responsive">
+
+                        <table class="table table-hover align-middle text-nowrap">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>user</th>
+                                    <th>variant-sku</th>
+                                    <th>rating</th>
+                                    <th>title</th>
+                                    <th>status</th>
+                                    <th class="text-end"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($reviews as $index => $review)
+                                    <tr>
+                                        <td>{{ $index + 1 }}</td>
+                                        <td>{{ $review->user->name }}</td>
+
+                                        <td>{{ $review->ProductVariant->sku }}</td>
+
+                                        {{-- Hiển thị rating bằng sao --}}
+                                        <td>
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                @if ($i <= $review->rating)
+                                                    <i class="fas fa-star text-warning"></i>
+                                                @else
+                                                    <i class="far fa-star text-warning"></i>
+                                                @endif
+                                            @endfor
+                                        </td>
+
+                                        <td>{{ $review->title }}</td>
+
+                                        {{-- Hiển thị trạng thái với màu sắc --}}
+                                        <td>
+                                            @php
+                                                switch ($review->status) {
+                                                    case 'pending':
+                                                        $badgeClass = 'bg-warning';
+                                                        $statusText = 'Chưa duyệt';
+                                                        break;
+                                                    case 'approved':
+                                                        $badgeClass = 'bg-success';
+                                                        $statusText = 'Đã duyệt';
+                                                        break;
+                                                    case 'rejected':
+                                                        $badgeClass = 'bg-danger';
+                                                        $statusText = 'Ẩn';
+                                                        break;
+                                                    default:
+                                                        $badgeClass = 'bg-secondary';
+                                                        $statusText = 'Không rõ';
+                                                }
+                                            @endphp
+                                            <span class="badge {{ $badgeClass }}">{{ $statusText }}</span>
+                                        </td>
+
+                                        <td class="text-end">
+                                            {{-- Các nút thao tác có thể được mở lại nếu cần --}}
+                                        </td>
+                                    </tr>
+                                @endforeach
+
+                                @if ($reviews->count() == 0)
+                                    <tr>
+                                        <td colspan="8" class="text-center text-muted">Không có đánh giá nào</td>
+                                    </tr>
+                                @endif
+                            </tbody>
+
                         </table>
                         <div class="mt-3">
                             {{ $variants->withQueryString()->fragment('variants')->links() }}

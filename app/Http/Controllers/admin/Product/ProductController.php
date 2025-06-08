@@ -14,6 +14,7 @@ use App\Models\ProductVariantValue;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
+use App\Models\Review;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -149,9 +150,21 @@ class ProductController extends Controller
             ->with('productVariantValues.attributeValue.attribute')
             ->where('deleted_at', null)
             ->paginate(5);
+        // Lấy danh sách ID của các biến thể thuộc sản phẩm
+        $variantIds = $product->productVariants()
+            ->whereNull('deleted_at')
+            ->pluck('id')
+            ->toArray();
+
+        // Lấy đánh giá theo product_variant_id
+        $reviews = Review::with(['user', 'productVariant.product']) // Eager load quan hệ nếu cần
+            ->whereIn('product_variant_id', $variantIds)
+            ->whereNull('deleted_at')
+            ->latest()
+            ->paginate(5);
         // dd($variants);
         // do du lieu thong tin chi tiet ra giao dien
-        return view('admin.products.show', compact('product', 'comments', 'variants'));
+        return view('admin.products.show', compact('product', 'comments', 'variants', 'reviews'));
 
     }
 

@@ -117,8 +117,8 @@
                                 <th>Giá gốc</th>
                                 <th>Giá đặt mua</th>
                                 <th>Số lượng</th>
-                                <th>Giảm giá (sp)</th>
                                 <th>Tổng giá</th>
+                                <th>Giảm giá (sp)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -129,14 +129,19 @@
                                     <td>{{ number_format($item->productVariant->price, 0, ',', '.') }} VND</td>
                                     <td>{{ number_format($item->unit_price, 0, ',', '.') }} VND</td>
                                     <td>{{ $item->quantity }}</td>
+                                    <td>{{ number_format($item->total_price, 0, ',', '.') }} VND</td>
+
                                     <td>
-                                        @if ($item->discount_id)
-                                            -{{ number_format($item->discount_id, 0, ',', '.') }} VND
+                                        @if (in_array($item->productVariant->product->id, $discountProductIds))
+                                            @if ($order->discount->discount_type == 'fixed')
+                                                -{{ number_format($order->discount->discount_value, 0, ',', '.') }} VND
+                                            @else
+                                                -{{ number_format($order->discount->discount_value, 0, ',', '.') }}%
+                                            @endif
                                         @else
                                             Không có
                                         @endif
                                     </td>
-                                    <td>{{ number_format($item->total_price, 0, ',', '.') }} VND</td>
                                     @php
                                         $totalOrderAmount += $item->total_price;
                                     @endphp
@@ -174,7 +179,7 @@
                                             <td>
                                                 -{{ number_format($discountAmount, 0, ',', '.') }} VND
                                                 <br>
-                                                <small>({{ $order->discount->type == 'order' ? 'Áp dụng toàn đơn' : 'Áp dụng sản phẩm' }})</small>
+                                                <small>({{ $order->discount->applies_to_all_products == 1 ? 'Áp dụng đơn hàng' : 'Áp dụng sản phẩm' }})</small>
                                             </td>
                                         @endif
                                         @if ($discountAmount <= 0)
@@ -189,7 +194,8 @@
 
                                     <tr class="table-success">
                                         <th>Tổng thanh toán</th>
-                                        <td><strong>{{ number_format($finalAmount, 0, ',', '.') }} VND</strong></td>
+                                        <td><strong>{{ number_format($order->total_amount, 0, ',', '.') }} VND</strong>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
