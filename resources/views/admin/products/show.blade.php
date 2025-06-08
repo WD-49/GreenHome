@@ -135,7 +135,7 @@
                 color: #6c757d;
             }
 
-            .tab-content img {
+            .tab-content .icon-img {
                 max-width: 1.2em;
                 max-height: 1.2em;
                 vertical-align: middle;
@@ -402,7 +402,7 @@
                                             </ul>
                                         </td>
                                         <td>
-                                            <img src="{{ asset('storage/' . $variant->image) }}" width="60"
+                                            <img src="{{ asset('storage/' . $variant->image) }}" width="100px"
                                                 class="rounded" alt="Ảnh biến thể">
                                         </td>
                                         <td>{{ number_format($variant->price, 0) }} đ</td>

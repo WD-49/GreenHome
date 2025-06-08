@@ -66,7 +66,7 @@ class OrderController extends Controller
             $query->where('payment_method_id', $request->payment_method);
         }
 
-        $orders = $query->paginate(20)->withQueryString(); // phân trang 20 item/trang, giữ query filter trong url
+        $orders = $query->withTrashed()->paginate(20)->withQueryString(); // phân trang 20 item/trang, giữ query filter trong url
 
         // Lấy danh sách trạng thái, phương thức thanh toán để đổ vào filter dropdown
         $orderStatuses = \App\Models\OrderStatus::all();
@@ -392,21 +392,19 @@ class OrderController extends Controller
     {
         $order = Order::with([
             'user.profile',
-            'discount',
+            'discount.products', 
             'items.productVariant.product',
             'status',
             'paymentMethod'
-        ])->findOrFail($id);
-        // dd($order);
+        ])->withTrashed()->findOrFail($id);
+
         $discountProductIds = $order->discount?->products->pluck('id')->toArray() ?? [];
-        // dd($discountProductIds);
-
-
 
         $statuses = OrderStatus::all();
-        // dd($order);
+
         return view('admin.orders.show', compact('order', 'statuses', 'discountProductIds'));
     }
+
 
     public function updateStatus(Request $request, $id)
     {

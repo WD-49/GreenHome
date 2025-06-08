@@ -51,7 +51,8 @@ class Product extends Model
     // Quan hệ với product_variants (1-nhiều)
     public function productVariants()
     {
-        return $this->hasMany(ProductVariant::class);
+        return $this->hasMany(ProductVariant::class)->withTrashed();
+
     }
 
     public function comments()

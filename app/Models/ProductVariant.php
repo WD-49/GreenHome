@@ -31,7 +31,7 @@ class ProductVariant extends Model
     // Quan hệ với product (nhiều-1)
     public function product()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class)->withTrashed();
     }
 
     public function reviews()

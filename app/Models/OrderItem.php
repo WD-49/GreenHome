@@ -18,6 +18,7 @@ class OrderItem extends Model
     public function product()
     {
         return $this->productVariant->product();
+
     }
 
     public function order()
@@ -26,6 +27,6 @@ class OrderItem extends Model
     }
     public function productVariant()
     {
-        return $this->belongsTo(ProductVariant::class);
+        return $this->belongsTo(ProductVariant::class)->withTrashed();
     }
 }
