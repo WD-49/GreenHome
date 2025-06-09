@@ -196,6 +196,7 @@ class OrderController extends Controller
 
                 $itemTotal = $variant->price * $quantityToOrder;
                 $subTotal += $itemTotal;
+                // dd($subTotal);
 
                 $cartItemsDetails[] = [
                     'product_variant_id' => $variantId,
@@ -206,6 +207,7 @@ class OrderController extends Controller
                     'variant_instance' => $variant, // Giữ lại instance để cập nhật stock
                 ];
             }
+            // dd($subTotal);
 
             $discountAmount = 0;
             $appliedDiscountId = null;
@@ -224,6 +226,9 @@ class OrderController extends Controller
 
                 if ($discountModelInstance->quantity <= 0) {
                     return redirect()->back()->withErrors(['discount_id' => 'Mã giảm giá đã hết lượt sử dụng.'])->withInput();
+                }
+                if ($subTotal > $discountModelInstance->max_order_value) {
+
                 }
 
                 // Kiểm tra giới hạn sử dụng của người dùng cho mã này
@@ -262,7 +267,7 @@ class OrderController extends Controller
                         return redirect()->back()->withErrors(['discount_id' => 'Mã giảm giá không áp dụng cho bất kỳ sản phẩm nào trong giỏ hàng.'])->withInput();
                     }
                     $amountEligibleForDiscount = $currentApplicableItemsTotal;
-                    // dd($currentApplicableItemsTotal);
+                    dd($currentApplicableItemsTotal);
                 }
                 // dd($productDiscountQuantity);
 
@@ -285,6 +290,10 @@ class OrderController extends Controller
                     // dd($discountAmount);
                 }
                 $discountAmount = min($discountAmount, $subTotal); // Đảm bảo giảm giá không lớn hơn tổng tiền hàng
+                if ($discountAmount > $discountModelInstance->max_discount) {
+                    return redirect()->back()->withErrors(['discount_id' => 'số tiền giảm giá của đơn hàng vượt quá giá trị giảm giá tối đa'])->withInput();
+                }
+                // dd($discountModelInstance);
                 $appliedDiscountId = $discountModelInstance->id;
                 // dd($discountAmount);
             }

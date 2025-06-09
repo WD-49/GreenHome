@@ -12,11 +12,12 @@ return new class extends Migration {
     {
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('product_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('product_variant_id')->constrained()->cascadeOnDelete();
             $table->tinyInteger('rating');
             $table->string('title', 150);
             $table->text('content');
+            $table->enum('status', ['pending', 'approved', 'rejected'])->after('content')->default('pending');
             $table->timestamps();
             $table->softDeletes();
         });

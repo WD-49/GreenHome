@@ -52,6 +52,6 @@ document.addEventListener('DOMContentLoaded', function () {
       let alert = new bootstrap.Alert(alertEl);
       alert.close();
     });
-  }, 3000);
+  }, 6000);
 });
 

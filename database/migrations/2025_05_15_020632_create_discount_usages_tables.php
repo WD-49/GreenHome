@@ -12,8 +12,12 @@ return new class extends Migration {
     {
         Schema::create('discount_usages', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('discount_id')->constrained('discounts')->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('discount_id')->nullable()->constrained('discounts')->nullOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('product_id')->nullable()->constrained('products')->cascadeOnDelete();
+            $table->string('discount_code');
+            $table->string('user_name');
+            $table->string('user_name');
             $table->dateTime('used_at');
             $table->timestamps();
             $table->softDeletes();
