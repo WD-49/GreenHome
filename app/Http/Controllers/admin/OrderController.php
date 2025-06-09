@@ -263,7 +263,8 @@ class OrderController extends Controller
                             // dd($cartItem);
                             if ($discountModelInstance->discount_type == 'fixed') {
                                 // dd('check');
-                                $discountAmountItem = $discountModelInstance->discount_value;
+                                $discountAmountItem = $discountModelInstance->discount_value * $cartItem['quantity'];
+
 
                                 $currentApplicableItemsTotal += max(0, $cartItem['total_price'] - $discountAmountItem);
                                 // dd($discountModelInstance->discount_value);
@@ -294,7 +295,7 @@ class OrderController extends Controller
                         return redirect()->back()->withErrors(['discount_id' => 'Mã giảm giá không áp dụng cho bất kỳ sản phẩm nào trong giỏ hàng.'])->withInput();
                     }
                     $amountEligibleForDiscount = $currentApplicableItemsTotal;
-                    // dd($amountEligibleForDiscount);
+                    dd($amountEligibleForDiscount);
                 }
                 // dd($amountEligibleForDiscount);
                 if ($amountEligibleForDiscount < $discountModelInstance->min_order_value) {
