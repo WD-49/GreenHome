@@ -263,11 +263,11 @@ class OrderController extends Controller
                             // dd($cartItem);
                             if ($discountModelInstance->discount_type == 'fixed') {
                                 // dd('check');
-                                $discountAmountItem = $discountModelInstance->value;
+                                $discountAmountItem = $discountModelInstance->discount_value;
 
                                 $currentApplicableItemsTotal += max(0, $cartItem['total_price'] - $discountAmountItem);
                                 // dd($discountModelInstance->discount_value);
-                                // dd($discountAmount);
+                                // dd($discountAmountItem);
 
                                 // dd($currentApplicableItemsTotal);
 
@@ -323,7 +323,6 @@ class OrderController extends Controller
                 } else {
                     $subTotal = $currentApplicableItemsTotal;
                     $appliedDiscountId = $discountModelInstance->id;
-
                 }
 
                 // dd($discountAmount);
