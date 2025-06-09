@@ -392,7 +392,7 @@ class OrderController extends Controller
     {
         $order = Order::with([
             'user.profile',
-            'discount.products', 
+            'discount.products',
             'items.productVariant.product',
             'status',
             'paymentMethod'

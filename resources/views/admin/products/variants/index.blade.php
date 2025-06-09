@@ -136,8 +136,14 @@
                                         </ul>
                                     </td>
                                     <td>
-                                        <img src="{{ asset('storage/' . $variant->image) }}" width="60" class="rounded"
-                                            alt="Ảnh biến thể">
+
+                                        @if ($variant->image)
+                                            <img src="{{ asset('storage/' . $variant->image) }}" width="60"
+                                                class="rounded" alt="Ảnh biến thể">
+                                        @else
+                                            biến thể không có ảnh
+                                        @endif
+
                                     </td>
                                     <td>{{ number_format($variant->price, 0) }} đ</td>
                                     <td>{{ $variant->quantity }}</td>

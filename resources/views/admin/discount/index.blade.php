@@ -64,19 +64,18 @@
             </div>
             <div class="col-md-3">
                 <label for="start_date" class="form-label">Ngày bắt đầu từ</label>
-                <input type="date"  name="start_date" class="form-control"
-                    value="{{ request('start_date') }}">
+                <input type="date" name="start_date" class="form-control" value="{{ request('start_date') }}">
             </div>
 
             <div class="col-md-3">
                 <label for="end_date" class="form-label">Ngày kết thúc đến</label>
-                <input type="date"  name="end_date" class="form-control" value="{{ request('end_date') }}">
+                <input type="date" name="end_date" class="form-control" value="{{ request('end_date') }}">
             </div>
 
             <div class="col-md-3">
                 <label for="discount_value" class="form-label">Giá trị giảm</label>
-                <input type="number"  name="discount_value" class="form-control"
-                    value="{{ request('discount_value') }}" min="0" step="0.01" placeholder="Nhập giá trị giảm">
+                <input type="number" name="discount_value" class="form-control" value="{{ request('discount_value') }}"
+                    min="0" step="0.01" placeholder="Nhập giá trị giảm">
             </div>
             <div class="col-md-3">
                 <label for="type" class="form-label">Loại giảm giá</label>
@@ -173,18 +172,18 @@
                                 <td class="table-actions">
                                     <a href="{{ route('admin.discount.show', $discount->id) }}"
                                         class="btn btn-sm btn-primary" title="Xem">
-                                        <i data-feather="eye"></i>
+                                        <i data-feather="eye">xem</i>
                                     </a>
                                     <a href="{{ route('admin.discount.edit', $discount->id) }}"
                                         class="btn btn-sm btn-warning" title="Sửa">
-                                        <i data-feather="edit"></i>
+                                        <i data-feather="edit">sửa</i>
                                     </a>
                                     <form action="{{ route('admin.discount.delete', $discount->id) }}" method="POST"
                                         onsubmit="return confirm('Bạn có muốn xóa mã này không?')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-danger" title="Xóa">
-                                            <i data-feather="trash-2"></i>
+                                            <i data-feather="trash-2">xóa</i>
                                         </button>
                                     </form>
                                 </td>

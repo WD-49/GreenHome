@@ -6,9 +6,9 @@
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">Quản lý tài khoản Admin</h1>
             <div>
-                <a href="{{ route('admin.account.createAdmin') }}" class="btn btn-success shadow-sm">
+                {{-- <a href="{{ route('admin.account.createAdmin') }}" class="btn btn-success shadow-sm">
                     <i class="fas fa-plus-circle fa-sm text-white-50"></i> Thêm Admin mới
-                </a>
+                </a> --}}
                 <a href="{{ route('admin.account.trashedAdmins') }}" class="btn btn-warning shadow-sm">
                     <i class="fas fa-trash-restore fa-sm text-white-50"></i> Thùng rác
                 </a>
@@ -100,16 +100,14 @@
                                         @if ($admin->role == 'admin')
                                             <span>Admin</span>
                                         @else
-                                            <span >{{ ucfirst($admin->role) }}</span>
+                                            <span>{{ ucfirst($admin->role) }}</span>
                                         @endif
                                     </td>
                                     <td class="text-center align-middle">
                                         @if ($admin->status == 1)
-                                            <span class="text-success"
-                                               >Hoạt động</span>
+                                            <span class="text-success">Hoạt động</span>
                                         @else
-                                            <span class="text-danger"
-                                               >Ngừng hoạt động</span>
+                                            <span class="text-danger">Ngừng hoạt động</span>
                                         @endif
                                     </td>
                                     <td class="text-center align-middle">
@@ -126,8 +124,7 @@
                                                 method="POST" class="d-inline"
                                                 onsubmit="return confirm('Bạn có chắc chắn muốn xóa tạm thời admin này không?')">
                                                 @csrf
-                                                <button type="submit" class="btn btn-danger btn-sm"
-                                                    title="Xóa tạm thời">
+                                                <button type="submit" class="btn btn-danger btn-sm" title="Xóa tạm thời">
                                                     <i class="fas fa-trash-alt"></i>
                                                 </button>
                                             </form>
