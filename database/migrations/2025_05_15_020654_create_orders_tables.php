@@ -18,10 +18,15 @@ return new class extends Migration {
             $table->string('shipping_name', 255);
             $table->string('shipping_phone', 15);
             $table->string('shipping_address', 255);
-            $table->foreignId('status_id')->constrained('order_statuses')->cascadeOnDelete();
+            $table->enum('order_status', [
+                'Chưa xác nhận',
+                'Xác nhận',
+                'Đang vận chuyển',
+                'Giao hàng thành công',
+                'Hủy đơn'
+            ])->default('Chưa xác nhận');
             $table->foreignId('discount_id')->nullable()->constrained('discounts')->nullOnDelete();
             $table->string('discount_code', 50)->nullable();
-            $table->string('discount_amount')->default(0);
             $table->string('discount_value');
             $table->enum('payment_method', ['cod', 'banking', 'momo'])->default('cod');
             $table->string('payment_method_name', 255);

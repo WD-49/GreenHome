@@ -1,5 +1,11 @@
-<div class="py-6 px-6 text-center">
-    <p class="mb-0 fs-4">Design and Developed by <a href="#"
-            class="pe-1 text-primary text-decoration-underline">Wrappixel.com</a> Distributed by <a
-            href="https://themewagon.com" target="_blank">ThemeWagon</a></p>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col fs-13 text-muted text-center">
+            &copy;
+            <script>
+                document.write(new Date().getFullYear())
+            </script> - Made with <span class="mdi mdi-heart text-danger"></span> by <a href="#!"
+                class="text-reset fw-semibold">Zoyothemes</a>
+        </div>
+    </div>
 </div>

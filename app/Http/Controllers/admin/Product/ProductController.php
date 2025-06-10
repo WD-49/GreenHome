@@ -64,7 +64,7 @@ class ProductController extends Controller
         //     $query->whereDate('date_of_entry', $request->ngay_nhap);
         // }
 
-        $products = $query->orderByDesc('id')->paginate(4)->appends($request->except('page'));
+        $products = $query->orderByDesc('id')->paginate(2)->appends($request->except('page'));
         $productAll = Product::whereNull('deleted_at')->get();
         $productTrashed = Product::onlyTrashed()->get();
 

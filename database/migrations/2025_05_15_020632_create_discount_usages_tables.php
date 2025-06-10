@@ -17,7 +17,6 @@ return new class extends Migration {
             $table->foreignId('product_id')->nullable()->constrained('products')->cascadeOnDelete();
             $table->string('discount_code');
             $table->string('user_name');
-            $table->string('user_name');
             $table->dateTime('used_at');
             $table->timestamps();
             $table->softDeletes();
