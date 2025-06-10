@@ -54,10 +54,10 @@
             <div class="collapse" id="sidebarAuth">
                 <ul class="nav-second-level">
                     <li>
-                        <a class='tp-link' href='auth-register.html'>Người dùng</a>
+                        <a class='tp-link' href='{{ route('admin.account.listUsers') }}'>Người dùng</a>
                     </li>
                     <li>
-                        <a class='tp-link' href='auth-register.html'>Quản trị</a>
+                        <a class='tp-link' href='{{ route('admin.account.listAdmins') }}'>Quản trị</a>
                     </li>
                 </ul>
             </div>
