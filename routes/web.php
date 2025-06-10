@@ -308,16 +308,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/restore/{id}', [OrderController::class, 'restore'])->name('restore');
         Route::patch('{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
 
-        Route::prefix('/status')->name('status.')->group(function () {
-            Route::get('/', [OrderStatusController::class, 'index'])->name('index');
-            Route::get('/create', [OrderStatusController::class, 'create'])->name('create');
-            Route::get('/{id}/edit', [OrderStatusController::class, 'edit'])->name('edit');
-            Route::get('/trashed', [OrderStatusController::class, 'trashed'])->name('trashed');
-            Route::put('/{id}/update', [OrderStatusController::class, 'update'])->name('update');
-            Route::put('/{id}/restore', [OrderStatusController::class, 'restore'])->name('restore');
-            Route::post('/store', [OrderStatusController::class, 'store'])->name('store');
-            Route::delete('/destroy/{id}', [OrderStatusController::class, 'destroy'])->name('destroy');
-        });
     });
 });
 // });
