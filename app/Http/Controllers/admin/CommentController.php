@@ -25,11 +25,11 @@ class CommentController extends Controller
         }
 
         // Lọc theo ngày
-        if ($request->filled('min_date')) {
-            $comments->whereDate('created_at', '>=', $request->min_date);
+        if ($request->filled('from_date')) {
+            $comments->whereDate('created_at', '>=', $request->from_date);
         }
-        if ($request->filled('max_date')) {
-            $comments->whereDate('created_at', '<=', $request->max_date);
+        if ($request->filled('to_date')) {
+            $comments->whereDate('created_at', '<=', $request->to_date);
         }
 
         // Lọc theo trạng thái

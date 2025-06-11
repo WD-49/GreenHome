@@ -207,17 +207,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
     // Quản lý brands
     Route::prefix('brands')->name('brands.')->group(function () {
-        Route::get('/', [BrandController::class, 'index'])->name('index');
-        Route::get('/create', [BrandController::class, 'create'])->name('create');
-        Route::post('/', [BrandController::class, 'store'])->name('store');
-        Route::get('/trashed', [BrandController::class, 'trash'])->name('trash');
-        Route::get('/{slug}', [BrandController::class, 'show'])->name('show');
-        Route::get('/{slug}/edit', [BrandController::class, 'edit'])->name('edit');
-        Route::put('/{slug}', [BrandController::class, 'update'])->name('update');
-        Route::delete('/{slug}', [BrandController::class, 'destroy'])->name('destroy');
-        Route::post('/{slug}/restore', [BrandController::class, 'restore'])->name('restore');
-        Route::delete('/{slug}/force-delete', [BrandController::class, 'forceDelete'])->name('forceDelete');
-    });
+    Route::get('/', [BrandController::class, 'index'])->name('index');
+    Route::get('/create', [BrandController::class, 'create'])->name('create');
+    Route::post('/', [BrandController::class, 'store'])->name('store');
+    Route::get('/trashed', [BrandController::class, 'trash'])->name('trash');
+    Route::get('/{slug}', [BrandController::class, 'show'])->name('show');
+    Route::get('/{slug}/edit', [BrandController::class, 'edit'])->name('edit');
+    Route::put('/{slug}', [BrandController::class, 'update'])->name('update');
+    Route::delete('/{slug}', [BrandController::class, 'destroy'])->name('destroy');
+    Route::post('/{slug}/restore', [BrandController::class, 'restore'])->name('restore');
+    Route::delete('/{slug}/force-delete', [BrandController::class, 'forceDelete'])->name('forceDelete');
+    Route::post('/bulk-delete', [BrandController::class, 'bulkSoftDelete'])->name('bulkSoftDelete');
+ });
 
     Route::prefix('comments')->name('comments.')->group(function () {
         Route::get('/', [CommentController::class, 'index'])->name('index');

@@ -148,6 +148,14 @@ class BrandController extends Controller
     return view('admin.brands.show', compact('brand', 'products', 'categories'));
 }
 
+public function bulkSoftDelete(Request $request)
+{
+    $ids = explode(',', $request->brand_ids);
+    Brand::whereIn('id', $ids)->delete();
+    return redirect()->back()->with('success', 'Đã xóa mềm các thương hiệu được chọn.');
+}
+
+
 
     
 }
