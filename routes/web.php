@@ -149,10 +149,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // client
         Route::get('/listUsers', [AccountUsersController::class, 'listUsers'])->name('listUsers');
         Route::get('/detailAccUser/{id}', [AccountUsersController::class, 'detailAccUser'])->name('detailAccUser');
-        Route::get('/createUser', [AccountUsersController::class, 'createUser'])->name('createUser');
-        Route::post('/storeUser', [AccountUsersController::class, 'storeUser'])->name('storeUser');
-        Route::get('/editUser/{id}', [AccountUsersController::class, 'editUser'])->name('editUser');
-        Route::post('/updateUser/{id}', [AccountUsersController::class, 'updateUser'])->name('updateUser');
         Route::post('/softDeleteUser/{id}', [AccountUsersController::class, 'softDeleteUser'])->name('softDeleteUser');
         Route::get('/trashedUsers', [AccountUsersController::class, 'trashedUsers'])->name('trashedUsers');
         Route::post('/restoreUser/{id}', [AccountUsersController::class, 'restoreUser'])->name('restoreUser');
