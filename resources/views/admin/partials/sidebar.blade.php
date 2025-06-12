@@ -99,27 +99,19 @@
             <div class="collapse" id="sidebarExpages">
                 <ul class="nav-second-level">
                     <li>
-                        <a class='tp-link' href="{{ url('pages-starter.html') }}">Danh sách đơn hàng</a>
+                        <a class='tp-link' href="{{ route('admin.orders.index') }}">Danh sách đơn hàng</a>
                     </li>
                     <li>
-                        <a class='tp-link' href="{{ url('pages-profile.html') }}">Phương thức thanh toán</a>
+                        <a class='tp-link' href="{{ route('admin.paymentMethods.index') }}">Phương thức thanh toán</a>
                     </li>
                 </ul>
             </div>
         </li>
-
-        <li>
-            <a class='tp-link' href="{{ url('calendar.html') }}">
-                <i data-feather="calendar"></i>
-                <span> Bình luận </span>
-            </a>
-        </li>
         <li>
             <a class='tp-link' href='{{ route('admin.comments.index') }}'>
-    <i data-feather="message-square"></i>
-    <span> Bình luận </span>
-</a>
-
+                <i data-feather="message-square"></i>
+                <span> Bình luận </span>
+            </a>
         </li>
         <li>
             <a class='tp-link' href='{{ route('admin.reviews.index') }}'>
