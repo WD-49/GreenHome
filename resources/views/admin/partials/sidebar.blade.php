@@ -64,7 +64,7 @@
         </li>
 
         <li>
-            <a href="" data-bs-toggle="collapse">
+            <a href="#" data-bs-toggle="collapse">
                 <i data-feather="package"></i>
 
                 <span> Sản phẩm </span>
@@ -113,7 +113,7 @@
             </a>
         </li>
         <li>
-            <a class='tp-link' href='calendar.html'>
+            <a class='tp-link' href='{{ route('admin.reviews.index') }}'>
                 <i data-feather="calendar"></i>
                 <span> Đánh giá </span>
             </a>
@@ -130,10 +130,10 @@
             <div class="collapse" id="sidebarBaseui">
                 <ul class="nav-second-level">
                     <li>
-                        <a class='tp-link' href='ui-accordions.html'>danh sách</a>
+                        <a class='tp-link' href='{{ route('admin.discount.index') }}'>Danh sách</a>
                     </li>
                     <li>
-                        <a class='tp-link' href='ui-alerts.html'>lịch sử sử dụng</a>
+                        <a class='tp-link' href='{{ route('admin.discount.history') }}'>Lịch sử dùng mã</a>
                     </li>
                 </ul>
             </div>
