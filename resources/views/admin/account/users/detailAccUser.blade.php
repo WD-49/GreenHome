@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 @section('title', 'Chi tiết người dùng')
 
-@push('styles')
+@push('styles')1233
     <style>
         .avatar-xxl {
             width: 150px;

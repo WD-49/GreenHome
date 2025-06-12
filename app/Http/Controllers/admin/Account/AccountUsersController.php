@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\UserProfile;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -54,6 +55,32 @@ class AccountUsersController extends Controller
         return view('admin.account.users.listUsers', compact('users'));
     }
 
+    // Phương thức mới để thay đổi vai trò người dùng
+    public function toggleUserRole(Request $request, User $user)
+    {
+        // Kiểm tra quyền hạn của người thực hiện hành động (ví dụ: chỉ admin mới được làm)
+        // Đây là ví dụ cơ bản, bạn nên dùng Laravel Gates/Policies cho việc này
+        
+
+        $newRole = $request->input('new_role');
+
+        // Xác thực vai trò mới hợp lệ
+        if (!in_array($newRole, ['client', 'admin'])) {
+            return response()->json(['success' => false, 'message' => 'Vai trò không hợp lệ.'], 400);
+        }
+
+        try {
+            $user->role = $newRole;
+            $user->save();
+
+            $message = "Đã chuyển vai trò của {$user->name} thành " . ucfirst($newRole) . ".";
+            return response()->json(['success' => true, 'message' => $message, 'new_role' => $newRole]);
+        } catch (\Exception $e) {
+            Log::error("Lỗi khi thay đổi vai trò người dùng {$user->id}: " . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Đã xảy ra lỗi khi thay đổi vai trò.'], 500);
+        }
+    }
+
     public function detailAccUser($id)
     {
         $user = User::with([
@@ -62,7 +89,7 @@ class AccountUsersController extends Controller
                 $query->withTrashed()->orderBy('created_at', 'desc');
             },
             'orders.items.product' => function ($query) {
-                $query// Eager load quan hệ 'status' (trỏ đến OrderStatus)
+                $query // Eager load quan hệ 'status' (trỏ đến OrderStatus)
                     ->orderBy('created_at', 'desc')
                     ->take(10);
             },

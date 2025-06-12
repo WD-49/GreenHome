@@ -156,6 +156,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/resetPassUser/{id}', [AccountUsersController::class, 'resetPassUser'])->name('resetPassUser');
         Route::get('/orders/{order}/ajax-details', [AccountUsersController::class, 'getAjaxOrderDetails'])
             ->name('order.ajaxDetails');
+        // ROUTE MỚI CHO PHÂN QUYỀN
+        Route::post('toggleUserRole/{user}', [AccountUsersController::class, 'toggleUserRole'])->name('toggleUserRole');
         // Admins
         Route::get('/listAdmins', [AccountAdminController::class, 'listAdmins'])->name('listAdmins');
         Route::get('/detailAccAdmin/{id}', [AccountAdminController::class, 'detailAccAdmin'])->name('detailAccAdmin');
