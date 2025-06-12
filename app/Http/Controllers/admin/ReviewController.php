@@ -104,13 +104,29 @@ $reviews = $reviews->with(['user', 'productVariant'])->paginate(10);
 
 
 
-    public function trash()
-    {
-        // Lấy các review đã bị xóa mềm (soft deleted)
-        $reviews = Review::onlyTrashed()->paginate(10);
+   public function trash(Request $request)
+{
+    $query = Review::onlyTrashed();
 
-        return view('admin.reviews.trash', compact('reviews'));
+    // Lọc theo số sao nếu có
+    if ($request->filled('rating')) {
+        $query->where('rating', $request->rating);
     }
+
+    // Lọc theo trạng thái nếu có
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+
+    // Lấy dữ liệu đã phân trang và kèm theo quan hệ
+    $reviews = $query->with(['productVariant', 'user'])->paginate(10);
+
+    // Giữ nguyên query string khi phân trang
+    $reviews->appends($request->only(['rating', 'status']));
+
+    return view('admin.reviews.trash', compact('reviews'));
+}
+
     public function restore($id)
     {
         $review = Review::withTrashed()->findOrFail($id);
