@@ -49,21 +49,23 @@ class PaymentMethodController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|max:255|unique:payment_methods,name',
-            'description' => 'nullable|max:1000',
-            'status' => 'required|boolean',
-        ], [
-            'name.required' => 'Vui lòng nhập tên phương thức thanh toán.',
-            'name.unique' => 'Tên phương thức đã tồn tại.',
-            'name.max' => 'Tên không quá 255 ký tự.',
-            'description.max' => 'Mô tả không quá 1000 ký tự.',
-            'status.required' => 'Vui lòng chọn trạng thái.',
-            'status.boolean' => 'Trạng thái không hợp lệ.',
+        $data = $request->validate([
+            'name.*' => 'required|string|max:255',
+            'description.*' => 'nullable|string',
+            'status.*' => 'required|in:0,1',
         ]);
-        PaymentMethod::create($validated);
+
+        foreach ($data['name'] as $index => $name) {
+            PaymentMethod::create([
+                'name' => $name,
+                'description' => $data['description'][$index] ?? '',
+                'status' => $data['status'][$index],
+            ]);
+        }
+
         return redirect()->route('admin.paymentMethods.index')->with('success', 'Thêm phương thức thành công!');
     }
+
 
     public function edit($id)
     {
@@ -74,19 +76,15 @@ class PaymentMethodController extends Controller
     public function update(Request $request, $id)
     {
         $paymentMethod = PaymentMethod::findOrFail($id);
+
         $validated = $request->validate([
-            'name' => 'required|max:255|unique:payment_methods,name,' . $id,
-            'description' => 'nullable|max:1000',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'status' => 'required|boolean',
-        ], [
-            'name.required' => 'Vui lòng nhập tên phương thức thanh toán.',
-            'name.unique' => 'Tên phương thức đã tồn tại.',
-            'name.max' => 'Tên không quá 255 ký tự.',
-            'description.max' => 'Mô tả không quá 1000 ký tự.',
-            'status.required' => 'Vui lòng chọn trạng thái.',
-            'status.boolean' => 'Trạng thái không hợp lệ.',
         ]);
+
         $paymentMethod->update($validated);
+
         return redirect()->route('admin.paymentMethods.index')->with('success', 'Cập nhật thành công!');
     }
 
@@ -122,14 +120,13 @@ class PaymentMethodController extends Controller
         $paymentMethods = $query->orderBy('deleted_at', 'desc')->paginate(10);
 
         // Dùng lại view index cho đồng bộ tabs, table, filter
-     return view('admin.payment_methods.trash', [
-    'paymentMethods' => $paymentMethods,
-    'methodAll' => $paymentAll,
-    'methodActive' => $paymentActive,
-    'methodInactive' => $paymentInactive,
-    'methodTrashed' => $paymentTrashed,
-]);
-
+        return view('admin.payment_methods.trash', [
+            'paymentMethods' => $paymentMethods,
+            'methodAll' => $paymentAll,
+            'methodActive' => $paymentActive,
+            'methodInactive' => $paymentInactive,
+            'methodTrashed' => $paymentTrashed,
+        ]);
     }
 
     public function restore($id)
@@ -146,9 +143,8 @@ class PaymentMethodController extends Controller
         return redirect()->route('admin.paymentMethods.trash')->with('success', 'Xóa vĩnh viễn thành công!');
     }
     public function show($id)
-{
-    $paymentMethod = PaymentMethod::withTrashed()->findOrFail($id);
-    return view('admin.payment_methods.show', compact('paymentMethod'));
-}
-
+    {
+        $paymentMethod = PaymentMethod::withTrashed()->findOrFail($id);
+        return view('admin.payment_methods.show', compact('paymentMethod'));
+    }
 }
