@@ -2,24 +2,24 @@
 <div id="sidebar-menu">
 
     {{-- logo --}}
-    <div class="logo-box">
-        <a class='logo logo-light' href='index.html'>
+    {{-- <div class="logo-box">
+        <a class='logo logo-light' href="{{ url('index.html') }}">
             <span class="logo-sm">
-                <img src="assets/images/logo-sm.png" alt="" height="22">
+                <img src="{{ asset('public/assets/images/logo-sm.png') }}" alt="" height="22">
             </span>
             <span class="logo-lg">
-                <img src="assets/images/logo-light.png" alt="" height="24">
+                <img src="{{ asset('public/assets/images/logo-light.png') }}" alt="" height="24">
             </span>
         </a>
-        <a class='logo logo-dark' href='index.html'>
+        <a class='logo logo-dark' href="{{ url('index.html') }}">
             <span class="logo-sm">
-                <img src="assets/images/logo-sm.png" alt="" height="22">
+                <img src="{{ asset('public/assets/images/logo-sm.png') }}" alt="" height="22">
             </span>
             <span class="logo-lg">
-                <img src="assets/images/logo-dark.png" alt="" height="24">
+                <img src="{{ asset('public/assets/images/logo-dark.png') }}" alt="" height="24">
             </span>
         </a>
-    </div>
+    </div> --}}
     {{-- end logo --}}
 
     <ul id="side-menu">
@@ -35,10 +35,10 @@
             <div class="collapse" id="sidebarDashboards">
                 <ul class="nav-second-level">
                     <li>
-                        <a class='tp-link' href='index.html'>Analytical</a>
+                        <a class='tp-link' href="{{ url('index.html') }}">Analytical</a>
                     </li>
                     <li>
-                        <a class='tp-link' href='ecommerce.html'>E-commerce</a>
+                        <a class='tp-link' href="{{ url('ecommerce.html') }}">E-commerce</a>
                     </li>
                 </ul>
             </div>
@@ -54,35 +54,35 @@
             <div class="collapse" id="sidebarAuth">
                 <ul class="nav-second-level">
                     <li>
-                        <a class='tp-link' href='auth-register.html'>Người dùng</a>
+                        <a class='tp-link' href="{{ url('auth-register.html') }}">Người dùng</a>
                     </li>
                     <li>
-                        <a class='tp-link' href='auth-register.html'>Quản trị</a>
+                        <a class='tp-link' href="{{ url('auth-register.html') }}">Quản trị</a>
                     </li>
                 </ul>
             </div>
         </li>
 
         <li>
-            <a href="" data-bs-toggle="collapse">
+            <a href="#sidebarProduct" data-bs-toggle="collapse">
                 <i data-feather="package"></i>
 
                 <span> Sản phẩm </span>
                 <span class="menu-arrow"></span>
             </a>
-            <div class="collapse" id="sidebarError">
+            <div class="collapse" id="sidebarProduct">
                 <ul class="nav-second-level">
                     <li>
-                        <a class='tp-link' href='{{ route('admin.products.index') }}'>Danh sách sản phẩm</a>
+                        <a class='tp-link' href="{{ route('admin.products.index') }}">Danh sách sản phẩm</a>
                     </li>
                     <li>
-                        <a class='tp-link' href='{{ route('admin.categories.index') }}'>Danh mục</a>
+                        <a class='tp-link' href="{{ route('admin.categories.index') }}">Danh mục</a>
                     </li>
                     <li>
-                        <a class='tp-link' href='{{ route('admin.brands.index') }}'>Thương hiệu</a>
+                        <a class='tp-link' href="{{ route('admin.brands.index') }}">Thương hiệu</a>
                     </li>
                     <li>
-                        <a class='tp-link' href='{{ route('admin.attribute.index') }}'>Thuộc tính</a>
+                        <a class='tp-link' href="{{ route('admin.attribute.index') }}">Thuộc tính</a>
                     </li>
                 </ul>
             </div>
@@ -97,23 +97,23 @@
             <div class="collapse" id="sidebarExpages">
                 <ul class="nav-second-level">
                     <li>
-                        <a class='tp-link' href='pages-starter.html'>Danh sách đơn hàng</a>
+                        <a class='tp-link' href="{{ url('pages-starter.html') }}">Danh sách đơn hàng</a>
                     </li>
                     <li>
-                        <a class='tp-link' href='pages-profile.html'>Phương thức thanh toán</a>
+                        <a class='tp-link' href="{{ url('pages-profile.html') }}">Phương thức thanh toán</a>
                     </li>
                 </ul>
             </div>
         </li>
 
         <li>
-            <a class='tp-link' href='calendar.html'>
+            <a class='tp-link' href="{{ url('calendar.html') }}">
                 <i data-feather="calendar"></i>
                 <span> Bình luận </span>
             </a>
         </li>
         <li>
-            <a class='tp-link' href='calendar.html'>
+            <a class='tp-link' href="{{ url('calendar.html') }}">
                 <i data-feather="calendar"></i>
                 <span> Đánh giá </span>
             </a>
@@ -130,17 +130,17 @@
             <div class="collapse" id="sidebarBaseui">
                 <ul class="nav-second-level">
                     <li>
-                        <a class='tp-link' href='ui-accordions.html'>danh sách</a>
+                        <a class='tp-link' href="{{ url('ui-accordions.html') }}">danh sách</a>
                     </li>
                     <li>
-                        <a class='tp-link' href='ui-alerts.html'>lịch sử sử dụng</a>
+                        <a class='tp-link' href="{{ url('ui-alerts.html') }}">lịch sử sử dụng</a>
                     </li>
                 </ul>
             </div>
         </li>
 
         <li>
-            <a class='tp-link' href='widgets.html'>
+            <a class='tp-link' href="{{ url('widgets.html') }}">
                 <i data-feather="aperture"></i>
                 <span> Banner </span>
             </a>
@@ -155,10 +155,10 @@
             <div class="collapse" id="sidebarMaps">
                 <ul class="nav-second-level">
                     <li>
-                        <a class='tp-link' href='maps-google.html'>Google Maps</a>
+                        <a class='tp-link' href="{{ url('maps-google.html') }}">Google Maps</a>
                     </li>
                     <li>
-                        <a class='tp-link' href='maps-vector.html'>Vector Maps</a>
+                        <a class='tp-link' href="{{ url('maps-vector.html') }}">Vector Maps</a>
                     </li>
                 </ul>
             </div>

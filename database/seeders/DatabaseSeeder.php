@@ -26,22 +26,37 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use App\Models\ProductVariantValue;
 use Illuminate\Support\Facades\Hash;
+use Database\Factories\ProductFactory;
+use Faker\Factory as Faker;
+
+
 
 class DatabaseSeeder extends Seeder
 {
 
     public function run()
     {
-        DB::table('users')->insert([
-            'name' => 'Admin',
-            'email' => 'linh@gmail.com',
-            'password' => Hash::make('24092005'),
-            'role' => 'admin',
-            'status' => true,
-            'email_verified_at' => now(),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        // $faker = Faker::create();
+        // $categories = Category::pluck('id')->toArray();
+        // $brands = Brand::pluck('id')->toArray();
+
+        // for ($i = 0; $i < 20; $i++) {
+        //     Product::create([
+        //         'category_id' => $faker->randomElement($categories),
+        //         'brand_id' => $faker->randomElement($brands),
+        //         'name' => $faker->words(3, true),
+        //         'slug' => $faker->slug,
+        //         'description' => $faker->paragraph,
+        //         'quantity' => $faker->numberBetween(1, 100),
+        //         'date_of_entry' => $faker->date(),
+        //         'status' => $faker->boolean,
+        //         'image' => $faker->imageUrl(),
+        //         'view' => $faker->numberBetween(0, 1000),
+        //         'created_at' => now(),
+        //         'updated_at' => now(),
+        //         'deleted_at' => null,
+        //     ]);
+        // }
 
     }
 }

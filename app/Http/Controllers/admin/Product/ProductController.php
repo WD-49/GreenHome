@@ -63,10 +63,14 @@ class ProductController extends Controller
         // if ($request->filled('ngay_nhap')) {
         //     $query->whereDate('date_of_entry', $request->ngay_nhap);
         // }
+        $perPage = $request->input('per_page', 10);
 
-        $products = $query->orderByDesc('id')->paginate(2)->appends($request->except('page'));
+        $products = $query->orderByDesc('id')->paginate($perPage)->appends($request->except('page'));
         $productAll = Product::whereNull('deleted_at')->get();
         $productTrashed = Product::onlyTrashed()->get();
+        if ($request->ajax()) {
+            return view('admin.products.table', compact('products'));
+        }
 
 
         // dd($productAll);
@@ -131,42 +135,60 @@ class ProductController extends Controller
 
     public function show($id, Request $request)
     {
-        // dd($id);
         $product = Product::with(['category', 'brand'])
             ->findOrFail($id);
 
-        $comments = $product->comments()
+        // Dùng cho tất cả trường hợp
+        $commentsQuery = $product->comments()
             ->with('user')
             ->when($request->name, function ($query, $name) {
                 $query->whereHas('user', function ($q) use ($name) {
                     $q->where('name', 'like', "%$name%");
                 });
-            })
-            ->latest()
-            ->paginate(5)
-            ->appends($request->only('name')); // giữ lại query string khi phân trang
+            });
+
+        $comments = $commentsQuery->latest()->paginate(5)->appends($request->only('name'));
 
         $variants = $product->productVariants()
             ->with('productVariantValues.attributeValue.attribute')
-            ->where('deleted_at', null)
+            ->whereNull('deleted_at')
             ->paginate(5);
-        // Lấy danh sách ID của các biến thể thuộc sản phẩm
+
         $variantIds = $product->productVariants()
             ->whereNull('deleted_at')
             ->pluck('id')
             ->toArray();
 
-        // Lấy đánh giá theo product_variant_id
-        $reviews = Review::with(['user', 'productVariant.product']) // Eager load quan hệ nếu cần
+        $reviews = Review::with(['user', 'productVariant.product'])
             ->whereIn('product_variant_id', $variantIds)
             ->whereNull('deleted_at')
             ->latest()
             ->paginate(5);
-        // dd($variants);
-        // do du lieu thong tin chi tiet ra giao dien
-        return view('admin.products.show', compact('product', 'comments', 'variants', 'reviews'));
 
+        // Nếu là AJAX request cho một trong các bảng con
+        if ($request->ajax()) {
+            $tab = $request->get('tab');
+
+            if ($tab === 'comments') {
+                return view('admin.products.partials.comment-table', compact('comments'));
+            }
+
+            if ($tab === 'variants') {
+                return view('admin.products.partials.variant-table', compact('variants'));
+            }
+
+            if ($tab === 'reviews') {
+                return view('admin.products.partials.review-table', compact('reviews'));
+            }
+
+            // Trường hợp fallback (nếu cần)
+            return response()->json(['error' => 'Invalid tab'], 400);
+        }
+
+        // Trả về giao diện chính nếu không phải AJAX
+        return view('admin.products.show', compact('product', 'comments', 'variants', 'reviews'));
     }
+
 
     public function create()
     {
@@ -229,13 +251,6 @@ class ProductController extends Controller
             'simple_quantity' => 'required_unless:is_variant,1|integer',
             // 'simple_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
-        // if (!$request->boolean('is_variant')) {
-        //     $rules['simple_price'] = 'required|numeric';
-        //     $rules['simple_quantity'] = 'required|integer';
-        //     $rules['simple_image'] = 'nullable|image|mimes:jpeg,png,jpg|max:2048';
-        // }
-
-        // $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return redirect()
                 ->back()
@@ -277,10 +292,18 @@ class ProductController extends Controller
                     foreach ($variants as $index => $variant) {
                         // dd($variant['values']);
                         $values = explode(',', $variant['values']);
-                        // dd($values);
                         $attributeCombination = $values ?? [];
                         ksort($attributeCombination);
-                        // dd(ksort($attributeCombination));
+
+                        // Lấy tên thuộc tính (ví dụ: "M-Red")
+                        $attributeNames = [];
+                        foreach ($attributeCombination as $valueId) {
+                            $attrValue = \App\Models\AttributeValue::find($valueId);
+                            if ($attrValue) {
+                                $attributeNames[] = $attrValue->value;
+                            }
+                        }
+                        $attributeNameString = implode('-', $attributeNames);
 
                         $combinationKey = implode('-', array_map(function ($attrId, $valueId) {
                             return $attrId . ':' . $valueId;
@@ -297,6 +320,8 @@ class ProductController extends Controller
                         $newVariant->price = $variant['price'];
                         $newVariant->quantity = $variant['quantity'];
                         $newVariant->status = true;
+                        $newVariant->attribute_name = $attributeNameString;
+                        // dd($newVariant->attribute_name);
 
                         if ($request->hasFile("variants.$index.image")) {
                             $variantImage = $request->file("variants.$index.image");
@@ -335,6 +360,7 @@ class ProductController extends Controller
                     $newVariant->price = $request->input('simple_price');
                     $newVariant->quantity = $request->input('simple_quantity');
                     $newVariant->status = true;
+                    $newVariant->attribute_name = null; // Không có thuộc tính cho sản phẩm đơn
                     $newVariant->save();
                 }
             });
