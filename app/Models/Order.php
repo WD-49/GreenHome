@@ -49,6 +49,11 @@ class Order extends Model
         return $this->belongsTo(PaymentMethod::class);
     }
 
+    public function products()
+    {
+        return $this->belongsTo(Product::class);
+    }
+
     public function canBeCancelled()
     {
         // Ví dụ: Đơn hàng không thể hủy nếu đã "Hoàn tất", "Đã giao hàng" hoặc "Đã hủy"

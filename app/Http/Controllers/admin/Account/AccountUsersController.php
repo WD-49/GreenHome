@@ -58,11 +58,11 @@ class AccountUsersController extends Controller
     {
         $user = User::with([
             'profile',
-            'comments' => function ($query) {
+            'comments.product' => function ($query) {
                 $query->withTrashed()->orderBy('created_at', 'desc');
             },
-            'orders' => function ($query) {
-                $query->with('status') // Eager load quan hệ 'status' (trỏ đến OrderStatus)
+            'orders.items.product' => function ($query) {
+                $query// Eager load quan hệ 'status' (trỏ đến OrderStatus)
                     ->orderBy('created_at', 'desc')
                     ->take(10);
             },
