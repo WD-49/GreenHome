@@ -1,162 +1,178 @@
 @extends('layouts.admin')
+@section('title', 'Quản lý tài khoản người dùng')
+@push('styles')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+        integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Datatables css -->
+    <link href="../../assets/libs/datatables.net-bs5/css/dataTables.bootstrap5.min.css" rel="stylesheet" type="text/css" />
+    <link href="../../assets/libs/datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css" rel="stylesheet"
+        type="text/css" />
+    <link href="../../assets/libs/datatables.net-keytable-bs5/css/keyTable.bootstrap5.min.css" rel="stylesheet"
+        type="text/css" />
+    <link href="../../assets/libs/datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css" rel="stylesheet"
+        type="text/css" />
+    <link href="../../assets/libs/datatables.net-select-bs5/css/select.bootstrap5.min.css" rel="stylesheet"
+        type="text/css" />
 
+    <!-- App css -->
+    <link href="../../assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
+
+    <!-- Icons -->
+    <link href="../../assets/css/icons.min.css" rel="stylesheet" type="text/css" />
+@endpush
 @section('content')
-    <div class="container-fluid">
-        {{-- Tiêu đề trang --}}
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Quản lý tài khoản Admin</h1>
-            <div>
-                {{-- <a href="{{ route('admin.account.createAdmin') }}" class="btn btn-success shadow-sm">
-                    <i class="fas fa-plus-circle fa-sm text-white-50"></i> Thêm Admin mới
-                </a> --}}
-                <a href="{{ route('admin.account.trashedAdmins') }}" class="btn btn-warning shadow-sm">
-                    <i class="fas fa-trash-restore fa-sm text-white-50"></i> Thùng rác
-                </a>
+    <!-- Start Content-->
+    <div class="container-xxxl">
+
+        <div class="py-3 d-flex align-items-sm-center flex-sm-row flex-column">
+            <div class="flex-grow-1">
+                <h4 class="fs-18 fw-semibold m-0">Quản lý tài khoản người dùng</h4>
+            </div>
+
+            <div class="text-end">
+                <ol class="breadcrumb m-0 py-0">
+                    <h6 class="breadcrumb-item active">Home / Tài khoản / Quản lý tài khoản người dùng</h6>
+                </ol>
             </div>
         </div>
-
-        {{-- Form tìm kiếm thông tin --}}
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="fas fa-search"></i> Bộ lọc và Tìm kiếm
-                </h6>
+        {{-- Thông báo thành công --}}
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-            <div class="card-body">
-                <form method="GET" action="{{ route('admin.account.listAdmins') }}">
-                    {{-- 
-                Sử dụng "row g-2" (Bootstrap 5) để có khoảng cách nhỏ giữa các cột.
-                Nếu bạn dùng Bootstrap 4, hãy thay "row g-2" bằng "form-row".
-                "align-items-center" hoặc "align-items-end" để căn chỉnh các phần tử theo chiều dọc.
-            --}}
-                    <div class="row g-2 align-items-center">
-                        <div class="col-lg col-md-6 col-sm-12 mb-2 mb-lg-0">
-                            <input type="text" name="name" class="form-control form-control-sm"
-                                placeholder="Tên admin" value="{{ request('name') }}">
-                        </div>
-                        <div class="col-lg col-md-6 col-sm-12 mb-2 mb-lg-0">
-                            <input type="text" name="email" class="form-control form-control-sm" placeholder="Email"
-                                value="{{ request('email') }}">
-                        </div>
-                        <div class="col-lg col-md-6 col-sm-12 mb-2 mb-lg-0">
-                            <input type="text" name="phone" class="form-control form-control-sm" placeholder="SĐT"
-                                value="{{ request('phone') }}">
-                        </div>
-                        <div class="col-lg col-md-6 col-sm-12 mb-2 mb-lg-0">
-                            <input type="text" name="address" class="form-control form-control-sm" placeholder="Địa chỉ"
-                                value="{{ request('address') }}">
-                        </div>
-                        <div class="col-lg col-md-6 col-sm-12 mb-2 mb-lg-0">
-                            <select name="gender" class="form-control form-control-sm">
-                                <option value="">Giới tính</option>
-                                <option value="male" {{ request('gender') == 'male' ? 'selected' : '' }}>Nam</option>
-                                <option value="female" {{ request('gender') == 'female' ? 'selected' : '' }}>Nữ</option>
-                            </select>
-                        </div>
-                        <div class="col-lg-auto col-md-12 text-md-right mt-2 mt-lg-0">
-                            {{-- 
-                        Sử dụng "me-1" (Bootstrap 5) hoặc "mr-1" (Bootstrap 4) để tạo khoảng cách phải cho nút Lọc.
-                    --}}
-                            <button type="submit" class="btn btn-primary btn-sm me-1">
-                                <i class="fas fa-filter"></i> Lọc
-                            </button>
-                            <a href="{{ route('admin.account.listAdmins') }}" class="btn btn-secondary btn-sm">
-                                <i class="fas fa-sync-alt"></i> Reset
+        @endif
+        <!-- Datatables  -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Danh sách người dùng</h5>
+                        <div>
+                            <a href="{{ route('admin.account.trashedUsers') }}" class="btn btn-danger shadow-sm">
+                                <i class="fas fa-trash-restore fa-sm text-white-50"></i> Thùng rác
                             </a>
                         </div>
                     </div>
-                </form>
-            </div>
-        </div>
 
-
-        {{-- Bảng danh sách --}}
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="fas fa-list-ul"></i> Danh sách Tài khoản Admin
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover" id="dataTableAdmins" width="100%" cellspacing="0">
-                        <thead class="thead-light">
-                            <tr>
-                                <th class="text-center align-middle" style="width: 5%;">STT</th>
-                                <th class="align-middle" style="width: 20%;">Tên</th>
-                                <th class="align-middle" style="width: 25%;">Email</th>
-                                <th class="text-center align-middle" style="width: 15%;">Vai trò</th>
-                                <th class="text-center align-middle" style="width: 15%;">Trạng thái</th>
-                                <th class="text-center align-middle" style="width: 20%;">Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($admins as $key => $admin)
+                    <div class="card-body">
+                        <table id="datatable" class="table table-bordered dt-responsive table-responsive nowrap">
+                            <thead>
                                 <tr>
-                                    <td class="text-center align-middle">{{ $admins->firstItem() + $key }}</td>
-                                    <td class="align-middle">{{ $admin->name }}</td>
-                                    <td class="align-middle">{{ $admin->email }}</td>
-                                    <td class="text-center align-middle">
-                                        @if ($admin->role == 'admin')
-                                            <span>Admin</span>
-                                        @else
-                                            <span>{{ ucfirst($admin->role) }}</span>
-                                        @endif
-                                    </td>
-                                    <td class="text-center align-middle">
-                                        @if ($admin->status == 1)
-                                            <span class="text-success">Hoạt động</span>
-                                        @else
-                                            <span class="text-danger">Ngừng hoạt động</span>
-                                        @endif
-                                    </td>
-                                    <td class="text-center align-middle">
-                                        <div class="btn-group" role="group" aria-label="Admin Actions">
-                                            <a href="{{ route('admin.account.detailAccAdmin', $admin->id) }}"
-                                                class="btn btn-info btn-sm" title="Xem chi tiết">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ route('admin.account.editAdmin', $admin->id) }}"
-                                                class="btn btn-warning btn-sm" title="Chỉnh sửa">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form action="{{ route('admin.account.softDeleteAdmin', $admin->id) }}"
-                                                method="POST" class="d-inline"
-                                                onsubmit="return confirm('Bạn có chắc chắn muốn xóa tạm thời admin này không?')">
-                                                @csrf
-                                                <button type="submit" class="btn btn-danger btn-sm" title="Xóa tạm thời">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </button>
-                                            </form>
-                                            <form action="{{ route('admin.account.resetPassAdmin', $admin->id) }}"
-                                                method="POST" class="d-inline"
-                                                onsubmit="return confirm('Bạn có chắc muốn đặt lại mật khẩu cho người dùng này không?')">
-                                                @csrf
-                                                <button type="submit" class="btn btn-secondary btn-sm"
-                                                    title="Reset mật khẩu">
-                                                    <i class="fas fa-key"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="text-center">Không tìm thấy tài khoản admin nào phù hợp.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                                    <th>#</th>
+                                    <th>Tên</th>
+                                    <th>Email</th>
+                                    <th>Vai Trò</th>
+                                    <th>Trạng Thái</th>
+                                    <th>Hành Động</th>
 
-                {{-- Phân trang --}}
-                @if ($admins->hasPages())
-                    <div class="d-flex justify-content-center mt-4">
-                        {{ $admins->appends(request()->query())->links('pagination::bootstrap-5') }}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($admins as $item => $user)
+                                    <tr>
+                                        <td>{{ $admins->firstItem() + $item }}</td>
+                                        <td>{{ $user->name }}</td>
+                                        <td>{{ $user->email }}</td>
+                                        <td>{{-- Giả sử người dùng thông thường có role 'user' --}}
+                                            @if ($user->role == 'client')
+                                                <span>User</span>
+                                            @else
+                                                <span>{{ ucfirst($user->role) }}</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($user->status == 1)
+                                                <span class="text-success"
+                                                    style="font-size: 0.85em; padding: 0.5em 0.75em;">Hoạt động</span>
+                                            @else
+                                                <span class="text-danger"
+                                                    style="font-size: 0.85em; padding: 0.5em 0.75em;">Ngừng hoạt động</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group" aria-label="User Actions">
+                                                <a href="{{ route('admin.account.detailAccUser', $user->id) }}"
+                                                    class="btn btn-info btn-sm" title="Xem chi tiết">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+
+                                                <form action="{{ route('admin.account.softDeleteUser', $user->id) }}"
+                                                    method="POST" class="d-inline"
+                                                    onsubmit="return confirm('Bạn có chắc chắn muốn xóa tạm thời người dùng này không?')">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-danger btn-sm"
+                                                        title="Xóa tạm thời">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('admin.account.resetPassUser', $user->id) }}"
+                                                    method="POST" class="d-inline"
+                                                    onsubmit="return confirm('Bạn có chắc muốn đặt lại mật khẩu cho người dùng này không?')">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-secondary btn-sm"
+                                                        title="Reset mật khẩu">
+                                                        <i class="fas fa-key"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
-                @endif
+
+                </div>
             </div>
         </div>
-    </div>
+    </div> <!-- container-fluid -->
+
 @endsection
+
+@push('scripts')
+    <!-- Vendor -->
+    <script src="../../assets/libs/jquery/jquery.min.js"></script>
+    <script src="../../assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../../assets/libs/simplebar/simplebar.min.js"></script>
+    <script src="../../assets/libs/node-waves/waves.min.js"></script>
+    <script src="../../assets/libs/waypoints/lib/jquery.waypoints.min.js"></script>
+    <script src="../../assets/libs/jquery.counterup/jquery.counterup.min.js"></script>
+    <script src="../../assets/libs/feather-icons/feather.min.js"></script>
+
+    <!-- Datatables js -->
+    <script src="../../assets/libs/datatables.net/js/jquery.dataTables.min.js"></script>
+
+    <!-- dataTables.bootstrap5 -->
+    <script src="../../assets/libs/datatables.net-bs5/js/dataTables.bootstrap5.min.js"></script>
+    <script src="../../assets/libs/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+
+    <!-- buttons.colVis -->
+    <script src="../../assets/libs/datatables.net-buttons/js/buttons.colVis.min.js"></script>
+    <script src="../../assets/libs/datatables.net-buttons/js/buttons.flash.min.js"></script>
+    <script src="../../assets/libs/datatables.net-buttons/js/buttons.html5.min.js"></script>
+    <script src="../../assets/libs/datatables.net-buttons/js/buttons.print.min.js"></script>
+
+    <!-- buttons.bootstrap5 -->
+    <script src="../../assets/libs/datatables.net-buttons-bs5/js/buttons.bootstrap5.min.js"></script>
+
+    <!-- dataTables.keyTable -->
+    <script src="../../assets/libs/datatables.net-keytable/js/dataTables.keyTable.min.js"></script>
+    <script src="../../assets/libs/datatables.net-keytable-bs5/js/keyTable.bootstrap5.min.js"></script>
+
+    <!-- dataTable.responsive -->
+    <script src="../../assets/libs/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="../../assets/libs/datatables.net-responsive-bs5/js/responsive.bootstrap5.min.js"></script>
+
+    <!-- dataTables.select -->
+    <script src="../../assets/libs/datatables.net-select/js/dataTables.select.min.js"></script>
+    <script src="../../assets/libs/datatables.net-select-bs5/js/select.bootstrap5.min.js"></script>
+
+    <!-- Datatable Demo App Js -->
+    <script src="../../assets/js/pages/datatable.init.js"></script>
+
+    <!-- App js-->
+    <script src="../../assets/js/app.js"></script>
+@endpush
