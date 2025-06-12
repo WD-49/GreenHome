@@ -140,7 +140,7 @@ class OrderController extends Controller
                     return optional($pvv->attributeValue)->value;
                 })->filter()->implode(' - ');
             }
-            
+
             return [
                 $variant->id => [
                     'price' => (float) $variant->price,
@@ -190,7 +190,7 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-         $validator = Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             'user_id' => 'required|exists:users,id',
             'shipping_name' => 'required|string|max:255',
             'shipping_phone' => 'required|string|regex:/^[0-9]{10,15}$/',
@@ -232,16 +232,16 @@ class OrderController extends Controller
         return DB::transaction(function () use ($request) {
             $productVariantInputIds = $request->input('products');
             $requestedQuantities = $request->input('quantities');
-            $subTotal = 0; // Tổng tiền hàng trước giảm giá và phí ship
+            $subTotalCalculatedFromItems = 0; // Tổng tiền hàng ban đầu (trước giảm giá tổng đơn)
             $cartItemsDetails = []; // Mảng để lưu thông tin chi tiết các item sẽ tạo và biến thể để cập nhật
 
             // Lấy chi tiết các ProductVariant và Product liên quan cho tất cả các ID đã chọn
             $selectedVariants = ProductVariant::with('product:id,name,slug,image', 'productVariantValues.attributeValue')
-                                            ->findMany($productVariantInputIds);
+                ->findMany($productVariantInputIds);
             $selectedVariants = $selectedVariants->keyBy('id'); // Index by ID for easy lookup
 
             foreach ($productVariantInputIds as $index => $variantId) {
-                $variant = $selectedVariants->get($variantId); // Lấy instance đã load
+                $variant = $selectedVariants->get($variantId);
 
                 if (!$variant) {
                     return redirect()->back()->withErrors(['products.' . $index => "Sản phẩm không tồn tại (ID: {$variantId})."])->withInput();
@@ -255,24 +255,24 @@ class OrderController extends Controller
                         ->withInput();
                 }
 
-                $itemTotal = $variant->price * $quantityToOrder;
-                $subTotal += $itemTotal;
+                $itemTotalBeforeItemDiscount = $variant->price * $quantityToOrder;
+                $subTotalCalculatedFromItems += $itemTotalBeforeItemDiscount;
 
                 $cartItemsDetails[] = [
                     'product_variant_id' => $variantId,
                     'product_id' => $variant->product_id,
                     'quantity' => $quantityToOrder,
                     'unit_price' => $variant->price,
-                    'total_price' => $itemTotal,
-                    'variant_instance' => $variant, // Giữ lại instance để cập nhật stock và lấy thuộc tính
+                    'total_price_before_item_discount' => $itemTotalBeforeItemDiscount, // Lưu tạm để tính discount item
+                    'variant_instance' => $variant,
                 ];
             }
 
-            $discountAmount = 0;
+            $discountAmountAppliedToOrder = 0; // Tổng số tiền giảm giá cho toàn bộ đơn hàng
             $appliedDiscountId = null;
-            $discountModelInstance = null; // Biến để giữ model Discount nếu được áp dụng
+            $discountModelInstance = null;
 
-            // Tính toán giảm giá
+            // Tính toán giảm giá tổng đơn hàng
             if ($request->filled('discount_id')) {
                 $discountModelInstance = Discount::with('products') // Eager load products for discount
                     ->where('id', $request->discount_id)
@@ -288,13 +288,11 @@ class OrderController extends Controller
                 if ($discountModelInstance->quantity <= 0) {
                     return redirect()->back()->withErrors(['discount_id' => 'Mã giảm giá đã hết lượt sử dụng.'])->withInput();
                 }
-                
-                // Kiểm tra giới hạn tổng giá trị đơn hàng tối đa của mã giảm giá
-                if ($discountModelInstance->max_order_value && $subTotal > $discountModelInstance->max_order_value) {
+
+                if ($discountModelInstance->max_order_value && $subTotalCalculatedFromItems > $discountModelInstance->max_order_value) {
                     return redirect()->back()->withErrors(['discount_id' => 'Tổng giá trị đơn hàng vượt quá giới hạn tối đa cho phép của mã giảm giá.'])->withInput();
                 }
 
-                // Kiểm tra giới hạn sử dụng của người dùng cho mã này
                 if ($discountModelInstance->user_usage_limit > 0) {
                     $userUsesCount = Order::where('user_id', $request->user_id)
                         ->where('discount_id', $discountModelInstance->id)
@@ -305,28 +303,27 @@ class OrderController extends Controller
                     }
                 }
 
-                $amountEligibleForDiscount = 0; // Khởi tạo lại cho logic chính xác
-                $totalProductQuantityForFixedDiscount = 0; // Tổng số lượng sản phẩm áp dụng cho fixed discount
+                $amountEligibleForDiscount = 0; // Số tiền từ các sản phẩm đủ điều kiện giảm giá
+                $totalQuantityForFixedDiscountPerItem = 0; // Tổng số lượng sản phẩm đủ điều kiện cho fixed discount (nếu fixed là per-item)
 
-                if ((int)$discountModelInstance->applies_to_all_products === 1) { // Áp dụng cho tất cả sản phẩm
-                    $amountEligibleForDiscount = $subTotal;
-                    $totalProductQuantityForFixedDiscount = array_sum($requestedQuantities);
-                } else { // Áp dụng cho sản phẩm cụ thể (applies_to_all_products === 0)
-                    $applicableProductIds = $discountModelInstance->products->pluck('id')->toArray(); // products đã được eager load
+                if ((int)$discountModelInstance->applies_to_all_products === 1) {
+                    $amountEligibleForDiscount = $subTotalCalculatedFromItems;
+                    $totalQuantityForFixedDiscountPerItem = array_sum($requestedQuantities);
+                } else {
+                    $applicableProductIds = $discountModelInstance->products->pluck('id')->toArray();
 
                     foreach ($cartItemsDetails as $itemDetail) {
                         if (in_array($itemDetail['product_id'], $applicableProductIds)) {
-                            $amountEligibleForDiscount += $itemDetail['total_price'];
-                            $totalProductQuantityForFixedDiscount += $itemDetail['quantity'];
+                            $amountEligibleForDiscount += $itemDetail['total_price_before_item_discount'];
+                            $totalQuantityForFixedDiscountPerItem += $itemDetail['quantity'];
                         }
                     }
 
-                    if ($amountEligibleForDiscount === 0) { // Nếu không có sản phẩm nào hợp lệ, mã giảm giá không áp dụng
+                    if ($amountEligibleForDiscount === 0) {
                         return redirect()->back()->withErrors(['discount_id' => 'Mã giảm giá không áp dụng cho bất kỳ sản phẩm nào trong giỏ hàng hiện tại.'])->withInput();
                     }
                 }
-                
-                // Kiểm tra giá trị tối thiểu sau khi tính toán amountEligibleForDiscount
+
                 if ($amountEligibleForDiscount < $discountModelInstance->min_order_value) {
                     $formattedMinOrderValue = number_format($discountModelInstance->min_order_value, 0, ',', '.') . 'đ';
                     $errorMessage = $discountModelInstance->applies_to_all_products ?
@@ -337,30 +334,24 @@ class OrderController extends Controller
 
                 if ($discountModelInstance->discount_type === 'percentage') {
                     $rawDiscount = $amountEligibleForDiscount * ($discountModelInstance->discount_value / 100);
-                    $discountAmount = min($rawDiscount, $discountModelInstance->max_discount);
+                    $discountAmountAppliedToOrder = min($rawDiscount, $discountModelInstance->max_discount);
                 } elseif ($discountModelInstance->discount_type === 'fixed') {
-                    // Fixed discount: nếu áp dụng cho tất cả, thì giảm fixed amount cho tổng.
-                    // Nếu chỉ áp dụng cho một số SP, thì tính theo số lượng SP hợp lệ hoặc một lần.
-                    // Giả định fixed là tổng fixed amount cho tất cả các sản phẩm đủ điều kiện trong đơn hàng.
-                    // Hoặc nếu bạn muốn fixed per eligible product: $calculatedFixedDiscount = $discountModelInstance->discount_value * $totalProductQuantityForFixedDiscount;
-                    
-                    $calculatedFixedDiscount = $discountModelInstance->discount_value; // Fixed amount for the whole order/eligible items
-                    
-                    $discountAmount = min($calculatedFixedDiscount, $discountModelInstance->max_discount);
+                    $calculatedFixedDiscount = $discountModelInstance->discount_value;
+                    $discountAmountAppliedToOrder = min($calculatedFixedDiscount, $discountModelInstance->max_discount);
                 }
-                
-                $discountAmount = min($discountAmount, $amountEligibleForDiscount); // Đảm bảo giảm giá không lớn hơn tổng tiền hàng áp dụng
+
+                $discountAmountAppliedToOrder = min($discountAmountAppliedToOrder, $amountEligibleForDiscount);
                 $appliedDiscountId = $discountModelInstance->id;
             }
 
-            $totalAfterDiscount = max(0, $subTotal - $discountAmount);
+            $totalAfterDiscount = max(0, $subTotalCalculatedFromItems - $discountAmountAppliedToOrder);
             $grandTotal = $totalAfterDiscount + $request->input('shipping_fee', 0);
 
             do {
-                $orderSku = 'DH-' . rand(1000, 9999);
+                $orderSku = 'DH-' . strtoupper(Str::random(2)) . now()->format('ymd') . rand(100, 999);
             } while (Order::where('sku', $orderSku)->exists());
 
-            $user = User::find($request->user_id); // Lấy User instance để có name
+            $user = User::find($request->user_id);
             $paymentMethod = PaymentMethod::findOrFail($request->payment_method_id);
 
             $order = Order::create([
@@ -370,27 +361,57 @@ class OrderController extends Controller
                 'shipping_name' => $request->shipping_name,
                 'shipping_phone' => $request->shipping_phone,
                 'shipping_address' => $request->shipping_address,
-                'order_status' => 'Chưa xác nhận', // Trạng thái mặc định khi tạo đơn
+                'order_status' => 'Chưa xác nhận',
                 'discount_id' => $appliedDiscountId,
                 'payment_method_id' => $request->payment_method_id,
                 'discount_code' => optional($discountModelInstance)->code,
-                'discount_value' => optional($discountModelInstance)->discount_value ?? '0', // <-- ĐÃ SỬA Ở ĐÂY
+                'discount_value' => optional($discountModelInstance)->discount_value ?? '0',
                 'payment_method_name' => $paymentMethod->name,
-                'payment_status' => 'pending', // Có thể thay đổi dựa trên PT thanh toán
-                'discount_amount' => $discountAmount,
+                'payment_status' => 'pending',
+                'discount_amount' => $discountAmountAppliedToOrder, // Đây là tổng discount cho toàn đơn hàng
                 'shipping_fee' => $request->shipping_fee,
                 'total_amount' => $grandTotal,
                 'note' => $request->note,
             ]);
 
             $orderItemsToSave = [];
+            $totalItemDiscountDistributed = 0; // Biến để theo dõi tổng discount đã phân bổ cho các item
+
             foreach ($cartItemsDetails as $itemDetail) {
                 $variant = $itemDetail['variant_instance'];
-                
+
                 // Lấy các thuộc tính của biến thể
-                $productAttributeNames = optional($variant->productVariantValues)->map(function($pvv) {
+                $productAttributeNames = optional($variant->productVariantValues)->map(function ($pvv) {
                     return optional($pvv->attributeValue)->value;
                 })->filter()->implode(' - ');
+
+                // TÍNH TOÁN DISCOUNT_AMOUNT CHO TỪNG ORDER_ITEM Ở ĐÂY
+                $itemDiscountAmount = 0;
+                if ($discountModelInstance && $discountAmountAppliedToOrder > 0) { // Nếu có mã giảm giá được áp dụng cho đơn hàng
+                    if ((int)$discountModelInstance->applies_to_all_products === 1) { // Áp dụng cho tất cả sản phẩm
+                        // Phân bổ discount theo tỷ lệ giá trị của item so với tổng subTotal ban đầu (trước giảm giá)
+                        if ($subTotalCalculatedFromItems > 0) { // Tránh chia cho 0
+                            $itemDiscountAmount = ($itemDetail['total_price_before_item_discount'] / $subTotalCalculatedFromItems) * $discountAmountAppliedToOrder;
+                        }
+                    } else { // Áp dụng cho sản phẩm cụ thể
+                        $applicableProductIds = $discountModelInstance->products->pluck('id')->toArray();
+                        if (in_array($itemDetail['product_id'], $applicableProductIds)) {
+                            if ($discountModelInstance->discount_type === 'percentage') {
+                                $itemDiscountAmount = $itemDetail['total_price_before_item_discount'] * ($discountModelInstance->discount_value / 100);
+                            } elseif ($discountModelInstance->discount_type === 'fixed') {
+                                if ($totalQuantityForFixedDiscountPerItem > 0) { // Check for division by zero
+                                    $itemDiscountAmount = $discountAmountAppliedToOrder / $totalQuantityForFixedDiscountPerItem;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Làm tròn và đảm bảo itemDiscountAmount không lớn hơn total_price_before_item_discount
+                $itemDiscountAmount = round($itemDiscountAmount, 2);
+                $itemDiscountAmount = min($itemDiscountAmount, $itemDetail['total_price_before_item_discount']);
+
+                $totalItemDiscountDistributed += $itemDiscountAmount;
 
                 $orderItemsToSave[] = new OrderItem([
                     'product_variant_id' => $itemDetail['product_variant_id'],
@@ -399,17 +420,26 @@ class OrderController extends Controller
                     'product_attribute' => $productAttributeNames,
                     'quantity' => $itemDetail['quantity'],
                     'unit_price' => $itemDetail['unit_price'],
-                    'discount_amount' => 0.00,
-                    'total_price' => $itemDetail['total_price'],
+                    'discount_amount' => $itemDiscountAmount, // <-- Cập nhật ở đây
+                    'total_price' => $itemDetail['total_price_before_item_discount'] - $itemDiscountAmount, // <-- total_price sau khi item discount
                 ]);
 
                 // Giảm tồn kho cho biến thể sản phẩm
                 $variant->decrement('quantity', $itemDetail['quantity']);
             }
+
+            // Xử lý lệch tổng giảm giá do làm tròn hoặc phân bổ (nếu có)
+            $remainingDiscount = $discountAmountAppliedToOrder - $totalItemDiscountDistributed;
+            if ($remainingDiscount != 0 && count($orderItemsToSave) > 0) {
+                // Phân bổ sai số còn lại vào item đầu tiên (hoặc cuối cùng)
+                $orderItemsToSave[0]['total_price'] = round(max(0, $orderItemsToSave[0]['total_price'] + $remainingDiscount), 2);
+                $orderItemsToSave[0]['discount_amount'] = round(max(0, $orderItemsToSave[0]['discount_amount'] - $remainingDiscount), 2);
+            }
+
             $order->items()->saveMany($orderItemsToSave);
 
             // Giảm số lượng sử dụng của mã giảm giá (nếu có)
-            if ($discountModelInstance && $discountAmount > 0) {
+            if ($discountModelInstance && $discountAmountAppliedToOrder > 0) {
                 $discountModelInstance->decrement('quantity');
             }
 
