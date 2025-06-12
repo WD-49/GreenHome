@@ -1,266 +1,215 @@
 @extends('layouts.admin')
-@section('title', 'Danh sách đơn hàng')
+@section('title', 'Quản lý tài khoản người dùng')
+@push('styles')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+        integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Datatables css -->
+    <link href="../../assets/libs/datatables.net-bs5/css/dataTables.bootstrap5.min.css" rel="stylesheet" type="text/css" />
+    <link href="../../assets/libs/datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css" rel="stylesheet"
+        type="text/css" />
+    <link href="../../assets/libs/datatables.net-keytable-bs5/css/keyTable.bootstrap5.min.css" rel="stylesheet"
+        type="text/css" />
+    <link href="../../assets/libs/datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css" rel="stylesheet"
+        type="text/css" />
+    <link href="../../assets/libs/datatables.net-select-bs5/css/select.bootstrap5.min.css" rel="stylesheet"
+        type="text/css" />
+
+    <!-- App css -->
+    <link href="../../assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
+
+    <!-- Icons -->
+    <link href="../../assets/css/icons.min.css" rel="stylesheet" type="text/css" />
+    <style>
+        .btn-action-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            border-radius: 0.2rem;
+            margin-right: 0.25rem;
+            /* Khoảng cách giữa các nút */
+        }
+
+        /* Để nút cuối cùng trong nhóm không có margin-right */
+        .btn-action-sm:last-child {
+            margin-right: 0;
+        }
+    </style>
+@endpush
 @section('content')
-    <div class="container mt-5">
-        <div class="card shadow-sm border-0 rounded-4">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center rounded-top-4">
-                <h3 class="mb-0 fw-bold">Danh sách đơn hàng</h3>
-                <div>
-                    <a href="{{ route('admin.orders.trash') }}" class="btn btn-outline-light btn-sm me-2"
-                        data-bs-toggle="tooltip" title="Xem thùng rác">
-                        <i class="fas fa-trash-alt"></i>
-                    </a>
-                    <a href="{{ route('admin.orders.create') }}" class="btn btn-light btn-sm fw-semibold"
-                        data-bs-toggle="tooltip" title="Tạo đơn hàng mới">
-                        <i class="fas fa-plus-circle me-1"></i> Tạo đơn hàng
-                    </a>
-                </div>
+    <!-- Start Content-->
+    <div class="container-xxxl">
+
+        <div class="py-3 d-flex align-items-sm-center flex-sm-row flex-column">
+            <div class="flex-grow-1">
+                <h4 class="fs-18 fw-semibold m-0">Quản lý đơn hàng</h4>
             </div>
 
-            {{-- Form Lọc giữ nguyên --}}
-            <form method="GET" action="{{ route('admin.orders.index') }}" class="card-body">
-                <div class="row gx-2 gy-2 align-items-center">
-                    <div class="col-auto" style="min-width: 120px;">
-                        <input type="text" name="order_code" class="form-control form-control-sm" placeholder="Mã đơn"
-                            value="{{ request('order_code') }}">
-                    </div>
-                    <div class="col-auto" style="min-width: 140px;">
-                        <input type="text" name="customer_name" class="form-control form-control-sm"
-                            placeholder="Khách hàng" value="{{ request('customer_name') }}">
-                    </div>
-                    <div class="col-auto" style="min-width: 140px;">
-                        <select name="payment_status" class="form-select form-select-sm">
-                            <option value="">Trạng thái thanh toán</option>
-                            <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Đã thanh toán
-                            </option>
-                            <option value="pending" {{ request('payment_status') == 'pending' ? 'selected' : '' }}>Chờ thanh
-                                toán</option>
-                            <option value="failed" {{ request('payment_status') == 'failed' ? 'selected' : '' }}>Thanh toán
-                                thất bại</option>
-                        </select>
-                    </div>
-                    <div class="col-auto" style="min-width: 140px;">
-                        <select name="order_status" class="form-select form-select-sm">
-                            <option value="">Trạng thái đơn hàng</option>
-                            @foreach ($orderStatuses as $status)
-                                <option value="{{ $status->id }}"
-                                    {{ request('order_status') == $status->id ? 'selected' : '' }}>
-                                    {{ $status->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-auto" style="min-width: 130px;">
-                        <input type="date" name="date_from" class="form-control form-control-sm"
-                            value="{{ request('date_from') }}" placeholder="Từ ngày">
-                    </div>
-                    <div class="col-auto" style="min-width: 130px;">
-                        <input type="date" name="date_to" class="form-control form-control-sm"
-                            value="{{ request('date_to') }}" placeholder="Đến ngày">
-                    </div>
-                    <div class="col-auto" style="min-width: 150px;">
-                        <select name="payment_method" class="form-select form-select-sm">
-                            <option value="">Phương thức thanh toán</option>
-                            @foreach ($paymentMethods as $method)
-                                <option value="{{ $method->id }}"
-                                    {{ request('payment_method') == $method->id ? 'selected' : '' }}>
-                                    {{ $method->name }}
-                                </option>
-                            @endforeach
-                        </select>
+            <div class="text-end">
+                <ol class="breadcrumb m-0 py-0">
+                    <h6 class="breadcrumb-item active">Home / Đơn hàng / Quản lý đơn hàng</h6>
+                </ol>
+            </div>
+        </div>
+        {{-- Thông báo thành công --}}
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @endif
+        <!-- Datatables  -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Danh sách đơn hàng</h5>
+                        <div>
+                            <a href="{{ route('admin.orders.trash') }}" class="btn btn-danger shadow-sm">
+                                <i class="fas fa-trash-restore fa-sm text-white-50"></i> Thùng rác
+                            </a>
+                        </div>
                     </div>
 
-                    <div class="col-auto d-flex gap-2">
-                        <button type="submit" class="btn btn-primary btn-sm fw-semibold">Lọc</button>
-                        <a href="{{ route('admin.orders.index') }}"
-                            class="btn btn-outline-secondary btn-sm fw-semibold">Đặt lại</a>
-                    </div>
-                </div>
-            </form>
-
-
-            <div class="card-body pt-0">
-                <div class="table-responsive shadow-sm rounded-4">
-                    <table class="table table-striped table-hover align-middle mb-0">
-                        <thead class="table-dark text-center">
-                            <tr>
-                                <th scope="col" class="text-nowrap">STT</th>
-                                <th scope="col" class="text-nowrap">Mã đơn</th>
-                                <th scope="col" class="text-nowrap">Khách hàng</th>
-                                <th scope="col" class="text-nowrap">Tên người nhận</th>
-                                <th scope="col" class="text-nowrap">Ngày đặt</th>
-                                <th scope="col" class="text-nowrap">Tổng tiền</th>
-                                <th scope="col" class="text-nowrap">Phương thức</th>
-                                <th scope="col" class="text-nowrap">Trạng thái</th>
-                                <th scope="col" class="text-nowrap">Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($orders as $index => $order)
+                    <div class="card-body">
+                        <table id="datatable" class="table table-bordered dt-responsive table-responsive nowrap">
+                            <thead>
                                 <tr>
-                                    <td class="text-center">
-                                        {{ $loop->iteration + ($orders->currentPage() - 1) * $orders->perPage() }}</td>
-                                    <td class="text-primary fw-bold">#{{ $order->sku ?? $order->id }}</td>
-                                    <td>{{ $order->user->name ?? 'N/A' }}</td>
-                                    <td>{{ $order->shipping_name }}</td>
-                                    <td>{{ $order->created_at }}</td>
-                                    <td class="text-end fw-semibold text-success">
-                                        {{ number_format($order->total_amount, 0) }} VND</td>
-                                    <td class="text-capitalize">{{ $order->paymentMethod->name }}</td>
-                                    <td class="text-center">
-                                        <span
-                                            class="badge rounded-pill
-                                        @if ($order->status->name == 'Hoàn tất') bg-success
-                                        @elseif ($order->status->name == 'Đang xử lý') bg-warning text-dark
-                                        @elseif ($order->status->name == 'Đã hủy') bg-danger
-                                        @else bg-info text-dark @endif">
-                                            {{ $order->status->name ?? 'Chưa cập nhật' }}
-                                        </span>
-                                    </td>
-                                    <td class="text-center">
-                                        {{-- NÚT 3 CHẤM VÀ DROPDOWN HÀNH ĐỘNG --}}
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
-                                                type="button" id="actionDropdown-{{ $order->id }}"
-                                                data-bs-toggle="dropdown" aria-expanded="false" title="Hành động">
-                                                <i class="fas fa-ellipsis-v"></i>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-end"
-                                                aria-labelledby="actionDropdown-{{ $order->id }}">
-                                                <li>
-                                                    <a class="dropdown-item"
-                                                        href="{{ route('admin.orders.edit', $order->id) }}">
-                                                        <i class="fas fa-edit me-2"></i> Sửa
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="dropdown-item"
-                                                        href="{{ route('admin.orders.show', $order->id) }}">
-                                                        <i class="fas fa-eye me-2"></i> Xem chi tiết
-                                                    </a>
-                                                </li>
-                                                @if (method_exists($order, 'canBeCancelled') && $order->canBeCancelled())
-                                                    <li>
-                                                        <button type="button" class="dropdown-item"
-                                                            data-bs-toggle="modal"
-                                                            data-bs-target="#cancelOrderModal-{{ $order->id }}">
-                                                            <i class="fas fa-ban me-2"></i> Hủy đơn hàng
-                                                        </button>
-                                                    </li>
-                                                @endif
-                                                <li>
-                                                    <hr class="dropdown-divider">
-                                                </li>
-                                                <li>
-                                                    <form action="{{ route('admin.orders.destroy', $order->id) }}"
-                                                        method="POST"
-                                                        onsubmit="return confirm('Bạn có chắc muốn xóa đơn hàng này (đưa vào thùng rác)?')"
-                                                        class="d-inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="dropdown-item text-danger">
-                                                            <i class="fas fa-trash me-2"></i> Xóa (Thùng rác)
-                                                        </button>
-                                                    </form>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
+                                    <th>STT</th>
+                                    <th>Mã đơn</th>
+                                    <th>Khách hàng</th>
+                                    <th>Tên người nhận</th>
+                                    <th>Ngày đặt</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Phương thức</th>
+                                    <th>Trạng thái</th>
+                                    <th>Hành động</th>
+
                                 </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($orders as $index => $order)
+                                    <tr>
+                                        <td>{{ $index + 1 }}</td>
+                                        <td>#{{ $order->sku ?? $order->id }}</td>
+                                        <td>{{ $order->user->name ?? 'N/A' }}</td>
+                                        <td>{{ $order->shipping_name }}
+                                        </td>
+                                        <td>
+                                            {{ $order->created_at }}
+                                        </td>
+                                        <td>
+                                            {{ number_format($order->total_amount, 0) }} VND
+                                        </td>
+                                        <td>
+                                            {{ $order->paymentMethod->name }}
+                                        </td>
+                                        <td>
+                                            <span
+                                                class="badge rounded-pill
+                                        @if ($order->order_status == 'Giao hàng thành công') bg-success
+                                        @elseif ($order->order_status == 'Chờ xác nhận') bg-warning text-dark
+                                        @elseif ($order->order_status == 'Hủy đơn') bg-danger
+                                        @else bg-info text-dark @endif">
+                                                {{ $order->order_status ?? 'Chưa cập nhật' }}
+                                            </span>
+                                        </td>
 
-                                {{-- MODAL HỦY ĐƠN HÀNG --}}
-                                @if (method_exists($order, 'canBeCancelled') && $order->canBeCancelled())
-                                    <div class="modal fade" id="cancelOrderModal-{{ $order->id }}" tabindex="-1"
-                                        aria-labelledby="cancelOrderModalLabel-{{ $order->id }}" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <form action="{{ route('admin.orders.cancel', $order->id) }}"
-                                                    method="POST">
+                                        <td>
+                                            {{-- Nhóm các nút hành động lại --}}
+                                            <div class="btn-group" role="group" aria-label="Order Actions">
+                                                {{-- Nút Sửa --}}
+                                                <a href="{{ route('admin.orders.edit', $order->id) }}"
+                                                    class="btn btn-action-sm btn-primary" title="Sửa">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+
+                                                {{-- Nút Xem chi tiết --}}
+                                                <a href="{{ route('admin.orders.show', $order->id) }}"
+                                                    class="btn btn-action-sm btn-info" title="Xem chi tiết">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+
+                                                {{-- Nút Hủy đơn hàng (hiển thị dưới dạng một nút thông thường, không phải dropdown-item) --}}
+                                                @if (method_exists($order, 'canBeCancelled') && $order->canBeCancelled())
+                                                    <button type="button" class="btn btn-action-sm btn-warning"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#cancelOrderModal-{{ $order->id }}"
+                                                        title="Hủy đơn hàng">
+                                                        <i class="fas fa-ban"></i>
+                                                    </button>
+                                                @endif
+
+                                                {{-- Form Xóa (Thùng rác) --}}
+                                                {{-- Giữ form submit để xử lý delete --}}
+                                                <form action="{{ route('admin.orders.destroy', $order->id) }}"
+                                                    method="POST"
+                                                    onsubmit="return confirm('Bạn có chắc muốn xóa đơn hàng này (đưa vào thùng rác)?')"
+                                                    class="d-inline soft-delete-order-form"> {{-- Thêm class cho form --}}
                                                     @csrf
-                                                    @method('PATCH')
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title"
-                                                            id="cancelOrderModalLabel-{{ $order->id }}">Hủy đơn hàng
-                                                            #{{ $order->sku ?? $order->id }}</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                            aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <div class="mb-3">
-                                                            {{-- SỬA 'for' và 'id' ở đây --}}
-                                                            <label for="cancel_reason-{{ $order->id }}"
-                                                                class="form-label">Lý do hủy đơn hàng <span
-                                                                    class="text-danger">*</span></label>
-                                                            {{-- SỬA 'id' và 'name' ở đây --}}
-                                                            <textarea class="form-control" id="cancel_reason-{{ $order->id }}" name="cancel_reason" rows="4" required
-                                                                minlength="10"></textarea>
-                                                            {{-- Nếu bạn có hiển thị lỗi validation cụ thể cho trường này, cũng cần cập nhật tên trường trong đó --}}
-
-                                                            @if ($errors->hasBag("cancelForm_{$order->id}") && $errors->getBag("cancelForm_{$order->id}")->has('cancel_reason'))
-                                                                <div class="invalid-feedback d-block">
-                                                                    {{ $errors->getBag("cancelForm_{$order->id}")->first('cancel_reason') }}
-                                                                </div>
-                                                            @endif
-
-                                                            <div id="cancel_reason_error-{{ $order->id }}"
-                                                                class="invalid-feedback d-block"></div>
-                                                            {{-- ID cho JS error display cũng nên thống nhất --}}
-                                                        </div>
-                                                        <p class="form-text">Vui lòng nhập ít nhất 10 ký tự.</p>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary"
-                                                            data-bs-dismiss="modal">Đóng</button>
-                                                        <button type="submit" class="btn btn-danger">Xác nhận
-                                                            hủy</button>
-                                                    </div>
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-action-sm btn-danger"
+                                                        title="Xóa (Thùng rác)">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
                                                 </form>
                                             </div>
-                                        </div>
-                                    </div>
-                                @endif
-                            @empty
-                                <tr>
-                                    <td colspan="9" class="text-center text-muted py-5">Không có đơn hàng nào.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
 
-                <div class="mt-4 d-flex justify-content-end">
-                    {{ $orders->withQueryString()->links('pagination::bootstrap-5') }}
                 </div>
             </div>
         </div>
-    </div>
+    </div> <!-- container-fluid -->
 
-    {{-- Enable Bootstrap 5 tooltips --}}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            tooltipTriggerList.forEach(function(tooltipTriggerEl) {
-                new bootstrap.Tooltip(tooltipTriggerEl)
-            });
-
-            // Script để xử lý lỗi validation cho lý do hủy nếu không muốn reload trang
-            // Hoặc bạn có thể xử lý lỗi chuẩn của Laravel bằng cách redirect back with errors.
-            // Ví dụ đơn giản về hiển thị lỗi (nếu bạn dùng AJAX sau này hoặc muốn custom):
-            document.querySelectorAll('form[action*="/cancel"]').forEach(form => {
-                form.addEventListener('submit', function(event) {
-                    const textarea = form.querySelector('textarea[name="cancellation_reason"]');
-                    const errorDivId = 'cancellation_reason_error-' + textarea.id.split('-').pop();
-                    const errorDiv = document.getElementById(errorDivId);
-                    if (textarea.value.trim().length < 10) {
-                        event.preventDefault(); // Ngăn submit
-                        errorDiv.textContent = 'Lý do hủy phải có ít nhất 10 ký tự.';
-                        textarea.classList.add('is-invalid');
-                    } else {
-                        errorDiv.textContent = '';
-                        textarea.classList.remove('is-invalid');
-                    }
-                });
-            });
-        });
-    </script>
 @endsection
+
+@push('scripts')
+    <!-- Vendor -->
+    <script src="../../assets/libs/jquery/jquery.min.js"></script>
+    <script src="../../assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../../assets/libs/simplebar/simplebar.min.js"></script>
+    <script src="../../assets/libs/node-waves/waves.min.js"></script>
+    <script src="../../assets/libs/waypoints/lib/jquery.waypoints.min.js"></script>
+    <script src="../../assets/libs/jquery.counterup/jquery.counterup.min.js"></script>
+    <script src="../../assets/libs/feather-icons/feather.min.js"></script>
+
+    <!-- Datatables js -->
+    <script src="../../assets/libs/datatables.net/js/jquery.dataTables.min.js"></script>
+
+    <!-- dataTables.bootstrap5 -->
+    <script src="../../assets/libs/datatables.net-bs5/js/dataTables.bootstrap5.min.js"></script>
+    <script src="../../assets/libs/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+
+    <!-- buttons.colVis -->
+    <script src="../../assets/libs/datatables.net-buttons/js/buttons.colVis.min.js"></script>
+    <script src="../../assets/libs/datatables.net-buttons/js/buttons.flash.min.js"></script>
+    <script src="../../assets/libs/datatables.net-buttons/js/buttons.html5.min.js"></script>
+    <script src="../../assets/libs/datatables.net-buttons/js/buttons.print.min.js"></script>
+
+    <!-- buttons.bootstrap5 -->
+    <script src="../../assets/libs/datatables.net-buttons-bs5/js/buttons.bootstrap5.min.js"></script>
+
+    <!-- dataTables.keyTable -->
+    <script src="../../assets/libs/datatables.net-keytable/js/dataTables.keyTable.min.js"></script>
+    <script src="../../assets/libs/datatables.net-keytable-bs5/js/keyTable.bootstrap5.min.js"></script>
+
+    <!-- dataTable.responsive -->
+    <script src="../../assets/libs/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="../../assets/libs/datatables.net-responsive-bs5/js/responsive.bootstrap5.min.js"></script>
+
+    <!-- dataTables.select -->
+    <script src="../../assets/libs/datatables.net-select/js/dataTables.select.min.js"></script>
+    <script src="../../assets/libs/datatables.net-select-bs5/js/select.bootstrap5.min.js"></script>
+
+    <!-- Datatable Demo App Js -->
+    <script src="../../assets/js/pages/datatable.init.js"></script>
+
+    <!-- App js-->
+    <script src="../../assets/js/app.js"></script>
+@endpush

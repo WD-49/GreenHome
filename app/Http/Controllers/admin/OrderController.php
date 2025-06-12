@@ -21,14 +21,23 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Order::with(['user', 'discount', 'items', 'status', 'paymentMethod']);
+        // Bắt đầu query với các mối quan hệ cần thiết
+        $query = Order::with([
+            'user', // Thông tin người dùng đặt hàng
+            'discount', // Thông tin mã giảm giá (nếu có)
+            'paymentMethod', // Thông tin phương thức thanh toán
+            // Eager load chi tiết các mặt hàng trong đơn hàng, bao gồm biến thể và sản phẩm gốc
+            'items.productVariant.product',
+            // Eager load các giá trị thuộc tính của biến thể sản phẩm trong order_items
+            'items.productVariant.productVariantValues.attributeValue',
+        ])->latest(); // Sắp xếp mặc định theo ngày tạo mới nhất
 
-        // Lọc theo mã đơn hàng
+        // Lọc theo mã đơn hàng (sku hoặc id)
         if ($request->filled('order_code')) {
             $code = $request->order_code;
             $query->where(function ($q) use ($code) {
                 $q->where('sku', 'like', "%{$code}%")
-                    ->orWhere('id', $code);
+                  ->orWhere('id', $code);
             });
         }
 
@@ -40,17 +49,15 @@ class OrderController extends Controller
             });
         }
 
-        // Lọc theo trạng thái thanh toán (giả sử là trường 'payment_status' trong bảng orders)
+        // Lọc theo trạng thái thanh toán (payment_status: pending, paid, failed)
         if ($request->filled('payment_status')) {
             $query->where('payment_status', $request->payment_status);
         }
 
-        // Lọc theo trạng thái đơn hàng (dựa vào quan hệ status)
+        // Lọc theo trạng thái đơn hàng (order_status: enum)
+        // Vì 'order_status' là một cột enum trực tiếp trên bảng `orders`, không cần whereHas
         if ($request->filled('order_status')) {
-            $query->whereHas('status', function ($q) use ($request) {
-                $q->where('id', $request->order_status);
-                // hoặc theo tên: $q->where('name', $request->order_status);
-            });
+            $query->where('order_status', $request->order_status);
         }
 
         // Lọc theo ngày đặt (ngày bắt đầu và ngày kết thúc)
@@ -61,16 +68,21 @@ class OrderController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        // Lọc theo phương thức thanh toán
+        // Lọc theo phương thức thanh toán (payment_method_id)
         if ($request->filled('payment_method')) {
             $query->where('payment_method_id', $request->payment_method);
         }
 
-        $orders = $query->withTrashed()->paginate(20)->withQueryString(); // phân trang 20 item/trang, giữ query filter trong url
+        // Lấy kết quả phân trang, bao gồm cả những đơn hàng đã xóa mềm (nếu cần hiển thị)
+        // và giữ các tham số filter trên URL
+        $orders = $query->withTrashed()->paginate(20)->withQueryString();
 
-        // Lấy danh sách trạng thái, phương thức thanh toán để đổ vào filter dropdown
-        $orderStatuses = \App\Models\OrderStatus::all();
-        $paymentMethods = \App\Models\PaymentMethod::all();
+        // Lấy danh sách các trạng thái đơn hàng từ enum (có thể lấy từ model nếu có)
+        // Hoặc bạn có thể định nghĩa một hằng số hoặc cấu hình để có các giá trị enum này
+        $orderStatuses = ['Chưa xác nhận', 'Xác nhận', 'Đang vận chuyển', 'Giao hàng thành công', 'Hủy đơn'];
+
+        // Lấy danh sách phương thức thanh toán để đổ vào filter dropdown
+        $paymentMethods = PaymentMethod::all();
 
         return view('admin.orders.index', compact('orders', 'orderStatuses', 'paymentMethods'));
     }
@@ -361,7 +373,7 @@ class OrderController extends Controller
 
         $discountProductIds = $order->discount?->products->pluck('id')->toArray() ?? [];
 
-        $statuses = OrderStatus::all();
+        // $statuses = OrderStatus::all();
 
         return view('admin.orders.show', compact('order', 'statuses', 'discountProductIds'));
     }
@@ -377,38 +389,38 @@ class OrderController extends Controller
         $newStatusId = $request->input('status_id');
 
         // Lấy thông tin model của trạng thái mới và trạng thái cũ
-        $newStatusModel = OrderStatus::find($newStatusId);
+        // $newStatusModel = OrderStatus::find($newStatusId);
         $oldStatusModel = $order->status; // Giả sử $order->status là relationship
 
-        $newStatusName = $newStatusModel ? trim(mb_strtolower($newStatusModel->name, 'UTF-8')) : null;
+        // $newStatusName = $newStatusModel ? trim(mb_strtolower($newStatusModel->name, 'UTF-8')) : null;
         $oldStatusName = $oldStatusModel ? trim(mb_strtolower($oldStatusModel->name, 'UTF-8')) : null;
 
         Log::info("Old Status: ID={$order->status_id}, Name='{$oldStatusName}'");
-        Log::info("New Status: ID={$newStatusId}, Name='{$newStatusName}'");
+        // Log::info("New Status: ID={$newStatusId}, Name='{$newStatusName}'");
         Log::info("Cancel Reason from Request: " . $request->input('cancel_reason'));
 
         $order->status_id = $newStatusId;
 
         // 1. Nếu trạng thái mới là "Đã hủy"
-        if ($newStatusName === 'đã hủy') {
-            Log::info('Condition MET: New status IS "đã hủy".');
-            $request->validate([
-                'cancel_reason' => 'required|string|min:5|max:500', // Giảm min để dễ test, tăng max
-            ], [
-                'cancel_reason.required' => 'Vui lòng nhập lý do hủy đơn hàng.',
-                'cancel_reason.min' => 'Lý do hủy phải có ít nhất :min ký tự.',
-                'cancel_reason.max' => 'Lý do hủy không được vượt quá :max ký tự.',
-            ]);
-            $order->cancel_reason = $request->input('cancel_reason');
-            Log::info('Cancel reason to be saved: ' . $order->cancel_reason);
-        }
+        // if ($newStatusName === 'đã hủy') {
+        //     Log::info('Condition MET: New status IS "đã hủy".');
+        //     $request->validate([
+        //         'cancel_reason' => 'required|string|min:5|max:500', // Giảm min để dễ test, tăng max
+        //     ], [
+        //         'cancel_reason.required' => 'Vui lòng nhập lý do hủy đơn hàng.',
+        //         'cancel_reason.min' => 'Lý do hủy phải có ít nhất :min ký tự.',
+        //         'cancel_reason.max' => 'Lý do hủy không được vượt quá :max ký tự.',
+        //     ]);
+        //     $order->cancel_reason = $request->input('cancel_reason');
+        //     Log::info('Cancel reason to be saved: ' . $order->cancel_reason);
+        // }
         // 2. Nếu trạng thái cũ là "Đã hủy" VÀ trạng thái mới KHÁC "Đã hủy"
-        elseif ($oldStatusName === 'đã hủy' && $newStatusName !== 'đã hủy') {
-            Log::info('Condition MET: Old status WAS "đã hủy" and new status IS NOT "đã hủy". Clearing cancel_reason.');
-            $order->cancel_reason = null;
-        } else {
-            Log::info('Condition for cancel_reason NOT MET or no change needed.');
-        }
+        // elseif ($oldStatusName === 'đã hủy' && $newStatusName !== 'đã hủy') {
+        //     Log::info('Condition MET: Old status WAS "đã hủy" and new status IS NOT "đã hủy". Clearing cancel_reason.');
+        //     $order->cancel_reason = null;
+        // } else {
+        //     Log::info('Condition for cancel_reason NOT MET or no change needed.');
+        // }
 
         $order->save();
         Log::info('Order status updated successfully in DB.');
@@ -432,7 +444,7 @@ class OrderController extends Controller
     public function edit($id)
     {
         $order = Order::with(['user', 'discount', 'items', 'status', 'paymentMethod'])->findOrFail($id);
-        $statuses = OrderStatus::all();
+        // $statuses = OrderStatus::all();
         return view('admin.orders.edit', compact('order', 'statuses'));
     }
 
@@ -507,17 +519,17 @@ class OrderController extends Controller
             return redirect()->route('admin.orders.index')->with('error', 'Đơn hàng này không thể hủy.');
         }
 
-        $cancelledStatus = OrderStatus::where('name', 'Đã hủy')->first();
+        // $cancelledStatus = OrderStatus::where('name', 'Đã hủy')->first();
 
-        if (!$cancelledStatus) {
-            return redirect()->route('admin.orders.index')->with('error', 'Không tìm thấy trạng thái "Đã hủy". Vui lòng cấu hình.');
-        }
+        // if (!$cancelledStatus) {
+        //     return redirect()->route('admin.orders.index')->with('error', 'Không tìm thấy trạng thái "Đã hủy". Vui lòng cấu hình.');
+        // }
 
-        if ($order->status_id == $cancelledStatus->id) {
-            return redirect()->route('admin.orders.index')->with('warning', 'Đơn hàng này đã được hủy trước đó.');
-        }
+        // if ($order->status_id == $cancelledStatus->id) {
+        //     return redirect()->route('admin.orders.index')->with('warning', 'Đơn hàng này đã được hủy trước đó.');
+        // }
 
-        $order->status_id = $cancelledStatus->id;
+        // $order->status_id = $cancelledStatus->id;
         $order->cancel_reason = $validatedData['cancel_reason']; // << SỬA Ở ĐÂY (tên thuộc tính và key)
         // $order->cancelled_at = now();
         // $order->cancelled_by = auth()->id();
