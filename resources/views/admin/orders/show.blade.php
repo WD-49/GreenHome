@@ -7,8 +7,10 @@
                 <h3 class="mb-0">Chi tiết đơn hàng #{{ $order->sku }}</h3>
             </div>
             <div class="card-body">
-                {{-- Mã đơn hàng --}}
-                <p><strong>Mã đơn hàng:</strong> {{ $order->sku ?? $order->id }}</p>
+                {{-- Mã đơn hàng - Trạng thái đơn hàng --}}
+                <p class="fs-5"><strong>Mã đơn hàng:</strong> {{ $order->sku ?? $order->id }} |
+                    <strong>Trạng thái đơn hàng:</strong> {{ $order->order_status }}
+                </p>
 
                 {{-- Thông tin người đặt & người nhận --}}
                 <div class="row mb-4">
@@ -140,6 +142,40 @@
                                         <td><strong>{{ number_format($order->total_amount, 0, ',', '.') }} VND</strong>
                                         </td>
                                     </tr>
+                                    <tr>
+                                        <th>Phương thức thanh toán</th>
+                                        <td>
+                                            {{ $order->payment_method_name }}
+                                            @php
+                                                $paymentStatuses = [
+                                                    'pending' => 'Chờ thanh toán',
+                                                    'paid' => 'Đã thanh toán',
+                                                    'failed' => 'Thất bại',
+                                                ];
+                                                $currentStatusKey = old('payment_status', $order->payment_status);
+                                                $displayStatus =
+                                                    $paymentStatuses[$currentStatusKey] ?? 'Không xác định';
+
+                                                // Thêm class màu sắc cho trạng thái nếu cần
+                                                $statusColorClass = '';
+                                                switch ($currentStatusKey) {
+                                                    case 'pending':
+                                                        $statusColorClass = 'text-warning'; // Màu vàng cho chờ thanh toán
+                                                        break;
+                                                    case 'paid':
+                                                        $statusColorClass = 'text-success'; // Màu xanh lá cho đã thanh toán
+                                                        break;
+                                                    case 'failed':
+                                                        $statusColorClass = 'text-danger'; // Màu đỏ cho thất bại
+                                                        break;
+                                                }
+                                            @endphp
+                                            @if (!empty($displayStatus))
+                                                - <span
+                                                    class="{{ $statusColorClass }}"><strong>{{ $displayStatus }}</strong></span>
+                                                {{-- In đậm và thêm màu cho trạng thái --}}
+                                            @endif
+                                        </td>
                                 </tbody>
                             </table>
                         </div>
