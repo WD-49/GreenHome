@@ -16,7 +16,7 @@ class ProductFactory extends Factory
         return [
             'category_id' => Category::inRandomOrder()->first()->id,  // Chọn ngẫu nhiên một Category
             'brand_id' => Brand::inRandomOrder()->first()->id,        // Chọn ngẫu nhiên một Brand
-                 'name' => $this->faker->words(3, true), 
+            'name' => $this->faker->words(3, true),
             'slug' => $this->faker->slug(),
             'description' => $this->faker->paragraph(),
             'quantity' => $this->faker->numberBetween(10, 100),

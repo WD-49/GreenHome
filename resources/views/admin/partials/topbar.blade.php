@@ -46,7 +46,7 @@
                     <!-- item-->
                     <a href="javascript:void(0);" class="dropdown-item notify-item text-muted link-primary active">
                         <div class="notify-icon">
-                            <img src="assets/images/users/user-12.jpg" class="img-fluid rounded-circle"
+                            <img src="{{ asset('assets/images/users/user-12.jpg') }}" class="img-fluid rounded-circle"
                                 alt="" />
                         </div>
                         <div class="d-flex align-items-center justify-content-between">
@@ -62,7 +62,8 @@
                     <!-- item-->
                     <a href="javascript:void(0);" class="dropdown-item notify-item text-muted link-primary">
                         <div class="notify-icon">
-                            <img src="assets/images/users/user-2.jpg" class="img-fluid rounded-circle" alt="" />
+                            <img src="{{ asset('assets/images/users/user-2.jpg') }}" class="img-fluid rounded-circle"
+                                alt="" />
                         </div>
                         <div class="notify-content">
                             <div class="d-flex align-items-center justify-content-between">
@@ -87,7 +88,8 @@
                     <!-- item-->
                     <a href="javascript:void(0);" class="dropdown-item notify-item text-muted link-primary">
                         <div class="notify-icon">
-                            <img src="assets/images/users/user-3.jpg" class="img-fluid rounded-circle" alt="" />
+                            <img src="{{ asset('assets/images/users/user-3.jpg') }}" class="img-fluid rounded-circle"
+                                alt="" />
                         </div>
                         <div class="notify-content">
                             <div class="d-flex align-items-center justify-content-between">
@@ -103,7 +105,8 @@
                     <!-- item-->
                     <a href="javascript:void(0);" class="dropdown-item notify-item text-muted link-primary">
                         <div class="notify-icon">
-                            <img src="assets/images/users/user-8.jpg" class="img-fluid rounded-circle" alt="" />
+                            <img src="{{ asset('assets/images/users/user-8.jpg') }}" class="img-fluid rounded-circle"
+                                alt="" />
                         </div>
                         <div class="d-flex align-items-center justify-content-between">
                             <p class="notify-details">Violette Lasky</p>
@@ -118,7 +121,8 @@
                     <!-- item-->
                     <a href="javascript:void(0);" class="dropdown-item notify-item text-muted link-primary">
                         <div class="notify-icon">
-                            <img src="assets/images/users/user-5.jpg" class="img-fluid rounded-circle" alt="" />
+                            <img src="{{ asset('assets/images/users/user-5.jpg') }}" class="img-fluid rounded-circle"
+                                alt="" />
                         </div>
                         <div class="d-flex align-items-center justify-content-between">
                             <p class="notify-details">Ralph Edwards</p>
@@ -133,7 +137,7 @@
                     <!-- item-->
                     <a href="javascript:void(0);" class="dropdown-item notify-item text-muted link-primary">
                         <div class="notify-icon">
-                            <img src="assets/images/users/user-6.jpg" class="img-fluid rounded-circle"
+                            <img src="{{ asset('assets/images/users/user-6.jpg') }}" class="img-fluid rounded-circle"
                                 alt="" />
                         </div>
                         <div class="notify-content">
@@ -160,7 +164,7 @@
         <li class="dropdown notification-list topbar-dropdown">
             <a class="nav-link dropdown-toggle nav-user me-0" data-bs-toggle="dropdown" href="#"
                 role="button" aria-haspopup="false" aria-expanded="false">
-                <img src="assets/images/users/user-11.jpg" alt="user-image" class="rounded-circle">
+                <img src="{{ asset('assets/images/users/user-11.jpg') }}" alt="user-image" class="rounded-circle">
                 <span class="pro-user-name ms-1">
                     Christian <i class="mdi mdi-chevron-down"></i>
                 </span>

@@ -139,6 +139,7 @@
                     'Ngày kết thúc' => \Carbon\Carbon::parse($discount->end_date)->format('d/m/Y H:i'),
                     'Giá trị đơn hàng tối đa' => number_format($discount->max_order_value, 0) . ' VNĐ',
                     'Giá trị đơn hàng tối thiểu' => number_format($discount->min_order_value, 0) . ' VNĐ',
+                    'Giá trị giảm tối đa' => number_format($discount->max_discount_value, 0) . ' VNĐ',
                     'Số lượng mã' => $discount->quantity,
                     'Giới hạn mỗi người dùng' => $discount->user_usage_limit,
                     'Áp dụng cho tất cả sản phẩm' => $discount->applies_to_all_products ? 'Có' : 'Không',
@@ -158,19 +159,32 @@
                         </div>
                     @endforeach
 
-                    @if (!$discount->applies_to_all_products && $products && count($products))
-                        <div class="discount-row mt-3 d-flex">
-                            <div class="label-text mb-2">Sản phẩm áp dụng:</div>
+                @if (!$discount->applies_to_all_products && $products && count($products))
+    <div class="discount-row mt-3">
+        <label class="fw-semibold mb-3 d-block text-muted">Sản phẩm áp dụng:</label>
 
-                            <div class="value-text col-md-9">
-                                <ol class="mb-0 ps-3">
-                                    @foreach ($products as $product)
-                                        <li>{{ $product->name }}</li>
-                                    @endforeach
-                                </ol>
-                            </div>
-                        </div>
-                    @endif
+        <div class="table-responsive" style="max-width: 500px;">
+            <table class="table align-middle border mb-0 shadow-sm rounded-4 overflow-hidden"
+                   style="border-collapse: separate; border-spacing: 0; border-radius: 12px;">
+                <thead style="background-color: #e9f0ff;" class="text-dark fw-bold text-center">
+                    <tr>
+                        <th style="width: 50px; border-top-left-radius: 12px;">#</th>
+                        <th style="border-top-right-radius: 12px;">Tên sản phẩm</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($products as $index => $product)
+                        <tr class="{{ $index % 2 == 0 ? 'bg-light' : '' }}">
+                            <td class="text-center">{{ $index + 1 }}</td>
+                            <td class="text-start">{{ $product->name }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+@endif
+
 
 
                 </div>

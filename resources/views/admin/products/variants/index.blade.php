@@ -128,12 +128,11 @@
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $variant->sku }}</td>
                                     <td>
-                                        <ul class="mb-0">
-                                            @foreach ($variant->productVariantValues as $pvv)
-                                                <li>{{ $pvv->attributeValue->attribute->name }}:
-                                                    {{ $pvv->attributeValue->value }}</li>
-                                            @endforeach
-                                        </ul>
+                                        @if ($variant->attribute_name)
+                                            {{ $variant->attribute_name }}
+                                        @else
+                                            Sản phẩm không có thuộc tính
+                                        @endif
                                     </td>
                                     <td>
 
