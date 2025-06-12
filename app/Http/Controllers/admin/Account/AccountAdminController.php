@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\UserProfile;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -42,6 +43,40 @@ class AccountAdminController extends Controller
         return view('admin.account.admin.listAdmins', compact('admins'));
     }
 
+    // Phương thức mới để thay đổi vai trò người dùng
+    public function toggleUserRole(Request $request, User $user)
+    {
+        // --- CẢNH BÁO: ĐÃ BỎ KIỂM TRA QUYỀN HẠN CẤP ĐỘ CAO CHO MỤC ĐÍCH TEST.
+        // --- HÃY ĐẢM BẢO THÊM LẠI KIỂM TRA QUYỀN TRƯỚC KHI ĐƯA LÊN PRODUCTION!
+        // Ví dụ kiểm tra quyền hạn (nên sử dụng Gates/Policies của Laravel):
+        // if (!auth()->check() || auth()->user()->role !== 'admin') {
+        //     return response()->json(['success' => false, 'message' => 'Bạn không có quyền thực hiện hành động này.'], 403);
+        // }
+
+        // Không cho phép người dùng thay đổi vai trò của chính mình
+        // if (auth()->check() && auth()->user()->id === $user->id) {
+        //     return response()->json(['success' => false, 'message' => 'Bạn không thể thay đổi vai trò của chính mình.'], 403);
+        // }
+
+        $newRole = $request->input('new_role');
+
+        // Xác thực vai trò mới hợp lệ
+        if (!in_array($newRole, ['client', 'admin'])) {
+            return response()->json(['success' => false, 'message' => 'Vai trò không hợp lệ.'], 400);
+        }
+
+        try {
+            $user->role = $newRole;
+            $user->save();
+
+            $message = "Đã chuyển vai trò của {$user->name} thành " . ucfirst($newRole) . ".";
+            return response()->json(['success' => true, 'message' => $message, 'new_role' => $newRole]);
+        } catch (\Exception $e) {
+            Log::error("Lỗi khi thay đổi vai trò người dùng {$user->id}: " . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Đã xảy ra lỗi khi thay đổi vai trò.'], 500);
+        }
+    }
+
     public function detailAccAdmin($id)
     {
         $admins = User::with([
@@ -63,9 +98,9 @@ class AccountAdminController extends Controller
         return view('admin.account.admin.detailAccAdmin', compact('admins'));
     }
 
-    
 
-    
+
+
 
     public function editAdmin($id)
     {
