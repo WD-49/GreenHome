@@ -99,7 +99,8 @@
             <div class="collapse" id="sidebarExpages">
                 <ul class="nav-second-level">
                     <li>
-                        <a class='tp-link' href="{{ url('pages-starter.html') }}">Danh sách đơn hàng</a>
+                        <a class='tp-link' href='{{ route('admin.orders.index') }}'>Danh sách đơn hàng</a>
+
                     </li>
                     <li>
                         <a class='tp-link' href="{{ url('pages-profile.html') }}">Phương thức thanh toán</a>

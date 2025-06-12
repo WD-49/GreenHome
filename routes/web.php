@@ -156,6 +156,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/resetPassUser/{id}', [AccountUsersController::class, 'resetPassUser'])->name('resetPassUser');
         Route::get('/orders/{order}/ajax-details', [AccountUsersController::class, 'getAjaxOrderDetails'])
             ->name('order.ajaxDetails');
+        // ROUTE MỚI CHO PHÂN QUYỀN
+        Route::post('toggleUserRole/{user}', [AccountUsersController::class, 'toggleUserRole'])->name('toggleUserRole');
         // Admins
         Route::get('/listAdmins', [AccountAdminController::class, 'listAdmins'])->name('listAdmins');
         Route::get('/detailAccAdmin/{id}', [AccountAdminController::class, 'detailAccAdmin'])->name('detailAccAdmin');
@@ -168,6 +170,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/restoreAdmin/{id}', [AccountAdminController::class, 'restoreAdmin'])->name('restoreAdmin');
         Route::delete('/forceDeleteAdmin/{id}', [AccountAdminController::class, 'forceDeleteAdmin'])->name('forceDeleteAdmin');
         Route::post('/resetPassAdmin/{id}', [AccountAdminController::class, 'resetPassAdmin'])->name('resetPassAdmin');
+        // // ROUTE MỚI CHO PHÂN QUYỀN
+        // Route::post('toggleUserRole/{admin}', [AccountAdminController::class, 'toggleUserRole'])->name('toggleUserRole');
     });
 
 
@@ -303,7 +307,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/destroy/{id}', [OrderController::class, 'destroy'])->name('destroy');
         Route::get('/trash', [OrderController::class, 'trash'])->name('trash');
         Route::post('/restore/{id}', [OrderController::class, 'restore'])->name('restore');
-        Route::patch('{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
+        Route::post('{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
 
     });
 });
