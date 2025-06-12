@@ -11,11 +11,33 @@ use Illuminate\Support\Facades\Storage;
 
 class BannerController extends Controller
 {
-    public function index()
-    {
-        $banners = Banner::latest()->paginate(10);
-        return view('admin.banners.index', compact('banners'));
+   public function index(Request $request)
+{
+    $query = Banner::query();
+
+    // Tìm theo tên banner
+    if ($request->filled('search')) {
+        $query->where('name', 'like', '%' . $request->search . '%');
     }
+
+    // Lọc theo trạng thái
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+
+    // Lọc theo khoảng ngày tạo
+    if ($request->filled('min_date')) {
+        $query->whereDate('created_at', '>=', $request->min_date);
+    }
+    if ($request->filled('max_date')) {
+        $query->whereDate('created_at', '<=', $request->max_date);
+    }
+
+    $banners = $query->latest()->paginate(10);
+
+    return view('admin.banners.index', compact('banners'));
+}
+
 
     public function create()
     {
