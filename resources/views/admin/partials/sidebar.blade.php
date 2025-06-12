@@ -149,11 +149,18 @@
         </li>
 
         <li>
-            <a class='tp-link' href="{{ url('widgets.html') }}">
+            <a class='tp-link' href="{{ route('admin.banners.index') }}">
                 <i data-feather="aperture"></i>
                 <span> Banner </span>
             </a>
         </li>
+     <li>
+    <a class='tp-link' href="{{ route('admin.blog_categories.index') }}">
+        <i data-feather="file-text"></i>
+        <span> Blog </span>
+    </a>
+</li>
+
 
         <li>
             <a href="#sidebarMaps" data-bs-toggle="collapse">

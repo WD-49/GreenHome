@@ -172,8 +172,12 @@
     <!-- App js-->
     <script src="../../assets/js/app.js"></script>
     {{-- Kết thúc phần cho list accounts user --}}
+    <!-- Bootstrap Bundle JS (bao gồm cả Popper.js) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 
 </body>
+@yield('scripts')
 
 <!-- Mirrored from zoyothemes.com/tapeli/html/ by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 16 Jul 2024 08:34:03 GMT -->
 
