@@ -28,7 +28,7 @@
                     </div>
                 </div>
 
-                
+
 
                 @php
                     $totalOrderAmount = 0;
@@ -107,7 +107,11 @@
                                             <td>
                                                 -{{ number_format($discountAmount, 0, ',', '.') }} VND
                                                 <br>
-                                                <small>({{ $order->discount->applies_to_all_products == 1 ? 'Áp dụng đơn hàng' : 'Áp dụng sản phẩm' }})</small>
+                                                <p>
+                                                    {{-- Áp dụng cho tất cả sản phẩm: --}}
+                                                    {{-- Kiểm tra nếu discount tồn tại VÀ discount đó có thuộc tính applies_to_all_products là true --}}
+                                                    {{-- {{ optional($order->discount)->applies_to_all_products ? 'Có' : (optional($order->discount) ? 'Không' : 'N/A') }} --}}
+                                                </p>
                                             </td>
                                         @endif
                                         @if ($discountAmount <= 0)
@@ -160,5 +164,3 @@
         </div>
     </div>
 @endsection
-
-

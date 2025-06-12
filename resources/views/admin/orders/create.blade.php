@@ -204,12 +204,10 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Dữ liệu này cần được truyền từ Controller xuống View
-            // Ví dụ: $productVariantsForJs = $productVariants->mapWithKeys(function($v){ return [$v->id => ['price' => $v->price, 'name' => $v->product->name, 'sku' => $v->sku]]; });
-            // Và $discountsForJs = $discounts->mapWithKeys(function($d){ return [$d->id => ['type' => $d->discount_type, ...]]; });
-            // Hãy đảm bảo bạn đã truyền biến $productVariantsForJs và $discountsForJs từ controller create()
-            const productVariantsData =
-                @json($productVariantsForJs ?? []); // Sử dụng ?? [] để tránh lỗi nếu biến không tồn tại
+            const productVariantsData = @json($productVariantsForJs ?? []);
             const discountDetailsData = @json($discountsForJs ?? []);
+            // Đảm bảo discountProductsMap được truyền từ controller
+            const discountProductsMap = @json($discountProductsMap ?? []); 
 
             const productsContainer = document.getElementById('products_container');
             const addProductRowBtn = document.getElementById('addProductRowBtn');
@@ -230,8 +228,11 @@
 
             function calculateAndUpdateSummary() {
                 let subtotal = 0;
-
+                let totalProductQuantityInCart = 0; // Tổng số lượng sản phẩm trong giỏ (cho discount nếu cần)
+                
                 const productItems = productsContainer.querySelectorAll('.product-item');
+                let productIdsInCart = []; // Mảng chứa product_id của các sản phẩm đang có trong form
+
                 productItems.forEach(row => {
                     const variantSelect = row.querySelector('.product-variant-select');
                     const quantityInput = row.querySelector('.product-quantity-input');
@@ -243,9 +244,16 @@
                     let lineTotal = 0;
 
                     if (variantId && productVariantsData[variantId] && quantity > 0) {
-                        const price = parseFloat(productVariantsData[variantId].price);
+                        const variantDetails = productVariantsData[variantId];
+                        const price = parseFloat(variantDetails.price);
                         lineTotal = price * quantity;
                         subtotal += lineTotal;
+                        totalProductQuantityInCart += quantity; // Cập nhật tổng số lượng
+
+                        // Thu thập product_id cho logic giảm giá theo sản phẩm
+                        if (variantDetails.product_id) {
+                            productIdsInCart.push(variantDetails.product_id);
+                        }
                     }
 
                     if (totalPriceInput) {
@@ -253,17 +261,81 @@
                     }
                 });
 
-                // Tạm thời bỏ qua discount để hiển thị tổng đơn giản
+                let totalDiscount = 0;
+                const selectedDiscountId = discountSelectEl.value;
+
+                if (selectedDiscountId && discountDetailsData[selectedDiscountId]) {
+                    const discount = discountDetailsData[selectedDiscountId];
+                    let amountEligibleForDiscount = 0;
+                    let totalQuantityForFixedDiscount = 0; // Tổng số lượng sản phẩm áp dụng cho fixed discount
+
+                    // --- Logic xác định tổng tiền đủ điều kiện giảm giá ---
+                    if (discount.applies_to_all_products === 1) { // Áp dụng cho tất cả sản phẩm
+                        amountEligibleForDiscount = subtotal;
+                        totalQuantityForFixedDiscount = totalProductQuantityInCart;
+                    } else { // Áp dụng cho sản phẩm cụ thể (applies_to_all_products === 0)
+                        const applicableProductIdsForDiscount = discountProductsMap[selectedDiscountId] || [];
+                        
+                        productItems.forEach(row => {
+                            const variantSelect = row.querySelector('.product-variant-select');
+                            const quantityInput = row.querySelector('.product-quantity-input');
+                            
+                            const variantId = variantSelect?.value;
+                            const quantity = parseInt(quantityInput?.value) || 0;
+
+                            if (variantId && productVariantsData[variantId] && quantity > 0) {
+                                const variantDetails = productVariantsData[variantId];
+                                const currentProductId = variantDetails.product_id;
+
+                                if (applicableProductIdsForDiscount.includes(currentProductId)) {
+                                    const price = parseFloat(variantDetails.price);
+                                    amountEligibleForDiscount += price * quantity;
+                                    totalQuantityForFixedDiscount += quantity;
+                                }
+                            }
+                        });
+
+                        if (amountEligibleForDiscount === 0) {
+                            // Nếu không có sản phẩm nào hợp lệ, mã giảm giá không áp dụng
+                            // Không cần thông báo lỗi ở đây, chỉ là discount = 0
+                        }
+                    }
+
+                    // --- Kiểm tra điều kiện tối thiểu để áp dụng mã giảm giá ---
+                    if (amountEligibleForDiscount < discount.minValue) {
+                        totalDiscount = 0; // Chưa đạt giá trị tối thiểu
+                    } 
+                    else {
+                        // --- Tính toán số tiền giảm giá ---
+                        let calculatedDiscount = 0;
+                        if (discount.type === 'percentage') {
+                            calculatedDiscount = amountEligibleForDiscount * (discount.value / 100);
+                        } else if (discount.type === 'fixed') {
+                            // Logic fixed discount khớp với controller:
+                            // Nếu discount áp dụng cho tất cả sản phẩm, thì fixed amount là cho cả đơn hàng.
+                            // Nếu chỉ áp dụng cho sản phẩm cụ thể, thì fixed amount có thể là cho mỗi sản phẩm hợp lệ,
+                            // hoặc một lần cho toàn bộ phần hợp lệ.
+                            // Giả định fixed là tổng fixed amount cho tất cả các sản phẩm đủ điều kiện trong đơn hàng.
+                            // Hoặc nếu bạn muốn fixed per eligible product: discount.value * totalQuantityForFixedDiscount;
+                            calculatedDiscount = discount.value; // Fixed amount for the whole order/eligible items
+                        }
+                        
+                        // Áp dụng giới hạn tối đa của mã giảm giá (max_discount)
+                        totalDiscount = Math.min(calculatedDiscount, discount.maxValue);
+                        
+                        // Đảm bảo tổng giảm giá không lớn hơn số tiền đủ điều kiện giảm giá
+                        totalDiscount = Math.min(totalDiscount, amountEligibleForDiscount);
+                    }
+                }
+
                 const shippingFee = parseFloat(shippingFeeInputEl.value) || 0;
-                const grandTotal = subtotal + shippingFee;
+                const grandTotal = subtotal - totalDiscount + shippingFee;
 
                 summarySubtotalEl.textContent = formatCurrency(subtotal);
-                summaryDiscountEl.textContent = formatCurrency(0); // nếu chưa xử lý giảm giá
+                summaryDiscountEl.textContent = formatCurrency(totalDiscount);
                 summaryShippingFeeEl.textContent = formatCurrency(shippingFee);
                 summaryGrandTotalEl.innerHTML = `<strong>${formatCurrency(grandTotal)}</strong>`;
             }
-
-
 
             function addEventListenersToRow(rowElement) {
                 const variantSelect = rowElement.querySelector('.product-variant-select');
@@ -302,7 +374,6 @@
                         addEventListenersToRow(newRow); // Gắn event cho hàng mới
                         calculateAndUpdateSummary(); // Cập nhật lại tổng
                     } else {
-                        // Xử lý trường hợp không có dòng mẫu nào (có thể tạo HTML từ đầu)
                         console.warn("Không tìm thấy dòng sản phẩm mẫu để clone.");
                     }
                 });
