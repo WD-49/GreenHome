@@ -3,9 +3,30 @@
 @section('title')
     {{ $title }}
 @endsection
+@push('styles')
+    <style>
+        .form-label {
+            font-weight: 500;
+        }
+
+        .table th,
+        .table td {
+            vertical-align: middle !important;
+        }
+
+        @media (max-width: 768px) {
+            .table-responsive {
+                font-size: 14px;
+            }
+
+            .btn-group label {
+                font-size: 14px;
+            }
+        }
+    </style>
+@endpush
 
 @section('content')
-    <h1 class="text-center">{{ $title }}</h1>
 
     <!-- Hiển thị lỗi của validation -->
     @if ($errors->any())
@@ -25,10 +46,13 @@
         </div>
     @endif
 
-    <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data"
+        class="p-4 rounded shadow bg-white">
         @csrf
 
         <div class="mb-4">
+            <h1 class="text-center">{{ $title }}</h1>
+
             <div class="row">
                 <div class="col-md-6">
                     <div class="mb-3">
@@ -98,14 +122,18 @@
                         @enderror
                     </div>
 
+                    {{-- ...existing code... --}}
                     <div class="mb-3">
                         <label for="image" class="form-label">Hình ảnh sản phẩm</label>
                         <input type="file" class="form-control @error('image') is-invalid @enderror" name="image"
                             id="image">
+                        <img id="mainImagePreview" src="#" alt="Xem trước ảnh" class="img-thumbnail mt-2 d-none"
+                            style="max-width: 150px;">
                         @error('image')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
+                    {{-- ...existing code... --}}
                 </div>
             </div>
 
@@ -121,23 +149,20 @@
 
         <hr>
         {{-- Chọn loại sản phẩm --}}
+        {{-- ...existing code... --}}
         <div class="mb-4">
             <label class="form-label fw-bold">Loại sản phẩm</label>
-            {{-- Ẩn: default là sản phẩm đơn --}}
-            {{-- <input type="hidden" name="is_variant" value="0"> --}}
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="is_variant" id="simple_product" value="0"
-                    {{ old('is_variant') ? '' : 'checked' }}>
-                <label class="form-check-label" for="simple_product">Sản phẩm đơn (không có thuộc tính)</label>
-            </div>
+            <div class="btn-group w-100 mb-2" role="group" aria-label="Chọn loại sản phẩm">
+                <input type="radio" class="btn-check" name="is_variant" id="simple_product" value="0"
+                    autocomplete="off" {{ old('is_variant') ? '' : 'checked' }}>
+                <label class="btn btn-outline-primary" for="simple_product">Sản phẩm đơn</label>
 
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="is_variant" id="variant_product" value="1"
-                    {{ old('is_variant') ? 'checked' : '' }}>
-
-                <label class="form-check-label" for="variant_product">Sản phẩm có biến thể</label>
+                <input type="radio" class="btn-check" name="is_variant" id="variant_product" value="1"
+                    autocomplete="off" {{ old('is_variant') ? 'checked' : '' }}>
+                <label class="btn btn-outline-primary" for="variant_product">Có biến thể</label>
             </div>
         </div>
+        {{-- ...existing code... --}}
         {{-- Thuộc tính (chỉ hiện nếu chọn sản phẩm biến thể) --}}
         <div id="attribute-section" class="mb-4 d-none">
             <label class="form-label fw-bold">Chọn thuộc tính và giá trị</label>
@@ -173,7 +198,7 @@
                 </div>
             </div>
 
-            <button type="button" class="btn btn-outline-primary mt-3" id="generateVariants">
+            <button type="button" class="btn btn-outline-primary mt-3 w-100" id="generateVariants">
                 ⚡ Tạo nhanh các biến thể từ tổ hợp giá trị
             </button>
         </div>
@@ -181,52 +206,47 @@
         {{-- Danh sách biến thể --}}
         <div id="variant-table" class="mt-4 d-none">
             <h5 class="mb-3">Danh sách biến thể</h5>
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Biến thể</th>
-                        <th>Giá</th>
-                        <th>Số lượng</th>
-                        <th>ảnh</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody id="variantBody">
-                    {{-- Các dòng biến thể được thêm động bằng JS --}}
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle shadow-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Biến thể</th>
+                            <th>Giá</th>
+                            <th>Số lượng</th>
+                            <th>Ảnh</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="variantBody">
+                        {{-- Các dòng biến thể được thêm động bằng JS --}}
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         {{-- Chỉ hiện với sản phẩm đơn --}}
         <div id="simple-fields" class="mb-4">
-            <div class="mb-3">
-                <label for="simple_price" class="form-label">Giá sản phẩm <span class="text-danger">*</span></label>
-                <input type="number" class="form-control @error('simple_price') is-invalid @enderror"
-                    name="simple_price" id="simple_price" min="0" step="1000"
-                    value="{{ old('simple_price') }}">
-                @error('simple_price')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="simple_price" class="form-label">Giá sản phẩm <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control @error('simple_price') is-invalid @enderror"
+                        name="simple_price" id="simple_price" min="0" step="1000"
+                        value="{{ old('simple_price') }}">
+                    @error('simple_price')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="simple_quantity" class="form-label">Số lượng <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control @error('simple_quantity') is-invalid @enderror"
+                        name="simple_quantity" id="simple_quantity" min="0"
+                        value="{{ old('simple_quantity') }}">
+                    @error('simple_quantity')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
             </div>
-
-            <div class="mb-3">
-                <label for="simple_quantity" class="form-label">Số lượng <span class="text-danger">*</span></label>
-                <input type="number" class="form-control @error('simple_quantity') is-invalid @enderror"
-                    name="simple_quantity" id="simple_quantity" min="0" value="{{ old('simple_quantity') }}">
-                @error('simple_quantity')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-            </div>
-
-            {{-- <div class="mb-3">
-                <label for="simple_image" class="form-label">Hình ảnh sản phẩm <span class="text-danger">*</span></label>
-                <input type="file" class="form-control @error('simple_image') is-invalid @enderror"
-                    name="simple_image" id="simple_image">
-                @error('simple_image')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-            </div> --}}
-        </div>
+        </div>  
 
         {{-- Nút Thêm sản phẩm --}}
         <div class="text-center mt-4">
@@ -385,5 +405,19 @@
                 document.querySelector('#description').value = editorInstance.getData();
             });
         });
+        // ...existing code...
+        // Xem trước ảnh sản phẩm chính
+        document.getElementById('image').addEventListener('change', function(e) {
+            const preview = document.getElementById('mainImagePreview');
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    preview.src = ev.target.result;
+                    preview.classList.remove('d-none');
+                }
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+        // ...existing code...
     </script>
 @endpush
