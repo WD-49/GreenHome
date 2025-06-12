@@ -3,6 +3,56 @@
 @section('content')
 <div class="container mt-4">
     <h1 class="mb-4">Quản lý Banner</h1>
+    {{-- Bộ lọc nâng cao --}}
+<div class="mb-4">
+    <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse"
+            data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
+        Bộ lọc nâng cao
+    </button>
+
+    <div class="collapse mt-3" id="filterCollapse">
+        <div class="border rounded p-3 bg-light">
+            <form method="GET" action="{{ route('admin.banners.index') }}" class="row g-3">
+                {{-- Tên banner --}}
+                <div class="col-md-4">
+                    <label for="search" class="form-label">Tên banner</label>
+                    <input type="text" name="search" class="form-control"
+                           placeholder="Nhập tên banner" value="{{ request('search') }}">
+                </div>
+
+                {{-- Trạng thái --}}
+                <div class="col-md-4">
+                    <label for="status" class="form-label">Trạng thái</label>
+                    <select name="status" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                        <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>Hiển thị</option>
+                        <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>Ẩn</option>
+                    </select>
+                </div>
+
+                {{-- Ngày tạo --}}
+                <div class="col-md-4">
+                    <label class="form-label">Ngày tạo</label>
+                    <div class="input-group">
+                        <span class="input-group-text">Từ</span>
+                        <input type="date" name="min_date" class="form-control"
+                               value="{{ request('min_date') }}">
+                        <span class="input-group-text">đến</span>
+                        <input type="date" name="max_date" class="form-control"
+                               value="{{ request('max_date') }}">
+                    </div>
+                </div>
+
+                {{-- Nút lọc --}}
+                <div class="col-12 text-end mt-2">
+                    <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                    <a href="{{ route('admin.banners.index') }}" class="btn btn-secondary">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 
     <a href="{{ route('admin.banners.create') }}" class="btn btn-primary mb-3">Thêm mới</a>
 
@@ -73,7 +123,10 @@
 </div>
 
 <div class="mt-3">
-    {{ $banners->links() }}
+    <div class="mt-3">
+    {{ $banners->appends(request()->query())->links() }}
+</div>
+
 </div>
 
 </div>
