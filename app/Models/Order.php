@@ -8,18 +8,21 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Order extends Model
 {
-    /** @use HasFactory<\Database\Factories\OrderFactory> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'user_id',
+        'user_name', // Đảm bảo fillable nếu bạn lưu tên người dùng trực tiếp
         'sku',
         'shipping_name',
         'shipping_phone',
         'shipping_address',
-        'status_id',
+        'order_status', // Use 'order_status' directly
         'discount_id',
         'payment_method_id',
+        'discount_code', // Đảm bảo fillable
+        'discount_value', // Đảm bảo fillable
+        'payment_method_name', // Đảm bảo fillable
         'payment_status',
         'discount_amount',
         'shipping_fee',
@@ -30,12 +33,12 @@ class Order extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->withTrashed(); // Thêm withTrashed nếu user có thể bị soft delete
     }
 
     public function discount()
     {
-        return $this->belongsTo(Discount::class);
+        return $this->belongsTo(Discount::class)->withTrashed(); // Thêm withTrashed
     }
 
     public function items()
@@ -43,24 +46,19 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-
     public function paymentMethod()
     {
-        return $this->belongsTo(PaymentMethod::class);
+        return $this->belongsTo(PaymentMethod::class)->withTrashed(); // Thêm withTrashed
     }
 
-    public function products()
+    // Phương thức kiểm tra xem đơn hàng có thể bị hủy không
+    public function canBeCancelled(): bool
     {
-        return $this->belongsTo(Product::class);
-    }
+        // Các trạng thái mà đơn hàng KHÔNG THỂ bị hủy
+        // Ví dụ: Đơn hàng đã "Đang vận chuyển", "Giao hàng thành công", hoặc đã "Hủy đơn" thì không thể hủy nữa.
+        // Nếu bạn muốn cho phép hủy ở trạng thái "Xác nhận", hãy bỏ "Xác nhận" khỏi mảng này.
+        $nonCancellableStatuses = ['Đang vận chuyển', 'Giao hàng thành công', 'Hủy đơn'];
 
-    public function canBeCancelled()
-    {
-        // Ví dụ: Đơn hàng không thể hủy nếu đã "Hoàn tất", "Đã giao hàng" hoặc "Đã hủy"
-        if ($this->status) { // Đảm bảo $this->status tồn tại và đã được load
-            $nonCancellableStatuses = ['Xác nhận', 'Đang vận chuyển', 'Đã hủy', 'Đã giao hàng']; // Các trạng thái không cho phép hủy
-            return !in_array($this->status->name, $nonCancellableStatuses);
-        }
-        return false; // Mặc định không cho hủy nếu không có status hoặc status không được load
+        return !in_array($this->order_status, $nonCancellableStatuses);
     }
 }

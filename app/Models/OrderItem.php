@@ -2,38 +2,48 @@
 
 namespace App\Models;
 
-use App\Models\Order;
-use App\Models\ProductVariant;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class OrderItem extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['order_id', 'product_variant_id', 'quantity', 'unit_price', 'total_price', 'poduct_name', 'product_variant_sku']; // Thêm các cột còn thiếu trong $fillable nếu cần
+    protected $fillable = [
+        'order_id',
+        'product_variant_id',
+        'product_name', // Đã sửa chính tả và đảm bảo fillable
+        'product_variant_sku', // Đảm bảo fillable
+        'product_attribute', // Đảm bảo fillable
+        'quantity',
+        'unit_price',
+        'discount_amount',
+        'total_price',
+        // 'note', // Nếu có cột 'note' trong order_items, thêm vào đây
+    ];
 
     public function order()
     {
-        return $this->belongsTo(Order::class);
+        return $this->belongsTo(Order::class)->withTrashed(); // Thêm withTrashed
     }
 
     public function productVariant()
     {
-        return $this->belongsTo(ProductVariant::class)->withTrashed(); // Đảm bảo include soft deleted variants
+        // OrderItem liên kết với ProductVariant qua product_variant_id
+        return $this->belongsTo(ProductVariant::class)->withTrashed(); // Thêm withTrashed
     }
 
-    // Sửa phương thức product() để trả về mối quan hệ Product thông qua ProductVariant
+    // Phương thức truy cập trực tiếp Product từ OrderItem thông qua ProductVariant (optional)
     public function product()
     {
         return $this->hasOneThrough(
-            Product::class,      // Model cuối cùng bạn muốn truy cập (Product)
-            ProductVariant::class, // Model trung gian (ProductVariant)
-            'id',                // Khóa ngoại trên bảng trung gian (product_variants) trỏ đến id của ProductVariant (đây là khóa chính của ProductVariant)
-            'id',                // Khóa chính trên bảng cuối cùng (products)
-            'product_variant_id',// Khóa cục bộ trên bảng hiện tại (order_items) trỏ đến ProductVariant
-            'product_id'         // Khóa cục bộ trên bảng trung gian (product_variants) trỏ đến Product
+            Product::class,
+            ProductVariant::class,
+            'id', // Khóa chính trên ProductVariant
+            'id', // Khóa chính trên Product
+            'product_variant_id', // Khóa cục bộ trên OrderItem
+            'product_id' // Khóa cục bộ trên ProductVariant
         );
     }
 }
