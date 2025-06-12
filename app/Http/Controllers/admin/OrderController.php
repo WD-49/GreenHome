@@ -68,7 +68,7 @@ class OrderController extends Controller
             $code = $request->order_code;
             $query->where(function ($q) use ($code) {
                 $q->where('sku', 'like', "%{$code}%")
-                  ->orWhere('id', $code);
+                    ->orWhere('id', $code);
             });
         }
 
@@ -308,7 +308,7 @@ class OrderController extends Controller
                     $discountAmount = $discountModelInstance->discount_value;
                     $discountAmount = min($discountAmount, $discountModelInstance->max_discount);
                 }
-                
+
                 $discountAmount = min($discountAmount, $subTotal);
                 $appliedDiscountId = $discountModelInstance->id;
             }
@@ -345,9 +345,9 @@ class OrderController extends Controller
             $orderItemsToSave = [];
             foreach ($cartItemsDetails as $itemDetail) {
                 $variant = $itemDetail['variant_instance'];
-                
+
                 // Lấy các thuộc tính của biến thể
-                $productAttributeNames = $variant->productVariantValues->map(function($pvv) {
+                $productAttributeNames = $variant->productVariantValues->map(function ($pvv) {
                     return optional($pvv->attributeValue)->value;
                 })->filter()->implode(' - ');
 
@@ -382,19 +382,19 @@ class OrderController extends Controller
             'user.profile',
             'discount.products',
             'paymentMethod',
-            'items' => function($query) {
+            'items' => function ($query) {
                 $query->withTrashed();
             },
-            'items.productVariant' => function($query) {
+            'items.productVariant' => function ($query) {
                 $query->withTrashed();
             },
-            'items.productVariant.product' => function($query) {
+            'items.productVariant.product' => function ($query) {
                 $query->withTrashed();
             },
             'items.productVariant.productVariantValues.attributeValue',
         ])
-        ->withTrashed()
-        ->findOrFail($id);
+            ->withTrashed()
+            ->findOrFail($id);
 
         $discountProductIds = $order->discount?->products->pluck('id')->toArray() ?? [];
 
@@ -448,13 +448,13 @@ class OrderController extends Controller
         }
         // Cho phép chuyển sang 'Hủy đơn' nếu đơn hàng có thể hủy
         elseif ($newOrderStatus === 'Hủy đơn' && !$order->canBeCancelled()) {
-             $validator->after(function ($validator) {
+            $validator->after(function ($validator) {
                 $validator->errors()->add('order_status', "Đơn hàng này không thể chuyển sang trạng thái 'Hủy đơn'.");
             });
         }
         // Kiểm tra bắt buộc lý do hủy nếu trạng thái mới là 'Hủy đơn'
         elseif ($newOrderStatus === 'Hủy đơn' && empty($request->input('cancel_reason'))) {
-             $validator->after(function ($validator) {
+            $validator->after(function ($validator) {
                 $validator->errors()->add('cancel_reason', 'Vui lòng cung cấp lý do hủy nếu chọn trạng thái "Hủy đơn".');
             });
         }
@@ -586,7 +586,7 @@ class OrderController extends Controller
                 $validator->errors()->add('cancel_reason', 'Vui lòng cung cấp lý do hủy nếu chọn trạng thái "Hủy đơn".');
             });
         }
-        
+
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
@@ -670,37 +670,48 @@ class OrderController extends Controller
 
     public function cancel(Request $request, Order $order)
     {
+        Log::info('--- Bắt đầu xử lý hủy đơn hàng ---');
+        Log::info('Order ID: ' . $order->id);
+        Log::info('Trạng thái hiện tại của đơn hàng: ' . $order->order_status);
+        Log::info('Request data (cancel): ', $request->all());
+
         try {
+            // SỬA Ở ĐÂY: Đảm bảo chỉ có 'required' và 'max:1000'
             $validatedData = $request->validate([
-                'cancel_reason' => 'required|string|min:10|max:1000',
+                'cancel_reason' => 'required|string|max:1000', // Không có min:10 ở đây
             ], [
                 'cancel_reason.required' => 'Vui lòng nhập lý do hủy đơn hàng.',
-                'cancel_reason.min' => 'Lý do hủy phải có ít nhất :min ký tự.',
                 'cancel_reason.max' => 'Lý do hủy không được vượt quá :max ký tự.',
             ]);
+            Log::info('Lý do hủy đã xác thực: ' . $validatedData['cancel_reason']);
 
-            // Kiểm tra xem đơn hàng có thể hủy không (sử dụng phương thức canBeCancelled từ Order model)
-            if (method_exists($order, 'canBeCancelled') && !$order->canBeCancelled()) {
-                // Return JSON response for AJAX
+            // Kiểm tra xem đơn hàng có thể hủy không
+            $canBeCancelled = $order->canBeCancelled();
+            Log::info('Kết quả canBeCancelled(): ' . ($canBeCancelled ? 'true' : 'false'));
+
+            if (!$canBeCancelled) {
+                Log::warning("Đơn hàng {$order->id} không thể hủy vì trạng thái hiện tại: {$order->order_status}");
                 return response()->json(['success' => false, 'message' => 'Đơn hàng này không thể hủy.'], 400);
             }
 
             // Kiểm tra nếu đơn hàng đã ở trạng thái 'Hủy đơn'
             if ($order->order_status === 'Hủy đơn') {
+                Log::warning("Đơn hàng {$order->id} đã được hủy trước đó.");
                 return response()->json(['success' => false, 'message' => 'Đơn hàng này đã được hủy trước đó.'], 400);
             }
 
             $order->order_status = 'Hủy đơn'; // Cập nhật trạng thái enum
             $order->cancel_reason = $validatedData['cancel_reason'];
             $order->save();
+            Log::info("Đơn hàng {$order->id} đã được hủy thành công.");
 
             return response()->json(['success' => true, 'message' => 'Đơn hàng #' . ($order->sku ?? $order->id) . ' đã được hủy thành công.']);
-
         } catch (ValidationException $e) {
             Log::warning("Validation error during order cancellation for order {$order->id}: " . json_encode($e->errors()));
             return response()->json(['success' => false, 'message' => 'Lỗi xác thực.', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
-            Log::error("Lỗi khi hủy đơn hàng {$order->id}: " . $e->getMessage());
+            Log::error("LỖI NGHIÊM TRỌNG khi hủy đơn hàng {$order->id}: " . $e->getMessage());
+            Log::error("Stack trace: " . $e->getTraceAsString());
             return response()->json(['success' => false, 'message' => 'Đã xảy ra lỗi khi hủy đơn hàng.'], 500);
         }
     }

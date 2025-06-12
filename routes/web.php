@@ -306,7 +306,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/destroy/{id}', [OrderController::class, 'destroy'])->name('destroy');
         Route::get('/trash', [OrderController::class, 'trash'])->name('trash');
         Route::post('/restore/{id}', [OrderController::class, 'restore'])->name('restore');
-        Route::patch('{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
+        Route::post('{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
 
     });
 });
