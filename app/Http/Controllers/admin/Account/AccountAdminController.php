@@ -46,11 +46,11 @@ class AccountAdminController extends Controller
     {
         $admins = User::with([
             'profile',
-            'comments' => function ($query) {
+            'comments.product' => function ($query) {
                 $query->withTrashed()->orderBy('created_at', 'desc');
             },
-            'orders' => function ($query) {
-                $query->with('status') // Eager load quan hệ 'status' (trỏ đến OrderStatus)
+            'orders.items.product' => function ($query) {
+                $query // Eager load quan hệ 'status' (trỏ đến OrderStatus)
                     ->orderBy('created_at', 'desc')
                     ->take(10);
             },
@@ -63,55 +63,9 @@ class AccountAdminController extends Controller
         return view('admin.account.admin.detailAccAdmin', compact('admins'));
     }
 
-    public function createAdmin()
-    {
-        return view('admin.account.admin.createAdmin');
-    }
+    
 
-    public function storeAdmin(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6|confirmed',
-            'role' => 'required|in:admin,client',
-            'status' => 'required|boolean',
-            'phone' => 'nullable|string',
-            'address' => 'nullable|string',
-            'gender' => 'required|in:nam,nu,khac',
-            'user_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
-
-        $admins = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-            'status' => $request->status,
-        ]);
-
-        $profile = new UserProfile([
-            'phone' => $request->phone,
-            'address' => $request->address,
-            'gender' => $request->gender,
-        ]);
-
-        if ($request->hasFile('user_image')) {
-
-            $image = $request->file('user_image');
-            $filename = time() . '_' . Str::slug($admins->name) . '.' . $image->getClientOriginalExtension();
-
-            // Lưu ảnh mới
-            $path = $image->storeAs('images/users', $filename, 'public');
-
-            // Gán đường dẫn vào DB
-            $profile->user_image = $path;
-        }
-
-        $admins->profile()->save($profile);
-
-        return redirect()->route('admin.account.listAdmins')->with('success', 'Tạo quản trị viên thành công.');
-    }
+    
 
     public function editAdmin($id)
     {
