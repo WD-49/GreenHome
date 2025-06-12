@@ -12,10 +12,23 @@ class ReviewController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index( Request $request)
     {
         //
-        $reviews = Review::with(['user', 'productVariant'])->paginate(10);
+     
+
+$reviews = Review::query();
+
+if ($request->filled('rating')) {
+    $reviews->where('rating', $request->rating);
+}
+
+if ($request->filled('status')) {
+    $reviews->where('status', $request->status);
+}
+
+$reviews = $reviews->with(['user', 'productVariant'])->paginate(10);
+
 
         // Test: dd($reviews->pluck('rating'));
 

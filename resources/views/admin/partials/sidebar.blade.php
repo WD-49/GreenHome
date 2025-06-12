@@ -58,6 +58,7 @@
                     </li>
                     <li>
                         <a class='tp-link' href="{{ url('auth-register.html') }}">Quản trị</a>
+
                     </li>
                 </ul>
             </div>
@@ -88,6 +89,7 @@
             </div>
         </li>
 
+
         <li>
             <a href="#sidebarExpages" data-bs-toggle="collapse">
                 <i data-feather="calendar"></i>
@@ -113,7 +115,14 @@
             </a>
         </li>
         <li>
-            <a class='tp-link' href="{{ url('calendar.html') }}">
+            <a class='tp-link' href='{{ route('admin.comments.index') }}'>
+    <i data-feather="message-square"></i>
+    <span> Bình luận </span>
+</a>
+
+        </li>
+        <li>
+            <a class='tp-link' href='{{ route('admin.reviews.index') }}'>
                 <i data-feather="calendar"></i>
                 <span> Đánh giá </span>
             </a>
@@ -130,10 +139,10 @@
             <div class="collapse" id="sidebarBaseui">
                 <ul class="nav-second-level">
                     <li>
-                        <a class='tp-link' href="{{ url('ui-accordions.html') }}">danh sách</a>
+                        <a class='tp-link' href='{{ route('admin.discount.index') }}'>Danh sách</a>
                     </li>
                     <li>
-                        <a class='tp-link' href="{{ url('ui-alerts.html') }}">lịch sử sử dụng</a>
+                        <a class='tp-link' href='{{ route('admin.discount.history') }}'>Lịch sử dùng mã</a>
                     </li>
                 </ul>
             </div>
