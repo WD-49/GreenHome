@@ -54,10 +54,10 @@
             <div class="collapse" id="sidebarAuth">
                 <ul class="nav-second-level">
                     <li>
-                        <a class='tp-link' href='auth-register.html'>Người dùng</a>
+                        <a class='tp-link' href='{{ route('admin.account.listUsers') }}'>Người dùng</a>
                     </li>
                     <li>
-                        <a class='tp-link' href='auth-register.html'>Quản trị</a>
+                        <a class='tp-link' href='{{ route('admin.account.listAdmins') }}'>Quản trị</a>
                     </li>
                 </ul>
             </div>
@@ -88,6 +88,7 @@
 </li>
 
 
+
         <li>
             <a href="#sidebarExpages" data-bs-toggle="collapse">
                 <i data-feather="calendar"></i>
@@ -114,7 +115,7 @@
 
         </li>
         <li>
-            <a class='tp-link' href='calendar.html'>
+            <a class='tp-link' href='{{ route('admin.reviews.index') }}'>
                 <i data-feather="calendar"></i>
                 <span> Đánh giá </span>
             </a>
@@ -131,10 +132,10 @@
             <div class="collapse" id="sidebarBaseui">
                 <ul class="nav-second-level">
                     <li>
-                        <a class='tp-link' href='ui-accordions.html'>danh sách</a>
+                        <a class='tp-link' href='{{ route('admin.discount.index') }}'>Danh sách</a>
                     </li>
                     <li>
-                        <a class='tp-link' href='ui-alerts.html'>lịch sử sử dụng</a>
+                        <a class='tp-link' href='{{ route('admin.discount.history') }}'>Lịch sử dùng mã</a>
                     </li>
                 </ul>
             </div>

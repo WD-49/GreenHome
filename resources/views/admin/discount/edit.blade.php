@@ -113,6 +113,12 @@
                 <input type="number" name="max_order_value" class="form-control" value="{{ old('max_order_value', $discount->max_order_value) }}">
                 @error('max_order_value') <div class="text-danger">{{ $message }}</div> @enderror
             </div>
+     
+             <div class="mb-3">
+                <label class="form-label">Giá trị giảm tối đa</label>
+                <input type="number" name="max_discount" class="form-control" value="{{ old('max_discount', $discount->max_discount) }}">
+                @error('max_discount') <div class="text-danger">{{ $message }}</div> @enderror
+            </div>
         </div>
 
         {{-- Cột phải --}}
