@@ -18,18 +18,20 @@
             @csrf
             <div id="categories-container">
                 <div class="row mb-3 category-row align-items-center">
-                    <div class="col-md-5">
+                    <div class="col-md-12">
                         <label for="name" class="form-label">Tên danh mục</label>
                         <input type="text" name="name[]" class="form-control form-control-lg"
                             placeholder="Tên danh mục">
                     </div>
-                    <div class="col-md-5">
+                    <div class="col-md-12">
                         <label for="description" class="form-label">Mô tả</label>
                         <textarea name="description[]" class="form-control ckeditor" placeholder="Mô tả"></textarea>
                     </div>
-                    <div class="col-md-2 text-center">
-                        <button type="button" class="btn btn-danger btn-remove" onclick="removeCategory(this)"
-                            title="Xóa danh mục"></button>
+                    <div class="col-md-12 p-2">
+                        <button type="button" class="btn btn-outline-danger btn-lg"
+                            onclick="removeCategory(this)">
+                            Xóa 
+                        </button>
                     </div>
                 </div>
             </div>
@@ -75,29 +77,23 @@
         }
 
         .category-row .btn-remove {
-            font-size: 16px;
-            width: 40px;
-            height: 40px;
-            padding: 0;
-            margin-top: 30px;
+            font-size: 10px;
+            padding: 10px 20px;
             border-radius: 8px;
-            background-color: #e74c3c;
-            border: none;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            border: 2px solid #e74c3c;
+            background-color: transparent;
+            color: #e74c3c;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        .category-row .btn-remove:hover {
-            background-color: #c0392b;
-            transform: scale(1.1);
+        .category-row .btn-remove {
+            background-color: #ff1900;
+            color: #fff;
         }
+
 
         .category-row .btn-remove::before {
-            content: '-';
+            content: '';
             font-size: 22px;
             font-weight: bold;
         }
@@ -120,7 +116,7 @@
                 align-items: flex-start;
             }
 
-            .col-md-5 {
+            .col-md-12 {
                 width: 100%;
                 margin-bottom: 10px;
             }
@@ -162,17 +158,20 @@
             var newRow = document.createElement('div');
             newRow.classList.add('row', 'mb-3', 'category-row', 'align-items-center');
             newRow.innerHTML = `
-                <div class="col-md-5">
-                    <label class="form-label">Tên danh mục</label>
-                    <input type="text" name="name[]" class="form-control form-control-lg" placeholder="Tên danh mục">
-                </div>
-                <div class="col-md-5">
-                    <label class="form-label">Mô tả</label>
-                    <textarea name="description[]" class="form-control ckeditor" placeholder="Mô tả"></textarea>
-                </div>
-                <div class="col-md-2 text-center">
-                    <button type="button" class="btn btn-danger btn-remove" onclick="removeCategory(this)" title="Xóa danh mục"></button>
-                </div>
+                <div class="col-md-12">
+                        <label for="name" class="form-label">Tên danh mục</label>
+                        <input type="text" name="name[]" class="form-control form-control-lg"
+                            placeholder="Tên danh mục">
+                    </div>
+                    <div class="col-md-12">
+                        <label for="description" class="form-label">Mô tả</label>
+                        <textarea name="description[]" class="form-control ckeditor" placeholder="Mô tả"></textarea>
+                    </div>
+                    <div class="col-md-12 p-2">
+                        <button type="button" class="btn btn-outline-danger btn-lg"
+                            onclick="removeCategory(this)">
+                            Xóa 
+                        </button>
             `;
             container.appendChild(newRow);
             initializeEditors();

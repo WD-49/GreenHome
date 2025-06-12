@@ -5,7 +5,7 @@
 @section('content')
     <style>
         .payment-method-form-container {
-            max-width: 700px;
+            max-width: 100%;
             margin: 40px auto;
             background: #fff;
             padding: 30px;
@@ -65,7 +65,7 @@
         </form>
     </div>
 
-    {{-- CKEditor Script --}}
+    {{-- CKEditor --}}
     <script src="https://cdn.ckeditor.com/ckeditor5/35.0.1/classic/ckeditor.js"></script>
     <script>
         ClassicEditor

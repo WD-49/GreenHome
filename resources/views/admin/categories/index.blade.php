@@ -1,217 +1,218 @@
 @extends('layouts.admin')
 
-@section('title')
-    {{ $title ?? 'Danh sách danh mục' }}
-@endsection
-
 @section('content')
     <style>
-        .nav-pills .nav-link.active {
-            font-weight: 700;
-            border-radius: 0 !important;
-            background-color: #f0f8ff !important;
-            color: #0768e8;
+        .section-header {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: #1d4583;
         }
 
-        .table th,
+        .card-table {
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .table th {
+            background: #1c4077;
+            color: #fff;
+            vertical-align: middle;
+            text-align: center;
+        }
+
         .table td {
             vertical-align: middle;
+            text-align: center;
         }
 
-        .btn-primary {
-            background-color: #0066cc;
-            border-color: #005bb5;
+        .btn-custom {
+            font-weight: 600;
+            border-radius: 8px;
         }
 
-        .btn-primary:hover {
-            background-color: #005bb5;
-            border-color: #004a94;
+        .filter-dropdown {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
         }
 
-        .pagination .page-item.active .page-link {
-            background-color: #0768e8;
-            border-color: #0768e8;
+        .table-actions a,
+        .table-actions form {
+            display: inline-block;
         }
 
-        .pagination .page-link {
-            border: 1px solid #dee2e6;
+        .table-actions button {
+            border-radius: 6px;
         }
     </style>
 
-    <div class="row">
-        <h2 class="text-center mb-4">{{ $title ?? 'Danh sách danh mục' }}</h2>
-        <!-- Tabs Trạng thái -->
+    <div class="container-fluid">
+        <div class="section-header">Quản lý danh mục</div>
+
+        {{-- Tabs trạng thái --}}
         <ul class="nav nav-pills mb-3">
             <li class="nav-item">
                 <a class="nav-link {{ request('status') == null ? 'active' : '' }}"
-                    href="{{ route('admin.categories.index') }}">
+                   href="{{ route('admin.categories.index') }}">
                     Tất cả ({{ $categoryAll->count() }})
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link {{ request('status') == 'active' ? 'active' : '' }}"
-                    href="{{ route('admin.categories.index', ['status' => 'active']) }}">
+                   href="{{ route('admin.categories.index', ['status' => 'active']) }}">
                     Đang hoạt động ({{ $categoryActive->count() }})
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link {{ request('status') == 'deleted' || request()->routeIs('admin.categories.trash') ? 'active' : '' }}"
-                    href="{{ route('admin.categories.trash') }}">
+                   href="{{ route('admin.categories.trash') }}">
                     Thùng rác ({{ $categoryTrashed->count() }})
                 </a>
             </li>
         </ul>
 
-        <div class="card">
-            <div class="card-body">
-                <div class="d-md-flex align-items-center mb-3">
-                    <div>
-                        <h4 class="card-title mb-1">Danh sách danh mục</h4>
-                        <p class="card-subtitle">Quản lý các danh mục trong hệ thống</p>
-                    </div>
-                    <div class="ms-auto mt-3 mt-md-0">
-                        <a href="{{ route('admin.categories.create') }}" class="btn btn-primary">
-                            <i class="fa-solid fa-plus me-1"></i> Thêm danh mục
-                        </a>
-                        <button class="btn btn-outline-secondary ms-2" data-bs-toggle="collapse"
-                            data-bs-target="#filterForm">
-                            <i class="fas fa-filter me-1"></i> Bộ lọc
-                        </button>
-                    </div>
+        {{-- Bộ lọc nâng cao --}}
+        <div class="mb-4">
+            <button class="btn btn-outline-primary btn-custom" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
+                Bộ lọc nâng cao
+            </button>
+            <div class="collapse mt-3" id="filterCollapse">
+                <div class="filter-dropdown">
+                    <form method="GET" action="{{ route('admin.categories.index') }}" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="search" class="form-label">Tên danh mục</label>
+                            <input type="text" name="search" class="form-control" placeholder="Nhập tên danh mục"
+                                   value="{{ request('search') }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="status" class="form-label">Trạng thái</label>
+                            <select name="status" class="form-select">
+                                <option value="">-- Tất cả --</option>
+                                <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Đang hoạt động</option>
+                                <option value="deleted" {{ request('status') == 'deleted' ? 'selected' : '' }}>Đã xóa</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Ngày tạo</label>
+                            <div class="input-group">
+                                <span class="input-group-text">Từ</span>
+                                <input type="date" name="min_date" class="form-control"
+                                       value="{{ request('min_date') }}">
+                                <span class="input-group-text">đến</span>
+                                <input type="date" name="max_date" class="form-control"
+                                       value="{{ request('max_date') }}">
+                            </div>
+                        </div>
+                        <div class="col-12 text-end mt-3">
+                            <button type="submit" class="btn btn-primary btn-custom">Tìm kiếm</button>
+                            <a href="{{ route('admin.categories.index') }}" class="btn btn-secondary btn-custom">Reset</a>
+                        </div>
+                    </form>
                 </div>
+            </div>
+        </div>
 
-                <div class="collapse" id="filterForm">
-                    <div class="card card-body mb-4">
-                        <form method="GET" action="{{ route('admin.categories.index') }}" class="row g-3">
-                            <div class="col-md-6">
-                                <label for="search" class="form-label">Tên danh mục</label>
-                                <input type="text" name="search" id="search" class="form-control"
-                                    placeholder="Nhập tên danh mục" value="{{ request('search') }}">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="status" class="form-label">Trạng thái</label>
-                                <select name="status" id="status" class="form-select">
-                                    <option value="">-- Tất cả --</option>
-                                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Đang hoạt
-                                        động</option>
-                                    <option value="deleted" {{ request('status') == 'deleted' ? 'selected' : '' }}>Đã xóa
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="col-md-12">
-                                <label class="form-label">Ngày tạo</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light">Từ</span>
-                                    <input type="date" name="min_date" class="form-control"
-                                        value="{{ request('min_date') }}">
-                                    <span class="input-group-text bg-light">đến</span>
-                                    <input type="date" name="max_date" class="form-control"
-                                        value="{{ request('max_date') }}">
-                                </div>
-                            </div>
-                            <div class="col-md-12 d-flex justify-content-end gap-2">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-search me-1"></i> Tìm kiếm
-                                </button>
-                                <a href="{{ route('admin.categories.index') }}" class="btn btn-warning">
-                                    <i class="fas fa-sync me-1"></i> Làm mới
-                                </a>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+        {{-- Nút thêm mới --}}
+        <div class="mb-4 text-end">
+            <a href="{{ route('admin.categories.create') }}" class="btn btn-success btn-custom">
+                <i data-feather="plus" class="me-1"></i> Thêm danh mục
+            </a>
+        </div>
 
-                <div class="table-responsive mt-4">
-                    <table class="table table-striped table-hover align-middle">
-                        <thead class="table-light">
+        {{-- Bảng danh sách --}}
+        <div class="card card-table">
+            <div class="table-responsive">
+                <table class="table table-bordered mb-0">
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Tên danh mục</th>
+                            <th>Slug</th>
+                            <th>Mô tả</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày tạo</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($categories as $index => $category)
                             <tr>
-                                <th class="text-muted">ID</th>
-                                <th class="text-muted">Tên danh mục</th>
-                                <th class="text-muted">Slug</th>
-                                <th class="text-muted">Mô tả</th>
-                                <th class="text-muted">Trạng thái</th>
-                                <th class="text-muted">Ngày tạo</th>
-                                <th class="text-muted text-end">Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($categories as $category)
-                                <tr>
-                                    <td>{{ $category->id }}</td>
-                                    <td>{{ $category->name }}</td>
-                                    <td>{{ $category->slug }}</td>
-                                    <td>{!! $category->description !!}</td>
-                                    <td>
-                                        <span class="badge {{ $category->deleted_at ? 'bg-danger' : 'bg-success' }}">
-                                            {{ $category->deleted_at ? 'Đã xóa' : 'Đang hoạt động' }}
-                                        </span>
-                                    </td>
-                                    <td>{{ $category->created_at->format('d/m/Y') }}</td>
-                                    <td class="text-end">
+                                <td>{{ ($categories->currentPage() - 1) * $categories->perPage() + $loop->index + 1 }}</td>
+                                <td>{{ $category->name }}</td>
+                                <td>{{ $category->slug }}</td>
+                                <td>{!! $category->description !!}</td>
+                                <td>
+                                    <span class="badge {{ $category->deleted_at ? 'bg-secondary' : 'bg-success' }}">
+                                        {{ $category->deleted_at ? 'Đã xóa' : 'Đang hoạt động' }}
+                                    </span>
+                                </td>
+                                <td>{{ $category->created_at ? $category->created_at->format('d/m/Y') : 'Không rõ' }}</td>
+                                <td class="position-relative">
+                                    <div class="d-flex justify-content-center align-items-center" style="height: 100%;">
                                         <div class="dropdown">
-                                            <button class="btn btn-light btn-sm" type="button"
-                                                id="dropdownMenuButton{{ $category->id }}" data-bs-toggle="dropdown"
+                                            <button type="button"
+                                                class="btn btn-sm border border-primary text-primary bg-white rounded-circle d-flex align-items-center justify-content-center p-0"
+                                                style="width: 36px; height: 36px;" data-bs-toggle="dropdown"
                                                 aria-expanded="false">
-                                                <i class="fas fa-ellipsis-v"></i>
+                                                <i data-feather="more-horizontal" style="width: 20px; height: 20px;"></i>
                                             </button>
-                                            <ul class="dropdown-menu dropdown-menu-end"
-                                                aria-labelledby="dropdownMenuButton{{ $category->id }}">
+
+                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm rounded-3 px-2 py-2" style="min-width: 140px;">
                                                 <li>
-                                                    <a class="dropdown-item"
-                                                        href="{{ route('admin.categories.show', $category->slug) }}">
-                                                        Xem chi tiết
+                                                    <a class="dropdown-item d-flex align-items-center gap-2 text-primary"
+                                                       href="{{ route('admin.categories.show', $category->slug) }}">
+                                                        <i data-feather="eye" width="16" height="16"></i>
+                                                        <span>Xem</span>
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <a class="dropdown-item"
-                                                        href="{{ route('admin.categories.edit', $category->slug) }}">
-                                                        Chỉnh sửa
+                                                    <a class="dropdown-item d-flex align-items-center gap-2 text-warning"
+                                                       href="{{ route('admin.categories.edit', $category->slug) }}">
+                                                        <i data-feather="edit-3" width="16" height="16"></i>
+                                                        <span>Sửa</span>
                                                     </a>
                                                 </li>
                                                 <li>
                                                     <form action="{{ route('admin.categories.destroy', $category->slug) }}"
-                                                        method="POST"
-                                                        onsubmit="return confirm('Bạn có chắc chắn muốn bỏ danh mục này vào thùng rác không?')">
+                                                          method="POST"
+                                                          onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục này?')">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button class="dropdown-item text-danger" type="submit">
-                                                            Xóa danh mục
+                                                        <button type="submit"
+                                                                class="dropdown-item d-flex align-items-center gap-2 text-danger">
+                                                            <i data-feather="trash" width="16" height="16"></i>
+                                                            <span>Xóa</span>
                                                         </button>
                                                     </form>
                                                 </li>
                                             </ul>
                                         </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="7" class="text-center">Không tìm thấy danh mục nào.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- PHÂN TRANG -->
-                @if ($categories->lastPage() > 1)
-                    <nav aria-label="Page navigation example">
-                        <ul class="pagination justify-content-end mt-3 mb-0">
-                            <li class="page-item {{ $categories->onFirstPage() ? 'disabled' : '' }}">
-                                <a class="page-link" href="{{ $categories->previousPageUrl() }}">Previous</a>
-                            </li>
-                            @for ($i = 1; $i <= $categories->lastPage(); $i++)
-                                <li class="page-item {{ $i == $categories->currentPage() ? 'active' : '' }}">
-                                    <a class="page-link" href="{{ $categories->url($i) }}">{{ $i }}</a>
-                                </li>
-                            @endfor
-                            <li class="page-item {{ !$categories->hasMorePages() ? 'disabled' : '' }}">
-                                <a class="page-link" href="{{ $categories->nextPageUrl() }}">Next</a>
-                            </li>
-                        </ul>
-                    </nav>
-                @endif
-
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="text-center text-danger">Không tìm thấy danh mục nào.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
+        </div>
+
+        {{-- Phân trang --}}
+        <div class="d-flex justify-content-center mt-4">
+            {{ $categories->appends(request()->query())->links('pagination::bootstrap-4') }}
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        feather.replace();
+    </script>
+@endpush

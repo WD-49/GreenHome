@@ -18,7 +18,7 @@
         <!-- Mô tả danh mục -->
         <div class="col-md-12 mb-4">
             <label class="form-label">Mô tả danh mục</label>
-            <p>{{ $category->description }}</p>
+            <p>{!! $category->description !!}</p>
         </div>
 
         <!-- Bộ lọc tìm kiếm -->
