@@ -24,7 +24,7 @@
             </div>
             <div class="ms-auto mt-3 mt-md-0">
                 <a href="{{ route('admin.blogs.create') }}" class="btn btn-primary">
-                    <i class="fa-solid fa-plus me-1"></i> Thêm mới
+                    <i class="fa-solid fa-plus me-1"></i> Tạo bài viết
                 </a>
             </div>
         </div>
@@ -39,10 +39,8 @@
                     <tr>
                         <th>STT</th>
                         <th>Tiêu đề</th>
-                        <th>Slug</th>
                         <th>Trạng thái</th>
                         <th>Thể loại</th>
-                        <th>Thumbnail</th>
                         <th>Ngày tạo</th>
                         <th>Thao tác</th>
                     </tr>
@@ -52,39 +50,31 @@
                         <tr>
                             <td>{{ $key + 1 }}</td>
                             <td>{{ $blog->title }}</td>
-                            <td>{{ $blog->slug }}</td>
                             <td>
                                 @if ($blog->status == 1)
-                                    <span class="badge bg-success">Hiển thị</span>
+                                    <span class="badge bg-success">Đang hiển thị</span>
                                 @else
-                                    <span class="badge bg-secondary">Ẩn</span>
+                                    <span class="badge bg-secondary">Bản nháp</span>
                                 @endif
                             </td>
                             <td>{{ $blog->category->name ?? 'Chưa phân loại' }}</td>
-                            <td>
-                                @if ($blog->thumbnail)
-                                    <img src="{{ asset('storage/' . $blog->thumbnail) }}" alt="thumbnail" width="60">
-                                @else
-                                    <span class="text-muted">Không có</span>
-                                @endif
-                            </td>
                             <td>{{ $blog->created_at->format('d/m/Y') }}</td>
                             <td class="d-flex">
                                 <div class="dropdown">
                                     <button class="btn btn-light btn-sm me-2" type="button" id="dropdownMenuButton"
                                         data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="fas fa-ellipsis-v mx-auto"></i>
+                                        <i class="fas fa-ellipsis-v mx-auto">...</i>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
                                         <li>
                                             <a class="dropdown-item"
-                                                href="{{ route('admin.blogs.show', $id = $blog->id) }}">
+                                                href="{{ route('admin.blogs.show', $blog->id) }}">
                                                 Chi tiết
                                             </a>
                                         </li>
                                         <li>
                                             <a class="dropdown-item"
-                                                href="{{ route('admin.blogs.edit', $id = $blog->id) }}">
+                                                href="{{ route('admin.blogs.edit', $blog->id) }}">
                                                 Chỉnh sửa
                                             </a>
                                         </li>
@@ -106,6 +96,7 @@
                     @endforeach
                 </tbody>
             </table>
+        {{$blogs->links()}} 
         @endif
     </div>
 @endsection

@@ -64,29 +64,29 @@
         </li>
 
         <li>
-            <a href="" data-bs-toggle="collapse">
-                <i data-feather="package"></i>
+    <a href="#sidebarError" data-bs-toggle="collapse">
+        <i data-feather="package"></i>
+        <span> Sản phẩm </span>
+        <span class="menu-arrow"></span>
+    </a>
+    <div class="collapse" id="sidebarError">
+        <ul class="nav-second-level">
+            <li>
+                <a class="tp-link" href="{{ route('admin.products.index') }}">Danh sách sản phẩm</a>
+            </li>
+            <li>
+                <a class="tp-link" href="{{ route('admin.categories.index') }}">Danh mục</a>
+            </li>
+            <li>
+                <a class="tp-link" href="{{ route('admin.brands.index') }}">Thương hiệu</a>
+            </li>
+            <li>
+                <a class="tp-link" href="{{ route('admin.attribute.index') }}">Thuộc tính</a>
+            </li>
+        </ul>
+    </div>
+</li>
 
-                <span> Sản phẩm </span>
-                <span class="menu-arrow"></span>
-            </a>
-            <div class="collapse" id="sidebarError">
-                <ul class="nav-second-level">
-                    <li>
-                        <a class='tp-link' href='{{ route('admin.products.index') }}'>Danh sách sản phẩm</a>
-                    </li>
-                    <li>
-                        <a class='tp-link' href='{{ route('admin.categories.index') }}'>Danh mục</a>
-                    </li>
-                    <li>
-                        <a class='tp-link' href='{{ route('admin.brands.index') }}'>Thương hiệu</a>
-                    </li>
-                    <li>
-                        <a class='tp-link' href='{{ route('admin.attribute.index') }}'>Thuộc tính</a>
-                    </li>
-                </ul>
-            </div>
-        </li>
 
         <li>
             <a href="#sidebarExpages" data-bs-toggle="collapse">
@@ -110,6 +110,12 @@
             <a class='tp-link' href='calendar.html'>
                 <i data-feather="calendar"></i>
                 <span> Bình luận </span>
+            </a>
+        </li>
+        <li>
+            <a class='tp-link' href='{{route('admin.blogs.index')}}'>
+                <i data-feather="calendar"></i>
+                <span> Bài viết </span>
             </a>
         </li>
         <li>
