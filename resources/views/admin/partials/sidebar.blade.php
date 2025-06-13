@@ -122,7 +122,8 @@
             </a>
         </li>
         <li>
-            <a class='tp-link' href='calendar.html'>
+            <a class='tp-link' href='
+            {{ route('admin.reviews.index') }}'>
                 <i data-feather="calendar"></i>
                 <span> Đánh giá </span>
             </a>

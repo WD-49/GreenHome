@@ -139,7 +139,7 @@
                     'Ngày kết thúc' => \Carbon\Carbon::parse($discount->end_date)->format('d/m/Y H:i'),
                     'Giá trị đơn hàng tối đa' => number_format($discount->max_order_value, 0) . ' VNĐ',
                     'Giá trị đơn hàng tối thiểu' => number_format($discount->min_order_value, 0) . ' VNĐ',
-                    'Giá trị giảm tối đa' => number_format($discount->max_discount_value, 0) . ' VNĐ',
+                    'Giá trị giảm tối đa' => number_format($discount->max_discount, 0) . ' VNĐ',
                     'Số lượng mã' => $discount->quantity,
                     'Giới hạn mỗi người dùng' => $discount->user_usage_limit,
                     'Áp dụng cho tất cả sản phẩm' => $discount->applies_to_all_products ? 'Có' : 'Không',
@@ -148,7 +148,6 @@
                 $half = ceil(count($fields) / 2);
                 $leftFields = array_slice($fields, 0, $half, true);
                 $rightFields = array_slice($fields, $half, null, true);
-
             @endphp
             <div class="row gx-5">
                 <div class="col-md-6">
@@ -159,11 +158,11 @@
                         </div>
                     @endforeach
 
-                {{-- @if (!$discount->applies_to_all_products && $products && count($products)) --}}
-    {{-- <div class="discount-row mt-3">
+                    {{-- @if (!$discount->applies_to_all_products && $products && count($products)) --}}
+                    {{-- <div class="discount-row mt-3">
         <label class="fw-semibold mb-3 d-block text-muted">Sản phẩm áp dụng:</label> --}}
 
-        {{-- <div class="table-responsive" style="max-width: 500px;">
+                    {{-- <div class="table-responsive" style="max-width: 500px;">
             <table class="table align-middle border mb-0 shadow-sm rounded-4 overflow-hidden"
                    style="border-collapse: separate; border-spacing: 0; border-radius: 12px;">
                 <thead style="background-color: #e9f0ff;" class="text-dark fw-bold text-center">
@@ -182,8 +181,8 @@
                 </tbody>
             </table>
         </div> --}}
-    {{-- </div> --}}
-{{-- @endif --}}
+                    {{-- </div> --}}
+                    {{-- @endif --}}
 
 
 
@@ -209,34 +208,35 @@
                 </div>
             </div>
         </div>
-         @if (!$discount->applies_to_all_products && $products && count($products))
-    <div class="card discount-card p-4 mt-5">
-        <h5 class="fw-bold mb-4" style="font-size: 1.6rem; color: #0d6efd;">
-            <i class="bi bi-bag-check-fill me-2"></i> Sản phẩm áp dụng mã giảm giá
-        </h5>
-        
-        <div class="table-responsive rounded-4 overflow-hidden">
-            <table class="table table-striped align-middle mb-0 shadow-sm"
-                   style="border-collapse: separate; border-spacing: 0;">
-                <thead class="text-white text-center" style="background: linear-gradient(to right, #0d6efd, #0056b3);">
-                    <tr>
-                        <th class="py-3 px-4" style="border-top-left-radius: 12px; width: 60px;">#</th>
-                        <th class="py-3 px-4" style="border-top-right-radius: 12px;">Tên sản phẩm</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($products as $index => $product)
-                        <tr style="transition: background 0.3s ease;" 
-                            class="{{ $index % 2 == 0 ? 'bg-white' : 'bg-light' }}">
-                            <td class="text-center fw-bold text-secondary py-3 px-4">{{ $index + 1 }}</td>
-                            <td class="fw-semibold text-dark py-3 px-4">{{ $product->name }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
-@endif
+        @if (!$discount->applies_to_all_products && $products && count($products))
+            <div class="card discount-card p-4 mt-5">
+                <h5 class="fw-bold mb-4" style="font-size: 1.6rem; color: #0d6efd;">
+                    <i class="bi bi-bag-check-fill me-2"></i> Sản phẩm áp dụng mã giảm giá
+                </h5>
+
+                <div class="table-responsive rounded-4 overflow-hidden">
+                    <table class="table table-striped align-middle mb-0 shadow-sm"
+                        style="border-collapse: separate; border-spacing: 0;">
+                        <thead class="text-white text-center"
+                            style="background: linear-gradient(to right, #0d6efd, #0056b3);">
+                            <tr>
+                                <th class="py-3 px-4" style="border-top-left-radius: 12px; width: 60px;">#</th>
+                                <th class="py-3 px-4" style="border-top-right-radius: 12px;">Tên sản phẩm</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($products as $index => $product)
+                                <tr style="transition: background 0.3s ease;"
+                                    class="{{ $index % 2 == 0 ? 'bg-white' : 'bg-light' }}">
+                                    <td class="text-center fw-bold text-secondary py-3 px-4">{{ $index + 1 }}</td>
+                                    <td class="fw-semibold text-dark py-3 px-4">{{ $product->name }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
 
 
         <div class="btn-group-custom">

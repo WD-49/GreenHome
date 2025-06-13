@@ -1,7 +1,8 @@
 @extends('layouts.admin')
 @section('title', 'Chi tiết người dùng')
 
-@push('styles')1233
+@push('styles')
+    1233
     <style>
         .avatar-xxl {
             width: 150px;
@@ -62,7 +63,7 @@
                 <h4 class="fs-18 fw-semibold m-0">Tài khoản <b>{{ $user->name }}</b></h4>
             </div>
 
-            
+
             <div class="ms-auto">
                 <a href="{{ route('admin.account.listUsers') }}" class="btn btn-sm btn-outline-secondary shadow-sm">
                     <i class="fas fa-arrow-left fa-sm text-gray-700 me-1"></i> Quay lại danh sách
@@ -324,10 +325,21 @@
                                                                 <tbody>
                                                                     @foreach ($order->items as $item)
                                                                         <tr>
-                                                                            <img src="{{ $item->product->image ? asset('storage/' . $item->product->image) : 'https://spencil.vn/wp-content/uploads/2024/11/chup-anh-san-pham-SPencil-Agency-1.jpg' }}"
-                                                                                alt="Product Image"
-                                                                                class="img-fluid rounded me-2"
-                                                                                style="width:50px; height:50px; object-fit:cover;">
+                                                                            @if ($item->product && $item->product->image)
+                                                                                <td>
+                                                                                    <img src="{{ asset('storage/' . $item->product->image) }}"
+                                                                                        alt="Product Image"
+                                                                                        class="img-fluid rounded me-2"
+                                                                                        style="width:50px; height:50px; object-fit:cover;">
+                                                                                </td>
+                                                                            @else
+                                                                                <td>
+                                                                                    <img src="https://spencil.vn/wp-content/uploads/2024/11/chup-anh-san-pham-SPencil-Agency-1.jpg"
+                                                                                        alt="Product Image"
+                                                                                        class="img-fluid rounded me-2"
+                                                                                        style="width:50px; height:50px; object-fit:cover;">
+                                                                                </td>
+                                                                            @endif
                                                                             <td></td>
                                                                             <td>
                                                                                 {{ $item->product_name }}
@@ -542,34 +554,33 @@
                                                                     <i class="fas fa-eye"></i>
                                                                 </button>
 
-                                                                
-                                                            </tr>
-                                                            <tr class="comment-detail-row"
-                                                                id="comment-detail-row-{{ $comment->id }}"
-                                                                style="display: none;">
-                                                                <td colspan="5">
-                                                                    <div class="comment-detail-content p-2 border-top"
-                                                                        id="comment-detail-content-{{ $comment->id }}">
-                                                                        <p class="text-center text-muted"><i
-                                                                                class="fas fa-spinner fa-spin"></i> Đang tải chi
-                                                                            tiết...</p>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                        @endforeach
-                                                    </tbody>
-                                                </table>
-                                            @else
-                                                <div class="alert alert-light text-center">Không có bình luận nào đang hoạt động.
-                                                </div>
-                                            @endif
-                                        </div>
-                                        <hr>
-                                        <div id="trashedCommentsSection" style="display: none;">
-                                            <h5 class="mb-3">Bình luận đã xóa</h5>
-                                            <div id="trashedCommentsContainer">
-                                                <p class="text-center text-muted">Nhấp vào "Thùng rác bình luận" để xem.</p>
+
+                                                        </tr>
+                                                        <tr class="comment-detail-row"
+                                                            id="comment-detail-row-{{ $comment->id }}"
+                                                            style="display: none;">
+                                                            <td colspan="5">
+                                                                <div class="comment-detail-content p-2 border-top"
+                                                                    id="comment-detail-content-{{ $comment->id }}">
+                                                                    <p class="text-center text-muted"><i
+                                                                            class="fas fa-spinner fa-spin"></i> Đang tải chi
+                                                                        tiết...</p>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        @else
+                                            <div class="alert alert-light text-center">Không có bình luận nào đang hoạt động.
                                             </div>
+                                        @endif
+                                    </div>
+                                    <hr>
+                                    <div id="trashedCommentsSection" style="display: none;">
+                                        <h5 class="mb-3">Bình luận đã xóa</h5>
+                                        <div id="trashedCommentsContainer">
+                                            <p class="text-center text-muted">Nhấp vào "Thùng rác bình luận" để xem.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -578,137 +589,138 @@
                     </div>
                 </div>
             </div>
-        @endsection
+        </div>
+    @endsection
 
-        @push('scripts')
-            {{-- <script src="path/to/third-party-library.js"></script>
+    @push('scripts')
+        {{-- <script src="path/to/third-party-library.js"></script>
     <script src="{{ asset('js/path/to/language-file-vi.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/@some-library/language-vi.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> --}}
 
-            {{-- DÒNG NÀY CÓ THỂ ĐÃ ĐƯỢC TẢI TRONG LAYOUT CHÍNH (layouts/admin.blade.php) --}}
-            {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> --}}
+        {{-- DÒNG NÀY CÓ THỂ ĐÃ ĐƯỢC TẢI TRONG LAYOUT CHÍNH (layouts/admin.blade.php) --}}
+        {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> --}}
 
-            {{-- ĐẢM BẢO CÁC ĐƯỜNG DẪN NÀY ĐÚNG VỚI ASSETS CỦA BẠN --}}
-            {{-- <script src="../../../assets/libs/jquery/jquery.min.js"></script>  <-- TRÙNG LẶP VỚI CDN JQUERY --}}
-            {{-- <script src="../../../assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script> <-- TRÙNG LẶP VỚI CDN BOOTSTRAP --}}
-            {{-- <script src="../../../assets/libs/simplebar/simplebar.min.js"></script>
+        {{-- ĐẢM BẢO CÁC ĐƯỜNG DẪN NÀY ĐÚNG VỚI ASSETS CỦA BẠN --}}
+        {{-- <script src="../../../assets/libs/jquery/jquery.min.js"></script>  <-- TRÙNG LẶP VỚI CDN JQUERY --}}
+        {{-- <script src="../../../assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script> <-- TRÙNG LẶP VỚI CDN BOOTSTRAP --}}
+        {{-- <script src="../../../assets/libs/simplebar/simplebar.min.js"></script>
     <script src="../../../assets/libs/node-waves/waves.min.js"></script>
     <script src="../../../assets/libs/waypoints/lib/jquery.waypoints.min.js"></script>
     <script src="../../../assets/libs/jquery.counterup/jquery.counterup.min.js"></script>
     <script src="../../../assets/libs/feather-icons/feather.min.js"></script> --}}
 
-            {{-- <script src="../../../assets/js/app.js"></script> --}}
+        {{-- <script src="../../../assets/js/app.js"></script> --}}
 
 
-            <script>
-                $(document).ready(function() {
-                    const csrfTokenGlobal = $('meta[name="csrf-token"]').attr('content');
+        <script>
+            $(document).ready(function() {
+                const csrfTokenGlobal = $('meta[name="csrf-token"]').attr('content');
 
-                    // Khởi tạo tất cả tooltips khi trang tải
-                    // Kiểm tra nếu Bootstrap đã được tải, thì mới khởi tạo tooltip
-                    if ($.fn.tooltip) {
-                        $('[data-bs-toggle="tooltip"]').tooltip();
-                    }
+                // Khởi tạo tất cả tooltips khi trang tải
+                // Kiểm tra nếu Bootstrap đã được tải, thì mới khởi tạo tooltip
+                if ($.fn.tooltip) {
+                    $('[data-bs-toggle="tooltip"]').tooltip();
+                }
 
-                    // --- HÀM TIỆN ÍCH (giữ nguyên hoặc điều chỉnh nếu cần) ---
-                    function updateActiveCommentUIAfterAction(commentId, statusText, statusClassBadge, actionsHtml) {
-                        /* ... */
-                    }
+                // --- HÀM TIỆN ÍCH (giữ nguyên hoặc điều chỉnh nếu cần) ---
+                function updateActiveCommentUIAfterAction(commentId, statusText, statusClassBadge, actionsHtml) {
+                    /* ... */
+                }
 
-                    function updateTotalCommentsBadgeOnTab(newCount) {
-                        /* ... */
-                    }
+                function updateTotalCommentsBadgeOnTab(newCount) {
+                    /* ... */
+                }
 
-                    function showTemporaryMessage(message, type = 'success', duration = 3500) {
-                        let alertClass = 'alert-success';
-                        if (type === 'error') alertClass = 'alert-danger';
-                        if (type === 'info') alertClass = 'alert-info';
-                        const messageId = 'temp-alert-' + Date.now();
-                        const messageDiv = $(
-                            `<div class="alert ${alertClass} alert-dismissible fade show m-2" role="alert" id="${messageId}" style="position:fixed; top: 60px; right: 20px; z-index: 1050; min-width: 250px; max-width: 400px;">
+                function showTemporaryMessage(message, type = 'success', duration = 3500) {
+                    let alertClass = 'alert-success';
+                    if (type === 'error') alertClass = 'alert-danger';
+                    if (type === 'info') alertClass = 'alert-info';
+                    const messageId = 'temp-alert-' + Date.now();
+                    const messageDiv = $(
+                        `<div class="alert ${alertClass} alert-dismissible fade show m-2" role="alert" id="${messageId}" style="position:fixed; top: 60px; right: 20px; z-index: 1050; min-width: 250px; max-width: 400px;">
                         ${message}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>`
-                        );
-                        // Try to prepend to #main-wrapper (if exists) or body
-                        const container = $('#main-wrapper').length ? $('#main-wrapper') : $('body');
-                        container.prepend(messageDiv);
-                        setTimeout(function() {
-                            $('#' + messageId).fadeOut(500, function() {
-                                $(this).remove();
-                            });
-                        }, duration);
-                    }
-
-                    // ++++ XỬ LÝ COLLAPSE CHO ĐƠN HÀNG (TRONG TAB "ĐƠN HÀNG") ++++
-                    // Bắt sự kiện khi một panel collapse ĐƯỢC KÍCH HOẠT (toggle)
-                    $('#pane-orders').on('show.bs.collapse', '.collapse', function() {
-                        const currentCollapseId = $(this).attr('id');
-
-                        // Đóng tất cả các panel khác trong cùng tab và reset icon của chúng
-                        $('#pane-orders .collapse').each(function() {
-                            if ($(this).attr('id') !== currentCollapseId && $(this).hasClass('show')) {
-                                $(this).collapse('hide');
-                                // Cập nhật icon của panel đang đóng
-                                $(this).prev('.card-body.cursor-pointer').find('.order-toggle-icon')
-                                    .removeClass('fa-chevron-up')
-                                    .addClass('fa-chevron-down');
-                            }
+                    );
+                    // Try to prepend to #main-wrapper (if exists) or body
+                    const container = $('#main-wrapper').length ? $('#main-wrapper') : $('body');
+                    container.prepend(messageDiv);
+                    setTimeout(function() {
+                        $('#' + messageId).fadeOut(500, function() {
+                            $(this).remove();
                         });
+                    }, duration);
+                }
 
-                        // Cập nhật icon của panel đang mở
-                        const cardBodyToggle = $(this).prev('.card-body.cursor-pointer');
-                        cardBodyToggle.find('.order-toggle-icon')
-                            .removeClass('fa-chevron-down')
-                            .addClass('fa-chevron-up');
+                // ++++ XỬ LÝ COLLAPSE CHO ĐƠN HÀNG (TRONG TAB "ĐƠN HÀNG") ++++
+                // Bắt sự kiện khi một panel collapse ĐƯỢC KÍCH HOẠT (toggle)
+                $('#pane-orders').on('show.bs.collapse', '.collapse', function() {
+                    const currentCollapseId = $(this).attr('id');
+
+                    // Đóng tất cả các panel khác trong cùng tab và reset icon của chúng
+                    $('#pane-orders .collapse').each(function() {
+                        if ($(this).attr('id') !== currentCollapseId && $(this).hasClass('show')) {
+                            $(this).collapse('hide');
+                            // Cập nhật icon của panel đang đóng
+                            $(this).prev('.card-body.cursor-pointer').find('.order-toggle-icon')
+                                .removeClass('fa-chevron-up')
+                                .addClass('fa-chevron-down');
+                        }
                     });
 
-                    // Bắt sự kiện khi một panel collapse ĐÓNG LẠI (ẩn)
-                    $('#pane-orders').on('hide.bs.collapse', '.collapse', function() {
-                        // Cập nhật icon của panel đang đóng
-                        const cardBodyToggle = $(this).prev('.card-body.cursor-pointer');
-                        cardBodyToggle.find('.order-toggle-icon')
-                            .removeClass('fa-chevron-up')
-                            .addClass('fa-chevron-down');
-                    });
+                    // Cập nhật icon của panel đang mở
+                    const cardBodyToggle = $(this).prev('.card-body.cursor-pointer');
+                    cardBodyToggle.find('.order-toggle-icon')
+                        .removeClass('fa-chevron-down')
+                        .addClass('fa-chevron-up');
+                });
+
+                // Bắt sự kiện khi một panel collapse ĐÓNG LẠI (ẩn)
+                $('#pane-orders').on('hide.bs.collapse', '.collapse', function() {
+                    // Cập nhật icon của panel đang đóng
+                    const cardBodyToggle = $(this).prev('.card-body.cursor-pointer');
+                    cardBodyToggle.find('.order-toggle-icon')
+                        .removeClass('fa-chevron-up')
+                        .addClass('fa-chevron-down');
+                });
 
 
-                    // ++++ AJAX CHO NÚT "THÙNG RÁC BÌNH LUẬN" ++++
-                    $('#toggleTrashedCommentsBtn').on('click', function() {
-                        const buttonSelf = $(this);
-                        const userId = buttonSelf.data('userId');
-                        const trashedSection = $('#trashedCommentsSection');
-                        const trashedContainer = $('#trashedCommentsContainer');
+                // ++++ AJAX CHO NÚT "THÙNG RÁC BÌNH LUẬN" ++++
+                $('#toggleTrashedCommentsBtn').on('click', function() {
+                    const buttonSelf = $(this);
+                    const userId = buttonSelf.data('userId');
+                    const trashedSection = $('#trashedCommentsSection');
+                    const trashedContainer = $('#trashedCommentsContainer');
 
-                        let urlFetchTrashedComments =
-                            "{{ route('admin.account.comment.account.trashedComments', ['user' => ':userId']) }}";
-                        urlFetchTrashedComments = urlFetchTrashedComments.replace(':userId', userId);
+                    let urlFetchTrashedComments =
+                        "{{ route('admin.account.comment.account.trashedComments', ['user' => ':userId']) }}";
+                    urlFetchTrashedComments = urlFetchTrashedComments.replace(':userId', userId);
 
-                        console.log('Fetching trashed comments from:', urlFetchTrashedComments);
+                    console.log('Fetching trashed comments from:', urlFetchTrashedComments);
 
-                        if (trashedSection.is(':visible')) {
-                            trashedSection.slideUp();
-                            buttonSelf.html('<i class="fas fa-trash"></i> Thùng rác bình luận');
-                            buttonSelf.removeClass('btn-danger').addClass('btn-outline-danger');
-                        } else {
-                            trashedContainer.html(
-                                '<p class="text-center my-3"><i class="fas fa-spinner fa-spin"></i> Đang tải...</p>'
-                            );
-                            trashedSection.slideDown();
-                            $.ajax({
-                                url: urlFetchTrashedComments,
-                                type: 'GET',
-                                dataType: 'json',
-                                success: function(response) {
-                                    let html = '';
-                                    if (response.comments && response.comments.length > 0) {
-                                        html +=
-                                            '<table class="table table-sm table-hover table-bordered">';
-                                        html +=
-                                            `<thead class="table-light"><tr><th>ID</th><th>Người gửi</th><th>Nội dung</th><th>Ngày xóa</th><th style="width: 10%;">Hành động</th></tr></thead><tbody>`;
-                                        response.comments.forEach(function(comment) {
-                                            html += `<tr id="trashed-comment-row-${comment.id}">
+                    if (trashedSection.is(':visible')) {
+                        trashedSection.slideUp();
+                        buttonSelf.html('<i class="fas fa-trash"></i> Thùng rác bình luận');
+                        buttonSelf.removeClass('btn-danger').addClass('btn-outline-danger');
+                    } else {
+                        trashedContainer.html(
+                            '<p class="text-center my-3"><i class="fas fa-spinner fa-spin"></i> Đang tải...</p>'
+                        );
+                        trashedSection.slideDown();
+                        $.ajax({
+                            url: urlFetchTrashedComments,
+                            type: 'GET',
+                            dataType: 'json',
+                            success: function(response) {
+                                let html = '';
+                                if (response.comments && response.comments.length > 0) {
+                                    html +=
+                                        '<table class="table table-sm table-hover table-bordered">';
+                                    html +=
+                                        `<thead class="table-light"><tr><th>ID</th><th>Người gửi</th><th>Nội dung</th><th>Ngày xóa</th><th style="width: 10%;">Hành động</th></tr></thead><tbody>`;
+                                    response.comments.forEach(function(comment) {
+                                        html += `<tr id="trashed-comment-row-${comment.id}">
                                         <td>${comment.id}</td>
                                         <td>${comment.user_name || 'N/A'}</td>
                                         <td>${comment.content}</td>
@@ -719,319 +731,319 @@
                                                 <button type="button" class="btn btn-xs btn-success restore-comment-btn" title="Khôi phục" data-comment-id="${comment.id}" data-bs-toggle="tooltip"><i class="fas fa-trash-restore"></i></button>
                                             </form>
                                         </td></tr>`;
-                                        });
-                                        html += '</tbody></table>';
-                                    } else {
-                                        html =
-                                            '<p class="text-center text-muted">Không có bình luận nào trong thùng rác.</p>';
-                                    }
-                                    trashedContainer.html(html);
-                                    // Re-initialize tooltips for newly added buttons in trashed comments
-                                    if ($.fn.tooltip) {
-                                        $('#trashedCommentsContainer [data-bs-toggle="tooltip"]')
-                                            .tooltip(
-                                                'dispose').tooltip();
-                                    }
-                                    buttonSelf.html('<i class="fas fa-eye-slash"></i> Ẩn thùng rác');
-                                    buttonSelf.removeClass('btn-outline-danger').addClass('btn-danger');
-                                },
-                                error: function(xhr) {
-                                    console.error("Lỗi khi lấy thùng rác bình luận:", xhr.responseText);
-                                    showTemporaryMessage('Lỗi tải thùng rác. Vui lòng thử lại.',
-                                        'error');
-                                    trashedContainer.html(
-                                        '<p class="text-center text-danger">Lỗi tải thùng rác. Vui lòng thử lại.</p>'
-                                    );
-                                    buttonSelf.html('<i class="fas fa-trash"></i> Thùng rác bình luận')
-                                        .removeClass('btn-danger').addClass('btn-outline-danger');
+                                    });
+                                    html += '</tbody></table>';
+                                } else {
+                                    html =
+                                        '<p class="text-center text-muted">Không có bình luận nào trong thùng rác.</p>';
                                 }
-                            });
-                        }
-                    });
-
-                    // --- AJAX CHO NÚT "XEM CHI TIẾT BÌNH LUẬN" ---
-                    $('#pane-comments').on('click', '.view-comment-details-btn', function() {
-                        const button = $(this);
-                        const commentId = button.data('commentId');
-                        const detailRow = $('#comment-detail-row-' + commentId);
-                        const detailContentDiv = $('#comment-detail-content-' + commentId);
-
-                        $('.comment-detail-row').not(detailRow).slideUp();
-                        $('.view-comment-details-btn').not(button).html('<i class="fas fa-eye"></i>').attr('title',
-                            'Xem chi tiết bình luận');
-
-                        if (detailRow.is(':visible')) {
-                            detailRow.slideUp();
-                            button.html('<i class="fas fa-eye"></i>').attr('title', 'Xem chi tiết bình luận');
-                        } else {
-                            detailContentDiv.html(
-                                '<p class="text-center my-3"><i class="fas fa-spinner fa-spin"></i> Đang tải chi tiết...</p>'
-                            );
-                            detailRow.slideDown();
-                            let fetchDetailUrl =
-                                "{{ route('admin.account.comment.detailWithProduct', ['comment' => ':commentId']) }}";
-                            fetchDetailUrl = fetchDetailUrl.replace(':commentId', commentId);
-                            console.log('Fetching comment detail from:', fetchDetailUrl);
-                            $.ajax({
-                                url: fetchDetailUrl,
-                                type: 'GET',
-                                dataType: 'json',
-                                success: function(response) {
-                                    if (response.success) {
-                                        let html = '<div class="container-fluid"><div class="row">';
-                                        html += '<div class="col-md-12 mb-3">';
-                                        html +=
-                                            '<h6><i class="fas fa-comment-dots text-primary me-2"></i>Chi tiết Bình luận:</h6>';
-                                        html +=
-                                            `<p class="mb-1"><small><strong>Người gửi:</strong> ${response.comment.user_name}</small></p>`;
-                                        html +=
-                                            `<p class="mb-1"><small><strong>Ngày gửi:</strong> ${response.comment.created_at_formatted}</small></p>`;
-                                        html +=
-                                            `<div class="comment-full-content border p-2 bg-light rounded small" style="white-space: pre-wrap;">${response.comment.content_full}</div>`;
-                                        html += '</div>';
-
-                                        if (response.product) {
-                                            const productNameDisplay = response.product.name;
-                                            // SỬ DỤNG TRỰC TIẾP 'image_url' NẾU NÓ ĐÃ ĐƯỢC TẠO SẴN Ở BACKEND VÀ LUÔN ĐÚNG
-                                            const productImageUrl = response.product.image_url ?
-                                                response.product.image_url :
-                                                // Sử dụng trực tiếp URL đã được tạo sẵn
-                                                'https://placehold.co/70x70/EBF0F5/7F8EA3?text=SP'; // Placeholder
-
-                                            html += '<div class="col-md-12">';
-                                            html +=
-                                                '<h6><i class="fas fa-box-open text-success me-2"></i>Sản phẩm được bình luận:</h6>';
-                                            html += '<div class="d-flex align-items-center">';
-                                            html +=
-                                                `<img src="${productImageUrl}" alt="${productNameDisplay}" class="img-thumbnail me-3" style="width: 70px; height: 70px; object-fit: cover;">`;
-                                            html +=
-                                                `<div><p class="mb-1"><strong>Tên Sản phẩm:</strong> ${productNameDisplay}</p></div></div></div>`;
-                                        } else {
-                                            html +=
-                                                '<div class="col-md-12"><p class="text-muted small">Không tìm thấy thông tin sản phẩm.</p></div>';
-                                        }
-                                        html += '</div></div>';
-                                        detailContentDiv.html(html);
-                                        button.html('<i class="fas fa-eye-slash"></i>').attr('title',
-                                            'Ẩn chi tiết');
-                                    } else {
-                                        // ... (phần xử lý lỗi response.success == false) ...
-                                    }
-                                },
-                                error: function(xhr) {
-                                    console.error("Lỗi AJAX khi lấy chi tiết bình luận:", xhr
-                                        .responseText);
-                                    showTemporaryMessage('Lỗi khi tải chi tiết. Vui lòng thử lại.',
-                                        'error');
-                                    detailContentDiv.html(
-                                        '<p class="text-danger small">Lỗi khi tải chi tiết. Vui lòng thử lại.</p>'
-                                    );
-                                    button.html('<i class="fas fa-eye"></i>').attr('title',
-                                        'Xem chi tiết');
-                                    setTimeout(function() {
-                                        detailRow.slideUp();
-                                    }, 3000);
+                                trashedContainer.html(html);
+                                // Re-initialize tooltips for newly added buttons in trashed comments
+                                if ($.fn.tooltip) {
+                                    $('#trashedCommentsContainer [data-bs-toggle="tooltip"]')
+                                        .tooltip(
+                                            'dispose').tooltip();
                                 }
-                            });
-                        }
-                    });
-
-                    // ---- XỬ LÝ CHO CÁC NÚT THAY ĐỔI TRẠNG THÁI ----
-                    $('#activeCommentsContainer').on('click', '.change-comment-status-btn', function() {
-                        const button = $(this);
-                        const commentId = button.data('commentId');
-                        const actionType = button.data('action');
-
-                        let actionUrl = '';
-                        let buttonTitleText = button.data('original-title') || button.attr('title') ||
-                            "thực hiện hành động";
-
-                        if (typeof buttonTitleText === 'undefined' || buttonTitleText === null || buttonTitleText
-                            .trim() === '') {
-                            buttonTitleText = "thực hiện hành động này";
-                        }
-
-                        if (actionType === 'approve') {
-                            actionUrl =
-                                "{{ route('admin.account.comment.approveComment', ['comment' => ':commentId']) }}"
-                                .replace(':commentId', commentId);
-                        } else if (actionType === 'hide') {
-                            actionUrl =
-                                "{{ route('admin.account.comment.hideComment', ['comment' => ':commentId']) }}"
-                                .replace(':commentId', commentId);
-                        } else if (actionType === 'show_again') {
-                            actionUrl =
-                                "{{ route('admin.account.comment.showAgainComment', ['comment' => ':commentId']) }}"
-                                .replace(':commentId', commentId);
-                        } else {
-                            console.error('Hành động không xác định cho change-status:', actionType);
-                            showTemporaryMessage('Hành động không hợp lệ.', 'error');
-                            return;
-                        }
-
-                        let confirmMessage = `Bạn có chắc muốn ${buttonTitleText.toLowerCase()}?`;
-                        if (!confirm(confirmMessage)) return;
-
-                        const originalActionsCellHtml = button.closest('.comment-actions-cell').html();
-                        button.closest('.comment-actions-cell').html(
-                            '<i class="fas fa-spinner fa-spin text-primary"></i>');
-
-                        $.ajax({
-                            url: actionUrl,
-                            type: 'POST',
-                            data: {
-                                _token: csrfTokenGlobal
+                                buttonSelf.html('<i class="fas fa-eye-slash"></i> Ẩn thùng rác');
+                                buttonSelf.removeClass('btn-outline-danger').addClass('btn-danger');
                             },
+                            error: function(xhr) {
+                                console.error("Lỗi khi lấy thùng rác bình luận:", xhr.responseText);
+                                showTemporaryMessage('Lỗi tải thùng rác. Vui lòng thử lại.',
+                                    'error');
+                                trashedContainer.html(
+                                    '<p class="text-center text-danger">Lỗi tải thùng rác. Vui lòng thử lại.</p>'
+                                );
+                                buttonSelf.html('<i class="fas fa-trash"></i> Thùng rác bình luận')
+                                    .removeClass('btn-danger').addClass('btn-outline-danger');
+                            }
+                        });
+                    }
+                });
+
+                // --- AJAX CHO NÚT "XEM CHI TIẾT BÌNH LUẬN" ---
+                $('#pane-comments').on('click', '.view-comment-details-btn', function() {
+                    const button = $(this);
+                    const commentId = button.data('commentId');
+                    const detailRow = $('#comment-detail-row-' + commentId);
+                    const detailContentDiv = $('#comment-detail-content-' + commentId);
+
+                    $('.comment-detail-row').not(detailRow).slideUp();
+                    $('.view-comment-details-btn').not(button).html('<i class="fas fa-eye"></i>').attr('title',
+                        'Xem chi tiết bình luận');
+
+                    if (detailRow.is(':visible')) {
+                        detailRow.slideUp();
+                        button.html('<i class="fas fa-eye"></i>').attr('title', 'Xem chi tiết bình luận');
+                    } else {
+                        detailContentDiv.html(
+                            '<p class="text-center my-3"><i class="fas fa-spinner fa-spin"></i> Đang tải chi tiết...</p>'
+                        );
+                        detailRow.slideDown();
+                        let fetchDetailUrl =
+                            "{{ route('admin.account.comment.detailWithProduct', ['comment' => ':commentId']) }}";
+                        fetchDetailUrl = fetchDetailUrl.replace(':commentId', commentId);
+                        console.log('Fetching comment detail from:', fetchDetailUrl);
+                        $.ajax({
+                            url: fetchDetailUrl,
+                            type: 'GET',
                             dataType: 'json',
                             success: function(response) {
                                 if (response.success) {
-                                    updateActiveCommentUIAfterAction(response.comment_id, response
-                                        .new_status_text, response.new_status_class_badge, response
-                                        .new_actions_html);
-                                    showTemporaryMessage(response.message, 'success');
-                                } else {
-                                    showTemporaryMessage(response.message || 'Hành động thất bại.',
-                                        'error');
-                                    $('#comment-actions-cell-' + commentId).html(
-                                        originalActionsCellHtml);
-                                    if ($.fn.tooltip) {
-                                        $(`#comment-actions-cell-${commentId} [data-bs-toggle="tooltip"]`)
-                                            .tooltip('dispose').tooltip();
+                                    let html = '<div class="container-fluid"><div class="row">';
+                                    html += '<div class="col-md-12 mb-3">';
+                                    html +=
+                                        '<h6><i class="fas fa-comment-dots text-primary me-2"></i>Chi tiết Bình luận:</h6>';
+                                    html +=
+                                        `<p class="mb-1"><small><strong>Người gửi:</strong> ${response.comment.user_name}</small></p>`;
+                                    html +=
+                                        `<p class="mb-1"><small><strong>Ngày gửi:</strong> ${response.comment.created_at_formatted}</small></p>`;
+                                    html +=
+                                        `<div class="comment-full-content border p-2 bg-light rounded small" style="white-space: pre-wrap;">${response.comment.content_full}</div>`;
+                                    html += '</div>';
+
+                                    if (response.product) {
+                                        const productNameDisplay = response.product.name;
+                                        // SỬ DỤNG TRỰC TIẾP 'image_url' NẾU NÓ ĐÃ ĐƯỢC TẠO SẴN Ở BACKEND VÀ LUÔN ĐÚNG
+                                        const productImageUrl = response.product.image_url ?
+                                            response.product.image_url :
+                                            // Sử dụng trực tiếp URL đã được tạo sẵn
+                                            'https://placehold.co/70x70/EBF0F5/7F8EA3?text=SP'; // Placeholder
+
+                                        html += '<div class="col-md-12">';
+                                        html +=
+                                            '<h6><i class="fas fa-box-open text-success me-2"></i>Sản phẩm được bình luận:</h6>';
+                                        html += '<div class="d-flex align-items-center">';
+                                        html +=
+                                            `<img src="${productImageUrl}" alt="${productNameDisplay}" class="img-thumbnail me-3" style="width: 70px; height: 70px; object-fit: cover;">`;
+                                        html +=
+                                            `<div><p class="mb-1"><strong>Tên Sản phẩm:</strong> ${productNameDisplay}</p></div></div></div>`;
+                                    } else {
+                                        html +=
+                                            '<div class="col-md-12"><p class="text-muted small">Không tìm thấy thông tin sản phẩm.</p></div>';
                                     }
+                                    html += '</div></div>';
+                                    detailContentDiv.html(html);
+                                    button.html('<i class="fas fa-eye-slash"></i>').attr('title',
+                                        'Ẩn chi tiết');
+                                } else {
+                                    // ... (phần xử lý lỗi response.success == false) ...
                                 }
                             },
                             error: function(xhr) {
-                                console.error("Lỗi AJAX khi thay đổi trạng thái:", xhr.responseText);
-                                showTemporaryMessage('Lỗi hệ thống khi thay đổi trạng thái.', 'error');
-                                $('#comment-actions-cell-' + commentId).html(originalActionsCellHtml);
+                                console.error("Lỗi AJAX khi lấy chi tiết bình luận:", xhr
+                                    .responseText);
+                                showTemporaryMessage('Lỗi khi tải chi tiết. Vui lòng thử lại.',
+                                    'error');
+                                detailContentDiv.html(
+                                    '<p class="text-danger small">Lỗi khi tải chi tiết. Vui lòng thử lại.</p>'
+                                );
+                                button.html('<i class="fas fa-eye"></i>').attr('title',
+                                    'Xem chi tiết');
+                                setTimeout(function() {
+                                    detailRow.slideUp();
+                                }, 3000);
+                            }
+                        });
+                    }
+                });
+
+                // ---- XỬ LÝ CHO CÁC NÚT THAY ĐỔI TRẠNG THÁI ----
+                $('#activeCommentsContainer').on('click', '.change-comment-status-btn', function() {
+                    const button = $(this);
+                    const commentId = button.data('commentId');
+                    const actionType = button.data('action');
+
+                    let actionUrl = '';
+                    let buttonTitleText = button.data('original-title') || button.attr('title') ||
+                        "thực hiện hành động";
+
+                    if (typeof buttonTitleText === 'undefined' || buttonTitleText === null || buttonTitleText
+                        .trim() === '') {
+                        buttonTitleText = "thực hiện hành động này";
+                    }
+
+                    if (actionType === 'approve') {
+                        actionUrl =
+                            "{{ route('admin.account.comment.approveComment', ['comment' => ':commentId']) }}"
+                            .replace(':commentId', commentId);
+                    } else if (actionType === 'hide') {
+                        actionUrl =
+                            "{{ route('admin.account.comment.hideComment', ['comment' => ':commentId']) }}"
+                            .replace(':commentId', commentId);
+                    } else if (actionType === 'show_again') {
+                        actionUrl =
+                            "{{ route('admin.account.comment.showAgainComment', ['comment' => ':commentId']) }}"
+                            .replace(':commentId', commentId);
+                    } else {
+                        console.error('Hành động không xác định cho change-status:', actionType);
+                        showTemporaryMessage('Hành động không hợp lệ.', 'error');
+                        return;
+                    }
+
+                    let confirmMessage = `Bạn có chắc muốn ${buttonTitleText.toLowerCase()}?`;
+                    if (!confirm(confirmMessage)) return;
+
+                    const originalActionsCellHtml = button.closest('.comment-actions-cell').html();
+                    button.closest('.comment-actions-cell').html(
+                        '<i class="fas fa-spinner fa-spin text-primary"></i>');
+
+                    $.ajax({
+                        url: actionUrl,
+                        type: 'POST',
+                        data: {
+                            _token: csrfTokenGlobal
+                        },
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.success) {
+                                updateActiveCommentUIAfterAction(response.comment_id, response
+                                    .new_status_text, response.new_status_class_badge, response
+                                    .new_actions_html);
+                                showTemporaryMessage(response.message, 'success');
+                            } else {
+                                showTemporaryMessage(response.message || 'Hành động thất bại.',
+                                    'error');
+                                $('#comment-actions-cell-' + commentId).html(
+                                    originalActionsCellHtml);
                                 if ($.fn.tooltip) {
                                     $(`#comment-actions-cell-${commentId} [data-bs-toggle="tooltip"]`)
                                         .tooltip('dispose').tooltip();
                                 }
                             }
-                        });
-                    });
-
-                    // ---- AJAX CHO XÓA MỀM BÌNH LUẬN ----
-                    $('#activeCommentsContainer').on('click', '.soft-delete-comment-btn', function() {
-                        const button = $(this);
-                        const commentId = button.data('commentId');
-                        let deleteUrl =
-                            "{{ route('admin.account.comment.softDeleteComment', ['comment' => ':commentId']) }}";
-                        deleteUrl = deleteUrl.replace(':commentId', commentId);
-
-                        if (!confirm('Bạn có chắc muốn chuyển bình luận này vào thùng rác?')) return;
-
-                        const originalActionsCellHtml = button.closest('.comment-actions-cell').html();
-                        button.closest('.comment-actions-cell').html(
-                            '<i class="fas fa-spinner fa-spin text-danger"></i>');
-
-                        $.ajax({
-                            url: deleteUrl,
-                            type: 'POST',
-                            data: {
-                                _token: csrfTokenGlobal
-                            },
-                            dataType: 'json',
-                            success: function(response) {
-                                if (response.success) {
-                                    $('#active-comment-row-' + response.comment_id).fadeOut(500,
-                                        function() {
-                                            $(this).remove();
-                                        });
-                                    $('#comment-detail-row-' + response.comment_id).fadeOut(500,
-                                        function() {
-                                            $(this).remove();
-                                        });
-                                    showTemporaryMessage(response.message, 'info');
-                                    if (response.new_total_comment_count !== undefined) {
-                                        updateTotalCommentsBadgeOnTab(response.new_total_comment_count);
-                                    }
-                                    if ($('#trashedCommentsSection').is(':visible')) {
-                                        $('#toggleTrashedCommentsBtn').click();
-                                        setTimeout(function() {
-                                            $('#toggleTrashedCommentsBtn').click();
-                                        }, 250);
-                                    }
-                                } else {
-                                    showTemporaryMessage(response.message || 'Lỗi khi xóa.', 'error');
-                                    $('#comment-actions-cell-' + commentId).html(
-                                        originalActionsCellHtml);
-                                    if ($.fn.tooltip) {
-                                        $(`#comment-actions-cell-${commentId} [data-bs-toggle="tooltip"]`)
-                                            .tooltip('dispose').tooltip();
-                                    }
-                                }
-                            },
-                            error: function(xhr) {
-                                console.error("Lỗi hệ thống khi xóa bình luận.", xhr.responseText);
-                                showTemporaryMessage('Lỗi hệ thống khi xóa bình luận.', 'error');
-                                $('#comment-actions-cell-' + commentId).html(originalActionsCellHtml);
-                                if ($.fn.tooltip) {
-                                    $(`#comment-actions-cell-${commentId} [data-bs-toggle="tooltip"]`)
-                                        .tooltip('dispose').tooltip();
-                                }
+                        },
+                        error: function(xhr) {
+                            console.error("Lỗi AJAX khi thay đổi trạng thái:", xhr.responseText);
+                            showTemporaryMessage('Lỗi hệ thống khi thay đổi trạng thái.', 'error');
+                            $('#comment-actions-cell-' + commentId).html(originalActionsCellHtml);
+                            if ($.fn.tooltip) {
+                                $(`#comment-actions-cell-${commentId} [data-bs-toggle="tooltip"]`)
+                                    .tooltip('dispose').tooltip();
                             }
-                        });
-                    });
-
-                    // ---- AJAX CHO KHÔI PHỤC BÌNH LUẬN TỪ THÙNG RÁC ----
-                    $('#trashedCommentsContainer').on('click', '.restore-comment-btn', function() {
-                        const button = $(this);
-                        const commentId = button.data('commentId');
-                        const form = button.closest('form');
-                        const restoreUrl = form.attr('action');
-
-                        if (!confirm('Bạn có chắc muốn khôi phục bình luận này?')) return;
-
-                        const originalButtonHtml = button.html();
-                        button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
-
-                        $.ajax({
-                            url: restoreUrl,
-                            type: 'POST',
-                            data: form.serialize(),
-                            dataType: 'json',
-                            success: function(response) {
-                                if (response.success) {
-                                    $('#trashed-comment-row-' + response.comment_id).fadeOut(500,
-                                        function() {
-                                            $(this).remove();
-                                        });
-                                    showTemporaryMessage(response.message, 'success');
-
-                                    if (response.new_total_comment_count !== undefined) {
-                                        updateTotalCommentsBadgeOnTab(response.new_total_comment_count);
-                                    }
-
-                                    if (response.restored_comment_html) {
-                                        $('#activeCommentsContainer table tbody').prepend(response
-                                            .restored_comment_html);
-                                        if ($.fn.tooltip) {
-                                            $('#activeCommentsContainer [data-bs-toggle="tooltip"]')
-                                                .tooltip('dispose').tooltip();
-                                        }
-                                    }
-
-                                    if ($('#trashedCommentsContainer table tbody tr').length === 0) {
-                                        $('#trashedCommentsContainer').html(
-                                            '<p class="text-center text-muted">Không có bình luận nào trong thùng rác.</p>'
-                                        );
-                                    }
-                                } else {
-                                    showTemporaryMessage(response.message || 'Lỗi khi khôi phục.',
-                                        'error');
-                                }
-                            },
-                            error: function(xhr) {
-                                console.error("Lỗi AJAX khi khôi phục:", xhr.responseText);
-                                showTemporaryMessage('Lỗi hệ thống khi khôi phục.', 'error');
-                            },
-                            complete: function() {
-                                button.prop('disabled', false).html(originalButtonHtml);
-                            }
-                        });
+                        }
                     });
                 });
-            </script>
-        @endpush
+
+                // ---- AJAX CHO XÓA MỀM BÌNH LUẬN ----
+                $('#activeCommentsContainer').on('click', '.soft-delete-comment-btn', function() {
+                    const button = $(this);
+                    const commentId = button.data('commentId');
+                    let deleteUrl =
+                        "{{ route('admin.account.comment.softDeleteComment', ['comment' => ':commentId']) }}";
+                    deleteUrl = deleteUrl.replace(':commentId', commentId);
+
+                    if (!confirm('Bạn có chắc muốn chuyển bình luận này vào thùng rác?')) return;
+
+                    const originalActionsCellHtml = button.closest('.comment-actions-cell').html();
+                    button.closest('.comment-actions-cell').html(
+                        '<i class="fas fa-spinner fa-spin text-danger"></i>');
+
+                    $.ajax({
+                        url: deleteUrl,
+                        type: 'POST',
+                        data: {
+                            _token: csrfTokenGlobal
+                        },
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.success) {
+                                $('#active-comment-row-' + response.comment_id).fadeOut(500,
+                                    function() {
+                                        $(this).remove();
+                                    });
+                                $('#comment-detail-row-' + response.comment_id).fadeOut(500,
+                                    function() {
+                                        $(this).remove();
+                                    });
+                                showTemporaryMessage(response.message, 'info');
+                                if (response.new_total_comment_count !== undefined) {
+                                    updateTotalCommentsBadgeOnTab(response.new_total_comment_count);
+                                }
+                                if ($('#trashedCommentsSection').is(':visible')) {
+                                    $('#toggleTrashedCommentsBtn').click();
+                                    setTimeout(function() {
+                                        $('#toggleTrashedCommentsBtn').click();
+                                    }, 250);
+                                }
+                            } else {
+                                showTemporaryMessage(response.message || 'Lỗi khi xóa.', 'error');
+                                $('#comment-actions-cell-' + commentId).html(
+                                    originalActionsCellHtml);
+                                if ($.fn.tooltip) {
+                                    $(`#comment-actions-cell-${commentId} [data-bs-toggle="tooltip"]`)
+                                        .tooltip('dispose').tooltip();
+                                }
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error("Lỗi hệ thống khi xóa bình luận.", xhr.responseText);
+                            showTemporaryMessage('Lỗi hệ thống khi xóa bình luận.', 'error');
+                            $('#comment-actions-cell-' + commentId).html(originalActionsCellHtml);
+                            if ($.fn.tooltip) {
+                                $(`#comment-actions-cell-${commentId} [data-bs-toggle="tooltip"]`)
+                                    .tooltip('dispose').tooltip();
+                            }
+                        }
+                    });
+                });
+
+                // ---- AJAX CHO KHÔI PHỤC BÌNH LUẬN TỪ THÙNG RÁC ----
+                $('#trashedCommentsContainer').on('click', '.restore-comment-btn', function() {
+                    const button = $(this);
+                    const commentId = button.data('commentId');
+                    const form = button.closest('form');
+                    const restoreUrl = form.attr('action');
+
+                    if (!confirm('Bạn có chắc muốn khôi phục bình luận này?')) return;
+
+                    const originalButtonHtml = button.html();
+                    button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+
+                    $.ajax({
+                        url: restoreUrl,
+                        type: 'POST',
+                        data: form.serialize(),
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.success) {
+                                $('#trashed-comment-row-' + response.comment_id).fadeOut(500,
+                                    function() {
+                                        $(this).remove();
+                                    });
+                                showTemporaryMessage(response.message, 'success');
+
+                                if (response.new_total_comment_count !== undefined) {
+                                    updateTotalCommentsBadgeOnTab(response.new_total_comment_count);
+                                }
+
+                                if (response.restored_comment_html) {
+                                    $('#activeCommentsContainer table tbody').prepend(response
+                                        .restored_comment_html);
+                                    if ($.fn.tooltip) {
+                                        $('#activeCommentsContainer [data-bs-toggle="tooltip"]')
+                                            .tooltip('dispose').tooltip();
+                                    }
+                                }
+
+                                if ($('#trashedCommentsContainer table tbody tr').length === 0) {
+                                    $('#trashedCommentsContainer').html(
+                                        '<p class="text-center text-muted">Không có bình luận nào trong thùng rác.</p>'
+                                    );
+                                }
+                            } else {
+                                showTemporaryMessage(response.message || 'Lỗi khi khôi phục.',
+                                    'error');
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error("Lỗi AJAX khi khôi phục:", xhr.responseText);
+                            showTemporaryMessage('Lỗi hệ thống khi khôi phục.', 'error');
+                        },
+                        complete: function() {
+                            button.prop('disabled', false).html(originalButtonHtml);
+                        }
+                    });
+                });
+            });
+        </script>
+    @endpush
