@@ -7,16 +7,29 @@
                 <h3 class="mb-0">Chi tiết đơn hàng #{{ $order->sku }}</h3>
             </div>
             <div class="card-body">
-                {{-- Mã đơn hàng --}}
-                <p><strong>Mã đơn hàng:</strong> {{ $order->sku ?? $order->id }}</p>
+                {{-- Mã đơn hàng - Trạng thái đơn hàng --}}
+                <p class="fs-5"><strong>Mã đơn hàng:</strong> {{ $order->sku ?? $order->id }} |
+                    <strong>Trạng thái đơn hàng:</strong> {{ $order->order_status }}
+                </p>
 
                 {{-- Thông tin người đặt & người nhận --}}
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <h5><b>Thông tin người đặt</b></h5>
-                        <p><strong>Họ tên:</strong> {{ $order->user->name }}</p>
-                        <p><strong>Số điện thoại:</strong> {{ $order->user->profile->phone ?? 'Chưa có số điện thoại' }}</p>
-                        <p><strong>Email:</strong> {{ $order->user->email }}</p>
+                        @if ($order->user)
+                            {{-- Kiểm tra nếu đối tượng user tồn tại --}}
+                            <p><strong>Họ tên:</strong> {{ $order->user->name ?? 'Người dùng không tồn tại' }}</p>
+                            <p><strong>Email:</strong> {{ $order->user->email ?? 'Không có Email' }}</p>
+
+                            {{-- Kiểm tra nếu profile tồn tại trước khi truy cập phone --}}
+                            <p><strong>Số điện thoại:</strong>
+                                {{ optional($order->user->profile)->phone ?? 'Chưa có số điện thoại' }}</p>
+                        @else
+                            <p class="text-danger">Người dùng đặt hàng không tồn tại hoặc đã bị xóa.</p>
+                            <p><strong>Họ tên:</strong> Người dùng ẩn danh</p>
+                            <p><strong>Email:</strong> N/A</p>
+                            <p><strong>Số điện thoại:</strong> N/A</p>
+                        @endif
                     </div>
                     <div class="col-md-6">
                         <h5><b>Thông tin người nhận</b></h5>
@@ -41,7 +54,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Tên sản phẩm</th>
-                                <th>Mã biến thể</th>
+                                <th>Loại sản phẩm</th>
                                 <th>Giá gốc</th>
                                 <th>Giá đặt mua</th>
                                 <th>Số lượng</th>
@@ -52,8 +65,8 @@
                         <tbody>
                             @foreach ($order->items as $item)
                                 <tr>
-                                    <td>{{ $item->productVariant->product->name }}</td>
-                                    <td>{{ $item->productVariant->sku }}</td>
+                                    <td>{{ $item->product_name }}</td>
+                                    <td>{{ $item->product_attribute }}</td>
                                     <td>{{ number_format($item->productVariant->price, 0, ',', '.') }} VND</td>
                                     <td>{{ number_format($item->unit_price, 0, ',', '.') }} VND</td>
                                     <td>{{ $item->quantity }}</td>
@@ -105,7 +118,7 @@
                                             {{ optional($order->discount)->description }}</th>
                                         @if ($discountAmount > 0)
                                             <td>
-                                                -{{ number_format($discountAmount, 0, ',', '.') }} VND
+                                                - {{ number_format($discountAmount, 0, ',', '.') }} VND
                                                 <br>
                                                 <p>
                                                     {{-- Áp dụng cho tất cả sản phẩm: --}}
@@ -129,6 +142,40 @@
                                         <td><strong>{{ number_format($order->total_amount, 0, ',', '.') }} VND</strong>
                                         </td>
                                     </tr>
+                                    <tr>
+                                        <th>Phương thức thanh toán</th>
+                                        <td>
+                                            {{ $order->payment_method_name }}
+                                            @php
+                                                $paymentStatuses = [
+                                                    'pending' => 'Chờ thanh toán',
+                                                    'paid' => 'Đã thanh toán',
+                                                    'failed' => 'Thất bại',
+                                                ];
+                                                $currentStatusKey = old('payment_status', $order->payment_status);
+                                                $displayStatus =
+                                                    $paymentStatuses[$currentStatusKey] ?? 'Không xác định';
+
+                                                // Thêm class màu sắc cho trạng thái nếu cần
+                                                $statusColorClass = '';
+                                                switch ($currentStatusKey) {
+                                                    case 'pending':
+                                                        $statusColorClass = 'text-warning'; // Màu vàng cho chờ thanh toán
+                                                        break;
+                                                    case 'paid':
+                                                        $statusColorClass = 'text-success'; // Màu xanh lá cho đã thanh toán
+                                                        break;
+                                                    case 'failed':
+                                                        $statusColorClass = 'text-danger'; // Màu đỏ cho thất bại
+                                                        break;
+                                                }
+                                            @endphp
+                                            @if (!empty($displayStatus))
+                                                - <span
+                                                    class="{{ $statusColorClass }}"><strong>{{ $displayStatus }}</strong></span>
+                                                {{-- In đậm và thêm màu cho trạng thái --}}
+                                            @endif
+                                        </td>
                                 </tbody>
                             </table>
                         </div>
