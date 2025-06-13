@@ -10,7 +10,7 @@
                     <div class="alert alert-info text-center">Không có giá trị nào cho thuộc tính này.</div>
                 @else
                     <table class="table table-bordered table-hover align-middle">
-                        <thead class="table-dark">
+                        <thead class="table">
                             <tr>
                                 <th>#</th>
                                 <th>Giá trị</th>

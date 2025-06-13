@@ -90,6 +90,7 @@
         </li>
 
 
+
         <li>
             <a href="#sidebarExpages" data-bs-toggle="collapse">
                 <i data-feather="calendar"></i>
@@ -115,7 +116,16 @@
             </a>
         </li>
         <li>
-            <a class='tp-link' href='{{ route('admin.reviews.index') }}'>
+            <<<<<<< HEAD <a class='tp-link' href='{{ route('admin.reviews.index') }}'>
+                =======
+                <a class='tp-link' href='{{ route('admin.blogs.index') }}'>
+                    <i data-feather="calendar"></i>
+                    <span> Bài viết </span>
+                </a>
+        </li>
+        <li>
+            <a class='tp-link' href='calendar.html'>
+                >>>>>>> origin/feature/giao-dien-thuoc-tinh-va-bai-viet-new
                 <i data-feather="calendar"></i>
                 <span> Đánh giá </span>
             </a>
@@ -147,12 +157,12 @@
                 <span> Banner </span>
             </a>
         </li>
-     <li>
-    <a class='tp-link' href="{{ route('admin.blog_categories.index') }}">
-        <i data-feather="file-text"></i>
-        <span> Blog </span>
-    </a>
-</li>
+        <li>
+            <a class='tp-link' href="{{ route('admin.blog_categories.index') }}">
+                <i data-feather="file-text"></i>
+                <span> Blog </span>
+            </a>
+        </li>
 
 
         <li>

@@ -16,7 +16,7 @@ class BlogController extends Controller
     public function index()
     {
         // Lấy danh sách bài viết (chưa bị xóa), kèm theo thông tin thể loại (category)
-        $blogs = Blog::with(['category', 'author'])->latest()->get(); // Thêm author
+        $blogs = Blog::with(['category', 'author'])->latest()->paginate(10); // Thêm author
         // Đếm số bài viết đã bị soft delete
         $deleteCount = Blog::onlyTrashed()->count();
 
