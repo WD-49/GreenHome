@@ -16,19 +16,17 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    {{-- <div class="card-header">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">Danh sách sản phẩm</h5>
-                    </div> --}}
-
-                    {{-- <div class="d-flex justify-content-end mb-3">
-                        <a href="{{ route('admin.products.create') }}" class="btn btn-outline-primary me-2">
-                            <i class="mdi mdi-plus"></i> Thêm sản phẩm
-                        </a>
-                        <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
-                            <i class="mdi mdi-filter-outline me-1"></i> Bộ lọc
-                        </button>
-                    </div> --}}
+                        <div>
+                            <a href="{{ route('admin.products.create') }}" class="btn btn-success shadow-sm">
+                                + Thêm sản phẩm
+                            </a>
+                            <a href="{{ route('admin.products.trashed') }}" class="btn btn-danger shadow-sm">
+                                <i class="fas fa-trash-restore fa-sm text-white-50"></i> Thùng rác
+                            </a>
+                        </div>
+                    </div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <form id="perPageForm" method="GET" action="{{ route('admin.products.index') }}"
@@ -48,9 +46,6 @@
                                 @endforeach
                             </form>
                             <div>
-                                <a href="{{ route('admin.products.create') }}" class="btn btn-outline-primary me-2">
-                                    <i class="mdi mdi-plus"></i> Thêm sản phẩm
-                                </a>
                                 <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse"
                                     data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
                                     <i class="mdi mdi-filter-outline me-1"></i> Bộ lọc

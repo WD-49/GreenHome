@@ -57,7 +57,7 @@
                         <a class='tp-link' href="{{ route('admin.account.listUsers') }}">Người dùng</a>
                     </li>
                     <li>
-                        <a class='tp-link' href="{{  route('admin.account.listAdmins') }}">Quản trị</a>
+                        <a class='tp-link' href="{{ route('admin.account.listAdmins') }}">Quản trị</a>
 
                     </li>
                 </ul>
@@ -116,16 +116,13 @@
             </a>
         </li>
         <li>
-            <<<<<<< HEAD <a class='tp-link' href='{{ route('admin.reviews.index') }}'>
-                =======
-                <a class='tp-link' href='{{ route('admin.blogs.index') }}'>
-                    <i data-feather="calendar"></i>
-                    <span> Bài viết </span>
-                </a>
+            <a class='tp-link' href='{{ route('admin.blogs.index') }}'>
+                <i data-feather="calendar"></i>
+                <span> Bài viết </span>
+            </a>
         </li>
         <li>
             <a class='tp-link' href='calendar.html'>
-                >>>>>>> origin/feature/giao-dien-thuoc-tinh-va-bai-viet-new
                 <i data-feather="calendar"></i>
                 <span> Đánh giá </span>
             </a>
