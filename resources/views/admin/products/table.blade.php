@@ -27,7 +27,8 @@
                 </td>
                 <td>{{ $product->name }}</td>
                 <td>{{ $product->category->name }}</td>
-                <td>{{ $product->brand->name }}</td>
+                {{-- Khi xóa vĩnh viễn thương hiệu --}}
+                <td>{{ $product->brand?->name ?? 'Không có thương hiệu' }}</td>  
                 <td>
                     <span class="badge {{ $product->status == 1 ? 'bg-success' : 'bg-danger' }}">
                         {{ $product->status == 1 ? 'Đang bán' : 'Dừng bán' }}

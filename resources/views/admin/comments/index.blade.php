@@ -36,19 +36,13 @@
                         <i class="ti ti-filter me-1"></i> Lọc
                     </button>
                     <a href="{{ route('admin.comments.index') }}" class="btn btn-secondary">
-                        <i class="ti ti-x me-1"></i> Xoá lọc
+                        <i class="ti ti-x me-1"></i> Làm Mới
                     </a>
                 </div>
             </form>
         </div>
     </div>
 
-    {{-- Nút Thùng rác --}}
-    <div class="d-flex justify-content-end mb-3">
-        <a href="{{ route('admin.comments.trash') }}" class="btn btn-danger">
-            <i class="ti ti-trash me-1"></i> Thùng rác
-        </a>
-    </div>
 
     {{-- Danh sách bình luận --}}
     <div class="card shadow-sm">
@@ -147,14 +141,6 @@
                                             </a>
                                         </li>
                                         <li>
-                                            <form method="POST" action="{{ route('admin.comments.destroy') }}">
-                                                @csrf
-                                                @method('DELETE')
-                                                <input type="hidden" name="id" value="{{ $comment->id }}">
-                                                <button type="submit" class="dropdown-item text-danger">
-                                                    <i class="ti ti-trash me-1"></i> Xoá mềm
-                                                </button>
-                                            </form>
                                         </li>
                                     </ul>
                                 </div>
