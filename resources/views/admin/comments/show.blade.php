@@ -16,8 +16,6 @@
                     <small class="text-muted">
                         (Danh mục: {{ $comment->product->category->name ?? '[N/A]' }})
                     </small>
-
-                    {{-- Thương hiệu sản phẩm --}}
                     @if ($comment->product->brand)
                         <br>
                         <small>
@@ -38,7 +36,6 @@
                     <a href="{{ route('admin.account.detailAccUser', $comment->user->id) }}">
                         {{ $comment->user->name }}
                     </a>
-                    
                 @else
                     [N/A]
                 @endif
@@ -48,7 +45,7 @@
                 @if ($comment->user && $comment->user->profile && $comment->user->profile->user_image)
                     <img src="{{ asset('storage/' . $comment->user->profile->user_image) }}" alt="avatar" class="rounded-circle" width="60" height="60">
                 @else
-                    <img src="{{ asset('images/default-avatar.png') }}" alt="người dùng chưa có ảnh đại diện" class="rounded-circle" width="60" height="60">
+                    <img src="{{ asset('images/default-avatar.png') }}" alt="avatar mặc định" class="rounded-circle" width="60" height="60">
                 @endif
             </p>
 
@@ -69,10 +66,6 @@
 
     <a href="{{ route('admin.comments.index') }}" class="btn btn-primary mb-3">
         <i class="ti ti-arrow-left"></i> Quay lại danh sách
-    </a>
-
-    <a href="{{ route('admin.comments.trash') }}" class="btn btn-danger mb-3 ms-2">
-        <i class="ti ti-trash"></i> Thùng rác
     </a>
 
     <h4 class="mb-3">Các bình luận khác cùng sản phẩm</h4>
@@ -101,7 +94,7 @@
         </div>
 
         <div class="col-md-2">
-            <select name="brand_id" class="form-select">
+            <select name="brand_slug" class="form-select">
                 <option value="">-- Thương hiệu --</option>
                 @foreach ($brands as $brand)
                     <option value="{{ $brand->slug }}" {{ request('brand_slug') == $brand->slug ? 'selected' : '' }}>
@@ -125,6 +118,7 @@
         <div class="col-md-2">
             <button type="submit" class="btn btn-secondary w-100">Lọc</button>
         </div>
+
         <div class="col-md-2 d-grid gap-2">
             <a href="{{ route('admin.comments.show', $comment->id) }}" class="btn btn-outline-dark">Làm mới</a>
         </div>
@@ -168,9 +162,9 @@
                     <div class="text-end">
                         @if ($related->product)
                             <div class="mb-2">
-                                sản phẩm:
+                                Sản phẩm:
                                 <a href="{{ route('admin.products.show', $related->product->id) }}">
-                                      {{ $related->product->name }}
+                                    {{ $related->product->name }}
                                 </a>
                                 <br>
                                 <small class="text-muted">Danh mục: {{ $related->product->category->name ?? '[N/A]' }}</small>
@@ -220,7 +214,7 @@
         </ul>
 
         <div class="mt-3">
-            {{ $relatedComments->links() }}
+            {{ $relatedComments->appends(request()->query())->links() }}
         </div>
     @endif
 @endsection

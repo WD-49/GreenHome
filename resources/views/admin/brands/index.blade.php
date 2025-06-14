@@ -55,21 +55,20 @@
                     </div>
 
                     {{-- Tìm kiếm từ khóa --}}
-                    <form method="GET" action="{{ route('admin.brands.index') }}" class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label for="keyword" class="form-label">Từ khóa</label>
-                            <input type="text" name="keyword" id="keyword" value="{{ request('keyword') }}"
-                                   class="form-control" placeholder="Nhập tên thương hiệu...">
-                        </div>
-                        <div class="col-md-6 d-flex align-items-end">
-                            <button type="submit" class="btn btn-outline-primary me-2">
-                                <i class="fas fa-search me-1"></i> Tìm
-                            </button>
-                            <a href="{{ route('admin.brands.index') }}" class="btn btn-outline-secondary">
-                                <i class="fas fa-sync me-1"></i> Làm mới
-                            </a>
-                        </div>
-                    </form>
+                   {{-- Tìm kiếm từ khóa --}}
+<form method="GET" action="{{ route('admin.brands.index') }}" class="d-flex justify-content-end align-items-end gap-2 mb-4 flex-wrap">
+    <input type="text" name="keyword" id="keyword" value="{{ request('keyword') }}"
+           class="form-control form-control-sm w-auto" placeholder="Nhập tên thương hiệu...">
+
+    <button type="submit" class="btn btn-sm btn-outline-primary">
+        <i class="fas fa-search me-1"></i> Tìm
+    </button>
+
+    <a href="{{ route('admin.brands.index') }}" class="btn btn-sm btn-outline-secondary">
+        <i class="fas fa-sync me-1"></i> Làm mới
+    </a>
+</form>
+
 
                     {{-- Bảng danh sách --}}
                     <div class="table-responsive">
