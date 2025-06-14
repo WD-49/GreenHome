@@ -3,9 +3,30 @@
 @section('title')
     {{ $title }}
 @endsection
+@push('styles')
+    <style>
+        .form-label {
+            font-weight: 500;
+        }
+
+        .table th,
+        .table td {
+            vertical-align: middle !important;
+        }
+
+        @media (max-width: 768px) {
+            .table-responsive {
+                font-size: 14px;
+            }
+
+            .btn-group label {
+                font-size: 14px;
+            }
+        }
+    </style>
+@endpush
 
 @section('content')
-    <h1 class="text-center">{{ $title }}</h1>
 
     <!-- Hiển thị lỗi của validation -->
     @if ($errors->any())
@@ -25,10 +46,13 @@
         </div>
     @endif
 
-    <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data"
+        class="p-4 rounded shadow bg-white">
         @csrf
 
         <div class="mb-4">
+            <h1 class="text-center">{{ $title }}</h1>
+
             <div class="row">
                 <div class="col-md-6">
                     <div class="mb-3">
@@ -98,14 +122,18 @@
                         @enderror
                     </div>
 
+                    {{-- ...existing code... --}}
                     <div class="mb-3">
                         <label for="image" class="form-label">Hình ảnh sản phẩm</label>
                         <input type="file" class="form-control @error('image') is-invalid @enderror" name="image"
                             id="image">
+                        <img id="mainImagePreview" src="#" alt="Xem trước ảnh" class="img-thumbnail mt-2 d-none"
+                            style="max-width: 150px;">
                         @error('image')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
+                    {{-- ...existing code... --}}
                 </div>
             </div>
 
@@ -120,145 +148,279 @@
         </div>
 
         <hr>
+        {{-- Chọn loại sản phẩm --}}
+        {{-- ...existing code... --}}
+        <div class="mb-4">
+            <label class="form-label fw-bold">Loại sản phẩm</label>
+            <div class="btn-group w-100 mb-2" role="group" aria-label="Chọn loại sản phẩm">
+                <input type="radio" class="btn-check" name="is_variant" id="simple_product" value="0"
+                    autocomplete="off" {{ old('is_variant') ? '' : 'checked' }}>
+                <label class="btn btn-outline-primary" for="simple_product">Sản phẩm đơn</label>
 
-        <!-- Phần chọn tổ hợp thuộc tính -->
-        <div id="attribute-selection">
-            <h4>Chọn các thuộc tính để thêm vào biến thể</h4>
-            @foreach ($attributes as $attribute)
-                <div class="form-check">
-                    <input class="form-check-input variant-attribute-checkbox" type="checkbox"
-                        id="attribute_{{ $attribute->id }}" value="{{ $attribute->id }}"
-                        data-name="{{ $attribute->name }}">
-                    <label class="form-check-label" for="attribute_{{ $attribute->id }}">
-                        {{ $attribute->name }}
-                    </label>
+                <input type="radio" class="btn-check" name="is_variant" id="variant_product" value="1"
+                    autocomplete="off" {{ old('is_variant') ? 'checked' : '' }}>
+                <label class="btn btn-outline-primary" for="variant_product">Có biến thể</label>
+            </div>
+        </div>
+        {{-- ...existing code... --}}
+        {{-- Thuộc tính (chỉ hiện nếu chọn sản phẩm biến thể) --}}
+        <div id="attribute-section" class="mb-4 d-none">
+            <label class="form-label fw-bold">Chọn thuộc tính và giá trị</label>
+
+            <div class="mb-3">
+                <select id="attributeSelector" class="form-select">
+                    <option value="">-- Chọn thuộc tính --</option>
+                    @foreach ($attributes as $attribute)
+                        <option value="{{ $attribute->id }}">{{ $attribute->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div id="attributeValuesContainer">
+                {{-- Các checkbox sẽ render ở đây khi chọn thuộc tính --}}
+            </div>
+            {{-- điền giá và số lượng default --}}
+            <div id="defaultPriceQuantity" class="mb-3 d-none">
+                <div class="row g-3 align-items-center">
+                    <div class="col-auto">
+                        <label for="defaultPrice" class="col-form-label">Giá mặc định</label>
+                    </div>
+                    <div class="col-auto">
+                        <input type="number" id="defaultPrice" class="form-control" min="0" step="1000"
+                            value="0">
+                    </div>
+                    <div class="col-auto">
+                        <label for="defaultQuantity" class="col-form-label">Số lượng mặc định</label>
+                    </div>
+                    <div class="col-auto">
+                        <input type="number" id="defaultQuantity" class="form-control" min="0" value="0">
+                    </div>
+                    <div class="col text-end">
+                        <button type="button" class="btn btn-outline-primary w-auto" id="generateVariants">
+                            ⚡ Tạo nhanh các biến thể từ tổ hợp giá trị
+                        </button>
+                    </div>
                 </div>
-            @endforeach
+            </div>
+
+
         </div>
 
-        <!-- Phần tạo biến thể -->
-        <div id="variants-block" class="mt-4">
-            <h4>Biến thể</h4>
-            <div id="variants-container">
-                <!-- Các biến thể được thêm động vào đây -->
+        {{-- Danh sách biến thể --}}
+        <div id="variant-table" class="mt-4 d-none">
+            <h5 class="mb-3">Danh sách biến thể</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle shadow-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Biến thể</th>
+                            <th>Giá</th>
+                            <th>Số lượng</th>
+                            <th>Ảnh</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="variantBody">
+                        {{-- Các dòng biến thể được thêm động bằng JS --}}
+                    </tbody>
+                </table>
             </div>
-            <button type="button" class="btn btn-secondary mt-2" id="add-variant">
-                + Thêm biến thể
+        </div>
+
+        {{-- Chỉ hiện với sản phẩm đơn --}}
+        <div id="simple-fields" class="mb-4">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="simple_price" class="form-label">Giá sản phẩm <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control @error('simple_price') is-invalid @enderror"
+                        name="simple_price" id="simple_price" min="0" step="1000"
+                        value="{{ old('simple_price') }}">
+                    @error('simple_price')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="simple_quantity" class="form-label">Số lượng <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control @error('simple_quantity') is-invalid @enderror"
+                        name="simple_quantity" id="simple_quantity" min="0"
+                        value="{{ old('simple_quantity') }}">
+                    @error('simple_quantity')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+        </div>
+
+        {{-- Nút Thêm sản phẩm --}}
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-success" id="submitProductBtn">
+                ✅ Thêm sản phẩm
             </button>
         </div>
 
-        <div class="text-center mt-4">
-            <button type="submit" class="btn btn-primary">Lưu sản phẩm</button>
-            <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">Hủy</a>
-        </div>
     </form>
+
+
+@endsection
+
+@push('scripts')
+    {{-- CKEditor --}}
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+
 
     <!-- Script JS xử lý động -->
     <!-- Đảm bảo tải jQuery & Bootstrap JS (với Collapse) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Bạn có thể dùng CDN Bootstrap JS cho collapse -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
     <script>
-        // Biến toàn cục để lưu các thuộc tính được chọn và dữ liệu gốc của attributes.
-        let selectedAttributes = [];
-        // Chuyển dữ liệu attributes từ server sang JS (đảm bảo cấu trúc phù hợp như đã mô tả).
-        let attributesData = @json($attributes);
-        // console.log(attributesData);
+        let editorInstance;
 
-        $(document).ready(function() {
-            // Khi checkbox thuộc tính được tích hoặc bỏ tích,
-            // cập nhật danh sách các thuộc tính được chọn.
-            $('.variant-attribute-checkbox').change(function() {
-                updateSelectedAttributes();
-                // Khi thay đổi thuộc tính đã chọn, ta xóa hết các biến thể đã tạo,
-                // tránh sự không đồng bộ giữa cấu trúc biến thể và các thuộc tính hiện hành.
-                $('#variants-container').empty();
-            });
+        document.addEventListener('DOMContentLoaded', function() {
+            const simpleRadio = document.getElementById('simple_product');
+            const variantRadio = document.getElementById('variant_product');
+            const attributeSection = document.getElementById('attribute-section');
+            const variantTable = document.getElementById('variant-table');
+            const simpleFields = document.getElementById('simple-fields');
+            const defaultPriceQuantity = document.getElementById('defaultPriceQuantity');
+            const attributeSelector = document.getElementById('attributeSelector');
+            const attributeValuesContainer = document.getElementById('attributeValuesContainer');
+            const variantBody = document.getElementById('variantBody');
 
-            function updateSelectedAttributes() {
-                selectedAttributes = [];
-                $('.variant-attribute-checkbox:checked').each(function() {
-                    let attrId = $(this).val();
-                    let attrData = attributesData.find(item => item.id == attrId);
-                    if (attrData) {
-                        selectedAttributes.push(attrData);
-                    }
+            const attributeData = @json($attributes->mapWithKeys(fn($a) => [$a->id => $a->attributeValues->map(fn($v) => ['id' => $v->id, 'value' => $v->value])]));
+
+            function toggleVariantMode() {
+                const isVariant = variantRadio.checked;
+
+                // Ẩn/hiện theo loại sản phẩm
+                attributeSection.classList.toggle('d-none', !isVariant);
+                variantTable.classList.toggle('d-none', !isVariant);
+                defaultPriceQuantity.classList.toggle('d-none', !isVariant);
+                simpleFields.classList.toggle('d-none', isVariant);
+
+                // Vô hiệu hóa các input trong simple-fields khi chọn biến thể
+                const simpleInputs = simpleFields.querySelectorAll('input');
+                simpleInputs.forEach(input => {
+                    input.disabled = isVariant;
                 });
             }
 
-            // Thêm biến thể mới dựa trên danh sách thuộc tính được chọn.
-            $('#add-variant').click(function() {
-                // Nếu chưa chọn thuộc tính thì thông báo cho người dùng.
-                if (selectedAttributes.length === 0) {
-                    alert("Vui lòng chọn ít nhất 1 thuộc tính ở trên!");
+            // Gọi ngay để áp dụng theo giá trị đã chọn
+            toggleVariantMode();
+
+            simpleRadio.addEventListener('change', toggleVariantMode);
+            variantRadio.addEventListener('change', toggleVariantMode);
+
+            // Khi chọn thuộc tính
+            attributeSelector.addEventListener('change', function() {
+                const attributeId = this.value;
+                if (!attributeId || attributeValuesContainer.querySelector(`[data-attr="${attributeId}"]`))
                     return;
-                }
 
-                // Đếm số biến thể hiện tại để tạo chỉ số duy nhất cho name input.
-                let variantIndex = $('#variants-container .variant-row').length;
-                let variantHtml = '<div class="variant-row border p-3 mb-2" data-index="' + variantIndex +
-                    '">';
-                variantHtml += '<div class="row">';
+                const values = attributeData[attributeId];
+                if (!values) return;
 
-                // Với mỗi thuộc tính được chọn, tạo dropdown lựa chọn giá trị.
-                selectedAttributes.forEach(function(attribute) {
-                    console.log('Attribute:',
-                        attribute.attribute_values); // Kiểm tra cấu trúc của đối tượng attribute
+                const wrapper = document.createElement('div');
+                wrapper.classList.add('mb-2');
+                wrapper.setAttribute('data-attr', attributeId);
 
-                    variantHtml += '<div class="col-md-3">';
-                    variantHtml += '<label class="form-label">' + attribute.name + '</label>';
-                    variantHtml += '<select class="form-select" name="variants[' + variantIndex +
-                        '][attributes][' + attribute.id + ']">';
-                    variantHtml += '<option value="">-- Chọn ' + attribute.name + ' --</option>';
+                let html =
+                    `<label class="form-label">Thuộc tính: ${this.options[this.selectedIndex].text}</label>
+    <div>`;
+                values.forEach(v => {
+                    html += `
+        <div class="form-check form-check-inline">
+            <input class="form-check-input attribute-checkbox" type="checkbox" name="attributes[${attributeId}][]"
+                value="${v.id}" id="attr_${attributeId}_${v.id}">
+            <label class="form-check-label" for="attr_${attributeId}_${v.id}">${v.value}</label>
+        </div>`;
+                });
+                html += `
+    </div>`;
+                wrapper.innerHTML = html;
+                attributeValuesContainer.appendChild(wrapper);
+            });
 
-                    if (attribute.attribute_values && attribute.attribute_values.length > 0) {
-                        attribute.attribute_values.forEach(function(value) {
-                            console.log('Value:',
-                                value); // Kiểm tra cấu trúc của đối tượng value
-                            variantHtml += '<option value="' + value.id + '">' + value
-                                .value + '</option>';
-                        });
-                    }
-                    variantHtml += '</select>';
-                    variantHtml += '</div>';
+            // Tạo biến thể
+            document.getElementById('generateVariants').addEventListener('click', function() {
+                variantBody.innerHTML = '';
+
+                const defaultPrice = Number(document.getElementById('defaultPrice').value) || 0;
+                const defaultQuantity = Number(document.getElementById('defaultQuantity').value) || 0;
+                const checkedBoxes = document.querySelectorAll('.attribute-checkbox:checked');
+
+                const attrMap = {};
+                checkedBoxes.forEach(cb => {
+                    const attrId = cb.name.match(/attributes\[(\d+)]/)[1];
+                    if (!attrMap[attrId]) attrMap[attrId] = [];
+                    attrMap[attrId].push({
+                        id: cb.value,
+                        label: document.querySelector(`label[for="${cb.id}"]`).textContent
+                            .trim()
+                    });
                 });
 
+                const attrValuesArray = Object.values(attrMap);
+                if (attrValuesArray.length === 0) return;
 
-                variantHtml += '</div>'; // end row
+                let combinations = [
+                    []
+                ];
+                attrValuesArray.forEach(group => {
+                    const newCombos = [];
+                    combinations.forEach(prefix => {
+                        group.forEach(item => {
+                            newCombos.push([...prefix, item]);
+                        });
+                    });
+                    combinations = newCombos;
+                });
 
-                // Phần nhập thông tin bổ sung của biến thể: giá, số lượng, ảnh
-                // Sử dụng collapse của Bootstrap để ẩn/hiện thông tin khi cần.
-                variantHtml +=
-                    '<button type="button" class="btn btn-secondary btn-sm mt-2" data-bs-toggle="collapse" data-bs-target="#variantInfo_' +
-                    variantIndex + '">';
-                variantHtml += 'Nhập thông tin bổ sung';
-                variantHtml += '</button>';
-                variantHtml += '<div class="collapse mt-2" id="variantInfo_' + variantIndex + '">';
-                variantHtml += '<div class="card card-body">';
-                variantHtml += '<div class="mb-3">';
-                variantHtml += '<label class="form-label">Giá</label>';
-                variantHtml += '<input type="number" class="form-control" name="variants[' + variantIndex +
-                    '][price]">';
-                variantHtml += '</div>';
-                variantHtml += '<div class="mb-3">';
-                variantHtml += '<label class="form-label">Số lượng</label>';
-                variantHtml += '<input type="number" class="form-control" name="variants[' + variantIndex +
-                    '][quantity]">';
-                variantHtml += '</div>';
-                variantHtml += '<div class="mb-3">';
-                variantHtml += '<label class="form-label">Ảnh</label>';
-                variantHtml += '<input type="file" class="form-control" name="variants[' + variantIndex +
-                    '][image]">';
-                variantHtml += '</div>';
-                variantHtml += '</div>';
-                variantHtml += '</div>';
+                combinations.forEach((combo, index) => {
+                    const variantName = combo.map(c => c.label).join(' / ');
+                    const variantIdValues = combo.map(c => c.id).join(',');
 
-                variantHtml += '</div>'; // end variant-row
+                    variantBody.insertAdjacentHTML('beforeend', `
+    <tr>
+        <td>
+            ${variantName}
+            <input type="hidden" name="variants[${index}][values]" value="${variantIdValues}">
+        </td>
+        <td><input type="number" name="variants[${index}][price]" class="form-control" required
+                value="${defaultPrice}"></td>
+        <td><input type="number" name="variants[${index}][quantity]" class="form-control" required
+                value="${defaultQuantity}"></td>
+        <td><input type="file" name="variants[${index}][image]" class="form-control"></td>
+        <td><button type="button" class="btn btn-sm btn-danger" onclick="this.closest('tr').remove()">❌</button></td>
+    </tr>
+    `);
+                });
+            });
 
-                // Thêm biến thể mới vào container.
-                $('#variants-container').append(variantHtml);
+            // xử lý mô tả bằng CKEditor
+            ClassicEditor
+                .create(document.querySelector('#description'))
+                .then(editor => {
+                    editorInstance = editor;
+                });
+
+            document.getElementById('submitProductBtn').addEventListener('click', function() {
+                document.querySelector('#description').value = editorInstance.getData();
             });
         });
+        // ...existing code...
+        // Xem trước ảnh sản phẩm chính
+        document.getElementById('image').addEventListener('change', function(e) {
+            const preview = document.getElementById('mainImagePreview');
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    preview.src = ev.target.result;
+                    preview.classList.remove('d-none');
+                }
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+        // ...existing code...
     </script>
-@endsection
+@endpush

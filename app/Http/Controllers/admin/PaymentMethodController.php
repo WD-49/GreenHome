@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\admin;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\PaymentMethod;
@@ -10,18 +10,37 @@ class PaymentMethodController extends Controller
 {
     public function index(Request $request)
     {
+        // Đếm cho tabs
+        $paymentAll = PaymentMethod::withTrashed()->get();
+        $paymentActive = PaymentMethod::where('status', 1)->get();
+        $paymentInactive = PaymentMethod::where('status', 0)->get();
+        $paymentTrashed = PaymentMethod::onlyTrashed()->get();
+
+        // Query filter
         $query = PaymentMethod::query();
 
-        // Lọc theo tên nếu có
-        if ($request->has('name') && $request->name !== null) {
+        if ($request->filled('name')) {
             $query->where('name', 'like', '%' . $request->name . '%');
+        }
+        if ($request->filled('status')) {
+            if ($request->status == 'active') {
+                $query->where('status', 1);
+            }
+            if ($request->status == 'inactive') {
+                $query->where('status', 0);
+            }
         }
 
         $paymentMethods = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        return view('admin.payment_methods.index', compact('paymentMethods'));
+        return view('admin.payment_methods.index', [
+            'paymentMethods' => $paymentMethods,
+            'paymentAll' => $paymentAll,
+            'paymentActive' => $paymentActive,
+            'paymentInactive' => $paymentInactive,
+            'paymentTrashed' => $paymentTrashed,
+        ]);
     }
-
 
     public function create()
     {
@@ -30,21 +49,23 @@ class PaymentMethodController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|max:255|unique:payment_methods,name',
-            'description' => 'nullable|max:1000',
-            'status' => 'required|boolean',
-        ], [
-            'name.required' => 'Vui lòng nhập tên phương thức thanh toán.',
-            'name.unique' => 'Tên phương thức đã tồn tại.',
-            'name.max' => 'Tên không quá 255 ký tự.',
-            'description.max' => 'Mô tả không quá 1000 ký tự.',
-            'status.required' => 'Vui lòng chọn trạng thái.',
-            'status.boolean' => 'Trạng thái không hợp lệ.',
+        $data = $request->validate([
+            'name.*' => 'required|string|max:255',
+            'description.*' => 'nullable|string',
+            'status.*' => 'required|in:0,1',
         ]);
-        PaymentMethod::create($validated);
+
+        foreach ($data['name'] as $index => $name) {
+            PaymentMethod::create([
+                'name' => $name,
+                'description' => $data['description'][$index] ?? '',
+                'status' => $data['status'][$index],
+            ]);
+        }
+
         return redirect()->route('admin.paymentMethods.index')->with('success', 'Thêm phương thức thành công!');
     }
+
 
     public function edit($id)
     {
@@ -55,19 +76,15 @@ class PaymentMethodController extends Controller
     public function update(Request $request, $id)
     {
         $paymentMethod = PaymentMethod::findOrFail($id);
+
         $validated = $request->validate([
-            'name' => 'required|max:255|unique:payment_methods,name,' . $id,
-            'description' => 'nullable|max:1000',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'status' => 'required|boolean',
-        ], [
-            'name.required' => 'Vui lòng nhập tên phương thức thanh toán.',
-            'name.unique' => 'Tên phương thức đã tồn tại.',
-            'name.max' => 'Tên không quá 255 ký tự.',
-            'description.max' => 'Mô tả không quá 1000 ký tự.',
-            'status.required' => 'Vui lòng chọn trạng thái.',
-            'status.boolean' => 'Trạng thái không hợp lệ.',
         ]);
+
         $paymentMethod->update($validated);
+
         return redirect()->route('admin.paymentMethods.index')->with('success', 'Cập nhật thành công!');
     }
 
@@ -80,18 +97,37 @@ class PaymentMethodController extends Controller
 
     public function trash(Request $request)
     {
+        // Đếm tabs cho thùng rác
+        $paymentAll = PaymentMethod::withTrashed()->get();
+        $paymentActive = PaymentMethod::where('status', 1)->get();
+        $paymentInactive = PaymentMethod::where('status', 0)->get();
+        $paymentTrashed = PaymentMethod::onlyTrashed()->get();
+
         $query = PaymentMethod::onlyTrashed();
 
-        // Lọc theo tên
-        if ($request->has('name') && $request->name !== null) {
+        if ($request->filled('name')) {
             $query->where('name', 'like', '%' . $request->name . '%');
+        }
+        if ($request->filled('status')) {
+            if ($request->status == 'active') {
+                $query->where('status', 1);
+            }
+            if ($request->status == 'inactive') {
+                $query->where('status', 0);
+            }
         }
 
         $paymentMethods = $query->orderBy('deleted_at', 'desc')->paginate(10);
 
-        return view('admin.payment_methods.trash', compact('paymentMethods'));
+        // Dùng lại view index cho đồng bộ tabs, table, filter
+        return view('admin.payment_methods.trash', [
+            'paymentMethods' => $paymentMethods,
+            'methodAll' => $paymentAll,
+            'methodActive' => $paymentActive,
+            'methodInactive' => $paymentInactive,
+            'methodTrashed' => $paymentTrashed,
+        ]);
     }
-
 
     public function restore($id)
     {
@@ -105,5 +141,10 @@ class PaymentMethodController extends Controller
         $paymentMethod = PaymentMethod::onlyTrashed()->findOrFail($id);
         $paymentMethod->forceDelete();
         return redirect()->route('admin.paymentMethods.trash')->with('success', 'Xóa vĩnh viễn thành công!');
+    }
+    public function show($id)
+    {
+        $paymentMethod = PaymentMethod::withTrashed()->findOrFail($id);
+        return view('admin.payment_methods.show', compact('paymentMethod'));
     }
 }

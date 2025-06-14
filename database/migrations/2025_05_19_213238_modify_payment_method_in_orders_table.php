@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::table('orders', function (Blueprint $table) {
             Schema::table('orders', function (Blueprint $table) {
                 // Thêm cột foreign key mới (nullable để tránh lỗi nếu có đơn chưa có payment_method_id)
-                $table->foreignId('payment_method_id')->nullable()->after('discount_id')->constrained('payment_methods')->cascadeOnDelete();
+                $table->foreignId('payment_method_id')->nullable()->after('discount_id')->constrained('payment_methods')->nullOnDelete();
             });
 
             // (Tuỳ chọn) Chuyển dữ liệu từ payment_method (enum) sang payment_method_id

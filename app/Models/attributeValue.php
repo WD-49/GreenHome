@@ -29,13 +29,13 @@ class attributeValue extends Model
 
 
     protected static function booted()
-{
-    static::deleting(function ($attributeValue) {
-        if (! $attributeValue->forceDeleting) {
-            // Xóa mềm tất cả product_variant_values liên quan
-            $attributeValue->productVariantValues()->delete();
-        }
-    });
-}
+    {
+        static::deleting(function ($attributeValue) {
+            if (!$attributeValue->forceDeleting) {
+                // Xóa mềm tất cả product_variant_values liên quan
+                $attributeValue->productVariantValues()->delete();
+            }
+        });
+    }
 
 }

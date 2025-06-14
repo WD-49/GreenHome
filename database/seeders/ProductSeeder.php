@@ -2,14 +2,16 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
+use App\Models\Brand;
 use App\Models\Product;
+use App\Models\Category;
+use Database\Factories\ProductFactory;
+use Illuminate\Database\Seeder;
 
 class ProductSeeder extends Seeder
 {
-    public function run()
-    {
-        // Tạo 10 sản phẩm giả
-        Product::factory(10)->create();
-    }
+  public function run(): void
+  {
+    
+  }
 }

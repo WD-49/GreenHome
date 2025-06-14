@@ -3,181 +3,216 @@
 @section('title')
     {{ $title }}
 @endsection
+
 @section('content')
-    <h1 class="text-center">{{ $title }}</h1>
+    <style>
+        .nav-pills .nav-link.active {
+            font-weight: 700;
+            border-radius: 0 !important;
+            background-color: transparent !important;
+            color: #0768e8;
+        }
+    </style>
 
-    {{-- <div class="card-header bg-primary text-white">
-        <h5 class="mb-0 "><i class="fas fa-search"></i> Lọc sản phẩm</h5>
-    </div>
-    <div class="card">s
-        <div class="card-body">
-            <form method="GET" action="{{ route('admin.products.index') }}" class="row g-3">
-                <!-- Tên sản phẩm -->
-                <div class="col-md-3">
-                    <label for="name" class="form-label">Tên sản phẩm</label>
-                    <input type="text" name="name" id="name" class="form-control" placeholder="Nhập tên sản phẩm"
-                        value="{{ request('name') }}" style="border-color: #e9ecef;">
-                </div>
-                <!-- Danh mục -->
-                <div class="col-md-3">
-                    <label for="category_id" class="form-label">Danh mục</label>
-                    <select name="category_id" id="category_id" class="form-select">
-                        <option value="">-- Tất cả danh mục --</option>
-                        @foreach ($categories as $category)
-                            <option value="{{ $category->id }}"
-                                {{ request('category_id') == $category->id ? 'selected' : '' }}>
-                                {{ $category->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Thương hiệu -->
-                <div class="col-md-3">
-                    <label for="brand_id" class="form-label">Thương hiệu</label>
-                    <select name="brand_id" id="brand_id" class="form-select">
-                        <option value="">-- Tất cả thương hiệu --</option>
-                        @foreach ($brands as $brand)
-                            <option value="{{ $brand->id }}" {{ request('brand_id') == $brand->id ? 'selected' : '' }}>
-                                {{ $brand->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Trạng thái -->
-                <div class="col-md-3">
-                    <label for="status" class="form-label">Trạng thái</label>
-                    <select name="status" id="status" class="form-select">
-                        <option value="">-- Tất cả trạng thái --</option>
-                        <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>Đang bán</option>
-                        <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>Dừng bán</option>
-                    </select>
-                </div>
-
-                <!-- Ngày nhập -->
-                <div class="col-md-4">
-                    <label for="date_range" class="form-label">Ngày nhập</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light">Từ ngày</span>
-                        <input type="date" name="min_date" class="form-control" value="{{ request('min_date') }}">
-                        <span class="input-group-text bg-light">đến ngày</span>
-                        <input type="date" name="max_date" class="form-control" value="{{ request('max_date') }}">
-                    </div>
-                </div>
-
-                <!-- Khoảng giá -->
-                <div class="col-md-4">
-                    <label for="price_range" class="form-label">Khoảng giá</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light">Từ</span>
-                        <input type="number" name="min_price" id="min_price" class="form-control"
-                            placeholder="Giá tối thiểu" value="{{ request('min_price') }}" min="0">
-                        <span class="input-group-text bg-light">đến</span>
-                        <input type="number" name="max_price" id="max_price" class="form-control" placeholder="Giá tối đa"
-                            value="{{ request('max_price') }}" min="0">
-                        <span class="input-group-text bg-light">VNĐ</span>
-                    </div>
-                </div>
-                <!-- Nút Tìm kiếm và Làm mới -->
-                <div class="col-md-4 d-flex align-items-end gap-2">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-search me-1"></i> Tìm kiếm
-                    </button>
-                    <a href="{{ route('admin.products.index') }}" class="btn btn-warning w-100">
-                        <i class="fas fa-sync me-1"></i> Làm mới
+    <div class="row">
+        <h2 class="text-center">{{ $title }}</h2>
+        <div class="d-md-flex align-items-center">
+            {{-- Nút thao tác --}}
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <a href="{{ route('admin.products.index') }}" class="btn btn-outline-secondary">
+                        <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách sản phẩm
                     </a>
                 </div>
-            </form>
-        </div>
-    </div> --}}
-    <div class="col-12 d-flex align-center justify-content-center gap-2">
-        <a href="{{ route('admin.products.variants.create', $product) }}" class="btn btn-success align-content-center"
-            title="Thêm sản phẩm"><i class="fa-solid fa-square-plus"></i> Thêm biến thể
-        </a>
-        <a href="{{ route('admin.products.variants.trashed', $product) }}" class="btn btn-warning" title="Thùng rác"><i
-                class="fa-solid fa-dumpster"></i> Thùng rác
-        </a>
-    </div>
-    <div class="card shadow-sm mb-4">
-        <div class="table-responsive py-4">
-            <table class="table table-flush" id="datatable">
-                <thead class="thead-light">
-                    <tr>
-                        <th>STT</th>
-                        <th>Mã sản phẩm</th>
-                        <th>thuộc tính</th>
-                        <th>ảnh</th>
-                        <th>Giá</th>
-                        <th>số lượng</th>
-                        <th>Trạng thái</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($variants as $index => $variant)
-                        <tr>
-                            <td>{{ $index + 1 }}</td>
-                            <td>{{ $variant->sku }}</td>
-                            <td>
-                                @foreach ($variant->productVariantValues as $pvv)
-                                    <li>
-                                        {{ $pvv->attributeValue->attribute->name }}: {{ $pvv->attributeValue->value }}
-                                    </li>
-                                @endforeach
-                            </td>
-                            <td> <img src="{{ asset('storage/' . $variant->image) }}" width="100px"
-                                    alt="Hình ảnh sản phẩm">
-                            </td>
-                            <td>{{ number_format($variant->price, 0) }} đ</td>
 
-                            <td>{{ $variant->quantity }}</td>
-                            <td scope="row">
-                                <span class="badge {{ $variant->status == 1 ? 'bg-success' : 'bg-danger' }}">
-                                    {{ $variant->status == 1 ? 'Đang bán' : 'Dừng bán' }}
-                                </span>
-                            </td>
+            </div>
+            {{-- BỘ LỌC --}}
+            <div class="ms-auto mt-3 mt-md-0">
 
-                            <td>
-                                <a href="{{ route('admin.products.variants.edit', [$variant->product, $variant]) }}"
-                                    class="btn btn-warning btn-sm" title="chỉnh sửa"><i class="fa-solid fa-pen"></i>
+                <div class="dropdown mb-3 text-end">
+
+                    <a href="{{ route('admin.products.variants.create', $product) }}" class="btn btn-outline-primary">
+                        <i class="fa-solid fa-square-plus me-1"></i> Thêm biến thể
+                    </a>
+                    <a class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"
+                        data-bs-auto-close="outside">
+                        <i class="fas fa-filter me-1"></i> Bộ lọc
+                    </a>
+                    <div class="dropdown-menu p-4" style="min-width: 600px;">
+                        <form method="GET" action="{{ route('admin.products.variants.index', $product) }}"
+                            class="row g-3">
+
+                            {{-- Thuộc tính --}}
+                            <div class="col-md-6">
+                                <label for="attribute" class="form-label">Thuộc tính</label>
+                                <input type="text" name="attribute" id="attribute" class="form-control"
+                                    value="{{ request('attribute') }}" placeholder="Màu, size...">
+                            </div>
+
+                            {{-- Giá từ đến --}}
+                            <div class="col-md-6">
+                                <label class="form-label">Khoảng giá</label>
+                                <div class="input-group">
+                                    <input type="number" name="min_price" class="form-control" placeholder="Từ"
+                                        value="{{ request('min_price') }}">
+                                    <input type="number" name="max_price" class="form-control" placeholder="Đến"
+                                        value="{{ request('max_price') }}">
+                                </div>
+                            </div>
+
+                            {{-- Trạng thái --}}
+                            <div class="col-md-6">
+                                <label for="status" class="form-label">Trạng thái</label>
+                                <select name="status" id="status" class="form-select">
+                                    <option value="">-- Tất cả trạng thái --</option>
+                                    <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>Đang bán
+                                    </option>
+                                    <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>Dừng bán
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-12 d-flex justify-content-end gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search me-1"></i> Tìm kiếm
+                                </button>
+                                <a href="{{ route('admin.products.variants.index', $product) }}" class="btn btn-warning">
+                                    <i class="fas fa-sync me-1"></i> Làm mới
                                 </a>
-                                <form
-                                    action="{{ route('admin.products.variants.destroy', [$variant->product, $variant]) }}"
-                                    method="POST" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm btn-confirm" title="xóa"
-                                        data-confirm-message="Bạn có chắc chắn muốn bỏ biến thể sản phẩm này vào thùng rác không?"><i
-                                            class="fa-solid fa-trash"></i></button>
-                                </form>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
-        @if ($variants->lastPage() > 1)
-            <nav aria-label="Page navigation example">
-                <ul class="pagination mb-0">
+        <ul class="nav nav-pills mb-3">
+            <li class="nav-item">
+                <a class="nav-link {{ request('status') == null ? 'active' : '' }}"
+                    href="{{ route('admin.products.variants.index', $product) }}">
+                    Tất cả ({{ $product->productVariants->count() }})
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('admin.products.variants.trashed', $product) ? 'active' : '' }}"
+                    href="{{ route('admin.products.variants.trashed', $product) }}">
+                    Thùng rác ({{ $variantTrashed->count() }})
+                </a>
+            </li>
+        </ul>
 
-                    {{-- Previous --}}
-                    <li class="page-item {{ $variants->onFirstPage() ? 'disabled' : '' }}">
-                        <a class="page-link" href="{{ $variants->previousPageUrl() }}" tabindex="-1">Previous</a>
-                    </li>
+        {{-- DANH SÁCH BIẾN THỂ --}}
+        <div class="card shadow-sm">
 
-                    {{-- Page Numbers --}}
-                    @for ($i = 1; $i <= $variants->lastPage(); $i++)
-                        <li class="page-item {{ $i == $variants->currentPage() ? 'active' : '' }}">
-                            <a class="page-link" href="{{ $variants->url($i) }}">{{ $i }}</a>
-                        </li>
-                    @endfor
+            <div class="card-body">
 
-                    {{-- Next --}}
-                    <li class="page-item {{ !$variants->hasMorePages() ? 'disabled' : '' }}">
-                        <a class="page-link" href="{{ $variants->nextPageUrl() }}">Next</a>
-                    </li>
-                </ul>
-            </nav>
-        @endif
-    @endsection
+                <div class="table-responsive">
+                    <div>
+                        <h4 class="card-title">Danh sách biến thể sản phẩm</h4>
+                    </div>
+                    <table class="table table-hover align-middle text-nowrap">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Mã SKU</th>
+                                <th>Thuộc tính</th>
+                                <th>Ảnh</th>
+                                <th>Giá</th>
+                                <th>Số lượng</th>
+                                <th>Trạng thái</th>
+                                <th class="text-end">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($variants as $index => $variant)
+                                <tr>
+                                    <td>{{ $index + 1 }}</td>
+                                    <td>{{ $variant->sku }}</td>
+                                    <td>
+                                        @if ($variant->attribute_name)
+                                            {{ $variant->attribute_name }}
+                                        @else
+                                            Sản phẩm không có thuộc tính
+                                        @endif
+                                    </td>
+                                    <td>
+
+                                        @if ($variant->image)
+                                            <img src="{{ asset('storage/' . $variant->image) }}" width="60"
+                                                class="rounded" alt="Ảnh biến thể">
+                                        @else
+                                            biến thể không có ảnh
+                                        @endif
+
+                                    </td>
+                                    <td>{{ number_format($variant->price, 0) }} đ</td>
+                                    <td>{{ $variant->quantity }}</td>
+                                    <td>
+                                        <span class="badge {{ $variant->status == 1 ? 'bg-success' : 'bg-danger' }}">
+                                            {{ $variant->status == 1 ? 'Đang bán' : 'Dừng bán' }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="dropdown">
+                                            <button class="btn btn-light btn-sm" type="button"
+                                                id="dropdownMenuButton{{ $product->id }}" data-bs-toggle="dropdown"
+                                                aria-expanded="false">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end"
+                                                aria-labelledby="dropdownMenuButton{{ $product->id }}">
+                                                <li>
+                                                    <a class="dropdown-item"
+                                                        href="{{ route('admin.products.variants.edit', [$variant->product, $variant]) }}">
+                                                        Chỉnh sửa
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <form
+                                                        action="{{ route('admin.products.variants.destroy', [$variant->product, $variant]) }}"
+                                                        method="POST"
+                                                        onsubmit="return confirm('Bạn có chắc chắn muốn bỏ sản phẩm này vào thùng rác không?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button class="dropdown-item text-danger" type="submit">
+                                                            Xóa sản phẩm
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+
+                            @if ($variants->count() == 0)
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">Không có biến thể nào phù hợp</td>
+                                </tr>
+                            @endif
+                        </tbody>
+                    </table>
+                </div>
+
+                {{-- PHÂN TRANG --}}
+                @if ($variants->lastPage() > 1)
+                    <nav class="mt-3">
+                        <ul class="pagination justify-content-end">
+                            <li class="page-item {{ $variants->onFirstPage() ? 'disabled' : '' }}">
+                                <a class="page-link" href="{{ $variants->previousPageUrl() }}">Previous</a>
+                            </li>
+                            @for ($i = 1; $i <= $variants->lastPage(); $i++)
+                                <li class="page-item {{ $i == $variants->currentPage() ? 'active' : '' }}">
+                                    <a class="page-link" href="{{ $variants->url($i) }}">{{ $i }}</a>
+                                </li>
+                            @endfor
+                            <li class="page-item {{ !$variants->hasMorePages() ? 'disabled' : '' }}">
+                                <a class="page-link" href="{{ $variants->nextPageUrl() }}">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                @endif
+
+            </div>
+        </div>
+    </div>
+@endsection

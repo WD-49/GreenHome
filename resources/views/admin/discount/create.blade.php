@@ -7,6 +7,9 @@
 
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 
 <style>
    /* body {
@@ -140,7 +143,7 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Giá trị</label>
+                <label class="form-label">Giá trị giảm</label>
                 <div style="display: flex; align-items: center;">
                     <input type="number" name="discount_value" class="form-control" value="{{ old('discount_value') }}">
                     <span id="unit_label" style="margin-left: 10px; font-weight: bold;">
@@ -160,6 +163,11 @@
                 <label class="form-label">Giá trị đơn hàng tối thiểu</label>
                 <input type="number" name="min_order_value" class="form-control" value="{{ old('min_order_value') }}">
                 @error('min_order_value') <div class="text-danger">{{ $message }}</div> @enderror
+            </div>
+             <div class="mb-3">
+                <label class="form-label">Giá trị giảm tối đa</label>
+                <input type="number" name="max_discount" class="form-control" value="{{ old('max_discount') }}">
+                @error('max_discount') <div class="text-danger">{{ $message }}</div> @enderror
             </div>
         </div>
 
@@ -198,16 +206,31 @@
                 @error('applies_to_all_products') <div class="text-danger">{{ $message }}</div> @enderror
             </div>
 
-            <div class="mb-3" id="product-selection-box">
-                <label class="form-label">Sản phẩm áp dụng</label>
-                <select name="product_ids[]" class="form-control select2" multiple>
-                    @foreach($products as $product)
-                        <option value="{{ $product->id }}" {{ in_array($product->id, old('product_ids', [])) ? 'selected' : '' }}>
-                            {{ $product->name }}
-                        </option>
-                    @endforeach
-                </select>
+         
+     <div class="mb-3" id="product-selection-box" style="{{ old('applies_to_all_products') == '1' ? 'display: none;' : '' }}">
+    <label class="form-label">Sản phẩm áp dụng</label>
+    <input type="text" id="search-product" class="form-control mb-2" placeholder="Tìm kiếm sản phẩm...">
+
+    <div id="product-checkbox-list" style="max-height: 200px; overflow-y: auto; border: 1px solid #ced4da; border-radius: 8px; padding: 10px;">
+        @foreach($products as $product)
+            <div class="form-check">
+                <input
+                    class="form-check-input product-checkbox"
+                    type="checkbox"
+                    name="product_ids[]"
+                    value="{{ $product->id }}"
+                    id="product_{{ $product->id }}"
+                    {{ in_array($product->id, old('product_ids', [])) ? 'checked' : '' }}
+                >
+                <label class="form-check-label" for="product_{{ $product->id }}">
+                    {{ $product->name }}
+                </label>
             </div>
+        @endforeach
+    </div>
+</div>
+
+
 
             <div class="mb-3">
                 <label class="form-label">Trạng thái</label>
@@ -224,45 +247,38 @@
         <button type="submit" class="btn btn-primary">Thêm mới</button>
         <a href="{{ route('admin.discount.index') }}" class="btn btn-secondary">Quay lại</a>
     </div>
+  
+
 </form>
 @endsection
 
 @section('scripts')
 <script>
-    // document.addEventListener('DOMContentLoaded', function () {
-    //     $('.select2').select2();
-
-    //     const discountType = document.getElementById('discount_type');
-    //     const unitLabel = document.getElementById('unit_label');
-    //     discountType.addEventListener('change', function () {
-    //         unitLabel.textContent = this.value === 'fixed' ? 'VND' : '%';
-    //     });
-
-    //     const selectElement = document.getElementById("applies_to_all_products");
-    //     const productBox = document.getElementById("product-selection-box");
-    //     function toggleProductBox() {
-    //         productBox.style.display = selectElement.value === "0" ? "block" : "none";
-    //     }
-    //     toggleProductBox();
-    //     selectElement.addEventListener("change", toggleProductBox);
-
-    //     const startInput = document.getElementById('start_date');
-    //     const endInput = document.getElementById('end_date');
-    //     startInput.addEventListener('change', function () {
-    //         if (startInput.value) {
-    //             endInput.min = startInput.value;
-    //             if (endInput.value && endInput.value < startInput.value) {
-    //                 endInput.value = '';
-    //             }
-    //         }
-    //     });
-    // });
+   
 document.addEventListener('DOMContentLoaded', function () {
+        // Tìm kiếm nâng cao checkbox
+    const searchBox = document.getElementById('search-product');
+    const productCheckboxes = document.querySelectorAll('.product-checkbox');
+
+    searchBox.addEventListener('keyup', function () {
+        const keyword = this.value.toLowerCase();
+        productCheckboxes.forEach(checkbox => {
+            const label = checkbox.nextElementSibling.textContent.toLowerCase();
+            const parent = checkbox.closest('.form-check');
+            if (label.includes(keyword)) {
+                parent.style.display = 'block';
+            } else {
+                parent.style.display = 'none';
+            }
+        });
+    });
+
     const discountType = document.getElementById('discount_type');
     const unitLabel = document.getElementById('unit_label');
+    const appliesToAllSelect = document.getElementById('applies_to_all_products');
+    const productSelectionBox = document.getElementById('product-selection-box');
 
     function updateUnitLabel() {
-        console.log('Discount type changed to:', discountType.value); // để debug
         if (discountType.value === 'fixed') {
             unitLabel.textContent = 'VND';
         } else {
@@ -270,10 +286,26 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    updateUnitLabel(); // gọi ngay khi trang load
-    discountType.addEventListener('change', updateUnitLabel);
-});
+    function toggleProductBox() {
+        if (appliesToAllSelect.value === '1') {
+            productSelectionBox.style.display = 'none';
+        } else {
+            productSelectionBox.style.display = 'block';
+        }
+    }
 
+    updateUnitLabel();
+    toggleProductBox();
+
+    discountType.addEventListener('change', updateUnitLabel);
+    appliesToAllSelect.addEventListener('change', toggleProductBox);
+
+    $('.select2').select2({
+        placeholder: "Chọn sản phẩm...",
+        allowClear: true,
+        width: '100%',
+    });
+});
 
 </script>
 @endsection

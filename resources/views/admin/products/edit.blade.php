@@ -59,16 +59,6 @@
                     @enderror
                 </div>
 
-                {{-- Số lượng --}}
-                <div class="mb-3">
-                    <label for="quantity" class="form-label">Số lượng</label>
-                    <input type="number" class="form-control @error('quantity') is-invalid @enderror" name="quantity"
-                        id="quantity" value="{{ old('quantity', $product->quantity) }}">
-                    @error('quantity')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
                 {{-- Trạng thái --}}
                 <div class="mb-3">
                     <label class="form-label">Trạng thái</label>
@@ -91,27 +81,6 @@
 
             {{-- Cột phải --}}
             <div class="col-md-6">
-                {{-- Giá gốc --}}
-                <div class="mb-3">
-                    <label for="price" class="form-label">Giá gốc</label>
-                    <input type="number" step="0.01" class="form-control @error('price') is-invalid @enderror"
-                        name="price" id="price" value="{{ old('price', $product->price) }}">
-                    @error('price')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                {{-- Giá khuyến mãi --}}
-                <div class="mb-3">
-                    <label for="promotional_price" class="form-label">Giá khuyến mãi</label>
-                    <input type="number" step="0.01"
-                        class="form-control @error('promotional_price') is-invalid @enderror" name="promotional_price"
-                        id="promotional_price" value="{{ old('promotional_price', $product->promotional_price) }}">
-                    @error('promotional_price')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
                 {{-- Ngày nhập --}}
                 <div class="mb-3">
                     <label for="date_of_entry" class="form-label">Ngày nhập</label>
@@ -134,20 +103,21 @@
 
                     @if (!empty($product->image))
                         <div class="mt-2">
-                            <img src="{{ asset('storage/' . $product->image) }}" width="100" alt="Ảnh sản phẩm">
+                            <img src="{{ asset('storage/' . $product->image) }}" width="200" alt="Ảnh sản phẩm">
                         </div>
                     @endif
                 </div>
 
-                {{-- Mô tả --}}
-                <div class="mb-3">
-                    <label for="description" class="form-label">Mô tả</label>
-                    <textarea class="form-control @error('description') is-invalid @enderror" name="description" id="description"
-                        rows="3">{{ old('description', $product->description) }}</textarea>
-                    @error('description')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+
+            </div>
+            {{-- Mô tả --}}
+            <div class="mb-3">
+                <label for="description" class="form-label">Mô tả</label>
+                <textarea class="form-control @error('description') is-invalid @enderror" name="description" id="description"
+                    rows="3">{!! old('description', $product->description) !!}</textarea>
+                @error('description')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
             </div>
         </div>
 
@@ -157,3 +127,27 @@
         </div>
     </form>
 @endsection
+
+@push('scripts')
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const editorElement = document.querySelector('#description');
+            if (editorElement) {
+                ClassicEditor.create(editorElement)
+                    .then(editor => {
+                        // chỉnh chiều cao vùng editable
+                        editor.editing.view.change(writer => {
+                            writer.setStyle('height', '300px', editor.editing.view.document.getRoot());
+                        });
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    });
+            } else {
+                console.error('Phần tử #description không tồn tại trong DOM');
+            }
+        });
+    </script>
+@endpush

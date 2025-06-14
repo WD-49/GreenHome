@@ -8,7 +8,7 @@
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
 
-        @if ($trashedComments->isEmpty())
+        @if ($comments->isEmpty())
             <p>Không có bình luận nào trong thùng rác.</p>
         @else
             <table class="table table-bordered table-striped align-middle">
@@ -22,7 +22,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($trashedComments as $comment)
+                    @foreach ($comments as $comment)
                         <tr>
                             <td>{{ $comment->id }}</td>
                             <td>{{ Str::limit($comment->content, 50) }}</td>
@@ -49,13 +49,13 @@
                 </tbody>
             </table>
             <div>
-                {{ $trashedComments->links() }}
+                {{ $comments->links() }}
             </div>
         @endif
 
-        <a href="{{ $userId ? route('admin.account.detailAccUser', $userId) : route('admin.account.listUsers') }}"
+        {{-- <a href="{{ $userId ? route('admin.account.detailAccUser', $userId) : route('admin.account.listUsers') }}"
             class="btn btn-secondary mt-3">
             Quay lại chi tiết tài khoản
-        </a>
+        </a> --}}
     </div>
 @endsection

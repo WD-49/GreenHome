@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\admin\Account;
 
 use App\Models\User;
+use App\Models\Order;
 use App\Models\UserProfile;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -41,15 +43,49 @@ class AccountAdminController extends Controller
         return view('admin.account.admin.listAdmins', compact('admins'));
     }
 
+    // Phương thức mới để thay đổi vai trò người dùng
+    public function toggleUserRole(Request $request, User $user)
+    {
+        // --- CẢNH BÁO: ĐÃ BỎ KIỂM TRA QUYỀN HẠN CẤP ĐỘ CAO CHO MỤC ĐÍCH TEST.
+        // --- HÃY ĐẢM BẢO THÊM LẠI KIỂM TRA QUYỀN TRƯỚC KHI ĐƯA LÊN PRODUCTION!
+        // Ví dụ kiểm tra quyền hạn (nên sử dụng Gates/Policies của Laravel):
+        // if (!auth()->check() || auth()->user()->role !== 'admin') {
+        //     return response()->json(['success' => false, 'message' => 'Bạn không có quyền thực hiện hành động này.'], 403);
+        // }
+
+        // Không cho phép người dùng thay đổi vai trò của chính mình
+        // if (auth()->check() && auth()->user()->id === $user->id) {
+        //     return response()->json(['success' => false, 'message' => 'Bạn không thể thay đổi vai trò của chính mình.'], 403);
+        // }
+
+        $newRole = $request->input('new_role');
+
+        // Xác thực vai trò mới hợp lệ
+        if (!in_array($newRole, ['client', 'admin'])) {
+            return response()->json(['success' => false, 'message' => 'Vai trò không hợp lệ.'], 400);
+        }
+
+        try {
+            $user->role = $newRole;
+            $user->save();
+
+            $message = "Đã chuyển vai trò của {$user->name} thành " . ucfirst($newRole) . ".";
+            return response()->json(['success' => true, 'message' => $message, 'new_role' => $newRole]);
+        } catch (\Exception $e) {
+            Log::error("Lỗi khi thay đổi vai trò người dùng {$user->id}: " . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Đã xảy ra lỗi khi thay đổi vai trò.'], 500);
+        }
+    }
+
     public function detailAccAdmin($id)
     {
         $admins = User::with([
             'profile',
-            'comments' => function ($query) {
+            'comments.product' => function ($query) {
                 $query->withTrashed()->orderBy('created_at', 'desc');
             },
-            'orders' => function ($query) {
-                $query->with('status') // Eager load quan hệ 'status' (trỏ đến OrderStatus)
+            'orders.items.product' => function ($query) {
+                $query // Eager load quan hệ 'status' (trỏ đến OrderStatus)
                     ->orderBy('created_at', 'desc')
                     ->take(10);
             },
@@ -62,55 +98,9 @@ class AccountAdminController extends Controller
         return view('admin.account.admin.detailAccAdmin', compact('admins'));
     }
 
-    public function createAdmin()
-    {
-        return view('admin.account.admin.createAdmin');
-    }
 
-    public function storeAdmin(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6|confirmed',
-            'role' => 'required|in:admin,client',
-            'status' => 'required|boolean',
-            'phone' => 'nullable|string',
-            'address' => 'nullable|string',
-            'gender' => 'required|in:nam,nu,khac',
-            'user_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
 
-        $admins = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-            'status' => $request->status,
-        ]);
 
-        $profile = new UserProfile([
-            'phone' => $request->phone,
-            'address' => $request->address,
-            'gender' => $request->gender,
-        ]);
-
-        if ($request->hasFile('user_image')) {
-
-            $image = $request->file('user_image');
-            $filename = time() . '_' . Str::slug($admins->name) . '.' . $image->getClientOriginalExtension();
-
-            // Lưu ảnh mới
-            $path = $image->storeAs('images/users', $filename, 'public');
-
-            // Gán đường dẫn vào DB
-            $profile->user_image = $path;
-        }
-
-        $admins->profile()->save($profile);
-
-        return redirect()->route('admin.account.listAdmins')->with('success', 'Tạo quản trị viên thành công.');
-    }
 
     public function editAdmin($id)
     {
@@ -222,5 +212,134 @@ class AccountAdminController extends Controller
         $admin->save();
 
         return redirect()->back()->with('success', "Đặt lại mật khẩu thành công. Mật khẩu mới: $newPassword");
+    }
+
+    public function getAjaxOrderDetails(Request $request, Order $order)
+    {
+        if (!$request->ajax()) {
+            return abort(403, 'Truy cập không hợp lệ.');
+        }
+
+        // Eager load các thông tin cần thiết
+        // Bỏ 'shippingAddress...' vì nó không phải là relationship
+        $order->load([
+            'user:id,name,email',       // Thông tin người đặt hàng (nếu order có user_id)
+            'status',                   // Trạng thái đơn hàng (từ model OrderStatus)
+            'items.productVariant.product', // Đảm bảo 'items' và 'images' là các relationship ĐÚNG
+        ]);
+
+        // Xử lý dữ liệu order items
+        $orderItemsData = $order->items->map(function ($item) { // Đảm bảo relationship tên là 'items' trong Order model
+            $product = optional(optional($item->productVariant)->product);
+            $variant = $item->productVariant;
+            $productName = $product->name ?? 'Sản phẩm không xác định';
+
+            $variantAttributes = [];
+            if ($variant && $variant->attributes) {
+                $attributesArray = is_string($variant->attributes) ? json_decode($variant->attributes, true) : (array) $variant->attributes;
+                if (is_array($attributesArray)) {
+                    foreach ($attributesArray as $attribute) {
+                        if (is_array($attribute) && isset($attribute['value'])) {
+                            $variantAttributes[] = $attribute['value'];
+                        }
+                    }
+                }
+            }
+            if (!empty($variantAttributes)) {
+                $productName .= ' (' . implode(' - ', $variantAttributes) . ')';
+            }
+
+            $imageUrl = 'https://placehold.co/60x60/EBF0F5/7F8EA3?text=Ảnh+SP';
+            if ($product->exists) {
+                if ($product->images && $product->images->isNotEmpty()) { // Nếu 'images' là collection
+                    $imgPath = $product->images->first()->image_url;
+                    if ($imgPath) {
+                        $imageUrl = str_starts_with($imgPath, 'http') ? $imgPath : Storage::url($imgPath);
+                    }
+                } elseif ($product->image) { // Nếu 'image' là một trường
+                    $imgPath = $product->image;
+                    $imageUrl = str_starts_with($imgPath, 'http') ? $imgPath : Storage::url($imgPath);
+                }
+            }
+
+            return [
+                'id' => $item->id,
+                'product_name' => $productName,
+                'quantity' => $item->quantity,
+                'unit_price' => number_format($item->unit_price, 0, ',', '.') . ' VNĐ',
+                'sub_total' => number_format($item->quantity * $item->unit_price, 0, ',', '.') . ' VNĐ',
+                'image_url' => $imageUrl,
+            ];
+        });
+
+        // Lấy thông tin giao hàng trực tiếp từ các cột của bảng orders
+        $shippingAddressData = [
+            'name' => $order->shipping_name ?? 'N/A',
+            'phone' => $order->shipping_phone ?? 'N/A',
+            'address_line1' => $order->shipping_address ?? 'N/A',
+            // Không có ward, district, city riêng cho shipping trong bảng orders
+            // Nếu bạn muốn lấy từ user_profiles, bạn cần có user_id trên order và load profile của user đó
+            'ward' => null,
+            'district' => null,
+            'city' => null,
+        ];
+
+        // Nếu bạn muốn thử lấy thông tin phường/xã/thành phố từ user_profile của người đặt hàng (nếu có)
+        // bạn cần đảm bảo $order->user và $order->user->profile được load
+        // Ví dụ:
+        // if ($order->user && $order->user->profile) {
+        //     $shippingAddressData['ward'] = $order->user->profile->ward;
+        //     $shippingAddressData['district'] = $order->user->profile->district;
+        //     $shippingAddressData['city'] = $order->user->profile->city;
+        // }
+
+
+        // CHUYỂN ĐỔI TRẠNG THÁI THANH TOÁN
+        $paymentStatusDisplay = $order->payment_status; // Giữ giá trị gốc
+        $paymentStatusClass = 'bg-warning text-dark'; // Mặc định cho pending
+
+        switch (strtolower($order->payment_status)) {
+            case 'pending':
+                $paymentStatusDisplay = 'Đang chờ';
+                $paymentStatusClass = 'bg-warning text-dark';
+                break;
+            case 'paid':
+                $paymentStatusDisplay = 'Đã thanh toán';
+                $paymentStatusClass = 'bg-success';
+                break;
+            case 'failed':
+                $paymentStatusDisplay = 'Không thành công';
+                $paymentStatusClass = 'bg-danger';
+                break;
+            default:
+                $paymentStatusDisplay = ucfirst($order->payment_status ?? 'N/A');
+                // Giữ class mặc định hoặc thêm logic nếu có các trạng thái khác
+                break;
+        }
+
+        return response()->json([
+            'success' => true,
+            'order' => [
+                'id' => $order->id,
+                'sku' => $order->sku ?? $order->id,
+                'created_at_formatted' => $order->created_at->format('d/m/Y H:i:s'),
+                'status_name' => optional($order->status)->name ?? ucfirst($order->status ?? 'N/A'),
+                'status_color_class' => optional($order->status)->color_class ?? 'bg-secondary',
+                'payment_method' => ucfirst(str_replace('_', ' ', optional($order->paymentMethod)->name ?? $order->payment_method ?? 'N/A')),
+                'payment_status_original' => $order->payment_status, // Giữ lại giá trị gốc nếu cần
+                'payment_status_display' => $paymentStatusDisplay,    // Giá trị đã dịch
+                'payment_status_class' => $paymentStatusClass,        // Class cho badge
+                'shipping_fee' => number_format($order->shipping_fee ?? 0, 0, ',', '.') . ' VNĐ',
+                'discount_amount' => number_format($order->discount_amount ?? 0, 0, ',', '.') . ' VNĐ',
+                'total_amount' => number_format($order->total_amount, 0, ',', '.') . ' VNĐ',
+                'notes' => $order->note,
+            ],
+            'order_items' => $orderItemsData,
+            'shipping_address' => $shippingAddressData,
+            'customer' => [
+                'name' => optional($order->user)->name ?? ($order->shipping_name ?? 'Khách vãng lai'),
+                'email' => optional($order->user)->email ?? 'N/A',
+            ]
+        ]);
     }
 }
