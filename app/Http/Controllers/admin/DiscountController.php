@@ -139,6 +139,7 @@ class DiscountController extends Controller
             'discount_value' => 'required|numeric|min:1',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
+            'max_discount' => 'required|numeric|min:0',
             'min_order_value' => 'required|numeric|min:0',
             'max_order_value' => 'required|numeric|min:0|gt:min_order_value',
             'quantity' => 'required|integer|min:1',
@@ -226,7 +227,7 @@ class DiscountController extends Controller
             $max_discount = $validated['discount_value'];
         }
         // dd($max_discount);
-        $validated['max_discount'] = $max_discount;
+        // $validated['max_discount'] = $max_discount;
         // dd($validated['max_discount']);
 
         if (Auth::user()) {
@@ -444,10 +445,9 @@ class DiscountController extends Controller
 
         return view('admin.discount.history', compact('usages'));
     }
-public function historyDetail($id)
-{
-    $usage = DiscountUsage::with(['discount', 'user', 'product', 'order'])->findOrFail($id);
-    return view('admin.discount.history_detail', compact('usage'));
-}
-
+    public function historyDetail($id)
+    {
+        $usage = DiscountUsage::with(['discount', 'user', 'product', 'order'])->findOrFail($id);
+        return view('admin.discount.history_detail', compact('usage'));
+    }
 }

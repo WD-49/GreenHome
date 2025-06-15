@@ -32,6 +32,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/data', [DashboardController::class, 'data']);
 
     Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login-submit', [AdminAuthController::class, 'login'])->name('login.submit');
@@ -309,12 +310,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/trash', [OrderController::class, 'trash'])->name('trash');
         Route::post('/restore/{id}', [OrderController::class, 'restore'])->name('restore');
         Route::post('{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
-
     });
 });
 // });
-
-
-
-
-

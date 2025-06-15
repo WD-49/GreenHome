@@ -25,26 +25,13 @@
     <ul id="side-menu">
 
         <li class="menu-title">Menu</li>
-
-        <li>
-            <a href="#sidebarDashboards" data-bs-toggle="collapse">
+            <li>
+            <a class='tp-link' href='{{ route('admin.dashboard') }}'>
                 <i data-feather="home"></i>
-                <span> Dashboard </span>
-                <span class="menu-arrow"></span>
+                <span>  Dashboard</span>
             </a>
-            <div class="collapse" id="sidebarDashboards">
-                <ul class="nav-second-level">
-                    <li>
-                        <a class='tp-link' href="{{ url('index.html') }}">Analytical</a>
-                    </li>
-                    <li>
-                        <a class='tp-link' href="{{ url('ecommerce.html') }}">E-commerce</a>
-                    </li>
-                </ul>
-            </div>
         </li>
 
-        {{-- <li class="menu-title">Pages</li> --}}
         <li>
             <a href="#sidebarAuth" data-bs-toggle="collapse">
                 <i data-feather="users"></i>
