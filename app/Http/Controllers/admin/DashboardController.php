@@ -102,44 +102,6 @@ class DashboardController extends Controller
         $totalProductsSoldLast7DaysLabels = $dates->map(fn($date) => Carbon::parse($date)->format('d/m'));
         // dd($totalProductsSoldToday, $totalProductsSoldYesterday, $totalProductsSoldPercent, $totalProductsSoldLast7Days, $totalProductsSoldLast7DaysLabels);
 
-        // ==== Repeat Customer Rate theo 11 ngày gần nhất ====
-        $endDate = Carbon::today();
-        $startDate = $endDate->copy()->subDays(9);
-
-        $periodDates = collect();
-        for ($d = $startDate->copy(); $d->lte($endDate); $d->addDay()) {
-            $periodDates->push($d->format('Y-m-d'));
-        }
-        $periodLabels = $periodDates->map(fn($date) => Carbon::parse($date)->format('d/m'));
-
-        // Lấy user_id và ngày đơn hàng đầu tiên của họ
-        $firstOrderDates = Order::select('user_id', DB::raw('MIN(DATE(created_at)) as first_order_date'))
-            ->groupBy('user_id')
-            ->pluck('first_order_date', 'user_id');
-
-        // Đếm đơn hàng của khách mới và khách cũ từng ngày trong khoảng
-        $newCustomerPerDay = [];
-        $oldCustomerPerDay = [];
-        foreach ($periodDates as $date) {
-            // Khách mới: đơn đầu tiên đúng ngày này
-            $newCustomerIds = $firstOrderDates->filter(fn($d) => $d == $date)->keys();
-            $newCount = Order::whereIn('user_id', $newCustomerIds)
-                ->whereDate('created_at', $date)
-                ->count();
-            $newCustomerPerDay[] = $newCount;
-
-            // Khách cũ: có đơn trong ngày này, nhưng đơn đầu tiên trước ngày này
-            $oldCustomerIds = $firstOrderDates->filter(fn($d) => $d < $date)->keys();
-            $oldCount = Order::whereIn('user_id', $oldCustomerIds)
-                ->whereDate('created_at', $date)
-                ->count();
-            $oldCustomerPerDay[] = $oldCount;
-        }
-
-        // Tổng khách mới/cũ trong khoảng
-        $totalNewCustomer = array_sum($newCustomerPerDay);
-        $totalOldCustomer = array_sum($oldCustomerPerDay);
-
         // Trả về dữ liệu dưới dạng JSON
         return response()->json([
             'orders_today' => (int)$ordersToday,
@@ -166,13 +128,108 @@ class DashboardController extends Controller
             'total_products_sold_last_7_days' => $totalProductsSoldLast7Days,
             'total_products_sold_last_7_days_labels' => $totalProductsSoldLast7DaysLabels,
 
-            'repeat_customer_labels' => $periodLabels,
-            'repeat_customer_new' => $newCustomerPerDay,
-            'repeat_customer_old' => $oldCustomerPerDay,
-            'repeat_customer_new_total' => $totalNewCustomer,
-            'repeat_customer_old_total' => $totalOldCustomer,
 
 
+
+        ]);
+    }
+
+    public function repeatCustomerRate()
+    {
+        $type = request('range', 'day'); // day, week, month
+
+        if ($type === 'week') {
+            $labels = collect();
+            $weeks = [];
+            for ($i = 9; $i >= 0; $i--) {
+                $start = Carbon::now()->startOfWeek()->subWeeks($i);
+                $end = $start->copy()->endOfWeek();
+                $weeks[] = [$start->copy(), $end->copy()];
+                $labels->push($start->format('d/m') . ' - ' . $end->format('d/m'));
+            }
+            $newCustomerPer = [];
+            $oldCustomerPer = [];
+            $firstOrderDates = Order::select('user_id', DB::raw('MIN(DATE(created_at)) as first_order_date'))
+                ->groupBy('user_id')
+                ->pluck('first_order_date', 'user_id');
+            foreach ($weeks as [$start, $end]) {
+                // Khách mới: đơn đầu tiên trong tuần này
+                $newCustomerIds = $firstOrderDates->filter(fn($d) => $d >= $start->format('Y-m-d') && $d <= $end->format('Y-m-d'))->keys();
+                $newCount = Order::whereIn('user_id', $newCustomerIds)
+                    ->whereBetween('created_at', [$start, $end])
+                    ->count();
+                $newCustomerPer[] = $newCount;
+
+                // Khách cũ: có đơn trong tuần này, nhưng đơn đầu tiên trước tuần này
+                $oldCustomerIds = $firstOrderDates->filter(fn($d) => $d < $start->format('Y-m-d'))->keys();
+                $oldCount = Order::whereIn('user_id', $oldCustomerIds)
+                    ->whereBetween('created_at', [$start, $end])
+                    ->count();
+                $oldCustomerPer[] = $oldCount;
+            }
+        } elseif ($type === 'month') {
+            $labels = collect();
+            $months = [];
+            for ($i = 11; $i >= 0; $i--) {
+                $start = Carbon::now()->startOfMonth()->subMonths($i);
+                $end = $start->copy()->endOfMonth();
+                $months[] = [$start->copy(), $end->copy()];
+                $labels->push($start->format('m/Y'));
+            }
+            $newCustomerPer = [];
+            $oldCustomerPer = [];
+            $firstOrderDates = Order::select('user_id', DB::raw('MIN(DATE(created_at)) as first_order_date'))
+                ->groupBy('user_id')
+                ->pluck('first_order_date', 'user_id');
+            foreach ($months as [$start, $end]) {
+                // Khách mới: đơn đầu tiên trong tháng này
+                $newCustomerIds = $firstOrderDates->filter(fn($d) => $d >= $start->format('Y-m-d') && $d <= $end->format('Y-m-d'))->keys();
+                $newCount = Order::whereIn('user_id', $newCustomerIds)
+                    ->whereBetween('created_at', [$start, $end])
+                    ->count();
+                $newCustomerPer[] = $newCount;
+
+                // Khách cũ: có đơn trong tháng này, nhưng đơn đầu tiên trước tháng này
+                $oldCustomerIds = $firstOrderDates->filter(fn($d) => $d < $start->format('Y-m-d'))->keys();
+                $oldCount = Order::whereIn('user_id', $oldCustomerIds)
+                    ->whereBetween('created_at', [$start, $end])
+                    ->count();
+                $oldCustomerPer[] = $oldCount;
+            }
+        } else { // day
+            $labels = collect();
+            $days = [];
+            for ($i = 9; $i >= 0; $i--) {
+                $date = Carbon::today()->subDays($i);
+                $days[] = $date->copy();
+                $labels->push($date->format('d/m'));
+            }
+            $newCustomerPer = [];
+            $oldCustomerPer = [];
+            $firstOrderDates = Order::select('user_id', DB::raw('MIN(DATE(created_at)) as first_order_date'))
+                ->groupBy('user_id')
+                ->pluck('first_order_date', 'user_id');
+            foreach ($days as $date) {
+                // Khách mới: đơn đầu tiên đúng ngày này
+                $newCustomerIds = $firstOrderDates->filter(fn($d) => $d == $date->format('Y-m-d'))->keys();
+                $newCount = Order::whereIn('user_id', $newCustomerIds)
+                    ->whereDate('created_at', $date->format('Y-m-d'))
+                    ->count();
+                $newCustomerPer[] = $newCount;
+
+                // Khách cũ: có đơn trong ngày này, nhưng đơn đầu tiên trước ngày này
+                $oldCustomerIds = $firstOrderDates->filter(fn($d) => $d < $date->format('Y-m-d'))->keys();
+                $oldCount = Order::whereIn('user_id', $oldCustomerIds)
+                    ->whereDate('created_at', $date->format('Y-m-d'))
+                    ->count();
+                $oldCustomerPer[] = $oldCount;
+            }
+        }
+
+        return response()->json([
+            'repeat_customer_labels' => $labels,
+            'repeat_customer_new' => $newCustomerPer,
+            'repeat_customer_old' => $oldCustomerPer,
         ]);
     }
 }

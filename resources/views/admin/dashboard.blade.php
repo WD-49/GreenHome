@@ -277,13 +277,18 @@
         <div class="col-md-6 col-xl-8">
             <div class="card">
 
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
                         <div class="border border-dark rounded-2 me-2 widget-icons-sections">
                             <i data-feather="bar-chart" class="widgets-icons"></i>
                         </div>
                         <h5 class="card-title mb-0">Repeat Customer Rate</h5>
                     </div>
+                    <select id="repeat-range" class="form-select form-select-sm" style="width: 160px;">
+                        <option value="day">10 ngày gần nhất</option>
+                        <option value="week">10 tuần gần nhất</option>
+                        <option value="month">12 tháng gần nhất</option>
+                    </select>
                 </div>
 
                 <div class="card-body">
@@ -727,40 +732,64 @@
                         }
                     }).render();
 
-                    new ApexCharts(document.querySelector("#repeat-customer-per-week"), {
-                        chart: {
-                            type: 'line',
-                            height: 300,
-                            toolbar: {
-                                show: false
-                            }
-                        },
-                        series: [{
-                                name: 'New Customer ',
-                                data: data.repeat_customer_new
-                            },
-                            {
-                                name: 'Old Customer ',
-                                data: data.repeat_customer_old
-                            }
-                        ],
-                        xaxis: {
-                            categories: data.repeat_customer_labels
-                        },
-                        colors: ['#3b82f6', '#34d399'],
-                        stroke: {
-                            width: 3
-                        },
-                        markers: {
-                            size: 4
-                        },
-                        tooltip: {
-                            y: {
-                                formatter: val => val + " đơn"
-                            }
-                        }
-                    }).render();
+
+
+
+
+
                 });
         });
+
+        function renderRepeatCustomerChart(data) {
+            new ApexCharts(document.querySelector("#repeat-customer-per-week"), {
+                chart: {
+                    type: 'line',
+                    height: 300,
+                    toolbar: {
+                        show: false
+                    }
+                },
+                series: [{
+                        name: 'New Customer',
+                        data: data.repeat_customer_new
+                    },
+                    {
+                        name: 'Old Customer',
+                        data: data.repeat_customer_old
+                    }
+                ],
+                xaxis: {
+                    categories: data.repeat_customer_labels
+                },
+                colors: ['#3b82f6', '#34d399'],
+                stroke: {
+                    width: 3
+                },
+                markers: {
+                    size: 4
+                },
+                tooltip: {
+                    y: {
+                        formatter: val => val + " đơn"
+                    }
+                }
+            }).render();
+        }
+
+        function fetchRepeatCustomerRate(range = 'day') {
+            fetch(`/admin/dashboard/repeat-customer-rate?range=${range}`)
+                .then(res => res.json())
+                .then(data => {
+                    document.querySelector("#repeat-customer-per-week").innerHTML = ""; // clear old chart
+                    renderRepeatCustomerChart(data);
+                });
+        }
+
+        document.getElementById('repeat-range').addEventListener('change', function() {
+            fetchRepeatCustomerRate(this.value);
+        });
+
+        // Khi load trang, mặc định là 10 ngày gần nhất
+        fetchRepeatCustomerRate('day');
     </script>
 @endpush
