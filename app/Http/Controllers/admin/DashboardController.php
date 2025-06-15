@@ -46,20 +46,26 @@ class DashboardController extends Controller
         });
 
         // doanh thu hôm nay & hôm qua
-        $salesToday = Order::whereDate('created_at', $today)->sum('total_amount');
-        $salesYesterday = Order::whereDate('created_at', $yesterday)->sum('total_amount');
+        $salesToday = Order::whereDate('created_at', $today)
+            ->where('payment_status', 'paid')
+            ->sum('total_amount');
+        $salesYesterday = Order::whereDate('created_at', $yesterday)
+            ->where('payment_status', 'paid')
+            ->sum('total_amount');
 
+        // Doanh thu 7 ngày gần nhất (chỉ tính đơn đang vận chuyển và đã thanh toán)
         $salesPerday = Order::whereBetween('created_at', [Carbon::today()->subDays(6), Carbon::today()->endOfDay()])
+            ->where('payment_status', 'paid')
             ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total')
             ->groupBy('date')
             ->pluck('total', 'date')
             ->map(function ($value) {
                 return $value ?: 0; // Đảm bảo giá trị không null
             });
+
         $salesLast7Days = $dates->map(function ($date) use ($salesPerday) {
             return $salesPerday->get($date, 0);
         });
-
         // dd($salesToday, $salesYesterday, $salesPercentChange);
 
         // Khách hàng mới hôm nay & hôm qua
@@ -96,6 +102,43 @@ class DashboardController extends Controller
         $totalProductsSoldLast7DaysLabels = $dates->map(fn($date) => Carbon::parse($date)->format('d/m'));
         // dd($totalProductsSoldToday, $totalProductsSoldYesterday, $totalProductsSoldPercent, $totalProductsSoldLast7Days, $totalProductsSoldLast7DaysLabels);
 
+        // ==== Repeat Customer Rate theo 11 ngày gần nhất ====
+        $endDate = Carbon::today();
+        $startDate = $endDate->copy()->subDays(9);
+
+        $periodDates = collect();
+        for ($d = $startDate->copy(); $d->lte($endDate); $d->addDay()) {
+            $periodDates->push($d->format('Y-m-d'));
+        }
+        $periodLabels = $periodDates->map(fn($date) => Carbon::parse($date)->format('d/m'));
+
+        // Lấy user_id và ngày đơn hàng đầu tiên của họ
+        $firstOrderDates = Order::select('user_id', DB::raw('MIN(DATE(created_at)) as first_order_date'))
+            ->groupBy('user_id')
+            ->pluck('first_order_date', 'user_id');
+
+        // Đếm đơn hàng của khách mới và khách cũ từng ngày trong khoảng
+        $newCustomerPerDay = [];
+        $oldCustomerPerDay = [];
+        foreach ($periodDates as $date) {
+            // Khách mới: đơn đầu tiên đúng ngày này
+            $newCustomerIds = $firstOrderDates->filter(fn($d) => $d == $date)->keys();
+            $newCount = Order::whereIn('user_id', $newCustomerIds)
+                ->whereDate('created_at', $date)
+                ->count();
+            $newCustomerPerDay[] = $newCount;
+
+            // Khách cũ: có đơn trong ngày này, nhưng đơn đầu tiên trước ngày này
+            $oldCustomerIds = $firstOrderDates->filter(fn($d) => $d < $date)->keys();
+            $oldCount = Order::whereIn('user_id', $oldCustomerIds)
+                ->whereDate('created_at', $date)
+                ->count();
+            $oldCustomerPerDay[] = $oldCount;
+        }
+
+        // Tổng khách mới/cũ trong khoảng
+        $totalNewCustomer = array_sum($newCustomerPerDay);
+        $totalOldCustomer = array_sum($oldCustomerPerDay);
 
         // Trả về dữ liệu dưới dạng JSON
         return response()->json([
@@ -122,6 +165,12 @@ class DashboardController extends Controller
             'total_products_sold_percent' => $totalProductsSoldPercent,
             'total_products_sold_last_7_days' => $totalProductsSoldLast7Days,
             'total_products_sold_last_7_days_labels' => $totalProductsSoldLast7DaysLabels,
+
+            'repeat_customer_labels' => $periodLabels,
+            'repeat_customer_new' => $newCustomerPerDay,
+            'repeat_customer_old' => $oldCustomerPerDay,
+            'repeat_customer_new_total' => $totalNewCustomer,
+            'repeat_customer_old_total' => $totalOldCustomer,
 
 
         ]);

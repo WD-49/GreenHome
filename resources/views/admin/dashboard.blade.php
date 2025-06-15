@@ -164,7 +164,7 @@
         </div>
 
 
-        <div class="col-md-12 col-xl-4">
+        {{-- <div class="col-md-12 col-xl-4">
             <div class="card">
                 <div class="card-header">
                     <div class="d-flex align-items-center">
@@ -179,7 +179,7 @@
                     <div id="sales-country" class="apex-charts"></div>
                 </div>
             </div>
-        </div>
+        </div> --}}
     </div>
 
 
@@ -287,7 +287,7 @@
                 </div>
 
                 <div class="card-body">
-                    <div id="repeat-customer" class="apex-charts"></div>
+                    <div id="repeat-customer-per-week" class="apex-charts"></div>
                 </div>
 
             </div>
@@ -723,6 +723,40 @@
                             enabled: true,
                             y: {
                                 formatter: val => val + " SP"
+                            }
+                        }
+                    }).render();
+
+                    new ApexCharts(document.querySelector("#repeat-customer-per-week"), {
+                        chart: {
+                            type: 'line',
+                            height: 300,
+                            toolbar: {
+                                show: false
+                            }
+                        },
+                        series: [{
+                                name: 'New Customer ',
+                                data: data.repeat_customer_new
+                            },
+                            {
+                                name: 'Old Customer ',
+                                data: data.repeat_customer_old
+                            }
+                        ],
+                        xaxis: {
+                            categories: data.repeat_customer_labels
+                        },
+                        colors: ['#3b82f6', '#34d399'],
+                        stroke: {
+                            width: 3
+                        },
+                        markers: {
+                            size: 4
+                        },
+                        tooltip: {
+                            y: {
+                                formatter: val => val + " đơn"
                             }
                         }
                     }).render();
