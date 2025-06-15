@@ -31,7 +31,7 @@
                                 </div>
 
                                 <div class="col-6 d-flex justify-content-center align-items-center">
-                                    <div id="order-per-week" style="min-height:200px"></div>
+                                    <div id="orders-report-per-week" style="min-height:200px"></div>
                                 </div>
                             </div>
 
@@ -58,26 +58,27 @@
                             <div class="row">
                                 <div class="col-6">
                                     <div class="d-flex align-items-center">
-                                        <div class="fs-14 mb-1 text-muted">Today's Sales</div>
+                                        <div class="fs-14 mb-1 text-muted">Doanh thu hôm nay</div>
                                     </div>
 
                                     <div class="d-flex align-items-baseline mb-0">
-                                        <div class="fs-20 mb-0 me-2 fw-semibold text-dark">76,524</div>
+                                        <div class="fs-20 mb-0 me-2 fw-semibold text-dark" id="sales-today"></div>
                                     </div>
                                 </div>
 
                                 <div class="col-6 d-flex justify-content-center align-items-center">
-                                    <div id="sales-report" class="apex-charts"></div>
+                                    <div id="sales-report-per-week" class="apex-charts"></div>
                                 </div>
                             </div>
 
                             <p class="d-flex align-content-center border-top mb-0 pt-3 mt-3">
-                                <span class="me-2 d-flex align-content-center fw-medium text-danger">
-                                    -18.06%
-                                    <i data-feather="trending-down" class="ms-1" style="height: 22px; width: 22px;"></i>
+                                <span class="fw-medium me-1 d-flex" id="sales-status"></span>
+                                <span class="me-2 d-flex align-content-center fw-medium text-danger" id="sales-percent">
+                                    %
                                 </span>
-                                <span class="fw-medium me-1 d-flex">Decrease</span>
-                                Sales
+                                <span class="fw-medium me-1 d-flex">so với hôm qua</span>
+                                <span class="fw-medium me-1 d-flex" id="sales-yesterday"></span>
+                                {{-- Doanh thu hôm qua --}}
                             </p>
 
                         </div>
@@ -90,7 +91,7 @@
                             <div class="row">
                                 <div class="col-6">
                                     <div class="d-flex align-items-center">
-                                        <div class="fs-14 mb-1 text-muted">Today's Revenue</div>
+                                        <div class="fs-14 mb-1 text-muted">Doanh thu hôm nay</div>
                                     </div>
 
                                     <div class="d-flex align-items-baseline mb-0">
@@ -583,10 +584,66 @@
                             }
                         }
                     };
-                    var chart = new ApexCharts(document.querySelector("#order-per-week"), options);
+                    var chart = new ApexCharts(document.querySelector("#orders-report-per-week"), options);
                     console.log(data.orders_last_7_days);
                     console.log(data.orders_last_7_days_labels);
                     chart.render();
+
+                    // Doanh thu hôm nay
+                    document.getElementById('sales-today').textContent = data.sales_today.toLocaleString();
+                    document.getElementById('sales-yesterday').textContent = data.sales_yesterday
+                        .toLocaleString();
+
+                    // % tăng/giảm doanh thu
+                    const salesPercentElem = document.getElementById('sales-percent');
+                    const salesStatusElem = document.getElementById('sales-status');
+                    const salesPercent = data.sales_percent_change;
+
+                    if (salesPercent > 0) {
+                        salesPercentElem.textContent = `+${salesPercent}% `;
+                        salesPercentElem.classList.add('text-success');
+                        salesPercentElem.classList.remove('text-danger');
+                        salesStatusElem.textContent = 'Tăng';
+                    } else if (salesPercent < 0) {
+                        salesPercentElem.textContent = `${salesPercent}% `;
+                        salesPercentElem.classList.add('text-danger');
+                        salesPercentElem.classList.remove('text-success');
+                        salesStatusElem.textContent = 'Giảm';
+                    } else {
+                        salesPercentElem.textContent = '0% ';
+                        salesPercentElem.classList.remove('text-success', 'text-danger');
+                        salesStatusElem.textContent = 'Không đổi';
+                    }
+
+                    // Biểu đồ doanh thu 7 ngày
+                    var salesOptions = {
+                        chart: {
+                            type: 'bar',
+                            height: 80,
+                            sparkline: {
+                                enabled: true
+                            }
+                        },
+                        series: [{
+                            name: 'Doanh thu',
+                            data: data.sales_last_7_days
+                        }],
+                        xaxis: {
+                            categories: data.sales_last_7_days_labels
+                        },
+                        colors: ['#f46a6a'],
+                        tooltip: {
+                            enabled: true,
+                            y: {
+                                formatter: function(val) {
+                                    return val.toLocaleString() + " đ";
+                                }
+                            }
+                        }
+                    };
+                    var salesChart = new ApexCharts(document.querySelector("#sales-report-per-week"),
+                        salesOptions);
+                    salesChart.render();
                 });
         });
     </script>

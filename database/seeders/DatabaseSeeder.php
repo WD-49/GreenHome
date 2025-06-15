@@ -111,8 +111,8 @@ class DatabaseSeeder extends Seeder
                 'order_status' => 'Xác nhận',
                 'payment_status' => 'paid',
                 'payment_method_name' => 'Chuyển khoản',
-                'shipping_fee' => 0,
-                'total_amount' => 0,
+                'shipping_fee' => rand(0, 2) * 10000, // 0, 10000, 20000
+                'total_amount' => 0, // cập nhật sau
                 'discount_value' => 0,
                 'discount_amount' => 0,
                 'created_at' => $date,
@@ -124,7 +124,7 @@ class DatabaseSeeder extends Seeder
             for ($j = 0; $j < $itemCount; $j++) {
                 $variantId = rand(1, 5);
                 $qty = rand(1, 3);
-                $unitPrice = rand(50000, 200000);
+                $unitPrice = rand(5, 20) * 10000; // 50,000 đến 200,000, bội số 10,000
                 $totalPrice = $qty * $unitPrice;
                 $total += $totalPrice;
 
@@ -141,8 +141,10 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
 
-            // Cập nhật lại tổng tiền cho order
-            DB::table('orders')->where('id', $orderId)->update(['total_amount' => $total]);
+            // Cập nhật lại tổng tiền cho order (số tròn chẵn)
+            DB::table('orders')->where('id', $orderId)->update([
+                'total_amount' => $total - 0, // không discount, không shipping_fee
+            ]);
         }
     }
 }
