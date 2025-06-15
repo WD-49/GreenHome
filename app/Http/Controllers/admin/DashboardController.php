@@ -22,24 +22,19 @@ class DashboardController extends Controller
     public function data()
     {
         $today = Carbon::today();
-        $salesToday = Order::whereDate('created_at', $today)->sum('total_amount');
         $yesterday = Carbon::yesterday();
-        $salesYesterday = Order::whereDate('created_at', $yesterday)->sum('total_amount');
 
+        // Dữ liệu 7 ngày gần nhất
+        $dates = collect();
+        for ($i = 6; $i >= 0; $i--) {
+            $dates->push($today->copy()->subDays($i)->format('Y-m-d'));
+        }
+        // dd($dates);
 
 
         // Đơn hàng hôm nay & hôm qua
         $ordersToday = Order::whereDate('created_at', $today)->count();
         $ordersYesterday = Order::whereDate('created_at', $yesterday)->count();
-
-        // Dữ liệu 7 ngày gần nhất
-        $dates = collect();
-        for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::today()->subDays($i);
-            $dates->push($date->format('Y-m-d'));
-        }
-        // dd($dates);
-
 
         $ordersPerDay = Order::whereBetween('created_at', [Carbon::today()->subDays(6), Carbon::today()->endOfDay()])
             ->selectRaw('DATE(created_at) as date, COUNT(*) as total')
@@ -51,6 +46,9 @@ class DashboardController extends Controller
         });
 
         // doanh thu hôm nay & hôm qua
+        $salesToday = Order::whereDate('created_at', $today)->sum('total_amount');
+        $salesYesterday = Order::whereDate('created_at', $yesterday)->sum('total_amount');
+
         $salesPerday = Order::whereBetween('created_at', [Carbon::today()->subDays(6), Carbon::today()->endOfDay()])
             ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total')
             ->groupBy('date')
@@ -64,8 +62,42 @@ class DashboardController extends Controller
 
         // dd($salesToday, $salesYesterday, $salesPercentChange);
 
+        // Khách hàng mới hôm nay & hôm qua
+        $newCustomersToday = User::whereDate('created_at', $today)->count();
+        $newCustomersYesterday = User::whereDate('created_at', $yesterday)->count();
+        // dd($newCustomersToday, $newCustomersYesterday);
+
+        $newCustomersPercent = $newCustomersYesterday == 0
+            ? ($newCustomersToday > 0 ? 100 : 0)
+            : round((($newCustomersToday - $newCustomersYesterday) / $newCustomersYesterday) * 100, 2);
+
+        // 7 ngày gần nhất cho khách hàng mới
+        $customersPerDay = User::whereBetween('created_at', [$today->copy()->subDays(6), $today->copy()->endOfDay()])
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as total')
+            ->groupBy('date')
+            ->pluck('total', 'date');
+        // dd($customersPerDay);
+        $newCustomersLast7Days = $dates->map(fn($date) => (int)($customersPerDay[$date] ?? 0));
+        $newCustomersLast7DaysLabels = $dates->map(fn($date) => Carbon::parse($date)->format('d/m'));
+
+        // Tổng số sản phẩm đã bán hôm nay & hôm qua
+        $totalProductsSoldToday = OrderItem::whereDate('created_at', $today)->sum('quantity');
+        $totalProductsSoldYesterday = OrderItem::whereDate('created_at', $yesterday)->sum('quantity');
+        $totalProductsSoldPercent = $totalProductsSoldYesterday == 0
+            ? ($totalProductsSoldToday > 0 ? 100 : 0)
+            : round((($totalProductsSoldToday - $totalProductsSoldYesterday) / $totalProductsSoldYesterday) * 100, 2);
+
+        // 7 ngày gần nhất cho tổng số sản phẩm đã bán
+        $productsSoldPerDay = OrderItem::whereBetween('created_at', [$today->copy()->subDays(6), $today->copy()->endOfDay()])
+            ->selectRaw('DATE(created_at) as date, SUM(quantity) as total')
+            ->groupBy('date')
+            ->pluck('total', 'date');
+        $totalProductsSoldLast7Days = $dates->map(fn($date) => (int)($productsSoldPerDay[$date] ?? 0));
+        $totalProductsSoldLast7DaysLabels = $dates->map(fn($date) => Carbon::parse($date)->format('d/m'));
+        // dd($totalProductsSoldToday, $totalProductsSoldYesterday, $totalProductsSoldPercent, $totalProductsSoldLast7Days, $totalProductsSoldLast7DaysLabels);
 
 
+        // Trả về dữ liệu dưới dạng JSON
         return response()->json([
             'orders_today' => (int)$ordersToday,
             'orders_yesterday' => (int)$ordersYesterday,
@@ -78,6 +110,18 @@ class DashboardController extends Controller
             'sales_percent_change' => $salesYesterday == 0 ? ($salesToday > 0 ? 100 : 0) : round((($salesToday - $salesYesterday) / $salesYesterday) * 100, 2),
             'sales_last_7_days' => $salesLast7Days->map(fn($v) => (float)$v),
             'sales_last_7_days_labels' => $dates->map(fn($date) => Carbon::parse($date)->format('d/m')),
+
+            'new_customers_today' => $newCustomersToday,
+            'new_customers_yesterday' => $newCustomersYesterday,
+            'new_customers_percent' => $newCustomersPercent,
+            'new_customers_last_7_days' => $newCustomersLast7Days,
+            'new_customers_last_7_days_labels' => $newCustomersLast7DaysLabels,
+
+            'total_products_sold_today' => (int)$totalProductsSoldToday,
+            'total_products_sold_yesterday' => (int)$totalProductsSoldYesterday,
+            'total_products_sold_percent' => $totalProductsSoldPercent,
+            'total_products_sold_last_7_days' => $totalProductsSoldLast7Days,
+            'total_products_sold_last_7_days_labels' => $totalProductsSoldLast7DaysLabels,
 
 
         ]);

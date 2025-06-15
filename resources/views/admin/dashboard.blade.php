@@ -91,28 +91,23 @@
                             <div class="row">
                                 <div class="col-6">
                                     <div class="d-flex align-items-center">
-                                        <div class="fs-14 mb-1 text-muted">Doanh thu hôm nay</div>
+                                        <div class="fs-14 mb-1 text-muted">Khách hàng mới hôm nay</div>
                                     </div>
-
                                     <div class="d-flex align-items-baseline mb-0">
-                                        <div class="fs-20 mb-0 me-2 fw-semibold text-dark">$11,1585</div>
+                                        <div class="fs-20 mb-0 me-2 fw-semibold text-dark" id="new-customers-today"></div>
                                     </div>
                                 </div>
-
                                 <div class="col-6 d-flex justify-content-center align-items-center">
-                                    <div id="revenue" class="apex-charts"></div>
+                                    <div id="new-customers-report-per-week" style="min-height:80px"></div>
                                 </div>
                             </div>
-
                             <p class="d-flex align-content-center border-top mb-0 pt-3 mt-3">
-                                <span class="me-2 d-flex align-content-center fw-medium text-success">
-                                    +32.40%
-
-                                </span>
-                                <span class="fw-medium me-1 d-flex">Increased</span>
-                                Revenue
+                                <span class="fw-medium me-1 d-flex" id="new-customers-status"></span>
+                                <span class="me-2 d-flex align-content-center fw-medium text-success"
+                                    id="new-customers-percent">+0%</span>
+                                <span class="fw-medium me-1 d-flex">so với hôm qua</span>
+                                <span class="fw-medium me-1 d-flex" id="new-customers-yesterday"></span>
                             </p>
-
                         </div>
                     </div>
                 </div>
@@ -123,28 +118,23 @@
                             <div class="row">
                                 <div class="col-6">
                                     <div class="d-flex align-items-center">
-                                        <div class="fs-14 mb-1 text-muted">Today's Expenses</div>
+                                        <div class="fs-14 mb-1 text-muted">Sản phẩm đã bán hôm nay</div>
                                     </div>
-
                                     <div class="d-flex align-items-baseline mb-0">
-                                        <div class="fs-20 mb-0 me-2 fw-semibold text-dark">$21,525</div>
+                                        <div class="fs-20 mb-0 me-2 fw-semibold text-dark" id="products-sold-today"></div>
                                     </div>
                                 </div>
-
                                 <div class="col-6 d-flex justify-content-center align-items-center">
-                                    <div id="expenses" class="apex-charts"></div>
+                                    <div id="products-sold-report-per-week" style="min-height:80px"></div>
                                 </div>
                             </div>
-
                             <p class="d-flex align-content-center border-top mb-0 pt-3 mt-3">
-                                <span class="me-2 d-flex align-content-center fw-medium text-success">
-                                    +32.40%
-                                    <i data-feather="trending-up" class="ms-1" style="height: 22px; width: 22px;"></i>
-                                </span>
-                                <span class="fw-medium me-1 d-flex">Increased</span>
-                                Expenses
+                                <span class="fw-medium me-1 d-flex" id="products-sold-status"></span>
+                                <span class="me-2 d-flex align-content-center fw-medium text-success"
+                                    id="products-sold-percent">+0%</span>
+                                <span class="fw-medium me-1 d-flex">so với hôm qua</span>
+                                <span class="fw-medium me-1 d-flex" id="products-sold-yesterday"></span>
                             </p>
-
                         </div>
                     </div>
                 </div>
@@ -644,6 +634,98 @@
                     var salesChart = new ApexCharts(document.querySelector("#sales-report-per-week"),
                         salesOptions);
                     salesChart.render();
+
+                    // Khách hàng mới hôm nay
+                    document.getElementById('new-customers-today').textContent = data.new_customers_today;
+                    document.getElementById('new-customers-yesterday').textContent = data
+                        .new_customers_yesterday;
+                    const ncPercentElem = document.getElementById('new-customers-percent');
+                    const ncStatusElem = document.getElementById('new-customers-status');
+                    const ncPercent = data.new_customers_percent;
+                    if (ncPercent > 0) {
+                        ncPercentElem.textContent = `+${ncPercent}% `;
+                        ncPercentElem.classList.add('text-success');
+                        ncPercentElem.classList.remove('text-danger');
+                        ncStatusElem.textContent = 'Tăng';
+                    } else if (ncPercent < 0) {
+                        ncPercentElem.textContent = `${ncPercent}% `;
+                        ncPercentElem.classList.add('text-danger');
+                        ncPercentElem.classList.remove('text-success');
+                        ncStatusElem.textContent = 'Giảm';
+                    } else {
+                        ncPercentElem.textContent = '0% ';
+                        ncPercentElem.classList.remove('text-success', 'text-danger');
+                        ncStatusElem.textContent = 'Không đổi';
+                    }
+                    new ApexCharts(document.querySelector("#new-customers-report-per-week"), {
+                        chart: {
+                            type: 'bar',
+                            height: 80,
+                            sparkline: {
+                                enabled: true
+                            }
+                        },
+                        series: [{
+                            name: 'Khách mới',
+                            data: data.new_customers_last_7_days
+                        }],
+                        xaxis: {
+                            categories: data.new_customers_last_7_days_labels
+                        },
+                        colors: ['#34c38f'],
+                        tooltip: {
+                            enabled: true,
+                            y: {
+                                formatter: val => val + " KH"
+                            }
+                        }
+                    }).render();
+
+                    // Tổng số sản phẩm đã bán hôm nay
+                    document.getElementById('products-sold-today').textContent = data.total_products_sold_today;
+                    document.getElementById('products-sold-yesterday').textContent = data
+                        .total_products_sold_yesterday;
+                    const psPercentElem = document.getElementById('products-sold-percent');
+                    const psStatusElem = document.getElementById('products-sold-status');
+                    const psPercent = data.total_products_sold_percent;
+                    if (psPercent > 0) {
+                        psPercentElem.textContent = `+${psPercent}% `;
+                        psPercentElem.classList.add('text-success');
+                        psPercentElem.classList.remove('text-danger');
+                        psStatusElem.textContent = 'Tăng';
+                    } else if (psPercent < 0) {
+                        psPercentElem.textContent = `${psPercent}% `;
+                        psPercentElem.classList.add('text-danger');
+                        psPercentElem.classList.remove('text-success');
+                        psStatusElem.textContent = 'Giảm';
+                    } else {
+                        psPercentElem.textContent = '0% ';
+                        psPercentElem.classList.remove('text-success', 'text-danger');
+                        psStatusElem.textContent = 'Không đổi';
+                    }
+                    new ApexCharts(document.querySelector("#products-sold-report-per-week"), {
+                        chart: {
+                            type: 'bar',
+                            height: 80,
+                            sparkline: {
+                                enabled: true
+                            }
+                        },
+                        series: [{
+                            name: 'Sản phẩm',
+                            data: data.total_products_sold_last_7_days
+                        }],
+                        xaxis: {
+                            categories: data.total_products_sold_last_7_days_labels
+                        },
+                        colors: ['#556ee6'],
+                        tooltip: {
+                            enabled: true,
+                            y: {
+                                formatter: val => val + " SP"
+                            }
+                        }
+                    }).render();
                 });
         });
     </script>

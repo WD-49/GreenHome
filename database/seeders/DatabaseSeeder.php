@@ -38,6 +38,8 @@ class DatabaseSeeder extends Seeder
 
     public function run()
     {
+        // fake dữ liệu cho sản phẩm
+
         // $faker = Faker::create();
         // $categories = Category::pluck('id')->toArray();
         // $brands = Brand::pluck('id')->toArray();
@@ -93,18 +95,22 @@ class DatabaseSeeder extends Seeder
 
         // DB::table('reviews')->insert($data);
 
-        $startDate = Carbon::create(2025, 6, 8);
-        $endDate = Carbon::create(2025, 6, 15);
-        $orderCount = 17;
+
+        // fake dữ liệu cho đơn hàng
+
+        $startDate = Carbon::create(2025, 6, 16);
+        $endDate = Carbon::create(2025, 6, 18);
+        $orderCount = 10;
 
         for ($i = 0; $i < $orderCount; $i++) {
-            $date = Carbon::create(2025, 6, 8)->addDays(rand(0, 7)); // Luôn từ 8/6 đến 15/6
+            // Random ngày từ 16/6/2025 đến 18/6/2025
+            $date = Carbon::create(2025, 6, 16)->addDays(rand(0, 2));
             $userId = rand(1, 2);
 
             $orderId = DB::table('orders')->insertGetId([
                 'user_id' => $userId,
                 'user_name' => 'User ' . $userId,
-                'sku' => 'SKU' . str_pad($i + 4, 3, '0', STR_PAD_LEFT),
+                'sku' => 'ORDER' . ($i + 1001),
                 'shipping_name' => fake()->name,
                 'shipping_phone' => '09' . rand(10000000, 99999999),
                 'shipping_address' => fake()->city,
@@ -143,8 +149,50 @@ class DatabaseSeeder extends Seeder
 
             // Cập nhật lại tổng tiền cho order (số tròn chẵn)
             DB::table('orders')->where('id', $orderId)->update([
-                'total_amount' => $total - 0, // không discount, không shipping_fee
+                'total_amount' => $total,
             ]);
         }
+
+        // fake dữ liệu cho người dùng
+        // $faker = Faker::create();
+        // $genders = ['nam', 'nu', 'khac'];
+        // $days = 9; // 7 ngày trước + hôm nay + 2 ngày sau
+        // $usersPerDay = intdiv(30, $days);
+        // $extra = 30 - ($usersPerDay * $days); // Nếu không chia hết
+
+        // $userId = 1;
+        // for ($i = 0; $i < $days; $i++) {
+        //     $date = Carbon::today()->subDays(7)->addDays($i); // Bắt đầu từ 7 ngày trước
+        //     $count = $usersPerDay + ($i < $extra ? 1 : 0); // Chia đều, dư thì cộng vào đầu
+
+        //     for ($j = 0; $j < $count; $j++, $userId++) {
+        //         $name = "User $userId";
+        //         $email = "user{$userId}@example.com";
+        //         $role = 'client';
+        //         $password = Hash::make('password' . $userId);
+        //         $status = 1;
+
+        //         $user_id = DB::table('users')->insertGetId([
+        //             'name' => $name,
+        //             'email' => $email,
+        //             'role' => $role,
+        //             'password' => $password,
+        //             'status' => $status,
+        //             'created_at' => $date,
+        //             'updated_at' => $date,
+        //         ]);
+
+        //         DB::table('user_profiles')->insert([
+        //             'user_id' => $user_id,
+        //             'phone' => '09' . str_pad($userId, 8, '0', STR_PAD_LEFT),
+        //             'address' => 'Địa chỉ ' . $userId,
+        //             'gender' => $genders[$userId % 3],
+        //             'birth_date' => $faker->date('Y-m-d', '2010-01-01'),
+        //             'user_image' => $faker->boolean(70) ? null : $faker->imageUrl(200, 200, 'people'),
+        //             'created_at' => $date,
+        //             'updated_at' => $date,
+        //         ]);
+        //     }
+        // }
     }
 }
