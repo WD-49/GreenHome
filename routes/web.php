@@ -34,6 +34,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/data', [DashboardController::class, 'data']);
     Route::get('/dashboard/repeat-customer-rate', [DashboardController::class, 'repeatCustomerRate']);
+    Route::get('/dashboard/top-selling-products', [DashboardController::class, 'topSellingProducts']);
+    Route::get('/dashboard/sales-report-income', [DashboardController::class, 'salesReportIncome']);
 
     Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login-submit', [AdminAuthController::class, 'login'])->name('login.submit');

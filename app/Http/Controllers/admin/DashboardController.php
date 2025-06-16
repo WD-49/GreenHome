@@ -5,6 +5,7 @@ namespace App\Http\Controllers\admin;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -141,7 +142,7 @@ class DashboardController extends Controller
         if ($type === 'week') {
             $labels = collect();
             $weeks = [];
-            for ($i = 9; $i >= 0; $i--) {
+            for ($i = 7; $i > 0; $i--) {
                 $start = Carbon::now()->startOfWeek()->subWeeks($i);
                 $end = $start->copy()->endOfWeek();
                 $weeks[] = [$start->copy(), $end->copy()];
@@ -230,6 +231,58 @@ class DashboardController extends Controller
             'repeat_customer_labels' => $labels,
             'repeat_customer_new' => $newCustomerPer,
             'repeat_customer_old' => $oldCustomerPer,
+        ]);
+    }
+    public function topSellingProducts()
+    {
+        // Lấy id các đơn hợp lệ
+        $validOrderIds = Order::whereNotIn('order_status', ['Hủy đơn', 'Chưa xác nhận'])->pluck('id');
+
+        // Lấy top 4 sản phẩm bán chạy nhất, join lấy ảnh nếu còn
+        $products = OrderItem::whereIn('order_id', $validOrderIds)
+            ->leftJoin('product_variants', 'order_items.product_variant_sku', '=', 'product_variants.sku')
+            ->select(
+                'order_items.product_name',
+                'order_items.product_variant_sku as product_sku',
+                'order_items.product_attribute',
+                DB::raw('MAX(order_items.unit_price) as product_price'),
+                DB::raw('SUM(order_items.quantity) as sold'),
+                'product_variants.image'
+            )
+            ->groupBy(
+                'order_items.product_name',
+                'order_items.product_variant_sku',
+                'order_items.product_attribute',
+                'product_variants.image'
+            )
+            ->orderByDesc('sold')
+            ->limit(4)
+            ->get();
+
+        return response()->json($products);
+    }
+
+    public function salesReportIncome()
+    {
+        // 12 tháng gần nhất
+        $months = collect();
+        for ($i = 11; $i >= 0; $i--) {
+            $months->push(Carbon::now()->subMonths($i)->format('Y-m'));
+        }
+        $labels = $months->map(fn($m) => Carbon::parse($m . '-01')->format('m/Y'));
+
+        // Doanh thu từng tháng (chỉ đơn đã thanh toán)
+        $salesPerMonth = Order::where('payment_status', 'paid')
+            ->whereBetween('created_at', [Carbon::now()->subMonths(11)->startOfMonth(), Carbon::now()->endOfMonth()])
+            ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as ym, SUM(total_amount) as total')
+            ->groupBy('ym')
+            ->pluck('total', 'ym');
+
+        $incomeData = $months->map(fn($m) => (float)($salesPerMonth[$m] ?? 0));
+
+        return response()->json([
+            'labels' => $labels,
+            'income' => $incomeData,
         ]);
     }
 }

@@ -158,7 +158,7 @@
                 </div>
 
                 <div class="card-body">
-                    <div id="chart-money" class="apex-charts"></div>
+                    <div id="sale-report" class="apex-charts"></div>
                 </div>
             </div>
         </div>
@@ -187,7 +187,6 @@
         <!-- Top Selling Products -->
         <div class="col-md-6 col-xl-4">
             <div class="card">
-
                 <div class="card-header">
                     <div class="d-flex align-items-center">
                         <div class="border border-dark rounded-2 me-2 widget-icons-sections">
@@ -196,80 +195,11 @@
                         <h5 class="card-title mb-0">Top Selling Products</h5>
                     </div>
                 </div>
-
-                <!-- start card body -->
                 <div class="card-body">
-                    <ul class="list-group custom-group">
-                        <li class="list-group-item align-items-center d-flex justify-content-between">
-                            <div class="product-list">
-                                <img class="avatar-md p-1 rounded-circle bg-primary-subtle img-fluid me-3"
-                                    src="assets/images/products/shoes.jpg" alt="product-image">
-
-                                <div class="product-body align-self-center">
-                                    <h6 class="m-0 fw-semibold">Nike Shoes</h6>
-                                    <p class="mb-0 mt-1 text-muted">Fashion</p>
-                                </div>
-                            </div>
-
-                            <div class="product-price">
-                                <h6 class="m-0 fw-semibold">$990</h6>
-                                <p class="mb-0 mt-1 text-muted">10 Sold</p>
-                            </div>
-                        </li>
-
-                        <li class="list-group-item align-items-center d-flex justify-content-between border-bottom">
-                            <div class="product-list">
-                                <img class="avatar-md p-1 rounded-circle bg-primary-subtle img-fluid me-3"
-                                    src="assets/images/products/bags.jpg" alt="product-image">
-
-                                <div class="product-body align-self-center">
-                                    <h6 class="m-0 fw-semibold">Shoulder Bag</h6>
-                                    <p class="mb-0 mt-1 text-muted">Fashion</p>
-                                </div>
-                            </div>
-
-                            <div class="product-price">
-                                <h6 class="m-0 fw-semibold">$650</h6>
-                                <p class="mb-0 mt-1 text-muted">11 Sold</p>
-                            </div>
-                        </li>
-
-                        <li class="list-group-item align-items-center d-flex justify-content-between border-bottom">
-                            <div class="product-list">
-                                <img class="avatar-md p-1 rounded-circle bg-primary-subtle img-fluid me-3"
-                                    src="assets/images/products/dresses.jpg" alt="product-image">
-
-                                <div class="product-body align-self-center">
-                                    <h6 class="m-0 fw-semibold">Velvet Red Dresse</h6>
-                                    <p class="mb-0 mt-1 text-muted">Fashion</p>
-                                </div>
-                            </div>
-
-                            <div class="product-price">
-                                <h6 class="m-0 fw-semibold">$480</h6>
-                                <p class="mb-0 mt-1 text-muted">08 Sold</p>
-                            </div>
-                        </li>
-
-                        <li class="list-group-item align-items-center d-flex justify-content-between border-bottom">
-                            <div class="product-list">
-                                <img class="avatar-md p-1 rounded-circle bg-primary-subtle img-fluid me-3"
-                                    src="assets/images/products/headphone.jpg" alt="product-image">
-
-                                <div class="product-body align-self-center">
-                                    <h6 class="m-0 fw-semibold">Fashion dresse</h6>
-                                    <p class="mb-0 mt-1 text-muted">Fashion</p>
-                                </div>
-                            </div>
-
-                            <div class="product-price">
-                                <h6 class="m-0 fw-semibold">$1500</h6>
-                                <p class="mb-0 mt-1 text-muted">14 Sold</p>
-                            </div>
-                        </li>
+                    <ul class="list-group custom-group" id="top-selling-products">
+                        <!-- Sẽ render động ở JS -->
                     </ul>
                 </div>
-                <!-- end card body -->
             </div>
         </div>
 
@@ -791,5 +721,61 @@
 
         // Khi load trang, mặc định là 10 ngày gần nhất
         fetchRepeatCustomerRate('day');
+
+        function renderTopSellingProducts(products) {
+            const list = document.getElementById('top-selling-products');
+            list.innerHTML = '';
+            products.forEach(product => {
+                list.innerHTML += `
+        <li class="list-group-item align-items-center d-flex justify-content-between">
+            <div class="product-list">
+                <img class="avatar-md p-1 rounded-circle bg-primary-subtle img-fluid me-3"
+                    src="${product.image ? window.location.origin + '/storage/' + product.image : 'https://via.placeholder.com/56x56?text=No+Image'}"
+                    >
+                <div class="product-body align-self-center">
+                    <h6 class="m-0 fw-semibold">${product.product_name}</h6>
+                    <p class="mb-0 mt-1 text-muted">SKU: ${product.product_sku ?? ''}</p>
+                    <p class="mb-0 mt-1 text-muted">${product.product_attribute ?? ''}</p>
+                </div>
+            </div>
+            <div class="product-price text-end">
+                <h6 class="m-0 fw-semibold">${Number(product.product_price).toLocaleString()} đ</h6>
+                <p class="mb-0 mt-1 text-muted">${product.sold ?? 0} Sold</p>
+            </div>
+        </li>
+        `;
+            });
+        }
+
+        fetch('/admin/dashboard/top-selling-products')
+            .then(res => res.json())
+            .then(data => renderTopSellingProducts(data));
+
+        fetch('/admin/dashboard/sales-report-income')
+            .then(res => res.json())
+            .then(data => {
+                new ApexCharts(document.querySelector("#sale-report"), {
+                    chart: {
+                        type: 'bar',
+                        height: 350,
+                        toolbar: {
+                            show: false
+                        }
+                    },
+                    series: [{
+                        name: 'Income',
+                        data: data.income
+                    }],
+                    xaxis: {
+                        categories: data.labels
+                    },
+                    colors: ['#556ee6'],
+                    tooltip: {
+                        y: {
+                            formatter: val => val.toLocaleString() + " đ"
+                        }
+                    }
+                }).render();
+            });
     </script>
 @endpush
