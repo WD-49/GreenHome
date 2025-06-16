@@ -444,4 +444,10 @@ class DiscountController extends Controller
 
         return view('admin.discount.history', compact('usages'));
     }
+public function historyDetail($id)
+{
+    $usage = DiscountUsage::with(['discount', 'user', 'product', 'order'])->findOrFail($id);
+    return view('admin.discount.history_detail', compact('usage'));
+}
+
 }

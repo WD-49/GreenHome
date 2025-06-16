@@ -21,10 +21,10 @@
                     <input type="text" name="user" id="user" value="{{ request('user') }}" class="form-control" placeholder="Tên hoặc email">
                 </div>
 
-                <div class="col-md-3">
+                {{-- <div class="col-md-3">
                     <label for="product" class="form-label">Sản phẩm</label>
                     <input type="text" name="product" id="product" value="{{ request('product') }}" class="form-control" placeholder="Tên sản phẩm">
-                </div>
+                </div> --}}
 
                 <div class="col-md-3">
                     <label for="order" class="form-label">Đơn hàng</label>
@@ -73,19 +73,19 @@
         </button>
         <ul class="dropdown-menu dropdown-menu-end shadow">
             <li>
-                <a href="" class="dropdown-item">
+                <a href="{{ route('admin.discount.historyDetail', $usage->id) }}" class="dropdown-item">
                     <i class="bi bi-eye text-primary me-2"></i> Xem
                 </a>
             </li>
            
             <li>
-                <form action="" method="POST" onsubmit="return confirm('Bạn có muốn xóa mã này không?')">
+                {{-- <form action="" method="POST" onsubmit="return confirm('Bạn có muốn xóa mã này không?')">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="dropdown-item">
                         <i class="bi bi-trash text-danger me-2"></i> Xóa
                     </button>
-                </form>
+                </form> --}}
             </li>
         </ul>
     </div>

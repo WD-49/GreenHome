@@ -43,9 +43,9 @@ class Product extends Model
 
     // Quan hệ với brand (nhiều-1)
     public function brand()
-    {
-        return $this->belongsTo(Brand::class);
-    }
+{
+    return $this->belongsTo(Brand::class)->withTrashed(); // xóa mềm giữ sản phẩm
+}
 
 
     // Quan hệ với product_variants (1-nhiều)

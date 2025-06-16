@@ -207,28 +207,24 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
     // Quản lý brands
     Route::prefix('brands')->name('brands.')->group(function () {
-    Route::get('/', [BrandController::class, 'index'])->name('index');
-    Route::get('/create', [BrandController::class, 'create'])->name('create');
-    Route::post('/', [BrandController::class, 'store'])->name('store');
-    Route::get('/trashed', [BrandController::class, 'trash'])->name('trash');
-    Route::get('/{slug}', [BrandController::class, 'show'])->name('show');
-    Route::get('/{slug}/edit', [BrandController::class, 'edit'])->name('edit');
-    Route::put('/{slug}', [BrandController::class, 'update'])->name('update');
-    Route::delete('/{slug}', [BrandController::class, 'destroy'])->name('destroy');
-    Route::post('/{slug}/restore', [BrandController::class, 'restore'])->name('restore');
-    Route::delete('/{slug}/force-delete', [BrandController::class, 'forceDelete'])->name('forceDelete');
-    Route::post('/bulk-delete', [BrandController::class, 'bulkSoftDelete'])->name('bulkSoftDelete');
- });
+        Route::get('/', [BrandController::class, 'index'])->name('index');
+        Route::get('/create', [BrandController::class, 'create'])->name('create');
+        Route::post('/', [BrandController::class, 'store'])->name('store');
+        Route::get('/trashed', [BrandController::class, 'trash'])->name('trash');
+        Route::get('/{slug}', [BrandController::class, 'show'])->name('show');
+        Route::get('/{slug}/edit', [BrandController::class, 'edit'])->name('edit');
+        Route::put('/{slug}', [BrandController::class, 'update'])->name('update');
+        Route::delete('/{slug}', [BrandController::class, 'destroy'])->name('destroy');
+        Route::post('/{slug}/restore', [BrandController::class, 'restore'])->name('restore');
+        Route::delete('/{slug}/force-delete', [BrandController::class, 'forceDelete'])->name('forceDelete');
+        Route::post('/bulk-delete', [BrandController::class, 'bulkSoftDelete'])->name('bulkSoftDelete');
+    });
 
     Route::prefix('comments')->name('comments.')->group(function () {
         Route::get('/', [CommentController::class, 'index'])->name('index');
-        Route::get('/trash', [CommentController::class, 'trash'])->name('trash');  // <-- đây
         Route::post('/approve', [CommentController::class, 'approve'])->name('approve');
         Route::post('/hide', [CommentController::class, 'hide'])->name('hide');
         Route::get('/{id}', [CommentController::class, 'show'])->name('show');
-        Route::delete('/delete', [CommentController::class, 'destroy'])->name('destroy');
-        Route::post('/restore/{id}', [CommentController::class, 'restore'])->name('restore');
-        Route::delete('/force-delete', [CommentController::class, 'forceDelete'])->name('forceDelete');
         Route::post('/show-again', [CommentController::class, 'showAgain'])->name('showAgain');
     });
 
@@ -279,6 +275,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/restore/{id}', [DiscountController::class, 'restore'])->name('restore');
         Route::delete('/force-delete/{id}', [DiscountController::class, 'forceDelete'])->name('forceDelete');
         Route::get('/history', [DiscountController::class, 'history'])->name('history');
+        Route::get('/history/{id}', [DiscountController::class, 'historyDetail'])->name('historyDetail');
     });
 
     //quản lí phương thức thanh toán

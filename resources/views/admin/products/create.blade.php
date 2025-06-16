@@ -195,12 +195,15 @@
                     <div class="col-auto">
                         <input type="number" id="defaultQuantity" class="form-control" min="0" value="0">
                     </div>
+                    <div class="col text-end">
+                        <button type="button" class="btn btn-outline-primary w-auto" id="generateVariants">
+                            ⚡ Tạo nhanh các biến thể từ tổ hợp giá trị
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <button type="button" class="btn btn-outline-primary mt-3 w-100" id="generateVariants">
-                ⚡ Tạo nhanh các biến thể từ tổ hợp giá trị
-            </button>
+
         </div>
 
         {{-- Danh sách biến thể --}}
@@ -246,7 +249,7 @@
                     @enderror
                 </div>
             </div>
-        </div>  
+        </div>
 
         {{-- Nút Thêm sản phẩm --}}
         <div class="text-center mt-4">

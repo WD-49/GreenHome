@@ -3,122 +3,155 @@
 @section('content')
     <h2 class="text-center mb-4">Chỉnh sửa bài viết</h2>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <form action="{{route('admin.blogs.update', $id = $blog->id)}}" method="POST" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
+    <form action="{{ route('admin.blogs.update', $blog->id) }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
 
-                {{-- Tiêu đề --}}
-                <div class="mb-3">
-                    <label for="title" class="form-label">Tiêu đề</label>
-                    <input type="text" class="form-control @error('title') is-invalid @enderror" id="title" name="title"
-                        value="{{ old('title', $blog->title) }}" required>
-                    @error('title')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+        <div class="row">
+            {{-- Cột trái: nội dung bài viết --}}
+            <div class="col-md-8">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        {{-- Tiêu đề --}}
+                        <label for="title" class="form-label fw-bold">Tiêu đề</label>
+                        <input type="text" name="title" id="title"
+                               class="form-control mb-3 @error('title') is-invalid @enderror"
+                               value="{{ old('title', $blog->title) }}">
+                        @error('title')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
 
-                {{-- Slug --}}
-                <div class="mb-3">
-                    <label for="slug" class="form-label">Slug</label>
-                    <input type="text" class="form-control @error('slug') is-invalid @enderror" id="slug" name="slug"
-                        value="{{ old('slug', $blog->slug) }}" required>
-                    @error('slug')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+                        {{-- Slug --}}
+                        <label for="slug" class="form-label fw-bold">Slug</label>
+                        <input type="text" name="slug" id="slug"
+                               class="form-control mb-3 @error('slug') is-invalid @enderror"
+                               value="{{ old('slug', $blog->slug) }}">
+                        @error('slug')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
 
-                {{-- Tóm tắt --}}
-                <div class="mb-3">
-                    <label for="summary" class="form-label">Tóm tắt</label>
-                    <textarea class="form-control @error('summary') is-invalid @enderror" id="summary" name="summary"
-                        rows="3" required>{{ old('summary', $blog->summary) }}</textarea>
-                    @error('summary')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                        {{-- Tóm tắt --}}
+                        <label for="summary" class="form-label fw-bold">Tóm tắt</label>
+                        <input type="text" name="summary" id="summary"
+                               class="form-control @error('summary') is-invalid @enderror"
+                               value="{{ old('summary', $blog->summary) }}">
+                        @error('summary')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
 
                 {{-- Nội dung --}}
-                <div class="mb-3">
-                    <label for="content" class="form-label">Nội dung</label>
-                    <textarea class="form-control @error('content') is-invalid @enderror" id="content" name="content"
-                        rows="8" required>{{ old('content', $blog->content) }}</textarea>
-                    @error('content')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                <div class="card">
+                    <div class="card-body">
+                        <label for="content" class="form-label fw-bold">Nội dung</label>
+                        <textarea name="content" rows="12"
+                                  class="form-control @error('content') is-invalid @enderror">{{ old('content', $blog->content) }}</textarea>
+                        @error('content')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+
+            {{-- Cột phải: thông tin phụ --}}
+            <div class="col-md-4">
+                {{-- Trạng thái --}}
+                <div class="card mb-3">
+                    <div class="card-header fw-bold">Đăng bài</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Trạng thái</label>
+                            <select name="status" id="status" class="form-select @error('status') is-invalid @enderror">
+                                <option value="1" {{ old('status', $blog->status) == 1 ? 'selected' : '' }}>Hiển thị</option>
+                                <option value="0" {{ old('status', $blog->status) == 0 ? 'selected' : '' }}>Bản nháp</option>
+                            </select>
+                            @error('status')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fa fa-save me-1"></i> Cập nhật bài viết
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Danh mục --}}
+                <div class="card mb-3">
+                    <div class="card-header fw-bold">Danh mục</div>
+                    <div class="card-body">
+                        <select name="blog_category_id" class="form-select @error('blog_category_id') is-invalid @enderror">
+                            <option value="">-- Chọn thể loại --</option>
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}"
+                                    {{ old('blog_category_id', $blog->blog_category_id) == $category->id ? 'selected' : '' }}>
+                                    {{ $category->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('blog_category_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
 
                 {{-- Thumbnail --}}
-                <div class="mb-3">
-                    <label for="thumbnail" class="form-label">Ảnh đại diện (Thumbnail)</label>
-                    @if ($blog->thumbnail)
+                <div class="card">
+                    <div class="card-header fw-bold">Ảnh bìa</div>
+                    <div class="card-body">
                         <div class="mb-2">
-                            <img src="{{ asset('storage/' . $blog->thumbnail) }}" alt="Thumbnail" style="max-height: 120px;">
-                        </div>
-                    @endif
-                    <input type="file" class="form-control @error('thumbnail') is-invalid @enderror" id="thumbnail"
-                        name="thumbnail">
-                    @error('thumbnail')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                {{-- Trạng thái --}}
-                <div class="mb-3">
-                    <label class="form-label d-block">Trạng thái</label>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="status" id="status1" value="1" {{ old('status', $blog->status) == 1 ? 'checked' : '' }}>
-                        <label class="form-check-label" for="status1">Hiển thị</label>
+    <img id="thumbnail-preview"
+         src="{{ $blog->thumbnail ? asset('storage/' . $blog->thumbnail) : '' }}"
+         alt="Thumbnail"
+         style="max-height: 150px; {{ $blog->thumbnail ? '' : 'display: none;' }}">
+</div>
+                        <input type="file" name="thumbnail"
+                               class="form-control @error('thumbnail') is-invalid @enderror">
+                        @error('thumbnail')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="status" id="status0" value="0" {{ old('status', $blog->status) == 0 ? 'checked' : '' }}>
-                        <label class="form-check-label" for="status0">Ẩn</label>
-                    </div>
-                    @error('status')
-                        <div class="text-danger">{{ $message }}</div>
-                    @enderror
                 </div>
-
-                {{-- Thể loại --}}
-                <div class="mb-3">
-                    <label for="blog_category_id" class="form-label">Danh mục</label>
-                    <select name="blog_category_id" id="blog_category_id"
-                        class="form-select @error('blog_category_id') is-invalid @enderror" required>
-                        <option value="">-- Chọn thể loại --</option>
-                        @foreach ($categories as $category)
-                            <option value="{{ $category->id }}" {{ old('blog_category_id', $blog->blog_category_id) == $category->id ? 'selected' : '' }}>
-                                {{ $category->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('blog_category_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <button type="submit" class="btn btn-primary">
-                    <i class="fa fa-save me-1"></i> Cập nhật
-                </button>
-                <a href="" class="btn btn-secondary ms-2">Hủy</a>
-            </form>
+            </div>
         </div>
-    </div>
+    </form>
+
+    {{-- CKEditor --}}
     <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
-<script>
-    let editor;
-    ClassicEditor
-        .create(document.querySelector('textarea[name="content"]'))
-        .then(newEditor => {
-            editor = newEditor;
-        })
-        .catch(error => {
-            console.error(error);
+    <script>
+        let editor;
+        ClassicEditor
+            .create(document.querySelector('textarea[name="content"]'))
+            .then(newEditor => {
+                editor = newEditor;
+            })
+            .catch(error => {
+                console.error(error);
+            });
+
+        // Cập nhật dữ liệu từ CKEditor về textarea khi submit
+        document.querySelector('form').addEventListener('submit', function () {
+            document.querySelector('textarea[name="content"]').value = editor.getData();
         });
 
-    // Cập nhật nội dung editor về textarea khi submit
-    document.querySelector('form').addEventListener('submit', function () {
-        document.querySelector('textarea[name="content"]').value = editor.getData();
-    });
-</script>
+          // Xử lý xem trước ảnh khi chọn ảnh mới
+    const thumbnailInput = document.querySelector('input[name="thumbnail"]');
+    const previewImage = document.querySelector('#thumbnail-preview');
+
+    if (thumbnailInput && previewImage) {
+        thumbnailInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    previewImage.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    </script>
 @endsection

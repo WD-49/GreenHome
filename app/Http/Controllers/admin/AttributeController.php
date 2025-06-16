@@ -12,10 +12,13 @@ use Illuminate\Http\Request;
 
 class AttributeController extends Controller
 {
-   public function index()
+   public function index(Request $request)
    {
+      $perPage = $request->input('per_page', 5);
       $title = "Quản lý thuộc tính";
-      $attributes = Attribute::all();
+       $attributes = Attribute::with('attributeValues')
+        ->whereNull('deleted_at')
+        ->paginate($perPage);
       $deleteCount = Attribute::onlyTrashed()->count();
       return view('admin.attribute.index', compact('title', 'attributes', 'deleteCount'));
    }

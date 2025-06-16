@@ -57,7 +57,7 @@
                         <a class='tp-link' href="{{ route('admin.account.listUsers') }}">Người dùng</a>
                     </li>
                     <li>
-                        <a class='tp-link' href="{{  route('admin.account.listAdmins') }}">Quản trị</a>
+                        <a class='tp-link' href="{{ route('admin.account.listAdmins') }}">Quản trị</a>
 
                     </li>
                 </ul>
@@ -90,6 +90,7 @@
         </li>
 
 
+
         <li>
             <a href="#sidebarExpages" data-bs-toggle="collapse">
                 <i data-feather="calendar"></i>
@@ -99,31 +100,30 @@
             <div class="collapse" id="sidebarExpages">
                 <ul class="nav-second-level">
                     <li>
-                        <a class='tp-link' href='{{ route('admin.orders.index') }}'>Danh sách đơn hàng</a>
+                        <a class='tp-link' href="{{ route('admin.orders.index') }}">Danh sách đơn hàng</a>
 
                     </li>
                     <li>
-                        <a class='tp-link' href="{{ url('pages-profile.html') }}">Phương thức thanh toán</a>
+                        <a class='tp-link' href="{{ route('admin.paymentMethods.index') }}">Phương thức thanh toán</a>
                     </li>
                 </ul>
             </div>
         </li>
-
         <li>
-            <a class='tp-link' href="{{ url('calendar.html') }}">
-                <i data-feather="calendar"></i>
+            <a class='tp-link' href='{{ route('admin.comments.index') }}'>
+                <i data-feather="message-square"></i>
                 <span> Bình luận </span>
             </a>
         </li>
         <li>
-            <a class='tp-link' href='{{ route('admin.comments.index') }}'>
-    <i data-feather="message-square"></i>
-    <span> Bình luận </span>
-</a>
-
+            <a class='tp-link' href='{{ route('admin.blogs.index') }}'>
+                <i data-feather="calendar"></i>
+                <span> Bài viết </span>
+            </a>
         </li>
         <li>
-            <a class='tp-link' href='{{ route('admin.reviews.index') }}'>
+            <a class='tp-link' href='
+            {{ route('admin.reviews.index') }}'>
                 <i data-feather="calendar"></i>
                 <span> Đánh giá </span>
             </a>
@@ -155,12 +155,12 @@
                 <span> Banner </span>
             </a>
         </li>
-     <li>
-    <a class='tp-link' href="{{ route('admin.blog_categories.index') }}">
-        <i data-feather="file-text"></i>
-        <span> Blog </span>
-    </a>
-</li>
+        <li>
+            <a class='tp-link' href="{{ route('admin.blog_categories.index') }}">
+                <i data-feather="file-text"></i>
+                <span> Blog </span>
+            </a>
+        </li>
 
 
         <li>

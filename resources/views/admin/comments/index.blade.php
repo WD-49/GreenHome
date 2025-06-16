@@ -7,7 +7,7 @@
     <h3 class="text-center mb-4">Quản lý bình luận</h3>
 
     {{-- Bộ lọc --}}
-    <div class="card mb-4">
+    {{-- <div class="card mb-4">
         <div class="card-body">
             <form method="GET" action="{{ route('admin.comments.index') }}" class="row g-3">
                 <div class="col-md-3">
@@ -36,24 +36,70 @@
                         <i class="ti ti-filter me-1"></i> Lọc
                     </button>
                     <a href="{{ route('admin.comments.index') }}" class="btn btn-secondary">
-                        <i class="ti ti-x me-1"></i> Xoá lọc
+                        <i class="ti ti-x me-1"></i> Làm Mới
                     </a>
                 </div>
             </form>
         </div>
-    </div>
+    </div> --}}
 
-    {{-- Nút Thùng rác --}}
-    <div class="d-flex justify-content-end mb-3">
-        <a href="{{ route('admin.comments.trash') }}" class="btn btn-danger">
-            <i class="ti ti-trash me-1"></i> Thùng rác
-        </a>
-    </div>
 
     {{-- Danh sách bình luận --}}
     <div class="card shadow-sm">
+        
         <div class="table-responsive py-3 px-2">
             <table class="table table-hover align-middle mb-0">
+                {{-- Nút mở/đóng bộ lọc --}}
+<div class="mb-3 d-flex justify-content-end">
+    <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse"
+        data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
+        <i class="mdi mdi-filter-outline me-1"></i> Bộ lọc
+    </button>
+</div>
+
+{{-- Form lọc --}}
+<div class="collapse mb-3" id="filterCollapse">
+    <div class="card card-body">
+        <form method="GET" action="{{ route('admin.comments.index') }}">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Tên sản phẩm</label>
+                    <input type="text" name="product_name" value="{{ request('product_name') }}" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Tên người dùng</label>
+                    <input type="text" name="username" value="{{ request('username') }}" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Trạng thái</label>
+                    <select name="status" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                        <option value="hiển thị" {{ request('status') === 'hiển thị' ? 'selected' : '' }}>Hiển thị</option>
+                        <option value="ẩn" {{ request('status') === 'ẩn' ? 'selected' : '' }}>Ẩn</option>
+                        <option value="chưa duyệt" {{ request('status') === 'chưa duyệt' ? 'selected' : '' }}>Chưa duyệt</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Từ ngày</label>
+                    <input type="date" name="from_date" value="{{ request('from_date') }}" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Đến ngày</label>
+                    <input type="date" name="to_date" value="{{ request('to_date') }}" class="form-control">
+                </div>
+                <div class="col-md-12 text-end mt-3">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="ti ti-filter me-1"></i> Lọc
+                    </button>
+                    <a href="{{ route('admin.comments.index') }}" class="btn btn-outline-secondary">
+                        <i class="ti ti-x me-1"></i> Làm mới
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
                 <thead class="table-light">
                     <tr>
                         <th>ID</th>
@@ -147,14 +193,6 @@
                                             </a>
                                         </li>
                                         <li>
-                                            <form method="POST" action="{{ route('admin.comments.destroy') }}">
-                                                @csrf
-                                                @method('DELETE')
-                                                <input type="hidden" name="id" value="{{ $comment->id }}">
-                                                <button type="submit" class="dropdown-item text-danger">
-                                                    <i class="ti ti-trash me-1"></i> Xoá mềm
-                                                </button>
-                                            </form>
                                         </li>
                                     </ul>
                                 </div>
