@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\admin\Product;
 
 use App\Models\Brand;
@@ -229,7 +230,7 @@ class ProductController extends Controller
             'status' => 'required|in:0,1',
             'date_of_entry' => 'required|date',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'is_variant' => 'required|boolean',
 
             // Nếu có biến thể
@@ -402,7 +403,7 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'brand_id' => 'required|exists:brands,id',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:2048',
             'date_of_entry' => 'required|date',
             'description' => 'nullable|string',
             'status' => 'required|in:0,1',
@@ -431,7 +432,6 @@ class ProductController extends Controller
 
         $product->delete();
         return redirect()->route('admin.products.index')->with('success', value: 'Sản phẩm đã được chuyển vào thùng rác!');
-
     }
 
     public function restore($id)
@@ -444,5 +444,4 @@ class ProductController extends Controller
 
         return redirect()->route('admin.products.index')->with('success', 'Sản phẩm đã được khôi phục thành công');
     }
-
 }

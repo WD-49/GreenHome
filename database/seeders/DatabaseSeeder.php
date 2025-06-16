@@ -20,6 +20,7 @@ use App\Models\OrderItem;
 use App\Models\OrderStatus;
 use App\Models\UserProfile;
 use Faker\Factory as Faker;
+use Illuminate\Support\Str;
 use App\Models\DiscountUsage;
 use App\Models\AttributeValue;
 use App\Models\ProductVariant;
@@ -37,6 +38,8 @@ class DatabaseSeeder extends Seeder
 
     public function run()
     {
+        // fake dữ liệu cho sản phẩm
+
         // $faker = Faker::create();
         // $categories = Category::pluck('id')->toArray();
         // $brands = Brand::pluck('id')->toArray();
@@ -58,39 +61,263 @@ class DatabaseSeeder extends Seeder
         //         'deleted_at' => null,
         //     ]);
         // }
+        // $userIds = \App\Models\User::pluck('id')->toArray();
+
+        // $data = [];
+
+        // // 10 reviews với product_variant_id liên quan đến product_id = 4 (giả sử bạn đã có các variant_id)
+        // for ($i = 1; $i <= 10; $i++) {
+        //     $data[] = [
+        //         'user_id' => $userIds[array_rand($userIds)],
+        //         'product_variant_id' => 4, // hoặc thay bằng id variant thực tế của product_id = 4
+        //         'rating' => rand(3, 5),
+        //         'title' => 'Review sản phẩm 4 #' . $i,
+        //         'content' => 'Nội dung đánh giá sản phẩm 4 số ' . $i,
+        //         'status' => 'approved',
+        //         'created_at' => Carbon::now()->subDays(rand(1, 30)),
+        //         'updated_at' => Carbon::now(),
+        //     ];
+        // }
+
+        // // 10 reviews cho các product_variant_id khác
+        // for ($i = 11; $i <= 20; $i++) {
+        //     $data[] = [
+        //         'user_id' => $userIds[array_rand($userIds)],
+        //         'product_variant_id' => rand(5, 10), // giả sử các variant_id khác từ 5-10
+        //         'rating' => rand(1, 5),
+        //         'title' => 'Review sản phẩm khác #' . $i,
+        //         'content' => 'Nội dung đánh giá sản phẩm khác số ' . $i,
+        //         'status' => 'pending',
+        //         'created_at' => Carbon::now()->subDays(rand(1, 30)),
+        //         'updated_at' => Carbon::now(),
+        //     ];
+        // }
+
+        // DB::table('reviews')->insert($data);
+
+
+        // fake dữ liệu cho đơn hàng
+
+        // $startDate = Carbon::create(2025, 6, 16);
+        // $endDate = Carbon::create(2025, 6, 18);
+        // $orderCount = 10;
+
+        // for ($i = 0; $i < $orderCount; $i++) {
+        //     // Random ngày từ 16/6/2025 đến 18/6/2025
+        //     $date = Carbon::create(2025, 6, 16)->addDays(rand(0, 2));
+        //     $userId = rand(1, 2);
+
+        //     $orderId = DB::table('orders')->insertGetId([
+        //         'user_id' => $userId,
+        //         'user_name' => 'User ' . $userId,
+        //         'sku' => 'ORDER' . ($i + 1001),
+        //         'shipping_name' => fake()->name,
+        //         'shipping_phone' => '09' . rand(10000000, 99999999),
+        //         'shipping_address' => fake()->city,
+        //         'order_status' => 'Xác nhận',
+        //         'payment_status' => 'paid',
+        //         'payment_method_name' => 'Chuyển khoản',
+        //         'shipping_fee' => rand(0, 2) * 10000, // 0, 10000, 20000
+        //         'total_amount' => 0, // cập nhật sau
+        //         'discount_value' => 0,
+        //         'discount_amount' => 0,
+        //         'created_at' => $date,
+        //         'updated_at' => $date,
+        //     ]);
+
+        //     $itemCount = rand(1, 3);
+        //     $total = 0;
+        //     for ($j = 0; $j < $itemCount; $j++) {
+        //         $variantId = rand(1, 5);
+        //         $qty = rand(1, 3);
+        //         $unitPrice = rand(5, 20) * 10000; // 50,000 đến 200,000, bội số 10,000
+        //         $totalPrice = $qty * $unitPrice;
+        //         $total += $totalPrice;
+
+        //         DB::table('order_items')->insert([
+        //             'order_id' => $orderId,
+        //             'product_variant_id' => $variantId,
+        //             'product_name' => 'Sản phẩm ' . Str::random(1),
+        //             'product_variant_sku' => 'SKU-' . Str::random(1),
+        //             'quantity' => $qty,
+        //             'unit_price' => $unitPrice,
+        //             'total_price' => $totalPrice,
+        //             'created_at' => $date,
+        //             'updated_at' => $date,
+        //         ]);
+        //     }
+
+        //     // Cập nhật lại tổng tiền cho order (số tròn chẵn)
+        //     DB::table('orders')->where('id', $orderId)->update([
+        //         'total_amount' => $total,
+        //     ]);
+        // }
+
+        // fake dữ liệu cho 1000 đơn hàng từ hôm nay đổ lại 12 tháng trước
+        $faker = \Faker\Factory::create();
         $userIds = \App\Models\User::pluck('id')->toArray();
+        $variantIds = \App\Models\ProductVariant::pluck('id')->toArray();
 
-        $data = [];
+        $currentYear = Carbon::now()->year;
+        $currentMonth = Carbon::now()->month;
 
-        // 10 reviews với product_variant_id liên quan đến product_id = 4 (giả sử bạn đã có các variant_id)
-        for ($i = 1; $i <= 10; $i++) {
-            $data[] = [
-                'user_id' => $userIds[array_rand($userIds)],
-                'product_variant_id' => 4, // hoặc thay bằng id variant thực tế của product_id = 4
-                'rating' => rand(3, 5),
-                'title' => 'Review sản phẩm 4 #' . $i,
-                'content' => 'Nội dung đánh giá sản phẩm 4 số ' . $i,
-                'status' => 'approved',
-                'created_at' => Carbon::now()->subDays(rand(1, 30)),
-                'updated_at' => Carbon::now(),
-            ];
+        // Lấy số thứ tự lớn nhất hiện tại (nếu có)
+        $lastOrder = DB::table('orders')->orderByDesc('id')->first();
+        $orderIndex = $lastOrder ? intval(preg_replace('/\D/', '', $lastOrder->sku)) : 10000;
+
+        // ---- Fake dữ liệu cho 12 tháng năm trước, mỗi tháng 10 đơn ----
+        $lastYear = $currentYear - 1;
+        for ($month = 1; $month <= 12; $month++) {
+            $ordersThisMonth = 10;
+            $startOfMonth = Carbon::create($lastYear, $month, 1);
+            $endOfMonth = $startOfMonth->copy()->endOfMonth();
+
+            for ($i = 0; $i < $ordersThisMonth; $i++) {
+                $orderIndex++;
+                $date = $faker->dateTimeBetween($startOfMonth, $endOfMonth);
+                $userId = $faker->randomElement($userIds);
+                $orderId = DB::table('orders')->insertGetId([
+                    'user_id' => $userId,
+                    'user_name' => 'User ' . $userId,
+                    'sku' => 'ORDER' . $orderIndex,
+                    'shipping_name' => $faker->name,
+                    'shipping_phone' => '09' . $faker->numberBetween(10000000, 99999999),
+                    'shipping_address' => $faker->city,
+                    'order_status' => $faker->randomElement(['Xác nhận', 'Đang vận chuyển']),
+                    'payment_status' => $faker->randomElement(['paid', 'pending', 'failed']),
+                    'payment_method_name' => 'Momo',
+                    'shipping_fee' => 0,
+                    'total_amount' => 0,
+                    'discount_value' => 0,
+                    'discount_amount' => 0,
+                    'created_at' => $date,
+                    'updated_at' => $date,
+                ]);
+
+                $itemCount = rand(1, 3);
+                $total = 0;
+                for ($j = 0; $j < $itemCount; $j++) {
+                    $variantId = $faker->randomElement($variantIds);
+                    $qty = rand(1, 3);
+                    $unitPrice = rand(5, 20) * 10000;
+                    $totalPrice = $qty * $unitPrice;
+                    $total += $totalPrice;
+
+                    DB::table('order_items')->insert([
+                        'order_id' => $orderId,
+                        'product_variant_id' => $variantId,
+                        'product_name' => 'Sản phẩm ' . Str::random(5),
+                        'product_variant_sku' => 'SKU-' . Str::random(5),
+                        'quantity' => $qty,
+                        'unit_price' => $unitPrice,
+                        'total_price' => $totalPrice,
+                        'created_at' => $date,
+                        'updated_at' => $date,
+                    ]);
+                }
+
+                DB::table('orders')->where('id', $orderId)->update([
+                    'total_amount' => $total,
+                ]);
+            }
         }
 
-        // 10 reviews cho các product_variant_id khác
-        for ($i = 11; $i <= 20; $i++) {
-            $data[] = [
-                'user_id' => $userIds[array_rand($userIds)],
-                'product_variant_id' => rand(5, 10), // giả sử các variant_id khác từ 5-10
-                'rating' => rand(1, 5),
-                'title' => 'Review sản phẩm khác #' . $i,
-                'content' => 'Nội dung đánh giá sản phẩm khác số ' . $i,
-                'status' => 'pending',
-                'created_at' => Carbon::now()->subDays(rand(1, 30)),
-                'updated_at' => Carbon::now(),
-            ];
+        // ---- Fake dữ liệu cho các tháng năm nay, mỗi tháng 50-100 đơn ----
+        for ($month = 1; $month <= $currentMonth; $month++) {
+            $ordersThisMonth = rand(50, 100);
+            $startOfMonth = Carbon::create($currentYear, $month, 1);
+            $endOfMonth = $startOfMonth->copy()->endOfMonth();
+
+            for ($i = 0; $i < $ordersThisMonth; $i++) {
+                $orderIndex++;
+                $date = $faker->dateTimeBetween($startOfMonth, $endOfMonth);
+                $userId = $faker->randomElement($userIds);
+                $orderId = DB::table('orders')->insertGetId([
+                    'user_id' => $userId,
+                    'user_name' => 'User ' . $userId,
+                    'sku' => 'ORDER' . $orderIndex,
+                    'shipping_name' => $faker->name,
+                    'shipping_phone' => '09' . $faker->numberBetween(10000000, 99999999),
+                    'shipping_address' => $faker->city,
+                    'order_status' => $faker->randomElement(['Xác nhận', 'Đang vận chuyển']),
+                    'payment_status' => $faker->randomElement(['paid', 'pending', 'failed']),
+                    'payment_method_name' => 'Momo',
+                    'shipping_fee' => 0,
+                    'total_amount' => 0,
+                    'discount_value' => 0,
+                    'discount_amount' => 0,
+                    'created_at' => $date,
+                    'updated_at' => $date,
+                ]);
+
+                $itemCount = rand(1, 3);
+                $total = 0;
+                for ($j = 0; $j < $itemCount; $j++) {
+                    $variantId = $faker->randomElement($variantIds);
+                    $qty = rand(1, 3);
+                    $unitPrice = rand(5, 20) * 10000;
+                    $totalPrice = $qty * $unitPrice;
+                    $total += $totalPrice;
+
+                    DB::table('order_items')->insert([
+                        'order_id' => $orderId,
+                        'product_variant_id' => $variantId,
+                        'product_name' => 'Sản phẩm ' . Str::random(5),
+                        'product_variant_sku' => 'SKU-' . Str::random(5),
+                        'quantity' => $qty,
+                        'unit_price' => $unitPrice,
+                        'total_price' => $totalPrice,
+                        'created_at' => $date,
+                        'updated_at' => $date,
+                    ]);
+                }
+
+                DB::table('orders')->where('id', $orderId)->update([
+                    'total_amount' => $total,
+                ]);
+            }
         }
 
-        DB::table('reviews')->insert($data);
+        // fake dữ liệu cho người dùng
+        // $faker = Faker::create();
+        // $genders = ['nam', 'nu', 'khac'];
+        // $days = 9; // 7 ngày trước + hôm nay + 2 ngày sau
+        // $usersPerDay = intdiv(30, $days);
+        // $extra = 30 - ($usersPerDay * $days); // Nếu không chia hết
 
+        // $userId = 1;
+        // for ($i = 0; $i < $days; $i++) {
+        //     $date = Carbon::today()->subDays(7)->addDays($i); // Bắt đầu từ 7 ngày trước
+        //     $count = $usersPerDay + ($i < $extra ? 1 : 0); // Chia đều, dư thì cộng vào đầu
+
+        //     for ($j = 0; $j < $count; $j++, $userId++) {
+        //         $name = "User $userId";
+        //         $email = "user{$userId}@example.com";
+        //         $role = 'client';
+        //         $password = Hash::make('password' . $userId);
+        //         $status = 1;
+
+        //         $user_id = DB::table('users')->insertGetId([
+        //             'name' => $name,
+        //             'email' => $email,
+        //             'role' => $role,
+        //             'password' => $password,
+        //             'status' => $status,
+        //             'created_at' => $date,
+        //             'updated_at' => $date,
+        //         ]);
+
+        //         DB::table('user_profiles')->insert([
+        //             'user_id' => $user_id,
+        //             'phone' => '09' . str_pad($userId, 8, '0', STR_PAD_LEFT),
+        //             'address' => 'Địa chỉ ' . $userId,
+        //             'gender' => $genders[$userId % 3],
+        //             'birth_date' => $faker->date('Y-m-d', '2010-01-01'),
+        //             'user_image' => $faker->boolean(70) ? null : $faker->imageUrl(200, 200, 'people'),
+        //             'created_at' => $date,
+        //             'updated_at' => $date,
+        //         ]);
+        //     }
+        // }
     }
 }

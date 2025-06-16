@@ -10,7 +10,6 @@
 /storage/logs/*
 
 
-
 .env
 .env.backup
 .env.production
