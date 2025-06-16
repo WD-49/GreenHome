@@ -158,60 +158,124 @@ class DatabaseSeeder extends Seeder
         $userIds = \App\Models\User::pluck('id')->toArray();
         $variantIds = \App\Models\ProductVariant::pluck('id')->toArray();
 
-        $orderCount = 1000;
-        $startDate = Carbon::today()->subMonths(12);
-        $endDate = Carbon::today();
-        $dateRange = $endDate->diffInDays($startDate);
+        $currentYear = Carbon::now()->year;
+        $currentMonth = Carbon::now()->month;
 
-        for ($i = 0; $i < $orderCount; $i++) {
-            // Trải đều ngày tạo
-            $daysAgo = intval($i * $dateRange / $orderCount);
-            $date = Carbon::today()->subDays($daysAgo);
+        // Lấy số thứ tự lớn nhất hiện tại (nếu có)
+        $lastOrder = DB::table('orders')->orderByDesc('id')->first();
+        $orderIndex = $lastOrder ? intval(preg_replace('/\D/', '', $lastOrder->sku)) : 10000;
 
-            $userId = $faker->randomElement($userIds);
-            $orderId = DB::table('orders')->insertGetId([
-                'user_id' => $userId,
-                'user_name' => 'User ' . $userId,
-                'sku' => 'ORDER' . ($i + 10001), // Đảm bảo không trùng
-                'shipping_name' => $faker->name,
-                'shipping_phone' => '09' . $faker->numberBetween(10000000, 99999999),
-                'shipping_address' => $faker->city,
-                'order_status' => $faker->randomElement(['Xác nhận', 'Đang vận chuyển']),
-                'payment_status' => $faker->randomElement(['paid', 'pending', 'failed']),
-                'payment_method_name' => 'Chuyển khoản',
-                'shipping_fee' => $faker->randomElement([0, 10000, 20000]),
-                'total_amount' => 0, // cập nhật sau
-                'discount_value' => 0,
-                'discount_amount' => 0,
-                'created_at' => $date,
-                'updated_at' => $date,
-            ]);
+        // ---- Fake dữ liệu cho 12 tháng năm trước, mỗi tháng 10 đơn ----
+        $lastYear = $currentYear - 1;
+        for ($month = 1; $month <= 12; $month++) {
+            $ordersThisMonth = 10;
+            $startOfMonth = Carbon::create($lastYear, $month, 1);
+            $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
-            $itemCount = rand(1, 3);
-            $total = 0;
-            for ($j = 0; $j < $itemCount; $j++) {
-                $variantId = $faker->randomElement($variantIds);
-                $qty = rand(1, 3);
-                $unitPrice = rand(5, 20) * 10000;
-                $totalPrice = $qty * $unitPrice;
-                $total += $totalPrice;
-
-                DB::table('order_items')->insert([
-                    'order_id' => $orderId,
-                    'product_variant_id' => $variantId,
-                    'product_name' => 'Sản phẩm ' . Str::random(5),
-                    'product_variant_sku' => 'SKU-' . Str::random(5),
-                    'quantity' => $qty,
-                    'unit_price' => $unitPrice,
-                    'total_price' => $totalPrice,
+            for ($i = 0; $i < $ordersThisMonth; $i++) {
+                $orderIndex++;
+                $date = $faker->dateTimeBetween($startOfMonth, $endOfMonth);
+                $userId = $faker->randomElement($userIds);
+                $orderId = DB::table('orders')->insertGetId([
+                    'user_id' => $userId,
+                    'user_name' => 'User ' . $userId,
+                    'sku' => 'ORDER' . $orderIndex,
+                    'shipping_name' => $faker->name,
+                    'shipping_phone' => '09' . $faker->numberBetween(10000000, 99999999),
+                    'shipping_address' => $faker->city,
+                    'order_status' => $faker->randomElement(['Xác nhận', 'Đang vận chuyển']),
+                    'payment_status' => $faker->randomElement(['paid', 'pending', 'failed']),
+                    'payment_method_name' => 'Momo',
+                    'shipping_fee' => 0,
+                    'total_amount' => 0,
+                    'discount_value' => 0,
+                    'discount_amount' => 0,
                     'created_at' => $date,
                     'updated_at' => $date,
                 ]);
-            }
 
-            DB::table('orders')->where('id', $orderId)->update([
-                'total_amount' => $total,
-            ]);
+                $itemCount = rand(1, 3);
+                $total = 0;
+                for ($j = 0; $j < $itemCount; $j++) {
+                    $variantId = $faker->randomElement($variantIds);
+                    $qty = rand(1, 3);
+                    $unitPrice = rand(5, 20) * 10000;
+                    $totalPrice = $qty * $unitPrice;
+                    $total += $totalPrice;
+
+                    DB::table('order_items')->insert([
+                        'order_id' => $orderId,
+                        'product_variant_id' => $variantId,
+                        'product_name' => 'Sản phẩm ' . Str::random(5),
+                        'product_variant_sku' => 'SKU-' . Str::random(5),
+                        'quantity' => $qty,
+                        'unit_price' => $unitPrice,
+                        'total_price' => $totalPrice,
+                        'created_at' => $date,
+                        'updated_at' => $date,
+                    ]);
+                }
+
+                DB::table('orders')->where('id', $orderId)->update([
+                    'total_amount' => $total,
+                ]);
+            }
+        }
+
+        // ---- Fake dữ liệu cho các tháng năm nay, mỗi tháng 50-100 đơn ----
+        for ($month = 1; $month <= $currentMonth; $month++) {
+            $ordersThisMonth = rand(50, 100);
+            $startOfMonth = Carbon::create($currentYear, $month, 1);
+            $endOfMonth = $startOfMonth->copy()->endOfMonth();
+
+            for ($i = 0; $i < $ordersThisMonth; $i++) {
+                $orderIndex++;
+                $date = $faker->dateTimeBetween($startOfMonth, $endOfMonth);
+                $userId = $faker->randomElement($userIds);
+                $orderId = DB::table('orders')->insertGetId([
+                    'user_id' => $userId,
+                    'user_name' => 'User ' . $userId,
+                    'sku' => 'ORDER' . $orderIndex,
+                    'shipping_name' => $faker->name,
+                    'shipping_phone' => '09' . $faker->numberBetween(10000000, 99999999),
+                    'shipping_address' => $faker->city,
+                    'order_status' => $faker->randomElement(['Xác nhận', 'Đang vận chuyển']),
+                    'payment_status' => $faker->randomElement(['paid', 'pending', 'failed']),
+                    'payment_method_name' => 'Momo',
+                    'shipping_fee' => 0,
+                    'total_amount' => 0,
+                    'discount_value' => 0,
+                    'discount_amount' => 0,
+                    'created_at' => $date,
+                    'updated_at' => $date,
+                ]);
+
+                $itemCount = rand(1, 3);
+                $total = 0;
+                for ($j = 0; $j < $itemCount; $j++) {
+                    $variantId = $faker->randomElement($variantIds);
+                    $qty = rand(1, 3);
+                    $unitPrice = rand(5, 20) * 10000;
+                    $totalPrice = $qty * $unitPrice;
+                    $total += $totalPrice;
+
+                    DB::table('order_items')->insert([
+                        'order_id' => $orderId,
+                        'product_variant_id' => $variantId,
+                        'product_name' => 'Sản phẩm ' . Str::random(5),
+                        'product_variant_sku' => 'SKU-' . Str::random(5),
+                        'quantity' => $qty,
+                        'unit_price' => $unitPrice,
+                        'total_price' => $totalPrice,
+                        'created_at' => $date,
+                        'updated_at' => $date,
+                    ]);
+                }
+
+                DB::table('orders')->where('id', $orderId)->update([
+                    'total_amount' => $total,
+                ]);
+            }
         }
 
         // fake dữ liệu cho người dùng

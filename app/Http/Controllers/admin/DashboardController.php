@@ -36,6 +36,8 @@ class DashboardController extends Controller
         // Đơn hàng hôm nay & hôm qua
         $ordersToday = Order::whereDate('created_at', $today)->count();
         $ordersYesterday = Order::whereDate('created_at', $yesterday)->count();
+        // $ordersToday = 165; // Giả lập dữ liệu
+        // $ordersYesterday = 150; // Giả lập dữ liệu
 
         $ordersPerDay = Order::whereBetween('created_at', [Carbon::today()->subDays(6), Carbon::today()->endOfDay()])
             ->selectRaw('DATE(created_at) as date, COUNT(*) as total')
@@ -54,7 +56,15 @@ class DashboardController extends Controller
             ->where('payment_status', 'paid')
             ->sum('total_amount');
 
-        // Doanh thu 7 ngày gần nhất (chỉ tính đơn đang vận chuyển và đã thanh toán)
+        // $salesToday = 1430000; // Giả lập dữ liệu
+        // $salesYesterday = 1200000; // Giả lập dữ liệu
+
+        // $salesToday = 1140000; // Giả lập dữ liệu
+        // $salesYesterday = 1320000; // Giả lập dữ liệu
+
+
+
+        // Doanh thu 7 ngày gần nhất (chỉ tính đơn đã thanh toán)
         $salesPerday = Order::whereBetween('created_at', [Carbon::today()->subDays(6), Carbon::today()->endOfDay()])
             ->where('payment_status', 'paid')
             ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total')
@@ -74,6 +84,9 @@ class DashboardController extends Controller
         $newCustomersYesterday = User::whereDate('created_at', $yesterday)->count();
         // dd($newCustomersToday, $newCustomersYesterday);
 
+        // $newCustomersToday = 20; // Giả lập dữ liệu
+        // $newCustomersYesterday = 15; // Giả lập dữ liệu
+
         $newCustomersPercent = $newCustomersYesterday == 0
             ? ($newCustomersToday > 0 ? 100 : 0)
             : round((($newCustomersToday - $newCustomersYesterday) / $newCustomersYesterday) * 100, 2);
@@ -88,14 +101,24 @@ class DashboardController extends Controller
         $newCustomersLast7DaysLabels = $dates->map(fn($date) => Carbon::parse($date)->format('d/m'));
 
         // Tổng số sản phẩm đã bán hôm nay & hôm qua
-        $totalProductsSoldToday = OrderItem::whereDate('created_at', $today)->sum('quantity');
-        $totalProductsSoldYesterday = OrderItem::whereDate('created_at', $yesterday)->sum('quantity');
+        $validOrderIdsToday = Order::whereDate('created_at', $today)
+            ->where('order_status', '!=', 'Hủy đơn')
+            ->pluck('id');
+        $totalProductsSoldToday = OrderItem::whereIn('order_id', $validOrderIdsToday)->sum('quantity');
+
+        $validOrderIdsYesterday = Order::whereDate('created_at', $yesterday)
+            ->where('order_status', '!=', 'Hủy đơn')
+            ->pluck('id');
+        $totalProductsSoldYesterday = OrderItem::whereIn('order_id', $validOrderIdsYesterday)->sum('quantity');
         $totalProductsSoldPercent = $totalProductsSoldYesterday == 0
             ? ($totalProductsSoldToday > 0 ? 100 : 0)
             : round((($totalProductsSoldToday - $totalProductsSoldYesterday) / $totalProductsSoldYesterday) * 100, 2);
 
         // 7 ngày gần nhất cho tổng số sản phẩm đã bán
-        $productsSoldPerDay = OrderItem::whereBetween('created_at', [$today->copy()->subDays(6), $today->copy()->endOfDay()])
+        $validOrderIds = Order::whereBetween('created_at', [$today->copy()->subDays(6), $today->copy()->endOfDay()])
+            ->where('order_status', '!=', 'Hủy đơn')
+            ->pluck('id');
+        $productsSoldPerDay = OrderItem::whereIn('order_id', $validOrderIds)
             ->selectRaw('DATE(created_at) as date, SUM(quantity) as total')
             ->groupBy('date')
             ->pluck('total', 'date');
@@ -264,25 +287,31 @@ class DashboardController extends Controller
 
     public function salesReportIncome()
     {
-        // 12 tháng gần nhất
-        $months = collect();
-        for ($i = 11; $i >= 0; $i--) {
-            $months->push(Carbon::now()->subMonths($i)->format('Y-m'));
-        }
-        $labels = $months->map(fn($m) => Carbon::parse($m . '-01')->format('m/Y'));
+        $year = request('year', Carbon::now()->year);
 
-        // Doanh thu từng tháng (chỉ đơn đã thanh toán)
+        // Lấy các năm có đơn hàng
+        $years = Order::selectRaw('YEAR(created_at) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+
+        // Label tháng 1-12
+        $labels = collect(range(1, 12))->map(fn($m) => 'Tháng ' . $m);
+
+        // Doanh thu từng tháng trong năm đã chọn
         $salesPerMonth = Order::where('payment_status', 'paid')
-            ->whereBetween('created_at', [Carbon::now()->subMonths(11)->startOfMonth(), Carbon::now()->endOfMonth()])
-            ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as ym, SUM(total_amount) as total')
-            ->groupBy('ym')
-            ->pluck('total', 'ym');
+            ->whereYear('created_at', $year)
+            ->selectRaw('MONTH(created_at) as month, SUM(total_amount) as total')
+            ->groupBy('month')
+            ->pluck('total', 'month');
 
-        $incomeData = $months->map(fn($m) => (float)($salesPerMonth[$m] ?? 0));
+        $incomeData = collect(range(1, 12))->map(fn($m) => (float)($salesPerMonth[$m] ?? 0));
 
         return response()->json([
             'labels' => $labels,
             'income' => $incomeData,
+            'years' => $years,
+            'selected_year' => (int)$year,
         ]);
     }
 }

@@ -146,20 +146,19 @@
 
     <!-- Sales Chart -->
     <div class="row">
-        <div class="col-md-12 col-xl-8">
-            <div class="card">
-                <div class="card-header">
-                    <div class="d-flex align-items-center">
-                        <div class="border border-dark rounded-2 me-2 widget-icons-sections">
-                            <i data-feather="git-commit" class="widgets-icons"></i>
-                        </div>
-                        <h5 class="card-title mb-0">Sales Report</h5>
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <div class="border border-dark rounded-2 me-2 widget-icons-sections">
+                        <i data-feather="bar-chart" class="widgets-icons"></i>
                     </div>
+                    <h5 class="card-title mb-0">Báo cáo doanh thu</h5>
                 </div>
+                <select id="sales-report-year" class="form-select form-select-sm" style="width: 120px;"></select>
+            </div>
 
-                <div class="card-body">
-                    <div id="sale-report" class="apex-charts"></div>
-                </div>
+            <div class="card-body">
+                <div id="sales-report-chart" class="apex-charts"></div>
             </div>
         </div>
 
@@ -481,7 +480,7 @@
                     } else {
                         percentElem.textContent = '0% ';
                         percentElem.classList.remove('text-success', 'text-danger');
-                        statusElem.textContent = 'No Change';
+                        statusElem.textContent = 'Không đổi';
                     }
 
                     var options = {
@@ -751,31 +750,53 @@
             .then(res => res.json())
             .then(data => renderTopSellingProducts(data));
 
-        fetch('/admin/dashboard/sales-report-income')
-            .then(res => res.json())
-            .then(data => {
-                new ApexCharts(document.querySelector("#sale-report"), {
-                    chart: {
-                        type: 'bar',
-                        height: 350,
-                        toolbar: {
-                            show: false
+        let salesChart = null;
+
+        function renderSalesReport(year) {
+            fetch(`/admin/dashboard/sales-report-income?year=${year}`)
+                .then(res => res.json())
+                .then(data => {
+                    // Render select năm
+                    const select = document.getElementById('sales-report-year');
+                    select.innerHTML = '';
+                    data.years.forEach(y => {
+                        select.innerHTML +=
+                            `<option value="${y}" ${y == data.selected_year ? 'selected' : ''}>${y}</option>`;
+                    });
+
+                    // Render chart
+                    if (salesChart) salesChart.destroy();
+                    salesChart = new ApexCharts(document.querySelector("#sales-report-chart"), {
+                        chart: {
+                            type: 'bar',
+                            height: 350,
+                            toolbar: {
+                                show: false
+                            }
+                        },
+                        series: [{
+                            name: 'Doanh thu',
+                            data: data.income
+                        }],
+                        xaxis: {
+                            categories: data.labels
+                        },
+                        colors: ['#556ee6'],
+                        tooltip: {
+                            y: {
+                                formatter: val => val.toLocaleString() + " đ"
+                            }
                         }
-                    },
-                    series: [{
-                        name: 'Income',
-                        data: data.income
-                    }],
-                    xaxis: {
-                        categories: data.labels
-                    },
-                    colors: ['#556ee6'],
-                    tooltip: {
-                        y: {
-                            formatter: val => val.toLocaleString() + " đ"
-                        }
-                    }
-                }).render();
+                    });
+                    salesChart.render();
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderSalesReport(new Date().getFullYear());
+            document.getElementById('sales-report-year').addEventListener('change', function() {
+                renderSalesReport(this.value);
             });
+        });
     </script>
 @endpush
