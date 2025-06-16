@@ -15,6 +15,7 @@ class Category extends Model
         'name',
         'description',
         'slug',
+        'status', // thêm status
     ];
 
     /**
@@ -28,8 +29,6 @@ class Category extends Model
     /**
      * Override phương thức boot để xử lý:
      * - Tự sinh slug nếu chưa có.
-     * - Xóa mềm sản phẩm khi danh mục bị xóa mềm.
-     * - Khôi phục sản phẩm khi khôi phục danh mục.
      */
     protected static function boot()
     {
@@ -42,18 +41,18 @@ class Category extends Model
             }
         });
 
-        // Xóa mềm các sản phẩm khi danh mục bị xóa
-        static::deleting(function ($category) {
-            if (!$category->isForceDeleting()) {
-                $category->products()->each(function ($product) {
-                    $product->delete();
-                });
-            }
-        });
+        // *** BỎ đoạn này để KHÔNG xóa mềm sản phẩm khi xóa mềm danh mục ***
+        // static::deleting(function ($category) {
+        //     if (!$category->isForceDeleting()) {
+        //         $category->products()->each(function ($product) {
+        //             $product->delete();
+        //         });
+        //     }
+        // });
 
-        // Khôi phục lại các sản phẩm khi danh mục được restore
-        static::restoring(function ($category) {
-            $category->products()->onlyTrashed()->restore();
-        });
+        // *** BỎ đoạn này để KHÔNG restore sản phẩm khi restore danh mục ***
+        // static::restoring(function ($category) {
+        //     $category->products()->onlyTrashed()->restore();
+        // });
     }
 }
