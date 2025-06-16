@@ -73,23 +73,6 @@ class CommentController extends Controller
         return redirect()->back()->with('success', 'Đã ẩn bình luận.');
     }
 
-    public function destroy(Request $request)
-    {
-        $comment = Comment::findOrFail($request->id);
-        $comment->delete();
-
-        return redirect()->back()->with('success', 'Đã xóa (tạm thời) bình luận.');
-    }
-
-    public function trashed()
-    {
-        $comments = Comment::onlyTrashed()->with(['user', 'product'])->paginate(10);
-
-        return view('admin.account.comments.trashed', [
-            'title' => 'Thùng rác bình luận',
-            'comments' => $comments,
-        ]);
-    }
 
     public function restore($id)
     {
@@ -98,28 +81,6 @@ class CommentController extends Controller
 
         return redirect()->back()->with('success', 'Đã khôi phục bình luận.');
     }
-
-    public function forceDelete(Request $request)
-    {
-        $comment = Comment::onlyTrashed()->findOrFail($request->id);
-        $comment->forceDelete();
-
-        return redirect()->back()->with('success', 'Đã xóa vĩnh viễn bình luận.');
-    }
-
-    // public function show($id)
-    // {
-    //     $comment = Comment::with(['product', 'user'])->findOrFail($id);
-
-    //     // Lấy các comment khác cùng product_id, trừ chính comment hiện tại
-    //     $relatedComments = Comment::where('product_id', $comment->product_id)
-    //         ->where('id', '!=', $comment->id)
-    //         ->with('user')
-    //         ->latest()
-    //         ->get();
-
-    //     return view('admin.comments.show', compact('comment', 'relatedComments'));
-    // }
 
 
     public function show(Request $request, $id)

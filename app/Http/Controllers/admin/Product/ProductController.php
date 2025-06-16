@@ -29,10 +29,10 @@ class ProductController extends Controller
         $query = Product::with(['category', 'brand'])
             ->whereHas('category', function ($q) {
                 $q->whereNull('deleted_at');
-            })
-            ->whereHas('brand', function ($q) {
-                $q->whereNull('deleted_at');
             });
+            // ->whereHas('brand', function ($q) {
+            //     $q->whereNull('deleted_at');
+            // });
 
 
         if ($request->filled('name')) {
@@ -42,10 +42,15 @@ class ProductController extends Controller
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
         }
+            
 
+        // xóa mềm ko xóa sản phẩm
         if ($request->filled('brand_id')) {
-            $query->where('brand_id', $request->brand_id);
-        }
+    $query->where('brand_id', $request->brand_id)
+          ->whereHas('brand', function ($q) {
+              $q->whereNull('deleted_at');
+          });
+}
 
         if ($request->filled('status')) {
             $query->where('status', $request->status == 1 ? 1 : 0);

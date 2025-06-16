@@ -222,13 +222,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::prefix('comments')->name('comments.')->group(function () {
         Route::get('/', [CommentController::class, 'index'])->name('index');
-        Route::get('/trash', [CommentController::class, 'trash'])->name('trash');  // <-- đây
         Route::post('/approve', [CommentController::class, 'approve'])->name('approve');
         Route::post('/hide', [CommentController::class, 'hide'])->name('hide');
         Route::get('/{id}', [CommentController::class, 'show'])->name('show');
-        Route::delete('/delete', [CommentController::class, 'destroy'])->name('destroy');
-        Route::post('/restore/{id}', [CommentController::class, 'restore'])->name('restore');
-        Route::delete('/force-delete', [CommentController::class, 'forceDelete'])->name('forceDelete');
         Route::post('/show-again', [CommentController::class, 'showAgain'])->name('showAgain');
     });
 
