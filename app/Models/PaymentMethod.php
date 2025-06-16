@@ -10,7 +10,7 @@ class PaymentMethod extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'payment_methods'; // Tên bảng trong DB
+    protected $table = 'payment_methods';
 
     protected $fillable = [
         'name',
@@ -19,10 +19,10 @@ class PaymentMethod extends Model
     ];
 
     /**
-     * Mối quan hệ: Một phương thức thanh toán có nhiều đơn hàng
+     * Một phương thức thanh toán có nhiều đơn hàng
      */
     public function orders()
     {
-        return $this->hasMany(Order::class);
+        return $this->hasMany(Order::class, 'payment_method_id');
     }
 }

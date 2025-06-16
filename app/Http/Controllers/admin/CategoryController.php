@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Category;
+use App\Models\Product; // Nhớ thêm dòng này để thao tác với Product
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
@@ -30,7 +31,10 @@ class CategoryController extends Controller
         // Filter trạng thái
         if ($request->filled('status')) {
             if ($request->status == 'active') {
-                $query->whereNull('deleted_at');
+                $query->where('status', 1)->whereNull('deleted_at');
+            }
+            if ($request->status == 'inactive') {
+                $query->where('status', 0)->whereNull('deleted_at');
             }
             if ($request->status == 'deleted') {
                 $query->onlyTrashed();
@@ -65,16 +69,18 @@ class CategoryController extends Controller
     {
         $request->validate([
             'name' => ['required', 'array'], // Mảng tên danh mục
-            'name.*' => ['required', 'string', 'max:255', 'distinct'], // Kiểm tra tên duy nhất
-            'description' => ['nullable', 'array'], // Mảng mô tả
+            'name.*' => ['required', 'string', 'max:255', 'distinct'],
+            'description' => ['nullable', 'array'],
             'description.*' => ['nullable', 'string'],
+            'status' => ['required', 'array'],
+            'status.*' => ['required', 'in:0,1'],
         ], [
             'name.required' => 'Tên danh mục là bắt buộc.',
             'name.*.required' => 'Tên danh mục không được để trống.',
             'name.*.distinct' => 'Tên danh mục không được trùng.',
+            'status.required' => 'Trạng thái là bắt buộc.',
         ]);
 
-        // Kiểm tra xem mảng 'name' và 'description' có tồn tại và có phải là mảng không
         if ($request->has('name') && is_array($request->name)) {
             foreach ($request->name as $index => $name) {
                 $slug = Str::slug($name);
@@ -85,21 +91,19 @@ class CategoryController extends Controller
                     $slug = $slug . '-' . uniqid();
                 }
 
-                // Tạo mới danh mục
                 $category = new Category();
                 $category->name = $name;
                 $category->slug = $slug;
                 $category->description = isset($request->description[$index]) ? $request->description[$index] : null;
+                $category->status = isset($request->status[$index]) ? $request->status[$index] : 1;
                 $category->save();
             }
 
             return redirect()->route('admin.categories.index')->with('success', 'Thêm danh mục thành công.');
         } else {
-            // Trường hợp không có dữ liệu 'name' hợp lệ
             return back()->withErrors(['name' => 'Danh mục không hợp lệ.']);
         }
     }
-
 
     public function edit($slug)
     {
@@ -114,10 +118,12 @@ class CategoryController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:categories,name,' . $category->id],
             'description' => ['nullable', 'string'],
+            'status' => ['required', 'in:0,1'],
         ], [
             'name.required' => 'Tên danh mục là bắt buộc.',
             'name.max' => 'Tên danh mục không được vượt quá 255 ký tự.',
             'name.unique' => 'Tên danh mục đã tồn tại.',
+            'status.required' => 'Trạng thái là bắt buộc.',
         ]);
 
         // Tạo slug duy nhất (ngoại trừ bản ghi hiện tại)
@@ -130,6 +136,7 @@ class CategoryController extends Controller
         $category->name = $request->name;
         $category->description = $request->description;
         $category->slug = $slugNew;
+        $category->status = $request->status;
         $category->save();
 
         return redirect()->route('admin.categories.index')->with('success', 'Cập nhật danh mục thành công.');
@@ -138,23 +145,28 @@ class CategoryController extends Controller
     public function destroy($slug)
     {
         $category = Category::where('slug', $slug)->firstOrFail();
-        $category->delete();
+        $category->delete(); // chỉ xóa mềm category, không đụng đến sản phẩm
         return redirect()->route('admin.categories.index')->with('success', 'Đã chuyển danh mục vào thùng rác.');
     }
 
     public function restore($slug)
     {
         $category = Category::onlyTrashed()->where('slug', $slug)->firstOrFail();
-        $category->restore();
-        $category->products()->onlyTrashed()->restore();
+        $category->restore(); // chỉ restore category, không đụng đến sản phẩm
+        // XÓA DÒNG BÊN DƯỚI ĐỂ KHÔNG RESTORE SẢN PHẨM (nếu có)
+        // $category->products()->onlyTrashed()->restore();
         return redirect()->route('admin.categories.trash')->with('success', 'Đã khôi phục danh mục.');
     }
 
     public function forceDelete($slug)
     {
         $category = Category::onlyTrashed()->where('slug', $slug)->firstOrFail();
+
+        // Trước khi xóa vĩnh viễn, update category_id của sản phẩm về null
+        Product::where('category_id', $category->id)->update(['category_id' => null]);
+
         $category->forceDelete();
-        return redirect()->route('admin.categories.trash')->with('success', 'Đã xóa vĩnh viễn danh mục.');
+        return redirect()->route('admin.categories.trash')->with('success', 'Đã xóa vĩnh viễn danh mục và các sản phẩm trong danh mục sẽ có danh mục trống.');
     }
 
     public function trash(Request $request)
@@ -205,12 +217,10 @@ class CategoryController extends Controller
             $minPrice = $request->input('min_price', 0);
             $maxPrice = $request->input('max_price', PHP_INT_MAX);
 
-            // Lấy danh sách product_id có biến thể nằm trong khoảng giá
             $productIds = \App\Models\ProductVariant::whereBetween('price', [$minPrice, $maxPrice])
                 ->pluck('product_id')
                 ->unique();
 
-            // Lọc products theo danh sách product_id trên
             $productsQuery->whereIn('id', $productIds);
         }
 
@@ -218,5 +228,4 @@ class CategoryController extends Controller
 
         return view('admin.categories.show', compact('category', 'products'));
     }
-
 }

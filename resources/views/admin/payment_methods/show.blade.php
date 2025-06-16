@@ -162,5 +162,47 @@
                 Chỉnh sửa
             </a>
         </div>
+
+        {{-- BẢNG ĐƠN HÀNG --}}
+        <div class="mt-5">
+            <h4 class="payment-method-title">Đơn hàng sử dụng phương thức này</h4>
+
+            @if($paymentMethod->orders->count() > 0)
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>ID</th>
+                                <th>Mã đơn hàng</th>
+                                <th>Khách hàng</th>
+                                <th>Ngày đặt</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($paymentMethod->orders as $order)
+                                <tr>
+                                    <td>{{ $order->id }}</td>
+                                    <td>{{ $order->code }}</td>
+                                    <td>{{ $order->customer_name ?? 'N/A' }}</td>
+                                    <td>{{ $order->created_at->format('d/m/Y') }}</td>
+                                    <td>
+                                        @if ($order->status === 'completed')
+                                            <span class="badge bg-success">Hoàn tất</span>
+                                        @elseif ($order->status === 'pending')
+                                            <span class="badge bg-warning text-dark">Đang xử lý</span>
+                                        @else
+                                            <span class="badge bg-secondary">Khác</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <p class="text-muted">Không có đơn hàng nào sử dụng phương thức này.</p>
+            @endif
+        </div>
     </div>
 @endsection

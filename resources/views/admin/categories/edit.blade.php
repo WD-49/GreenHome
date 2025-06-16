@@ -14,7 +14,6 @@
             </div>
         @endif
 
-        <!-- Sửa lại route để sử dụng slug thay vì id -->
         <form method="POST" action="{{ route('admin.categories.update', $category->slug) }}">
             @csrf
             @method('PUT')
@@ -25,7 +24,6 @@
                     value="{{ old('name', $category->name) }}" required>
             </div>
 
-            <!-- Nếu có trường slug -->
             <div class="mb-3">
                 <label for="slug" class="form-label">Slug</label>
                 <input type="text" class="form-control" id="slug" name="slug"
@@ -35,6 +33,14 @@
             <div class="mb-3">
                 <label for="description" class="form-label">Mô tả</label>
                 <textarea class="form-control" id="description" name="description">{{ old('description', $category->description) }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="status" class="form-label">Trạng thái</label>
+                <select name="status" class="form-control" required>
+                    <option value="1" {{ old('status', $category->status) == 1 ? 'selected' : '' }}>Hiện</option>
+                    <option value="0" {{ old('status', $category->status) == 0 ? 'selected' : '' }}>Ẩn</option>
+                </select>
             </div>
 
             <button type="submit" class="btn btn-primary">

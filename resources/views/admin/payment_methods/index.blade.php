@@ -1,209 +1,170 @@
 @extends('layouts.admin')
 
+@section('title')
+    {{ $title ?? 'Phương thức thanh toán' }}
+@endsection
+
 @section('content')
-    <style>
-        .section-header {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 1.5rem;
-            color: #1d4583;
-        }
+    <div class="container-xxl">
+        <div class="py-3 d-flex align-items-center flex-sm-row flex-column mb-3">
+            <div class="flex-grow-1 d-flex align-items-center gap-2">
+                <i class="mdi mdi-credit-card-outline fs-3 text-primary"></i>
+                <h4 class="fs-20 fw-bold m-0">Quản lý phương thức thanh toán</h4>
+            </div>
+        </div>
 
-        .card-table {
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-        }
-
-        .table th {
-            background: #1c4077;
-            color: #fff;
-            vertical-align: middle;
-            text-align: center;
-        }
-
-        .table td {
-            vertical-align: middle;
-            text-align: center;
-        }
-
-        .btn-custom {
-            font-weight: 600;
-            border-radius: 8px;
-        }
-
-        .filter-dropdown {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-        }
-
-        .table-actions a,
-        .table-actions form {
-            display: inline-block;
-        }
-
-        .table-actions button {
-            border-radius: 6px;
-        }
-    </style>
-
-    <div class="container-fluid">
-        <div class="section-header">Quản lý phương thức thanh toán</div>
-
-        {{-- Tabs trạng thái --}}
-        <ul class="nav nav-pills mb-3">
-            <li class="nav-item">
-                <a class="nav-link {{ request('status') == null ? 'active' : '' }}"
-                   href="{{ route('admin.paymentMethods.index') }}">
-                    Tất cả ({{ $paymentAll->count() }})
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {{ request('status') == 'active' ? 'active' : '' }}"
-                   href="{{ route('admin.paymentMethods.index', ['status' => 'active']) }}">
-                    Kích hoạt ({{ $paymentActive->count() }})
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {{ request('status') == 'inactive' ? 'active' : '' }}"
-                   href="{{ route('admin.paymentMethods.index', ['status' => 'inactive']) }}">
-                    Tạm tắt ({{ $paymentInactive->count() }})
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('admin.paymentMethods.trash') ? 'active' : '' }}"
-                   href="{{ route('admin.paymentMethods.trash') }}">
-                    Thùng rác ({{ $paymentTrashed->count() }})
-                </a>
-            </li>
-        </ul>
-
-        {{-- Bộ lọc nâng cao --}}
-        <div class="mb-4">
-            <button class="btn btn-outline-primary btn-custom" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
-                Bộ lọc nâng cao
-            </button>
-            <div class="collapse mt-3" id="filterCollapse">
-                <div class="filter-dropdown">
-                    <form method="GET" action="{{ route('admin.paymentMethods.index') }}" class="row g-3">
-                        <div class="col-md-6">
-                            <label for="name" class="form-label">Tên phương thức</label>
-                            <input type="text" name="name" id="name" class="form-control" placeholder="Nhập tên phương thức"
-                                   value="{{ request('name') }}">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Danh sách phương thức</h5>
+                        <div>
+                            <a href="{{ route('admin.paymentMethods.create') }}" class="btn btn-success shadow-sm">
+                                + Thêm phương thức
+                            </a>
+                            <a href="{{ route('admin.paymentMethods.trash') }}" class="btn btn-danger shadow-sm">
+                                <i class="fas fa-trash-restore fa-sm text-white-50"></i> Thùng rác
+                            </a>
                         </div>
-                        <div class="col-md-6">
-                            <label for="status" class="form-label">Trạng thái</label>
-                            <select name="status" id="status" class="form-select">
-                                <option value="">-- Tất cả --</option>
-                                <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Kích hoạt</option>
-                                <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Tạm tắt</option>
-                            </select>
+                    </div>
+
+                    <div class="card-body">
+                        {{-- Bộ lọc --}}
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <form id="perPageForm" method="GET" action="{{ route('admin.paymentMethods.index') }}"
+                                class="d-flex align-items-center">
+                                <label for="perPage" class="me-2 mb-0">Hiển thị</label>
+                                <select name="per_page" id="perPage" class="form-select form-select-sm w-auto">
+                                    @foreach ([10, 20, 50, 100] as $size)
+                                        <option value="{{ $size }}"
+                                            {{ request('per_page', 10) == $size ? 'selected' : '' }}>
+                                            {{ $size }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <span class="ms-2">dòng</span>
+                                @foreach (request()->except('per_page', 'page') as $key => $value)
+                                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                                @endforeach
+                            </form>
+
+                            <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
+                                <i class="mdi mdi-filter-outline me-1"></i> Bộ lọc
+                            </button>
                         </div>
-                        <div class="col-12 text-end mt-3">
-                            <button type="submit" class="btn btn-primary btn-custom">Tìm kiếm</button>
-                            <a href="{{ route('admin.paymentMethods.index') }}" class="btn btn-secondary btn-custom">Reset</a>
+
+                        <div class="collapse mb-3" id="filterCollapse">
+                            <div class="card card-body">
+                                <form method="GET" action="{{ route('admin.paymentMethods.index') }}">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Tên phương thức</label>
+                                            <input type="text" name="name" class="form-control"
+                                                value="{{ request('name') }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Trạng thái</label>
+                                            <select name="status" class="form-select">
+                                                <option value="">-- Tất cả --</option>
+                                                <option value="active"
+                                                    {{ request('status') == 'active' ? 'selected' : '' }}>Kích hoạt
+                                                </option>
+                                                <option value="inactive"
+                                                    {{ request('status') == 'inactive' ? 'selected' : '' }}>Tạm tắt
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-12 text-end">
+                                            <button type="submit" class="btn btn-outline-primary">Lọc</button>
+                                            <a href="{{ route('admin.paymentMethods.index') }}"
+                                                class="btn btn-outline-secondary">Reset</a>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-                    </form>
+
+                        {{-- Bảng danh sách --}}
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">#</th>
+                                        <th class="text-center">Tên phương thức</th>
+                                        <th class="text-center">Trạng thái</th>
+                                        <th class="text-center">Ngày tạo</th>
+                                        <th class="text-center">Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($paymentMethods as $index => $method)
+                                        <tr>
+                                            <td class="text-center">{{ $index + 1 }}</td>
+                                            <td class="text-center">{{ $method->name }}</td>
+                                            <td class="text-center">
+                                                <span
+                                                    class="badge {{ $method->status == 'active' || $method->status == 1 ? 'bg-success' : 'bg-secondary' }}">
+                                                    {{ $method->status == 'active' || $method->status == 1 ? 'Kích hoạt' : 'Tạm tắt' }}
+                                                </span>
+                                            </td>
+                                            <td class="text-center">{{ $method->created_at->format('d/m/Y') }}</td>
+                                            <td class="text-center">
+                                                <div class="dropdown">
+                                                    <button class="btn btn-sm btn-light" type="button"
+                                                        data-bs-toggle="dropdown">
+                                                        <i class="mdi mdi-dots-horizontal"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu dropdown-menu-end">
+                                                        <li>
+                                                            <a class="dropdown-item"
+                                                                href="{{ route('admin.paymentMethods.show', $method->id) }}">
+                                                                Chi tiết
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item"
+                                                                href="{{ route('admin.paymentMethods.edit', $method->id) }}">
+                                                                Chỉnh sửa
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <form
+                                                                action="{{ route('admin.paymentMethods.destroy', $method->id) }}"
+                                                                method="POST"
+                                                                onsubmit="return confirm('Bạn có chắc chắn muốn xóa phương thức này không?')">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit"
+                                                                    class="dropdown-item text-danger">Xóa</button>
+                                                            </form>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="text-center">Không có phương thức nào.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+
+                            </table>
+                            {{ $paymentMethods->appends(request()->query())->links() }}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-
-        {{-- Nút thêm mới --}}
-        <div class="mb-4 text-end">
-            <a href="{{ route('admin.paymentMethods.create') }}" class="btn btn-success btn-custom">
-                <i data-feather="plus" class="me-1"></i> Thêm phương thức
-            </a>
-        </div>
-
-        {{-- Bảng danh sách --}}
-        <div class="card card-table">
-            <div class="table-responsive">
-                <table class="table table-bordered mb-0">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Tên phương thức</th>
-                            <th>Mô tả</th>
-                            <th>Trạng thái</th>
-                            <th>Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($paymentMethods as $method)
-                            <tr>
-                                <td>{{ $method->id }}</td>
-                                <td>{{ $method->name }}</td>
-                                <td>{!! $method->description !!}</td>
-                                <td>
-                                    <span class="badge {{ $method->status ? 'bg-success' : 'bg-danger' }}">
-                                        {{ $method->status ? 'Kích hoạt' : 'Tạm tắt' }}
-                                    </span>
-                                </td>
-                                <td class="position-relative">
-                                    <div class="d-flex justify-content-center align-items-center" style="height: 100%;">
-                                        <div class="dropdown">
-                                            <button type="button"
-                                                class="btn btn-sm border border-primary text-primary bg-white rounded-circle d-flex align-items-center justify-content-center p-0"
-                                                style="width: 36px; height: 36px;" data-bs-toggle="dropdown"
-                                                aria-expanded="false">
-                                                <i data-feather="more-horizontal" style="width: 20px; height: 20px;"></i>
-                                            </button>
-
-                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm rounded-3 px-2 py-2" style="min-width: 140px;">
-                                                <li>
-                                                    <a class="dropdown-item d-flex align-items-center gap-2 text-primary"
-                                                       href="{{ route('admin.paymentMethods.show', $method->id) }}">
-                                                        <i data-feather="eye" width="16" height="16"></i>
-                                                        <span>Xem</span>
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="dropdown-item d-flex align-items-center gap-2 text-warning"
-                                                       href="{{ route('admin.paymentMethods.edit', $method->id) }}">
-                                                        <i data-feather="edit-3" width="16" height="16"></i>
-                                                        <span>Sửa</span>
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <form action="{{ route('admin.paymentMethods.destroy', $method->id) }}"
-                                                          method="POST"
-                                                          onsubmit="return confirm('Bạn có chắc chắn muốn xóa phương thức thanh toán này?')">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit"
-                                                                class="dropdown-item d-flex align-items-center gap-2 text-danger">
-                                                            <i data-feather="trash" width="16" height="16"></i>
-                                                            <span>Xóa</span>
-                                                        </button>
-                                                    </form>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="text-center text-danger">Không tìm thấy phương thức thanh toán nào.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        {{-- Phân trang --}}
-        <div class="d-flex justify-content-center mt-4">
-            {{ $paymentMethods->appends(request()->query())->links('pagination::bootstrap-4') }}
-        </div>
     </div>
-@endsection
 
-@push('scripts')
+    {{-- JS xử lý perPage --}}
     <script>
-        feather.replace();
+        document.getElementById('perPage').addEventListener('change', function() {
+            document.getElementById('perPageForm').submit();
+        });
     </script>
-@endpush
+
+    @vite('resources/js/app.js')
+@endsection
