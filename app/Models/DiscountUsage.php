@@ -11,7 +11,7 @@ class DiscountUsage extends Model
     /** @use HasFactory<\Database\Factories\DiscountUsageFactory> */
     use HasFactory, SoftDeletes;
 
-    protected $fillable = [ 'id','discount_id', 'order_id', 'user_id', 'used_at', 'product_id', ];
+    protected $fillable = [ 'id','discount_id', 'user_id', 'product_id', 'discount_code', 'user_name', 'order_id',  'used_at',  ];
 
     public function discount()
     {
