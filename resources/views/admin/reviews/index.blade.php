@@ -5,9 +5,9 @@
     <h1 class="mb-4">Quản lý đánh giá sản phẩm</h1>
 <!-- HÀNG CHỨA 2 NÚT -->
 <div class="d-flex justify-content-between align-items-center mb-4 gap-2 flex-wrap">
-    <a href="{{ route('admin.reviews.trash') }}" class="btn btn-outline-danger">
+    {{-- <a href="{{ route('admin.reviews.trash') }}" class="btn btn-outline-danger">
         <i class="bi bi-trash3"></i> Xem thùng rác
-    </a>
+    </a> --}}
 
     <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#filterForm" aria-expanded="false">
         <i class="bi bi-funnel"></i> Bộ lọc nâng cao
@@ -93,14 +93,14 @@
                                     <i class="bi bi-eye"></i>
                                 </a>
 
-                                <form action="{{ route('admin.reviews.destroy', $review->id) }}" method="POST"
+                                {{-- <form action="{{ route('admin.reviews.destroy', $review->id) }}" method="POST"
                                     onsubmit="return confirm('Bạn có chắc muốn xóa đánh giá này không?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-outline-danger">
                                         <i class="bi bi-trash"></i>
                                     </button>
-                                </form>
+                                </form> --}}
                             </div>
                         </td>
                         <td>
