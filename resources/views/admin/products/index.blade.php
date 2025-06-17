@@ -117,7 +117,7 @@
                 </div>
             </div>
         </div>
-    </div>5
+    </div>
 
     @vite('resources/js/app.js')
 @endsection

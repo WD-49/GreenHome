@@ -16,9 +16,9 @@ class AttributeController extends Controller
    {
       $perPage = $request->input('per_page', 5);
       $title = "Quản lý thuộc tính";
-       $attributes = Attribute::with('attributeValues')
-        ->whereNull('deleted_at')
-        ->paginate($perPage);
+      $attributes = Attribute::with('attributeValues')
+         ->whereNull('deleted_at')
+         ->paginate($perPage);
       $deleteCount = Attribute::onlyTrashed()->count();
       return view('admin.attribute.index', compact('title', 'attributes', 'deleteCount'));
    }
@@ -52,7 +52,7 @@ class AttributeController extends Controller
    }
 
    public function show($id)
-   {  
+   {
       $attribute_id = $id;
       $attribute = Attribute::findOrFail($id);
       $attributeValues = attributeValue::where('attribute_id', $id)->get();

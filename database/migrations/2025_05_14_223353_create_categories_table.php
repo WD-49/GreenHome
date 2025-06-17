@@ -15,7 +15,6 @@ return new class extends Migration {
             $table->string('name', 255);
             $table->string('slug')->unique();
             $table->text('description')->nullable();
-            $table->tinyInteger('status')->default(1)->comment('1: Hiện, 0: Ẩn');
             $table->timestamps();
             $table->softDeletes();
         });

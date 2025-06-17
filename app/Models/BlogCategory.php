@@ -21,10 +21,10 @@ class BlogCategory extends Model
     /**
      * Quan hệ: 1 blog_category có nhiều blog (giả sử có bảng blogs).
      */
-public function blogs()
-{
-    return $this->hasMany(Blog::class, 'blog_category_id');
-}
+    public function blogs()
+    {
+        return $this->hasMany(Blog::class, 'blog_category_id');
+    }
 
 
 
@@ -58,4 +58,3 @@ public function blogs()
         });
     }
 }
-

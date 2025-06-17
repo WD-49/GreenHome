@@ -43,9 +43,11 @@
 
             <p>
                 @if ($comment->user && $comment->user->profile && $comment->user->profile->user_image)
-                    <img src="{{ asset('storage/' . $comment->user->profile->user_image) }}" alt="avatar" class="rounded-circle" width="60" height="60">
+                    <img src="{{ asset('storage/' . $comment->user->profile->user_image) }}" alt="avatar"
+                        class="rounded-circle" width="60" height="60">
                 @else
-                    <img src="{{ asset('images/default-avatar.png') }}" alt="avatar mặc định" class="rounded-circle" width="60" height="60">
+                    <img src="{{ asset('images/default-avatar.png') }}" alt="avatar mặc định" class="rounded-circle"
+                        width="60" height="60">
                 @endif
             </p>
 
@@ -53,10 +55,20 @@
 
             <p><strong>Trạng thái:</strong>
                 @switch($comment->status)
-                    @case('chưa duyệt') <span class="badge bg-warning text-dark">Chưa duyệt</span> @break
-                    @case('hiển thị') <span class="badge bg-success">Hiển thị</span> @break
-                    @case('ẩn') <span class="badge bg-secondary">Ẩn</span> @break
-                    @default <span class="badge bg-info">{{ $comment->status }}</span>
+                    @case('chưa duyệt')
+                        <span class="badge bg-warning text-dark">Chưa duyệt</span>
+                    @break
+
+                    @case('hiển thị')
+                        <span class="badge bg-success">Hiển thị</span>
+                    @break
+
+                    @case('ẩn')
+                        <span class="badge bg-secondary">Ẩn</span>
+                    @break
+
+                    @default
+                        <span class="badge bg-info">{{ $comment->status }}</span>
                 @endswitch
             </p>
 
@@ -73,7 +85,8 @@
     {{-- Bộ lọc --}}
     <form method="GET" class="row g-2 mb-4">
         <div class="col-md-3">
-            <input type="text" name="user_name" class="form-control" placeholder="Tên người dùng" value="{{ request('user_name') }}">
+            <input type="text" name="user_name" class="form-control" placeholder="Tên người dùng"
+                value="{{ request('user_name') }}">
         </div>
 
         <div class="col-md-2">
@@ -125,17 +138,19 @@
     </form>
 
     {{-- Danh sách bình luận liên quan --}}
-    @if($relatedComments->isEmpty())
+    @if ($relatedComments->isEmpty())
         <p class="text-muted">Không có bình luận nào khác cho sản phẩm này.</p>
     @else
         <ul class="list-group list-group-flush">
-            @foreach($relatedComments as $related)
+            @foreach ($relatedComments as $related)
                 <li class="list-group-item d-flex justify-content-between flex-column flex-md-row">
                     <div class="d-flex align-items-center mb-2 mb-md-0">
                         @if ($related->user && $related->user->profile && $related->user->profile->user_image)
-                            <img src="{{ asset('storage/' . $related->user->profile->user_image) }}" alt="avatar" class="rounded-circle me-3" width="40" height="40">
+                            <img src="{{ asset('storage/' . $related->user->profile->user_image) }}" alt="avatar"
+                                class="rounded-circle me-3" width="40" height="40">
                         @else
-                            <img src="{{ asset('images/default-avatar.png') }}" alt="avatar mặc định" class="rounded-circle me-3" width="40" height="40">
+                            <img src="{{ asset('images/default-avatar.png') }}" alt="avatar mặc định"
+                                class="rounded-circle me-3" width="40" height="40">
                         @endif
                         <div>
                             <strong>
@@ -150,10 +165,20 @@
                             <small>
                                 Trạng thái:
                                 @switch($related->status)
-                                    @case('chưa duyệt') <span class="badge bg-warning text-dark">Chưa duyệt</span> @break
-                                    @case('hiển thị') <span class="badge bg-success">Hiển thị</span> @break
-                                    @case('ẩn') <span class="badge bg-secondary">Ẩn</span> @break
-                                    @default <span class="badge bg-info">{{ $related->status }}</span>
+                                    @case('chưa duyệt')
+                                        <span class="badge bg-warning text-dark">Chưa duyệt</span>
+                                    @break
+
+                                    @case('hiển thị')
+                                        <span class="badge bg-success">Hiển thị</span>
+                                    @break
+
+                                    @case('ẩn')
+                                        <span class="badge bg-secondary">Ẩn</span>
+                                    @break
+
+                                    @default
+                                        <span class="badge bg-info">{{ $related->status }}</span>
                                 @endswitch
                             </small>
                         </div>
@@ -167,7 +192,8 @@
                                     {{ $related->product->name }}
                                 </a>
                                 <br>
-                                <small class="text-muted">Danh mục: {{ $related->product->category->name ?? '[N/A]' }}</small>
+                                <small class="text-muted">Danh mục:
+                                    {{ $related->product->category->name ?? '[N/A]' }}</small>
                                 <br>
                                 @if ($related->product->brand)
                                     <small>
@@ -201,12 +227,13 @@
                                 </form>
                             @endif
 
-                            <form action="{{ route('admin.comments.destroy') }}" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa?');">
+                            {{-- 5:52 17/6 --}}
+                            {{-- <form action="{{ route('admin.comments.destroy') }}" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa?');">
                                 @csrf
                                 @method('DELETE')
                                 <input type="hidden" name="id" value="{{ $related->id }}">
                                 <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
-                            </form>
+                            </form> --}}
                         </div>
                     </div>
                 </li>

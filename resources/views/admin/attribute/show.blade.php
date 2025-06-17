@@ -13,7 +13,8 @@
                         <select name="per_page" id="perPage" class="form-select form-select-sm w-auto"
                             onchange="document.getElementById('perPageForm').submit();">
                             @foreach ([5, 10, 20, 50] as $size)
-                                <option value="{{ $size }}" {{ request('per_page', 10) == $size ? 'selected' : '' }}>
+                                <option value="{{ $size }}"
+                                    {{ request('per_page', 10) == $size ? 'selected' : '' }}>
                                     {{ $size }}
                                 </option>
                             @endforeach
@@ -25,7 +26,8 @@
                         <a href="{{ route('admin.attribute.index') }}" class="btn btn-outline-secondary btn-sm me-2">
                             <i class="fas fa-arrow-left me-1"></i> Quay lại
                         </a>
-                        <a href="{{ route('admin.attribute.value.trash', $attribute->id) }}" class="btn btn-outline-danger btn-sm">
+                        <a href="{{ route('admin.attribute.value.trash', $attribute->id) }}"
+                            class="btn btn-outline-danger btn-sm">
                             <i class="fas fa-trash-alt me-1"></i> Giá trị đã xóa
                         </a>
                     </div>
@@ -45,9 +47,9 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($attributeValues as $index => $value)
+                                @foreach ($attributeValues as $index => $value)
                                     <tr>
-                                        <td>{{ $attributeValues->firstItem() + $index }}</td>
+                                        <td>{{ $index + 1 }}</td>
                                         <td>{{ $value->value }}</td>
                                         <td>{{ $value->created_at->format('d/m/Y') }}</td>
                                         <td class="text-center">
@@ -70,7 +72,8 @@
                                 @endforeach
                             </tbody>
                         </table>
-                        {{ $attributeValues->appends(request()->query())->links() }}
+                        {{-- 5:34 17/6 note: appends chỉ dùng cho panigator not collection --}}
+                        {{-- {{ $attributeValues->appends(request()->query())->links() }} --}}
                     </div>
                 @endif
 

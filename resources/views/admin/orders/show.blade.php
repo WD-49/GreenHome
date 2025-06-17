@@ -66,7 +66,9 @@
                                 <tr>
                                     <td>{{ $item->product_name }}</td>
                                     <td>{{ $item->product_attribute }}</td>
-                                    <td>{{ number_format($item->productVariant->price, 0, ',', '.') }} VND</td>
+                                    {{-- 6:35 --}}
+                                    {{-- <td>{{ number_format($item->productVariant->price, 0, ',', '.') }} VND</td> --}}
+                                    <td>{{ number_format($item->unit_price, 0, ',', '.') }} VND</td>
                                     <td>{{ $item->quantity }}</td>
                                     <td>{{ number_format($item->total_price, 0, ',', '.') }} VND</td>
 

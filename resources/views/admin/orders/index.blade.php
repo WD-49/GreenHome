@@ -458,7 +458,7 @@
                             if (response.errors && response.errors.cancel_reason) {
                                 modalCancellationReasonTextarea.addClass('is-invalid');
                                 modalCancellationErrorDiv.text(response.errors.cancel_reason[
-                                0]);
+                                    0]);
                             } else {
                                 showTemporaryMessage(response.message ||
                                     'Hủy đơn hàng thất bại.', 'error');
@@ -509,7 +509,7 @@
                                 $(this).remove();
                                 if ($.fn.DataTable.isDataTable('#orders-datatable')) {
                                     $('#orders-datatable').DataTable().row(this)
-                                    .remove().draw();
+                                        .remove().draw();
                                 }
                             });
                         } else {
