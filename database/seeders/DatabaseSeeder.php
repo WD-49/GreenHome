@@ -61,39 +61,43 @@ class DatabaseSeeder extends Seeder
         //         'deleted_at' => null,
         //     ]);
         // }
-        // $userIds = \App\Models\User::pluck('id')->toArray();
+        $userIds = \App\Models\User::pluck('id')->toArray();
 
-        // $data = [];
+        $data = [];
 
-        // // 10 reviews với product_variant_id liên quan đến product_id = 4 (giả sử bạn đã có các variant_id)
-        // for ($i = 1; $i <= 10; $i++) {
-        //     $data[] = [
-        //         'user_id' => $userIds[array_rand($userIds)],
-        //         'product_variant_id' => 5, // hoặc thay bằng id variant thực tế của product_id = 4
-        //         'rating' => rand(3, 5),
-        //         'title' => 'Review sản phẩm 4 #' . $i,
-        //         'content' => 'Nội dung đánh giá sản phẩm 4 số ' . $i,
-        //         'status' => 'approved',
-        //         'created_at' => Carbon::now()->subDays(rand(1, 30)),
-        //         'updated_at' => Carbon::now(),
-        //     ];
-        // }
+        // 10 reviews với product_variant_id liên quan đến product_id = 4 (giả sử bạn đã có các variant_id)
+        for ($i = 1; $i <= 10; $i++) {
+            $data[] = [
+                'user_id' => $userIds[array_rand($userIds)],
+                'product_variant_id' => 5, // hoặc thay bằng id variant thực tế của product_id = 4
+                'rating' => rand(3, 5),
+                'title' => 'Review sản phẩm 4 #' . $i,
+                'content' => 'Nội dung đánh giá sản phẩm 4 số ' . $i,
+                'status' => 'approved',
+                'created_at' => Carbon::now()->subDays(rand(1, 30)),
+                'updated_at' => Carbon::now(),
+            ];
+        }
 
-        // // 10 reviews cho các product_variant_id khác
-        // for ($i = 11; $i <= 20; $i++) {
-        //     $data[] = [
-        //         'user_id' => $userIds[array_rand($userIds)],
-        //         'product_variant_id' => rand(5, 10), // giả sử các variant_id khác từ 5-10
-        //         'rating' => rand(1, 5),
-        //         'title' => 'Review sản phẩm khác #' . $i,
-        //         'content' => 'Nội dung đánh giá sản phẩm khác số ' . $i,
-        //         'status' => 'pending',
-        //         'created_at' => Carbon::now()->subDays(rand(1, 30)),
-        //         'updated_at' => Carbon::now(),
-        //     ];
-        // }
+        // 10 reviews cho các product_variant_id khác
+        $userIds = \App\Models\User::pluck('id')->toArray();
+        $variantIds = \App\Models\ProductVariant::pluck('id')->toArray();
 
-        // DB::table('reviews')->insert($data);
+        $data = [];
+        for ($i = 1; $i <= 20; $i++) {
+            $variantId = $variantIds[array_rand($variantIds)];
+            $data[] = [
+                'user_id' => $userIds[array_rand($userIds)],
+                'product_variant_id' => $variantId,
+                'rating' => rand(1, 5),
+                'title' => 'Review sản phẩm #' . $i,
+                'content' => 'Nội dung đánh giá sản phẩm số ' . $i,
+                'status' => $i <= 10 ? 'approved' : 'pending',
+                'created_at' => Carbon::now()->subDays(rand(1, 30)),
+                'updated_at' => Carbon::now(),
+            ];
+        }
+        DB::table('reviews')->insert($data);
 
 
         // fake dữ liệu cho đơn hàng

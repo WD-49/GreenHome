@@ -25,10 +25,10 @@
     <ul id="side-menu">
 
         <li class="menu-title">Menu</li>
-            <li>
+        <li>
             <a class='tp-link' href='{{ route('admin.dashboard') }}'>
                 <i data-feather="home"></i>
-                <span>  Dashboard</span>
+                <span> Dashboard</span>
             </a>
         </li>
 
@@ -102,12 +102,7 @@
                 <span> Bình luận </span>
             </a>
         </li>
-        <li>
-            <a class='tp-link' href='{{ route('admin.blogs.index') }}'>
-                <i data-feather="calendar"></i>
-                <span> Bài viết </span>
-            </a>
-        </li>
+
         <li>
             <a class='tp-link' href='
             {{ route('admin.reviews.index') }}'>
@@ -145,12 +140,18 @@
         <li>
             <a class='tp-link' href="{{ route('admin.blog_categories.index') }}">
                 <i data-feather="file-text"></i>
-                <span> Blog </span>
+                <span> Danh mục bài viết </span>
+            </a>
+        </li>
+        <li>
+            <a class='tp-link' href='{{ route('admin.blogs.index') }}'>
+                <i data-feather="calendar"></i>
+                <span> bài viết </span>
             </a>
         </li>
 
 
-        <li>
+        {{-- <li>
             <a href="#sidebarMaps" data-bs-toggle="collapse">
                 <i data-feather="map"></i>
                 <span> Maps </span>
@@ -166,7 +167,7 @@
                     </li>
                 </ul>
             </div>
-        </li>
+        </li> --}}
 
     </ul>
 
