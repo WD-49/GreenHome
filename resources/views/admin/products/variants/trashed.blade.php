@@ -141,7 +141,8 @@
 
                             <td>
                                 <a href="{{ route('admin.products.variants.restore', [$variant->product, $variant]) }}"
-                                    class="btn btn-primary btn-sm" title="Khôi phục"><i class="fa-solid fa-rotate-left"></i>
+                                    class="btn btn-primary btn-sm" title="Khôi phục"><i
+                                        class="fa-solid fa-rotate-left"></i>restore
                                 </a>
                             </td>
                         </tr>

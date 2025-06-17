@@ -69,7 +69,7 @@ class DatabaseSeeder extends Seeder
         // for ($i = 1; $i <= 10; $i++) {
         //     $data[] = [
         //         'user_id' => $userIds[array_rand($userIds)],
-        //         'product_variant_id' => 4, // hoặc thay bằng id variant thực tế của product_id = 4
+        //         'product_variant_id' => 5, // hoặc thay bằng id variant thực tế của product_id = 4
         //         'rating' => rand(3, 5),
         //         'title' => 'Review sản phẩm 4 #' . $i,
         //         'content' => 'Nội dung đánh giá sản phẩm 4 số ' . $i,
@@ -299,41 +299,41 @@ class DatabaseSeeder extends Seeder
         // }
 
         // fake dữ liệu cho giỏ hàng
-        foreach ([1, 2] as $userId) {
-            // Tạo giỏ hàng
-            $cartId = DB::table('carts')->insertGetId([
-                'user_id' => $userId,
-                'total_amount' => 0,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+        // foreach ([1, 2] as $userId) {
+        //     // Tạo giỏ hàng
+        //     $cartId = DB::table('carts')->insertGetId([
+        //         'user_id' => $userId,
+        //         'total_amount' => 0,
+        //         'created_at' => now(),
+        //         'updated_at' => now(),
+        //     ]);
 
-            $variantIds = \App\Models\ProductVariant::inRandomOrder()->limit(5)->pluck('id')->toArray();
-            $totalAmount = 0;
+        //     $variantIds = \App\Models\ProductVariant::inRandomOrder()->limit(5)->pluck('id')->toArray();
+        //     $totalAmount = 0;
 
-            foreach ($variantIds as $variantId) {
-                $variant = \App\Models\ProductVariant::find($variantId);
-                $quantity = rand(1, 5);
-                $unitPrice = $variant->price;
-                $totalPrice = $unitPrice * $quantity;
-                $totalAmount += $totalPrice;
+        //     foreach ($variantIds as $variantId) {
+        //         $variant = \App\Models\ProductVariant::find($variantId);
+        //         $quantity = rand(1, 5);
+        //         $unitPrice = $variant->price;
+        //         $totalPrice = $unitPrice * $quantity;
+        //         $totalAmount += $totalPrice;
 
-                DB::table('cart_items')->insert([
-                    'cart_id' => $cartId,
-                    'product_variant_id' => $variantId,
-                    'quantity' => $quantity,
-                    'unit_price' => $unitPrice,
-                    'total_price' => $totalPrice,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
+        //         DB::table('cart_items')->insert([
+        //             'cart_id' => $cartId,
+        //             'product_variant_id' => $variantId,
+        //             'quantity' => $quantity,
+        //             'unit_price' => $unitPrice,
+        //             'total_price' => $totalPrice,
+        //             'created_at' => now(),
+        //             'updated_at' => now(),
+        //         ]);
+        //     }
 
-            // Cập nhật lại tổng tiền cho giỏ hàng
-            DB::table('carts')->where('id', $cartId)->update([
-                'total_amount' => $totalAmount,
-            ]);
-        }
+        //     // Cập nhật lại tổng tiền cho giỏ hàng
+        //     DB::table('carts')->where('id', $cartId)->update([
+        //         'total_amount' => $totalAmount,
+        //     ]);
+        // }
 
         // fake dữ liệu cho người dùng
         // $faker = Faker::create();

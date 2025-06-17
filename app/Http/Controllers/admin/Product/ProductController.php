@@ -27,13 +27,10 @@ class ProductController extends Controller
         $categories = Category::get();
         $brands = Brand::get();
 
-        $query = Product::with(['category', 'brand'])
-            ->whereHas('category', function ($q) {
-                $q->whereNull('deleted_at');
-            });
-            // ->whereHas('brand', function ($q) {
-            //     $q->whereNull('deleted_at');
-            // });
+        $query = Product::with(['category', 'brand']);
+        // ->whereHas('brand', function ($q) {
+        //     $q->whereNull('deleted_at');
+        // });
 
 
         if ($request->filled('name')) {
@@ -43,15 +40,15 @@ class ProductController extends Controller
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
         }
-            
+
 
         // xóa mềm ko xóa sản phẩm
         if ($request->filled('brand_id')) {
-    $query->where('brand_id', $request->brand_id)
-          ->whereHas('brand', function ($q) {
-              $q->whereNull('deleted_at');
-          });
-}
+            $query->where('brand_id', $request->brand_id)
+                ->whereHas('brand', function ($q) {
+                    $q->whereNull('deleted_at');
+                });
+        }
 
         if ($request->filled('status')) {
             $query->where('status', $request->status == 1 ? 1 : 0);
@@ -221,8 +218,6 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request);
-        // dd($request);
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
@@ -241,7 +236,7 @@ class ProductController extends Controller
                 function ($attribute, $value, $fail) {
                     $valueIds = explode(',', $value);
                     foreach ($valueIds as $valueId) {
-                        if (!empty($valueId) && !AttributeValue::where('id', $valueId)->exists()) {
+                        if (!empty($valueId) && !\App\Models\AttributeValue::where('id', $valueId)->exists()) {
                             $fail("Giá trị thuộc tính $valueId trong $attribute không tồn tại.");
                         }
                     }
@@ -255,17 +250,41 @@ class ProductController extends Controller
             // Nếu là sản phẩm đơn
             'simple_price' => 'required_unless:is_variant,1|numeric',
             'simple_quantity' => 'required_unless:is_variant,1|integer',
-            // 'simple_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ], [
+            // Thông báo lỗi tiếng Việt
+            'name.required' => 'Vui lòng nhập tên sản phẩm.',
+            'category_id.required' => 'Vui lòng chọn danh mục.',
+            'brand_id.required' => 'Vui lòng chọn thương hiệu.',
+            'status.required' => 'Vui lòng chọn trạng thái.',
+            'date_of_entry.required' => 'Vui lòng nhập ngày nhập kho.',
+            'image.image' => 'Ảnh sản phẩm phải là tệp hình ảnh.',
+            'image.mimes' => 'Ảnh sản phẩm phải có định dạng jpeg, png, jpg, webp.',
+            'image.max' => 'Ảnh sản phẩm không được vượt quá 2MB.',
+            'is_variant.required' => 'Vui lòng chọn loại sản phẩm.',
+            'variants.required_if' => 'Vui lòng nhập ít nhất một biến thể.',
+            'variants.*.values.required_if' => 'Vui lòng chọn thuộc tính cho biến thể.',
+            'variants.*.price.required_if' => 'Vui lòng nhập giá cho biến thể.',
+            'variants.*.quantity.required_if' => 'Vui lòng nhập số lượng cho biến thể.',
+            'variants.*.image.image' => 'Ảnh biến thể phải là tệp hình ảnh.',
+            'variants.*.image.mimes' => 'Ảnh biến thể phải có định dạng jpeg, png, jpg.',
+            'variants.*.image.max' => 'Ảnh biến thể không được vượt quá 2MB.',
+            'simple_price.required_unless' => 'Vui lòng nhập giá cho sản phẩm.',
+            'simple_quantity.required_unless' => 'Vui lòng nhập số lượng cho sản phẩm.',
         ]);
+
+        $errors = [];
+
         if ($validator->fails()) {
+            $errors = $validator->errors()->all();
             return redirect()
                 ->back()
                 ->withErrors($validator)
+                ->with('all_errors', $errors)
                 ->withInput();
         }
 
         try {
-            DB::transaction(function () use ($request) {
+            DB::transaction(function () use ($request, &$errors) {
                 // Upload ảnh sản phẩm
                 $productImagePath = null;
                 if ($request->hasFile('image')) {
@@ -286,17 +305,16 @@ class ProductController extends Controller
                 $product->save();
 
                 if ($request->boolean('is_variant') && empty($request->input('variants', []))) {
+                    $errors[] = "Phải có ít nhất một biến thể cho sản phẩm có biến thể.";
                     throw new \Exception("Phải có ít nhất một biến thể cho sản phẩm có biến thể.");
                 }
 
                 // Nếu là sản phẩm có biến thể
                 if ($request->boolean('is_variant')) {
                     $variants = $request->input('variants', []);
-                    // dd($variants);
                     $seenCombinations = [];
 
                     foreach ($variants as $index => $variant) {
-                        // dd($variant['values']);
                         $values = explode(',', $variant['values']);
                         $attributeCombination = $values ?? [];
                         ksort($attributeCombination);
@@ -316,6 +334,7 @@ class ProductController extends Controller
                         }, array_keys($attributeCombination), $attributeCombination));
 
                         if (in_array($combinationKey, $seenCombinations)) {
+                            $errors[] = "Biến thể thứ " . ($index + 1) . " bị trùng tổ hợp thuộc tính.";
                             throw new \Exception("Biến thể thứ " . ($index + 1) . " bị trùng tổ hợp thuộc tính.");
                         }
                         $seenCombinations[] = $combinationKey;
@@ -327,7 +346,6 @@ class ProductController extends Controller
                         $newVariant->quantity = $variant['quantity'];
                         $newVariant->status = true;
                         $newVariant->attribute_name = $attributeNameString;
-                        // dd($newVariant->attribute_name);
 
                         if ($request->hasFile("variants.$index.image")) {
                             $variantImage = $request->file("variants.$index.image");
@@ -366,7 +384,7 @@ class ProductController extends Controller
                     $newVariant->price = $request->input('simple_price');
                     $newVariant->quantity = $request->input('simple_quantity');
                     $newVariant->status = true;
-                    $newVariant->attribute_name = null; // Không có thuộc tính cho sản phẩm đơn
+                    $newVariant->attribute_name = null;
                     $newVariant->save();
                 }
             });
@@ -375,9 +393,14 @@ class ProductController extends Controller
                 ->route('admin.products.index')
                 ->with('success', 'Sản phẩm đã được thêm thành công.');
         } catch (\Exception $e) {
+            // Gộp lỗi validate và lỗi ngoại lệ
+            $allErrors = $errors;
+            $allErrors[] = $e->getMessage();
+
             return redirect()
                 ->back()
-                ->with('error', 'Có lỗi xảy ra: ' . $e->getMessage())
+                ->withErrors($allErrors)
+                ->with('all_errors', $allErrors)
                 ->withInput();
         }
     }

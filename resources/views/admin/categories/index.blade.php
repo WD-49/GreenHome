@@ -124,10 +124,10 @@
                                                     </button>
                                                     <ul class="dropdown-menu dropdown-menu-end">
                                                         <li><a class="dropdown-item"
-                                                                href="{{ route('admin.categories.show', $category->id) }}">Chi
+                                                                href="{{ route('admin.categories.show', $category->slug) }}">Chi
                                                                 tiết</a></li>
                                                         <li><a class="dropdown-item"
-                                                                href="{{ route('admin.categories.edit', $category->id) }}">Chỉnh
+                                                                href="{{ route('admin.categories.edit', $category->slug) }}">Chỉnh
                                                                 sửa</a></li>
                                                         <li>
                                                             <form

@@ -28,21 +28,23 @@
 
 @section('content')
 
-    <!-- Hiển thị lỗi của validation -->
-    @if ($errors->any())
+    @if (session('all_errors'))
         <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
+            <ul class="mb-0">
+                @foreach (session('all_errors') as $error)
                     <li>{{ $error }}</li>
                 @endforeach
             </ul>
         </div>
     @endif
 
-    <!-- Hiển thị lỗi do xảy ra exception trong quá trình xử lý lưu -->
-    @if (session('error'))
+    @if ($errors->any() && !session('all_errors'))
         <div class="alert alert-danger">
-            {{ session('error') }}
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
     @endif
 
@@ -58,7 +60,7 @@
                     <div class="mb-3">
                         <label for="name" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('name') is-invalid @enderror" name="name"
-                            id="name" value="{{ old('name') }}" required>
+                            id="name" value="{{ old('name') }}">
                         @error('name')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -67,7 +69,7 @@
                     <div class="mb-3">
                         <label for="category_id" class="form-label">Danh mục <span class="text-danger">*</span></label>
                         <select class="form-select @error('category_id') is-invalid @enderror" name="category_id"
-                            id="category_id" required>
+                            id="category_id">
                             <option value="">-- Chọn danh mục --</option>
                             @foreach ($categories as $category)
                                 <option value="{{ $category->id }}"
@@ -83,8 +85,7 @@
 
                     <div class="mb-3">
                         <label for="brand_id" class="form-label">Thương hiệu <span class="text-danger">*</span></label>
-                        <select class="form-select @error('brand_id') is-invalid @enderror" name="brand_id" id="brand_id"
-                            required>
+                        <select class="form-select @error('brand_id') is-invalid @enderror" name="brand_id" id="brand_id">
                             <option value="">-- Chọn thương hiệu --</option>
                             @foreach ($brands as $brand)
                                 <option value="{{ $brand->id }}" {{ old('brand_id') == $brand->id ? 'selected' : '' }}>
@@ -101,7 +102,7 @@
                 <div class="col-md-6">
                     <div class="mb-3">
                         <label for="status" class="form-label">Trạng thái <span class="text-danger">*</span></label>
-                        <select class="form-select @error('status') is-invalid @enderror" name="status" required>
+                        <select class="form-select @error('status') is-invalid @enderror" name="status">
                             <option value="" {{ old('status') === null ? 'selected' : '' }}>-- Chọn trạng thái --
                             </option>
                             <option value="1" {{ old('status') === '1' ? 'selected' : '' }}>Đang bán</option>
@@ -386,9 +387,9 @@
             ${variantName}
             <input type="hidden" name="variants[${index}][values]" value="${variantIdValues}">
         </td>
-        <td><input type="number" name="variants[${index}][price]" class="form-control" required
+        <td><input type="number" name="variants[${index}][price]" class="form-control" 
                 value="${defaultPrice}"></td>
-        <td><input type="number" name="variants[${index}][quantity]" class="form-control" required
+        <td><input type="number" name="variants[${index}][quantity]" class="form-control" 
                 value="${defaultQuantity}"></td>
         <td><input type="file" name="variants[${index}][image]" class="form-control"></td>
         <td><button type="button" class="btn btn-sm btn-danger" onclick="this.closest('tr').remove()">❌</button></td>

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\admin\Product;
 
 use App\Models\Brand;
@@ -20,8 +21,9 @@ class ProductVariantController extends Controller
 
         $variants = $product->productVariants()
             ->with(['product', 'productVariantValues.attributeValue.attribute']) // Load cả value & attribute
+            ->whereNull('deleted_at') // Chỉ lấy các bản ghi không bị xóa mềm
             ->orderByDesc('id')
-            ->paginate(4)
+            ->paginate(10)
             ->appends($request->except('page'));
         // dd($variants);
         $variantTrashed = $product->productVariants()->onlyTrashed()->get();
@@ -44,7 +46,7 @@ class ProductVariantController extends Controller
                 'productVariantValues.attributeValue.attribute',
             ])
             ->orderByDesc('id')
-            ->paginate(4)
+            ->paginate(10)
             ->appends($request->except('page'));
         // dd($variants);
 
@@ -75,58 +77,52 @@ class ProductVariantController extends Controller
             'attributes.*' => 'exists:attributes,id',
             'attribute_values' => 'nullable|array',
             'attribute_values.*' => 'nullable|integer|max:255',
+        ], [
+            'price.required' => 'Vui lòng nhập giá.',
+            'quantity.required' => 'Vui lòng nhập số lượng.',
+            'status.required' => 'Vui lòng chọn trạng thái.',
+            'image.image' => 'Ảnh phải là tệp hình ảnh.',
+            'image.mimes' => 'Ảnh phải có định dạng jpeg, png, jpg, webp.',
+            'image.max' => 'Ảnh không được vượt quá 2MB.',
         ]);
         // dd('check');
+
+        $attributeNameString = null;
+        if ($request->has('attribute_values')) {
+            $valueIds = array_filter(array_values($request->attribute_values));
+            $attributeNames = \App\Models\AttributeValue::whereIn('id', $valueIds)->pluck('value')->toArray();
+            $attributeNameString = implode('-', $attributeNames);
+        }
+        // dd($attributeNameString);
 
         $imagePath = null;
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('images/products', 'public');
         }
-        // dd($request->image);
 
-        $submitted = collect($request->attribute_values)->sort()->implode(',');
-
-        // dd($submitted);
-        $sku = ProductVariant::generateUniqueSku($product->name);
-        // dd($sku);
-
-        $exists = $product->productVariants()
-            ->with('productVariantValues')
-            ->get()
-            ->contains(function ($variant) use ($submitted) {
-                return $variant->productVariantValues->pluck('attribute_value_id')->sort()->implode(',') === $submitted;
-            });
-
-        if ($exists) {
-            return back()->withErrors(['attributes' => 'Biến thể với tổ hợp thuộc tính này đã tồn tại.'])->withInput();
-        }
-
-
-        // Tạo biến thể mới
-        $variant = ProductVariant::create([
+        $variant = \App\Models\ProductVariant::create([
             'product_id' => $product->id,
-            'sku' => $sku,
+            'sku' => \App\Models\ProductVariant::generateUniqueSku($product->name),
             'price' => $request->price,
             'quantity' => $request->quantity,
             'image' => $imagePath,
             'status' => $request->status,
+            'attribute_name' => $attributeNameString,
         ]);
-        if ($request->attribute_values) {
-            foreach ($request->attribute_values as $index => $attributeId) {
-                // dd($attribute_values);
-                // dd('check');
-                ProductVariantValue::create([
-                    'product_variant_id' => $variant->id,
-                    'attribute_value_id' => $request->attribute_values[$index],
-                ]);
+
+        // Lưu các giá trị thuộc tính cho biến thể
+        if ($request->has('attribute_values')) {
+            foreach ($request->attribute_values as $attributeId => $valueId) {
+                if ($valueId) {
+                    \App\Models\ProductVariantValue::create([
+                        'product_variant_id' => $variant->id,
+                        'attribute_value_id' => $valueId,
+                    ]);
+                }
             }
         }
 
-        // Lưu các giá trị thuộc tính được chọn
-
-
-
-        return redirect()->route('admin.products.variants.index', $product)->with('success', 'Thêm biến thể của sản phẩm thành công!');
+        return redirect()->route('admin.products.variants.index', $product)->with('success', 'Thêm biến thể thành công!');
     }
 
     public function edit(Product $product, ProductVariant $productVariant)
@@ -142,17 +138,15 @@ class ProductVariantController extends Controller
     }
     public function update(Request $request, Product $product, ProductVariant $productVariant)
     {
-        // dd($request);
-        // dd($productVariant);
         $request->validate([
             'price' => 'required|numeric|min:0',
             'quantity' => 'required|integer|min:0',
             'image' => 'nullable|image|mimes:jpg,png,jpeg,gif,webp|max:2048',
             'status' => 'required|boolean',
-            'attributes' => 'required|array',
+            'attributes' => 'nullable|array',
             'attributes.*' => 'exists:attributes,id',
-            'attribute_values' => 'required|array',
-            'attribute_values.*' => 'required|integer|max:255',
+            'attribute_values' => 'nullable|array',
+            'attribute_values.*' => 'nullable|integer|max:255',
         ]);
 
         // Xử lý hình ảnh nếu có upload mới
@@ -164,14 +158,19 @@ class ProductVariantController extends Controller
             $imagePath = $request->file('image')->store('images/products', 'public');
         }
 
+        // Lấy lại attribute_name mới
+        $attributeNameString = null;
+        if ($request->has('attribute_values')) {
+            $valueIds = array_filter(array_values($request->attribute_values));
+            $attributeNames = \App\Models\AttributeValue::whereIn('id', $valueIds)->pluck('value')->toArray();
+            $attributeNameString = implode('-', $attributeNames);
+        }
+
         // Tổ hợp mới từ request
         $submitted = collect($request->attribute_values)->sort()->values()->implode(',');
-        // dd($submitted);
-
 
         // Tổ hợp hiện tại trong DB
         $current = $productVariant->productVariantValues->pluck('attribute_value_id')->sort()->values()->implode(',');
-        // dd($current);
 
         // Nếu tổ hợp có thay đổi thì mới kiểm tra trùng
         if ($submitted !== $current) {
@@ -188,7 +187,6 @@ class ProductVariantController extends Controller
             }
 
             // Nếu khác => cập nhật lại tổ hợp
-            // Xoá những cái không còn trong tổ hợp mới
             $productVariant->productVariantValues()->forceDelete();
 
             foreach ($request->attribute_values as $attributeValueId) {
@@ -199,16 +197,15 @@ class ProductVariantController extends Controller
                     ],
                 );
             }
-
-
         }
 
-        // Cập nhật các trường cơ bản
+        // Cập nhật các trường cơ bản, bao gồm attribute_name
         $productVariant->update([
             'price' => $request->price,
             'quantity' => $request->quantity,
             'image' => $imagePath,
             'status' => $request->status,
+            'attribute_name' => $attributeNameString,
         ]);
 
         return redirect()->route('admin.products.variants.index', $product)->with('success', 'Cập nhật biến thể thành công!');
@@ -227,7 +224,6 @@ class ProductVariantController extends Controller
 
         $productVariant->delete();
         return redirect()->route('admin.products.variants.index', $product)->with('success', 'biến thể đã được chuyển vào thùng rác!');
-
     }
 
     public function restore(Product $product, $id)
@@ -246,5 +242,4 @@ class ProductVariantController extends Controller
 
         return redirect()->route('admin.products.variants.trashed', $product)->with('success', 'Sản phẩm đã được khôi phục thành công');
     }
-
 }
