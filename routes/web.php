@@ -27,8 +27,17 @@ use App\Http\Controllers\Admin\BlogCategoryController;
 
 use Dom\Comment;
 
-Route::get('/', [HomeController::class, 'index'])->name('home');
+// route của trang client
 
+// trang trủ
+Route::get('/', [HomeController::class, 'index'])->name('home');
+// viết tiếp route của các trang tại đây
+// // Route::get('/blog', [HomeController::class, 'blog'])->name('blog'); ví dụ.
+
+
+
+
+// route của trang admin
 Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
@@ -308,12 +317,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/trash', [OrderController::class, 'trash'])->name('trash');
         Route::post('/restore/{id}', [OrderController::class, 'restore'])->name('restore');
         Route::post('{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
-
     });
 });
 // });
-
-
-
-
-

@@ -306,7 +306,7 @@ class OrderController extends Controller
                 $amountEligibleForDiscount = 0; // Số tiền từ các sản phẩm đủ điều kiện giảm giá
                 $totalQuantityForFixedDiscountPerItem = 0; // Tổng số lượng sản phẩm đủ điều kiện cho fixed discount (nếu fixed là per-item)
 
-                if ((int)$discountModelInstance->applies_to_all_products === 1) {
+                if ((int) $discountModelInstance->applies_to_all_products === 1) {
                     $amountEligibleForDiscount = $subTotalCalculatedFromItems;
                     $totalQuantityForFixedDiscountPerItem = array_sum($requestedQuantities);
                 } else {
@@ -388,7 +388,7 @@ class OrderController extends Controller
                 // TÍNH TOÁN DISCOUNT_AMOUNT CHO TỪNG ORDER_ITEM Ở ĐÂY
                 $itemDiscountAmount = 0;
                 if ($discountModelInstance && $discountAmountAppliedToOrder > 0) { // Nếu có mã giảm giá được áp dụng cho đơn hàng
-                    if ((int)$discountModelInstance->applies_to_all_products === 1) { // Áp dụng cho tất cả sản phẩm
+                    if ((int) $discountModelInstance->applies_to_all_products === 1) { // Áp dụng cho tất cả sản phẩm
                         // Phân bổ discount theo tỷ lệ giá trị của item so với tổng subTotal ban đầu (trước giảm giá)
                         if ($subTotalCalculatedFromItems > 0) { // Tránh chia cho 0
                             $itemDiscountAmount = ($itemDetail['total_price_before_item_discount'] / $subTotalCalculatedFromItems) * $discountAmountAppliedToOrder;
