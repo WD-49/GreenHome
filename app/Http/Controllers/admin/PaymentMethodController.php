@@ -10,13 +10,11 @@ class PaymentMethodController extends Controller
 {
     public function index(Request $request)
     {
-        // Đếm cho tabs
         $paymentAll = PaymentMethod::withTrashed()->get();
         $paymentActive = PaymentMethod::where('status', 1)->get();
         $paymentInactive = PaymentMethod::where('status', 0)->get();
         $paymentTrashed = PaymentMethod::onlyTrashed()->get();
 
-        // Query filter
         $query = PaymentMethod::query();
 
         if ($request->filled('name')) {
@@ -66,7 +64,6 @@ class PaymentMethodController extends Controller
         return redirect()->route('admin.paymentMethods.index')->with('success', 'Thêm phương thức thành công!');
     }
 
-
     public function edit($id)
     {
         $paymentMethod = PaymentMethod::findOrFail($id);
@@ -97,7 +94,6 @@ class PaymentMethodController extends Controller
 
     public function trash(Request $request)
     {
-        // Đếm tabs cho thùng rác
         $paymentAll = PaymentMethod::withTrashed()->get();
         $paymentActive = PaymentMethod::where('status', 1)->get();
         $paymentInactive = PaymentMethod::where('status', 0)->get();
@@ -119,7 +115,6 @@ class PaymentMethodController extends Controller
 
         $paymentMethods = $query->orderBy('deleted_at', 'desc')->paginate(10);
 
-        // Dùng lại view index cho đồng bộ tabs, table, filter
         return view('admin.payment_methods.trash', [
             'paymentMethods' => $paymentMethods,
             'methodAll' => $paymentAll,
@@ -142,9 +137,11 @@ class PaymentMethodController extends Controller
         $paymentMethod->forceDelete();
         return redirect()->route('admin.paymentMethods.trash')->with('success', 'Xóa vĩnh viễn thành công!');
     }
+
     public function show($id)
     {
-        $paymentMethod = PaymentMethod::withTrashed()->findOrFail($id);
+        // 👇 ĐÃ SỬA: Thêm `with('orders')` để nạp đơn hàng
+        $paymentMethod = PaymentMethod::withTrashed()->with('orders')->findOrFail($id);
         return view('admin.payment_methods.show', compact('paymentMethod'));
     }
 }

@@ -9,34 +9,47 @@
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>STT</th>
-                <th>Tên danh mục</th>
-                <th>Mô tả</th>
-                <th>Ngày xóa</th>
-                <th>Hành động</th>
+                <th class="text-center">STT</th>
+                <th class="text-center">Tên danh mục</th>
+                <th class="text-center">Mô tả</th>
+                <th class="text-center">Ngày xóa</th>
+                <th class="text-center">Hành động</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($categories as $index => $category)
                 <tr>
-                    <td>{{ ($categories->currentPage() - 1) * $categories->perPage() + $index + 1 }}</td>
-                    <td>{{ $category->name }}</td>
-                    <td>{!! Str::limit(strip_tags($category->description), 100) !!}</td>
-                    <td>{{ $category->deleted_at->format('d/m/Y') }}</td>
-                    <td>
-                        <form action="{{ route('admin.categories.restore', $category->slug) }}" method="POST" style="display:inline-block;">
-                            @csrf
-                            <button class="btn btn-sm btn-success" type="submit">Khôi phục</button>
-                        </form>
-                        <form action="{{ route('admin.categories.forceDelete', $category->slug) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Xóa vĩnh viễn danh mục này?')">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-sm btn-danger" type="submit">Xóa vĩnh viễn</button>
-                        </form>
+                    <td class="text-center">{{ ($categories->currentPage() - 1) * $categories->perPage() + $index + 1 }}</td>
+                    <td class="text-center">{{ $category->name }}</td>
+                    <td class="text-center">{!! Str::limit(strip_tags($category->description), 100) !!}</td>
+                    <td class="text-center">{{ $category->deleted_at->format('d/m/Y') }}</td>
+                    <td class="text-center">
+                        <div class="dropdown">
+                            <button class="btn btn-light border dropdown-toggle" type="button" id="dropdownMenuButton{{ $index }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                ...
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ $index }}">
+                                <li>
+                                    <form action="{{ route('admin.categories.restore', $category->slug) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item">Khôi phục</button>
+                                    </form>
+                                </li>
+                                <li>
+                                    <form action="{{ route('admin.categories.forceDelete', $category->slug) }}" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục này vĩnh viễn không?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="dropdown-item text-danger">Xóa vĩnh viễn</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="5" class="text-center text-muted">Không có danh mục nào trong thùng rác.</td></tr>
+                <tr>
+                    <td colspan="5" class="text-center text-muted">Không có danh mục nào trong thùng rác.</td>
+                </tr>
             @endforelse
         </tbody>
     </table>

@@ -41,6 +41,10 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/data', [DashboardController::class, 'data']);
+    Route::get('/dashboard/repeat-customer-rate', [DashboardController::class, 'repeatCustomerRate']);
+    Route::get('/dashboard/top-selling-products', [DashboardController::class, 'topSellingProducts']);
+    Route::get('/dashboard/sales-report-income', [DashboardController::class, 'salesReportIncome']);
 
     Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login-submit', [AdminAuthController::class, 'login'])->name('login.submit');
@@ -231,13 +235,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::prefix('comments')->name('comments.')->group(function () {
         Route::get('/', [CommentController::class, 'index'])->name('index');
-        Route::get('/trash', [CommentController::class, 'trash'])->name('trash');  // <-- đây
         Route::post('/approve', [CommentController::class, 'approve'])->name('approve');
         Route::post('/hide', [CommentController::class, 'hide'])->name('hide');
         Route::get('/{id}', [CommentController::class, 'show'])->name('show');
-        Route::delete('/delete', [CommentController::class, 'destroy'])->name('destroy');
-        Route::post('/restore/{id}', [CommentController::class, 'restore'])->name('restore');
-        Route::delete('/force-delete', [CommentController::class, 'forceDelete'])->name('forceDelete');
         Route::post('/show-again', [CommentController::class, 'showAgain'])->name('showAgain');
     });
 
@@ -288,6 +288,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/restore/{id}', [DiscountController::class, 'restore'])->name('restore');
         Route::delete('/force-delete/{id}', [DiscountController::class, 'forceDelete'])->name('forceDelete');
         Route::get('/history', [DiscountController::class, 'history'])->name('history');
+        Route::get('/history/{id}', [DiscountController::class, 'historyDetail'])->name('historyDetail');
     });
 
     //quản lí phương thức thanh toán

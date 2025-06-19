@@ -25,26 +25,13 @@
     <ul id="side-menu">
 
         <li class="menu-title">Menu</li>
-
         <li>
-            <a href="#sidebarDashboards" data-bs-toggle="collapse">
+            <a class='tp-link' href='{{ route('admin.dashboard') }}'>
                 <i data-feather="home"></i>
-                <span> Dashboard </span>
-                <span class="menu-arrow"></span>
+                <span> Dashboard</span>
             </a>
-            <div class="collapse" id="sidebarDashboards">
-                <ul class="nav-second-level">
-                    <li>
-                        <a class='tp-link' href="{{ url('index.html') }}">Analytical</a>
-                    </li>
-                    <li>
-                        <a class='tp-link' href="{{ url('ecommerce.html') }}">E-commerce</a>
-                    </li>
-                </ul>
-            </div>
         </li>
 
-        {{-- <li class="menu-title">Pages</li> --}}
         <li>
             <a href="#sidebarAuth" data-bs-toggle="collapse">
                 <i data-feather="users"></i>
@@ -57,7 +44,7 @@
                         <a class='tp-link' href="{{ route('admin.account.listUsers') }}">Người dùng</a>
                     </li>
                     <li>
-                        <a class='tp-link' href="{{  route('admin.account.listAdmins') }}">Quản trị</a>
+                        <a class='tp-link' href="{{ route('admin.account.listAdmins') }}">Quản trị</a>
 
                     </li>
                 </ul>
@@ -115,17 +102,10 @@
                 <span> Bình luận </span>
             </a>
         </li>
+
         <li>
-            <<<<<<< HEAD <a class='tp-link' href='{{ route('admin.reviews.index') }}'>
-                =======
-                <a class='tp-link' href='{{ route('admin.blogs.index') }}'>
-                    <i data-feather="calendar"></i>
-                    <span> Bài viết </span>
-                </a>
-        </li>
-        <li>
-            <a class='tp-link' href='calendar.html'>
-                >>>>>>> origin/feature/giao-dien-thuoc-tinh-va-bai-viet-new
+            <a class='tp-link' href='
+            {{ route('admin.reviews.index') }}'>
                 <i data-feather="calendar"></i>
                 <span> Đánh giá </span>
             </a>
@@ -160,12 +140,18 @@
         <li>
             <a class='tp-link' href="{{ route('admin.blog_categories.index') }}">
                 <i data-feather="file-text"></i>
-                <span> Blog </span>
+                <span> Danh mục bài viết </span>
+            </a>
+        </li>
+        <li>
+            <a class='tp-link' href='{{ route('admin.blogs.index') }}'>
+                <i data-feather="calendar"></i>
+                <span> bài viết </span>
             </a>
         </li>
 
 
-        <li>
+        {{-- <li>
             <a href="#sidebarMaps" data-bs-toggle="collapse">
                 <i data-feather="map"></i>
                 <span> Maps </span>
@@ -181,7 +167,7 @@
                     </li>
                 </ul>
             </div>
-        </li>
+        </li> --}}
 
     </ul>
 

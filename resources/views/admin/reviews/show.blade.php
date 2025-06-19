@@ -139,12 +139,12 @@
         <div class="btn-group-custom">
             <a href="{{ route('admin.reviews.index') }}" class="btn btn-custom btn-custom-outline">← Quay lại</a>
 
-            <form action="{{ route('admin.reviews.destroy', $review->id) }}" method="POST"
+            {{-- <form action="{{ route('admin.reviews.destroy', $review->id) }}" method="POST"
                 onsubmit="return confirm('Bạn có chắc muốn xóa đánh giá này không?');">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="btn btn-custom btn-danger">Xóa</button>
-            </form>
+            </form> --}}
         </div>
     </div>
 @endsection

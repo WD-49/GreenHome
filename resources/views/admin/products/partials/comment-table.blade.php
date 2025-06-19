@@ -23,23 +23,15 @@
                 </td>
                 <td>{{ $comment->created_at->format('d/m/Y') }}</td>
                 <td>
-                    <div class="dropdown">
+                    {{-- <div class="dropdown">
                         <button class="btn btn-light btn-sm me-2" type="button" data-bs-toggle="dropdown"
                             aria-expanded="false">
                             <span class="mdi mdi-settings-helper"></span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
 
-                            <li>
-                                <form action="{{ route('admin.comments.destroy', $comment->id) }}" method="POST"
-                                    onsubmit="return confirm('Bạn có chắc chắn muốn bỏ sản phẩm này vào thùng rác không?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="dropdown-item text-danger" type="submit">Xóa sản phẩm</button>
-                                </form>
-                            </li>
                         </ul>
-                    </div>
+                    </div> --}}
                 </td>
             </tr>
         @endforeach

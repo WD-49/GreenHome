@@ -55,7 +55,6 @@
                             <tr>
                                 <th>Tên sản phẩm</th>
                                 <th>Loại sản phẩm</th>
-                                <th>Giá gốc</th>
                                 <th>Giá đặt mua</th>
                                 <th>Số lượng</th>
                                 <th>Tổng giá</th>
@@ -67,18 +66,15 @@
                                 <tr>
                                     <td>{{ $item->product_name }}</td>
                                     <td>{{ $item->product_attribute }}</td>
-                                    <td>{{ number_format($item->productVariant->price, 0, ',', '.') }} VND</td>
+                                    {{-- 6:35 --}}
+                                    {{-- <td>{{ number_format($item->productVariant->price, 0, ',', '.') }} VND</td> --}}
                                     <td>{{ number_format($item->unit_price, 0, ',', '.') }} VND</td>
                                     <td>{{ $item->quantity }}</td>
                                     <td>{{ number_format($item->total_price, 0, ',', '.') }} VND</td>
 
                                     <td>
-                                        @if (in_array($item->productVariant->product->id, $discountProductIds))
-                                            @if ($order->discount->discount_type == 'fixed')
-                                                -{{ number_format($order->discount->discount_value, 0, ',', '.') }} VND
-                                            @else
-                                                -{{ number_format($order->discount->discount_value, 0, ',', '.') }}%
-                                            @endif
+                                        @if ($item->discount_amount > 0)
+                                            -{{ number_format($item->discount_amount, 0, ',', '.') }} VND
                                         @else
                                             Không có
                                         @endif

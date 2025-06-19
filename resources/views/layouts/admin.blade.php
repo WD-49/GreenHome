@@ -28,9 +28,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
         integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
+
 
     @stack('styles')
+
 
 </head>
 
@@ -101,20 +102,20 @@
     <script src="{{ asset('assets/libs/feather-icons/feather.min.js') }}"></script>
 
     <!-- Apexcharts JS -->
-    {{-- <script src="{{ asset('assets/libs/apexcharts/apexcharts.min.js') }}"></script> --}}
 
     <!-- for basic area chart -->
     <script src="{{ asset('assets/apexcharts.com/samples/assets/stock-prices.js') }}"></script>
 
+
+
     <!-- Widgets Init Js -->
-    <script src="{{ asset('assets/js/pages/analytics-dashboard.init.js') }}"></script>
 
     <!-- App js-->
     <script src="{{ asset('assets/js/app.js') }}"></script>
     @stack('scripts')
-</body>
 
 </body>
+
 @yield('scripts')
 
 <!-- Mirrored from zoyothemes.com/tapeli/html/ by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 16 Jul 2024 08:34:03 GMT -->
