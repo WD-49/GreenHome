@@ -35,6 +35,7 @@
 
     <!-- Main CSS -->
     <link rel="stylesheet" href="{{ asset('assets_client/assets/css/style.css') }}">
+    @stack('styles')
 </head>
 
 <body class="body-bg-6">
@@ -222,6 +223,7 @@
 
     <!-- Main Custom -->
     <script src="{{ asset('assets_client/assets/js/main.js') }}"></script>
+    @stack('scripts')
 </body>
 
 </html>
