@@ -38,6 +38,10 @@ class DatabaseSeeder extends Seeder
 
     public function run()
     {
+        $this->call([
+    BannerSeeder::class,
+]);
+
         // fake dữ liệu cho sản phẩm
 
         // $faker = Faker::create();

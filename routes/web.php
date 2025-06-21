@@ -27,6 +27,16 @@ use App\Http\Controllers\admin\ReviewController;
 use App\Http\Controllers\Admin\BlogCategoryController;
 use Dom\Comment;
 
+// route của trang client
+
+// trang trủ
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/category/{id}', [HomeController::class, 'category'])->name('shop.category');
+Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+Route::get('/products/category-id/{id}', [ProductController::class, 'getProductsByCategoryId']);
+
+// viết tiếp route của các trang tại đây
+// // Route::get('/blog', [HomeController::class, 'blog'])->name('blog'); ví dụ.
 use App\Http\Controllers\client\BlogController as ClientBlogController;
 
 
