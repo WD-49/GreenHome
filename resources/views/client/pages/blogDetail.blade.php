@@ -9,6 +9,7 @@
                     <div class="col-lg-12">
                         <div class="cr-breadcrumb-title">
                             <h2>{{ $blog->title }}</h2>
+                            <span><a href="{{ url('/') }}">Home</a> - Blog Details</span>
                             <span><a href="{{ route('home') }}">Trang chủ</a> - {{ $blog->title }}</span>
                         </div>
                     </div>
@@ -25,67 +26,73 @@
                     <div class="cr-blog-details">
                         {{-- Ảnh bìa --}}
                         <div class="cr-blog-details-image">
-                            <img src="{{ asset('storage/' . $blog->thumbnail) }}" alt="{{ $blog->slug }}">
+                          <img src="{{ asset('storage/' . $blog->thumbnail) }}" alt="{{ $blog->slug }}">
+                          <p>{{ asset('storage/' . $blog->thumbnail) }}</p>
                         </div>
 
                         {{-- Thông tin bài viết --}}
                         <div class="cr-blog-details-content">
                             <div class="cr-admin-date">
-                                <span>
-                                    <code>By {{ $blog->author->name ?? 'Admin' }}</code> /
-                                    {{ $blog->comments_count ?? 0 }} Comment /
-                                    {{ $blog->created_at->format('d/m/Y') }}
-                                </span>
+                                <span><code>By Admin</code> / {{ $blog->created_at->format('d-m-Y') }}</span>
+
                             </div>
 
                             <div class="cr-banner">
                                 <h2>{{ $blog->title }}</h2>
                             </div>
-
                             <p class="mb-15">{{ $blog->summary }}</p>
-
-                            <div>{!! $blog->content !!}</div>
+                            <p>{!! $blog->content !!}</p>
                         </div>
-
-                        {{-- Gợi ý nội dung khác: tạm thời bạn có thể giữ layout này --}}
-
-                        {{-- Đoạn cuối --}}
+                        <!-- Optional: Static inner images & quote -->
+                        {{-- <div class="row mt-30">
+                            <div class="col-6">
+                                <div class="cr-blog-inner-cols">
+                                    <div class="blog-img">
+                                        <img src="{{ asset('assets/img/blog/blog-2.jpg') }}" alt="blog-2">
+                                    </div>
+                                    <div class="cr-blog-inner-content">
+                                        <p>Sample content.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="cr-blog-inner-cols">
+                                    <div class="blog-img">
+                                        <img src="{{ asset('assets/img/blog/blog-3.jpg') }}" alt="blog-3">
+                                    </div>
+                                    <div class="cr-blog-inner-content">
+                                        <p>Sample content.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> --}}
+                        <div class="cr-blog-details-message">
+                            <p>{{ Str::limit(strip_tags($blog->content), 300) }}</p>
+                            <h5 class="title"> Admin</h5>
+                        </div>
                         <div class="cr-blog-details-paragrap">
-                            <p>Cảm ơn bạn đã đọc bài viết. Hãy để lại bình luận hoặc chia sẻ nếu bạn thấy hữu ích.</p>
+                            <p>Đây là nội dung phụ hoặc thêm của bài viết.</p>
+
                         </div>
 
                         {{-- Tags + Social --}}
                         <div class="cr-blog-details-tags">
-                            @if ($relatedBlogs->count())
-    <div class="related-blogs mt-5">
-        <h4 class="mb-4">Bài viết cùng chuyên mục</h4>
-        <div class="row">
-            @foreach ($relatedBlogs as $item)
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100 shadow-sm border-0">
-                        <img src="{{ asset('storage/' . $item->thumbnail) }}" class="card-img-top" alt="{{ $item->title }}" style="height: 200px; object-fit: cover;">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ Str::limit($item->title, 80) }}</h5>
-                            <p class="card-text text-muted small mb-2">
-                                {{ $item->created_at->format('d/m/Y') }} — {{ $item->author->name ?? 'Admin' }}
-                            </p>
-                            <p class="card-text">{{ Str::limit($item->summary, 100) }}</p>
-                            <a href="{{ route('blog.show', $item->slug) }}" class="btn btn-sm btn-outline-primary mt-2">
-                                Xem chi tiết
-                            </a>
+                            <div class="cr-details-tags">
+                                <ul class="cr-tags blog">
+                                    <li><a href="javascript:void(0)">Tag 1</a></li>
+                                    <li><a href="javascript:void(0)">Tag 2</a></li>
+                                </ul>
+                                <div class="cr-logo">
+                                    <a href="#"><i class="ri-facebook-line"></i></a>
+                                    <a href="#"><i class="ri-twitter-x-line"></i></a>
+                                    <a href="#"><i class="ri-instagram-line"></i></a>
+                                    <a href="#"><i class="ri-linkedin-line"></i></a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            @endforeach
-        </div>
-    </div>
-@endif
-                        </div>
-
-                    </div>
-                </div>
-
-                {{-- Pagination giả định (nếu bạn dùng bài kế tiếp / trước đó) --}}
+                <!-- Pagination nếu cần -->
 
             </div>
         </div>

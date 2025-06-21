@@ -325,4 +325,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
     });
 });
+
+// client 
+// BlogDetail 
+Route::get('/blog/{slug}', [App\Http\Controllers\client\BlogDetailController::class, 'show'])->name('blog.detail');
+
 // });
