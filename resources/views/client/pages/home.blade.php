@@ -5,7 +5,7 @@
     <script>
         AOS.init();
     </script>
-    <style>
+    {{-- <style>
         .banner-box {
             border-radius: 12px;
             overflow: hidden;
@@ -50,7 +50,7 @@
             font-weight: 600;
             margin-bottom: 10px;
         }
-    </style>
+    </style> --}}
 
     <!-- Hero slider -->
     <section class="section-hero padding-b-100 next">
@@ -67,7 +67,7 @@
                                         @foreach ($banner1 as $item)
                                             <h1>{{ $item->name }}</h1>
                                             <p>
-                                                {{ $item->description }}
+                                                {!! $item->description !!}
                                             </p>
                                             <div class="cr-last-buttons">
                                                 <a href="{{ $item->link }}" class="cr-button">
@@ -702,8 +702,8 @@
                                         </div>
 
                                         <div class="cr-blog-image">
-                                            <img src="{{ asset($blog->thumbnail) }}" alt="{{ $blog->title }}"
-                                                style="width: 100%; object-fit: cover;">
+                                            <img src="{{ asset('storage/' . $blog->thumbnail) }}"
+                                                alt="{{ $blog->title }}" style="width: 100%; object-fit: cover;">
                                             <div class="cr-blog-date">
                                                 <span>
                                                     {{ optional($blog->created_at)->format('d') }}

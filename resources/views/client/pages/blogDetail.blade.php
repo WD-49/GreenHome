@@ -26,7 +26,6 @@
                         {{-- Ảnh bìa --}}
                         <div class="cr-blog-details-image">
                             <img src="{{ asset('storage/' . $blog->thumbnail) }}" alt="{{ $blog->slug }}">
-                            <p>{{ asset('storage/' . $blog->thumbnail) }}</p>
                         </div>
 
                         {{-- Thông tin bài viết --}}
