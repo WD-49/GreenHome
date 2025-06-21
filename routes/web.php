@@ -28,28 +28,12 @@ use App\Http\Controllers\Admin\BlogCategoryController;
 use Dom\Comment;
 
 use App\Http\Controllers\client\BlogController as ClientBlogController;
-// route của trang client
-
-// trang trủ
-Route::get('/', [HomeController::class, 'index'])->name('home');
-// viết tiếp route của các trang tại đây
-Route::get('/blog/{slugCategory?}', [ClientBlogController::class, 'index'])->name('blog.index');
-Route::get('/blog/detail/{slug}', [ClientBlogController::class, 'show'])->name('blog.show');
-
-Route::get('/{slug}', [ProductClientController::class, 'show'])->name('productDetail');
-Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 
 
 
 
 // route của trang admin
 Route::prefix('admin')->name('admin.')->group(function () {
-
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard/data', [DashboardController::class, 'data']);
-    Route::get('/dashboard/repeat-customer-rate', [DashboardController::class, 'repeatCustomerRate']);
-    Route::get('/dashboard/top-selling-products', [DashboardController::class, 'topSellingProducts']);
-    Route::get('/dashboard/sales-report-income', [DashboardController::class, 'salesReportIncome']);
 
     Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login-submit', [AdminAuthController::class, 'login'])->name('login.submit');
@@ -58,6 +42,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Route::middleware(['admin'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/data', [DashboardController::class, 'data']);
+    Route::get('/dashboard/repeat-customer-rate', [DashboardController::class, 'repeatCustomerRate']);
+    Route::get('/dashboard/top-selling-products', [DashboardController::class, 'topSellingProducts']);
+    Route::get('/dashboard/sales-report-income', [DashboardController::class, 'salesReportIncome']);
 
     // Quản lý sản phẩm
     Route::prefix('/products')->name('products.')->group(function () {
@@ -326,8 +314,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 });
 
-// client 
-// BlogDetail 
+// route của trang client
+
+// trang trủ
+Route::get('/', [HomeController::class, 'index'])->name('home');
+// viết tiếp route của các trang tại đây
+Route::get('/blog/{slugCategory?}', [ClientBlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/detail/{slug}', [ClientBlogController::class, 'show'])->name('blog.show');
+
+Route::get('/san-pham/{slug}', [ProductClientController::class, 'show'])->name('productDetail');
+Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
+
 Route::get('/blog/{slug}', [App\Http\Controllers\client\BlogDetailController::class, 'show'])->name('blog.detail');
 
 // });

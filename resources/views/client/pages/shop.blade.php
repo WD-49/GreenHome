@@ -37,39 +37,41 @@
                 {{-- sidebar -------------------------------------------------------------------------------------------- --}}
                 <div class="col-lg-3 col-12 md-30" data-aos="fade-up" data-aos-duration="2000" data-aos-delay="400">
                     <div class="cr-shop-sideview">
-                    <form action="{{ route('shop.index') }}" method="GET" id="filter-form" class="mb-4">
+                        <form action="{{ route('shop.index') }}" method="GET" id="filter-form" class="mb-4">
 
-    {{-- Lọc theo danh mục --}}
-    <div class="mb-2 d-flex align-items-center">
-        <label for="category-select" class="fw-bold me-2" style="white-space: nowrap; width: 100px;">Danh mục:</label>
-        <select class="form-select" id="category-select" name="categories[]"
-                onchange="this.form.submit()" style="width: 220px; max-width: 100%;">
-            <option value="">Tất cả</option>
-            @foreach ($categories as $category)
-                <option value="{{ $category->id }}"
-                    {{ in_array($category->id, request()->input('categories', [])) ? 'selected' : '' }}>
-                    {{ $category->name }} ({{ $category->products_count }})
-                </option>
-            @endforeach
-        </select>
-    </div>
+                            {{-- Lọc theo danh mục --}}
+                            <div class="mb-2 d-flex align-items-center">
+                                <label for="category-select" class="fw-bold me-2"
+                                    style="white-space: nowrap; width: 100px;">Danh mục:</label>
+                                <select class="form-select" id="category-select" name="categories[]"
+                                    onchange="this.form.submit()" style="width: 220px; max-width: 100%;">
+                                    <option value="">Tất cả</option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}"
+                                            {{ in_array($category->id, request()->input('categories', [])) ? 'selected' : '' }}>
+                                            {{ $category->name }} ({{ $category->products_count }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-    {{-- Lọc theo thương hiệu --}}
-    <div class="mb-2 d-flex align-items-center">
-        <label for="brand-select" class="fw-bold me-2" style="white-space: nowrap; width: 100px;">Thương hiệu:</label>
-        <select class="form-select" id="brand-select" name="brand_id"
-                onchange="this.form.submit()" style="width: 220px; max-width: 100%;">
-            <option value="">Tất cả</option>
-            @foreach ($brands as $brand)
-                <option value="{{ $brand->id }}"
-                    {{ request()->input('brand_id') == $brand->id ? 'selected' : '' }}>
-                    {{ $brand->name }} ({{ $brand->products_count }})
-                </option>
-            @endforeach
-        </select>
-    </div>
+                            {{-- Lọc theo thương hiệu --}}
+                            <div class="mb-2 d-flex align-items-center">
+                                <label for="brand-select" class="fw-bold me-2"
+                                    style="white-space: nowrap; width: 100px;">Thương hiệu:</label>
+                                <select class="form-select" id="brand-select" name="brand_id" onchange="this.form.submit()"
+                                    style="width: 220px; max-width: 100%;">
+                                    <option value="">Tất cả</option>
+                                    @foreach ($brands as $brand)
+                                        <option value="{{ $brand->id }}"
+                                            {{ request()->input('brand_id') == $brand->id ? 'selected' : '' }}>
+                                            {{ $brand->name }} ({{ $brand->products_count }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-</form>
+                        </form>
 
 
 
@@ -146,19 +148,22 @@
                             <div class="cr-shop-bredekamp">
 
                                 <div class="center-content">
-    <span>Có {{ $products->total() }} sản phẩm được tìm thấy</span>
-</div>
+                                    <span>Có {{ $products->total() }} sản phẩm được tìm thấy</span>
+                                </div>
 
-<div class="cr-select">
-    <label>Sắp xếp theo :</label>
-    <form method="GET" action="{{ route('shop.index') }}">
-        <select class="form-select" name="sort" onchange="this.form.submit()">
-            <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Mới nhất</option>
-            <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Cũ nhất</option>
-            <option value="hot" {{ request('sort') == 'hot' ? 'selected' : '' }}>Hot nhất</option>
-        </select>
-    </form>
-</div>
+                                <div class="cr-select">
+                                    <label>Sắp xếp theo :</label>
+                                    <form method="GET" action="{{ route('shop.index') }}">
+                                        <select class="form-select" name="sort" onchange="this.form.submit()">
+                                            <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Mới
+                                                nhất</option>
+                                            <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Cũ
+                                                nhất</option>
+                                            <option value="hot" {{ request('sort') == 'hot' ? 'selected' : '' }}>Hot
+                                                nhất</option>
+                                        </select>
+                                    </form>
+                                </div>
 
                             </div>
                         </div>
@@ -220,7 +225,7 @@
                                         @else
                                             <p class="cr-price"><span class="new-price">Chưa có giá</span></p>
                                         @endif
-                                        <a href=" "
+                                        <a href="{{ route('productDetail', $product->slug) }}"
                                             class="btn btn-primary mt-2">
                                             Xem chi tiết
                                         </a>

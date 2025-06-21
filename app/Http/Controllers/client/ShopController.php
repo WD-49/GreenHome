@@ -31,8 +31,8 @@ class ShopController extends Controller
 
         // Lọc theo danh mục nếu có
         if (!empty(array_filter($selectedCategories))) {
-    $productsQuery->whereIn('category_id', $selectedCategories);
-}
+            $productsQuery->whereIn('category_id', $selectedCategories);
+        }
 
 
         // Lọc theo thương hiệu nếu có
