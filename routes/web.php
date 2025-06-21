@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Request;
 use App\Http\Controllers\admin\BrandController;
 use App\Http\Controllers\admin\OrderController;
 use App\Http\Controllers\client\HomeController;
+
+use App\Http\Controllers\client\ProductClientController;
+use App\Http\Controllers\Client\ShopController;
 use App\Http\Controllers\admin\BannerController;
 use App\Http\Controllers\admin\CommentController;
 use App\Http\Controllers\admin\DiscountController;
@@ -19,20 +22,22 @@ use App\Http\Controllers\admin\Account\AccountAdminController;
 use App\Http\Controllers\admin\Account\AccountUsersController;
 use App\Http\Controllers\admin\BlogController;
 use App\Http\Controllers\admin\CategoryController;
-
 use App\Http\Controllers\admin\Product\ProductVariantController;
 use App\Http\Controllers\admin\ReviewController;
-
 use App\Http\Controllers\Admin\BlogCategoryController;
-
 use Dom\Comment;
 
+use App\Http\Controllers\client\BlogController as ClientBlogController;
 // route của trang client
 
 // trang trủ
 Route::get('/', [HomeController::class, 'index'])->name('home');
 // viết tiếp route của các trang tại đây
-// // Route::get('/blog', [HomeController::class, 'blog'])->name('blog'); ví dụ.
+Route::get('/blog/{slugCategory?}', [ClientBlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/detail/{slug}', [ClientBlogController::class, 'show'])->name('blog.show');
+
+Route::get('/{slug}', [ProductClientController::class, 'show'])->name('productDetail');
+Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 
 
 

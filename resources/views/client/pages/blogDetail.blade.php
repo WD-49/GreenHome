@@ -10,6 +10,7 @@
                         <div class="cr-breadcrumb-title">
                             <h2>{{ $blog->title }}</h2>
                             <span><a href="{{ url('/') }}">Home</a> - Blog Details</span>
+                            <span><a href="{{ route('home') }}">Trang chủ</a> - {{ $blog->title }}</span>
                         </div>
                     </div>
                 </div>
@@ -23,15 +24,19 @@
             <div class="row" data-aos="fade-up" data-aos-duration="2000" data-aos-delay="400">
                 <div class="col-lg-12">
                     <div class="cr-blog-details">
+                        {{-- Ảnh bìa --}}
                         <div class="cr-blog-details-image">
                           <img src="{{ asset('storage/' . $blog->thumbnail) }}" alt="{{ $blog->slug }}">
                           <p>{{ asset('storage/' . $blog->thumbnail) }}</p>
-
                         </div>
+
+                        {{-- Thông tin bài viết --}}
                         <div class="cr-blog-details-content">
                             <div class="cr-admin-date">
                                 <span><code>By Admin</code> / {{ $blog->created_at->format('d-m-Y') }}</span>
+
                             </div>
+
                             <div class="cr-banner">
                                 <h2>{{ $blog->title }}</h2>
                             </div>
@@ -67,7 +72,10 @@
                         </div>
                         <div class="cr-blog-details-paragrap">
                             <p>Đây là nội dung phụ hoặc thêm của bài viết.</p>
+
                         </div>
+
+                        {{-- Tags + Social --}}
                         <div class="cr-blog-details-tags">
                             <div class="cr-details-tags">
                                 <ul class="cr-tags blog">
@@ -85,6 +93,7 @@
                     </div>
                 </div>
                 <!-- Pagination nếu cần -->
+
             </div>
         </div>
     </section>
