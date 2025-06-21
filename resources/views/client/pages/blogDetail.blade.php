@@ -8,8 +8,8 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="cr-breadcrumb-title">
-                            <h2>Blog Details</h2>
-                            <span> <a href="index.html">Home</a> - Blog Details</span>
+                            <h2>{{ $blog->title }}</h2>
+                            <span><a href="{{ route('home') }}">Trang chủ</a> - {{ $blog->title }}</span>
                         </div>
                     </div>
                 </div>
@@ -23,92 +23,70 @@
             <div class="row" data-aos="fade-up" data-aos-duration="2000" data-aos-delay="400">
                 <div class="col-lg-12">
                     <div class="cr-blog-details">
+                        {{-- Ảnh bìa --}}
                         <div class="cr-blog-details-image">
-                            <img src="assets/img/blog/blog-1.jpg" alt="blog-1">
+                            <img src="{{ asset('storage/' . $blog->thumbnail) }}" alt="{{ $blog->slug }}">
                         </div>
+
+                        {{-- Thông tin bài viết --}}
                         <div class="cr-blog-details-content">
                             <div class="cr-admin-date">
-                                <span><code>By Admin</code> / 07 Comment / Date - 09 ,09 ,2024</span>
+                                <span>
+                                    <code>By {{ $blog->author->name ?? 'Admin' }}</code> /
+                                    {{ $blog->comments_count ?? 0 }} Comment /
+                                    {{ $blog->created_at->format('d/m/Y') }}
+                                </span>
                             </div>
+
                             <div class="cr-banner">
-                                <h2>Health Benefits of a Row food</h2>
+                                <h2>{{ $blog->title }}</h2>
                             </div>
-                            <p class="mb-15">Lorem ipsum dolor sit amet consectetur adipisicing elit. Unde mollitia
-                                nihil sunt
-                                reprehenderit natus, soluta officia iure enim itaque. Iste qui exercitationem et odit
-                                beatae debitis ratione molestiae quis atque.</p>
-                            <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Sed doloribus dolor odio nobis
-                                eum voluptatem laudantium magni veritatis sint! Aspernatur est quisquam modi laudantium.
-                                Assumenda neque vitae corrupti asperiores, quos vel aliquid hic nisi nostrum repellendus
-                                dolorem placeat vero odit.</p>
+
+                            <p class="mb-15">{{ $blog->summary }}</p>
+
+                            <div>{!! $blog->content !!}</div>
                         </div>
-                        <div class="row mt-30">
-                            <div class="col-6">
-                                <div class="cr-blog-inner-cols">
-                                    <div class="blog-img">
-                                        <img src="assets/img/blog/blog-2.jpg" alt="blog-2">
-                                    </div>
-                                    <div class="cr-blog-inner-content">
-                                        <p>Lorem ipsum dolor consectetur adipisicing elit. Molestias, dolorum!</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="cr-blog-inner-cols">
-                                    <div class="blog-img">
-                                        <img src="assets/img/blog/blog-3.jpg" alt="blog-3">
-                                    </div>
-                                    <div class="cr-blog-inner-content">
-                                        <p>Lorem ipsum dolor consectetur adipisicing elit. Molestias, dolorum!</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="cr-blog-details-message">
-                            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Placeat repellat earum
-                                architecto odit soluta quas odio distinctio quae numquam? Quaerat nulla blanditiis
-                                possimus quae. Iusto doloribus, est aliquam delectus pariatur voluptatem cum iste
-                                exercitationem rem.</p>
-                            <h5 class="title"> John martin</h5>
-                        </div>
+
+                        {{-- Gợi ý nội dung khác: tạm thời bạn có thể giữ layout này --}}
+
+                        {{-- Đoạn cuối --}}
                         <div class="cr-blog-details-paragrap">
-                            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Asperiores officia magni
-                                explicabo fuga molestiae architecto ipsa excepturi laudantium molestias, assumenda vel
-                                fugiat hic exercitationem. Necessitatibus itaque et id! Ratione accusantium voluptatum
-                                optio rerum facilis expedita.</p>
+                            <p>Cảm ơn bạn đã đọc bài viết. Hãy để lại bình luận hoặc chia sẻ nếu bạn thấy hữu ích.</p>
                         </div>
+
+                        {{-- Tags + Social --}}
                         <div class="cr-blog-details-tags">
-                            <div class="cr-details-tags">
-                                <ul class="cr-tags blog">
-                                    <li><a href="javascript:void(0)">Cabbage</a></li>
-                                    <li><a href="javascript:void(0)">Appetizer</a></li>
-                                    <li><a href="javascript:void(0)">Meat Food</a></li>
-                                </ul>
-                                <div class="cr-logo">
-                                    <a href="javascript:void(0)"><i class="ri-facebook-line"></i></a>
-                                    <a href="javascript:void(0)"><i class="ri-twitter-x-line"></i></a>
-                                    <a href="javascript:void(0)"><i class="ri-instagram-line"></i></a>
-                                    <a href="javascript:void(0)"><i class="ri-linkedin-line"></i></a>
-                                </div>
-                            </div>
+                            @if ($relatedBlogs->count())
+    <div class="related-blogs mt-5">
+        <h4 class="mb-4">Bài viết cùng chuyên mục</h4>
+        <div class="row">
+            @foreach ($relatedBlogs as $item)
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <img src="{{ asset('storage/' . $item->thumbnail) }}" class="card-img-top" alt="{{ $item->title }}" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ Str::limit($item->title, 80) }}</h5>
+                            <p class="card-text text-muted small mb-2">
+                                {{ $item->created_at->format('d/m/Y') }} — {{ $item->author->name ?? 'Admin' }}
+                            </p>
+                            <p class="card-text">{{ Str::limit($item->summary, 100) }}</p>
+                            <a href="{{ route('blog.show', $item->slug) }}" class="btn btn-sm btn-outline-primary mt-2">
+                                Xem chi tiết
+                            </a>
                         </div>
                     </div>
                 </div>
-                <nav aria-label="..." class="cr-pagination">
-                    <ul class="pagination">
-                        <li class="page-item disabled">
-                            <span class="page-link">Previous</span>
-                        </li>
-                        <li class="page-item active" aria-current="page">
-                            <span class="page-link">1</span>
-                        </li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item">
-                            <a class="page-link" href="#">Next</a>
-                        </li>
-                    </ul>
-                </nav>
+            @endforeach
+        </div>
+    </div>
+@endif
+                        </div>
+
+                    </div>
+                </div>
+
+                {{-- Pagination giả định (nếu bạn dùng bài kế tiếp / trước đó) --}}
+
             </div>
         </div>
     </section>
