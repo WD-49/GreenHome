@@ -5,10 +5,9 @@ use Illuminate\Support\Facades\Request;
 use App\Http\Controllers\admin\BrandController;
 use App\Http\Controllers\admin\OrderController;
 use App\Http\Controllers\client\HomeController;
+
+use App\Http\Controllers\client\ProductClientController;
 use App\Http\Controllers\Client\ShopController;
-
-
-
 use App\Http\Controllers\admin\BannerController;
 use App\Http\Controllers\admin\CommentController;
 use App\Http\Controllers\admin\DiscountController;
@@ -38,6 +37,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 // viết tiếp route của các trang tại đây
 // // Route::get('/blog', [HomeController::class, 'blog'])->name('blog'); ví dụ.
 
+Route::get('/{slug}', [ProductClientController::class, 'show'])->name('productDetail');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 
 

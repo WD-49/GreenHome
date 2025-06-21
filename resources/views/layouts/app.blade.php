@@ -36,7 +36,7 @@
     <!-- Main CSS -->
     <link rel="stylesheet" href="{{ asset('assets_client/assets/css/style.css') }}">
 </head>
-
+@stack('scripts')
 <body class="body-bg-6">
 
     <!-- Loader -->
