@@ -26,7 +26,7 @@
 
                 </td>
                 <td>{{ $product->name }}</td>
-                <td>{{ $product->category->name }}</td>
+                <td>{{ $product->category?->name ?? 'Không có danh mục' }}</td>
                 {{-- Khi xóa vĩnh viễn thương hiệu --}}
                 <td>{{ $product->brand?->name ?? 'Không có thương hiệu' }}</td>  
                 <td>
