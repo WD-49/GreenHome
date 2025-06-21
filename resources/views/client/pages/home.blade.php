@@ -363,40 +363,40 @@
     <!-- Product banner -->
     @php use Illuminate\Support\Str; @endphp
 
- <section class="section-product-banner padding-b-100">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="cr-banner-slider swiper-container">
-                    <div class="swiper-wrapper">
-                        @foreach ($banners_mix as $banner)
-                            @php
-                                $imgPath = Str::replaceFirst('storage/', '', $banner->img);
-                            @endphp
-                            <div class="swiper-slide" data-aos="fade-up" data-aos-duration="1000">
-                                <div class="position-relative rounded overflow-hidden shadow" style="height: 300px;">
+    <section class="section-product-banner padding-b-100">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="cr-banner-slider swiper-container">
+                        <div class="swiper-wrapper">
+                            @foreach ($banners_mix as $banner)
+                                @php
+                                    $imgPath = Str::replaceFirst('storage/', '', $banner->img);
+                                @endphp
+                                <div class="swiper-slide" data-aos="fade-up" data-aos-duration="1000">
+                                    <div class="position-relative rounded overflow-hidden shadow" style="height: 300px;">
 
-                                    {{-- Ảnh banner --}}
-                                    <img src="{{ Storage::url($imgPath) }}" alt="{{ $banner->name }}"
-                                        class="w-100 h-100 object-cover">
+                                        {{-- Ảnh banner --}}
+                                        <img src="{{ Storage::url($imgPath) }}" alt="{{ $banner->name }}"
+                                            class="w-100 h-100 object-cover">
 
-                                    {{-- Chữ và nút chồng lên ảnh --}}
-                                    <div class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center text-center text-white p-3"
-                                         style="background: rgba(0, 0, 0, 0.3);">
-                                        <h5 class="fw-bold" style="font-size: 24px;">{!! $banner->name !!}</h5>
-                                        <p>{{ $banner->sub_title ?? '' }}</p>
-                                        <a href="{{ $banner->link ?? '#' }}" class="cr-button mt-2">Shop now</a>
+                                        {{-- Chữ và nút chồng lên ảnh --}}
+                                        <div class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center text-center text-white p-3"
+                                            style="background: rgba(0, 0, 0, 0.3);">
+                                            <h5 class="fw-bold" style="font-size: 24px;">{!! $banner->name !!}</h5>
+                                            <p>{{ $banner->sub_title ?? '' }}</p>
+                                            <a href="{{ $banner->link ?? '#' }}" class="cr-button mt-2">Shop now</a>
+                                        </div>
+
                                     </div>
-
                                 </div>
-                            </div>
-                        @endforeach
+                            @endforeach
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
 
 
@@ -501,75 +501,79 @@
             <div class="row">
                 <div class="col-xxl-7 col-xl-6 col-lg-6 col-md-12" data-aos="fade-up" data-aos-duration="2000">
                     <div class="cr-twocolumns-product">
-                       @foreach ($products as $product)
-    <div class="slick-slide">
-        <div class="cr-product-card">
-            <div class="cr-product-image">
-                <div class="cr-image-inner zoom-image-hover">
-                    <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}">
-                </div>
-                <div class="cr-side-view">
-                    <a href="javascript:void(0)" class="wishlist"><i class="ri-heart-line"></i></a>
-                    <a class="model-oraganic-product" data-bs-toggle="modal" href="#quickview" role="button">
-                        <i class="ri-eye-line"></i>
-                    </a>
-                </div>
-                <a class="cr-shopping-bag" href="javascript:void(0)">
-                    <i class="ri-shopping-bag-line"></i>
-                </a>
-            </div>
-            <div class="cr-product-details">
-                <div class="cr-brand">
-                    <a href="shop-left-sidebar.html">{{ $product->category->name ?? 'Category' }}</a>
-                    <div class="cr-star">
-                        <i class="ri-star-fill"></i>
-                        <i class="ri-star-fill"></i>
-                        <i class="ri-star-fill"></i>
-                        <i class="ri-star-fill"></i>
-                        <i class="ri-star-line"></i>
-                        <p>(4.0)</p>
-                    </div>
-                </div>
-                <a href="product-left-sidebar.html" class="title">
-                    {{ $product->name }}
-                </a>
-                <p class="cr-price">
-                    <span class="new-price">${{ $product->sale_price ?? $product->price }}</span>
-                    @if ($product->sale_price)
-                        <span class="old-price">${{ $product->price }}</span>
-                    @endif
-                </p>
-            </div>
-        </div>
-    </div>
-@endforeach
+                        @foreach ($products as $product)
+                            <div class="slick-slide">
+                                <div class="cr-product-card">
+                                    <div class="cr-product-image">
+                                        <div class="cr-image-inner zoom-image-hover">
+                                            <img src="{{ asset('storage/' . $product->image) }}"
+                                                alt="{{ $product->name }}">
+                                        </div>
+                                        <div class="cr-side-view">
+                                            <a href="javascript:void(0)" class="wishlist"><i
+                                                    class="ri-heart-line"></i></a>
+                                            <a class="model-oraganic-product" data-bs-toggle="modal" href="#quickview"
+                                                role="button">
+                                                <i class="ri-eye-line"></i>
+                                            </a>
+                                        </div>
+                                        <a class="cr-shopping-bag" href="javascript:void(0)">
+                                            <i class="ri-shopping-bag-line"></i>
+                                        </a>
+                                    </div>
+                                    <div class="cr-product-details">
+                                        <div class="cr-brand">
+                                            <a
+                                                href="shop-left-sidebar.html">{{ $product->category->name ?? 'Category' }}</a>
+                                            <div class="cr-star">
+                                                <i class="ri-star-fill"></i>
+                                                <i class="ri-star-fill"></i>
+                                                <i class="ri-star-fill"></i>
+                                                <i class="ri-star-fill"></i>
+                                                <i class="ri-star-line"></i>
+                                                <p>(4.0)</p>
+                                            </div>
+                                        </div>
+                                        <a href="product-left-sidebar.html" class="title">
+                                            {{ $product->name }}
+                                        </a>
+                                        <p class="cr-price">
+                                            <span class="new-price">${{ $product->sale_price ?? $product->price }}</span>
+                                            @if ($product->sale_price)
+                                                <span class="old-price">${{ $product->price }}</span>
+                                            @endif
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
 
                     </div>
                 </div>
 
-             <div class="col-xxl-5 col-xl-6 col-lg-6 col-md-12" data-aos="fade-up" data-aos-duration="2000">
-    <div class="cr-products-rightbar position-relative overflow-hidden rounded shadow">
-        @if ($banner12)
-            {{-- Ảnh banner từ DB --}}
-            <img src="{{ Storage::url($banner12->img) }}" alt="{{ $banner12->name }}"
-                class="w-100 h-100 object-cover" style="max-height: 400px;">
+                <div class="col-xxl-5 col-xl-6 col-lg-6 col-md-12" data-aos="fade-up" data-aos-duration="2000">
+                    <div class="cr-products-rightbar position-relative overflow-hidden rounded shadow">
+                        @if ($banner12)
+                            {{-- Ảnh banner từ DB --}}
+                            <img src="{{ Storage::url($banner12->img) }}" alt="{{ $banner12->name }}"
+                                class="w-100 h-100 object-cover" style="max-height: 400px;">
 
-            {{-- Nội dung chèn lên ảnh --}}
-            <div class="cr-products-rightbar-content position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-start text-white p-4"
-                style="background: rgba(0, 0, 0, 0.3);">
-                <h4>{!! $banner12->name !!}</h4>
-                <div class="cr-off">
-                    <span>{{ $banner12->discount ?? '25%' }} <code>OFF</code></span>
+                            {{-- Nội dung chèn lên ảnh --}}
+                            <div class="cr-products-rightbar-content position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-start text-white p-4"
+                                style="background: rgba(0, 0, 0, 0.3);">
+                                <h4>{!! $banner12->name !!}</h4>
+                                <div class="cr-off">
+                                    <span>{{ $banner12->discount ?? '25%' }} <code>OFF</code></span>
+                                </div>
+                                <div class="rightbar-buttons mt-2">
+                                    <a href="{{ $banner12->link ?? '#' }}" class="cr-button">Shop Now</a>
+                                </div>
+                            </div>
+                        @else
+                            <p class="text-danger">Banner with priority 12 not found.</p>
+                        @endif
+                    </div>
                 </div>
-                <div class="rightbar-buttons mt-2">
-                    <a href="{{ $banner12->link ?? '#' }}" class="cr-button">Shop Now</a>
-                </div>
-            </div>
-        @else
-            <p class="text-danger">Banner with priority 12 not found.</p>
-        @endif
-    </div>
-</div>
 
             </div>
         </div>
@@ -596,25 +600,25 @@
                     <div class="cr-testimonial-slider swiper-container">
                         <div class="swiper-wrapper cr-testimonial-pt-50">
                             @foreach ($reviews as $review)
-    <div class="swiper-slide" data-aos="fade-up" data-aos-duration="2000">
-        <div class="cr-testimonial">
-            <div class="cr-testimonial-image">
-                <img src="{{ asset('assets_client/assets/img/testimonial/default.jpg') }}"
-                    alt="{{ $review->user->name ?? 'User' }}">
-            </div>
-            <div class="cr-testimonial-inner">
-                <span>{{ $review->user->email ?? 'User' }}</span>
-                <h4 class="title">{{ $review->title }}</h4>
-                <p>“{{ $review->content }}”</p>
-                <div class="cr-star">
-                    @for ($i = 1; $i <= 5; $i++)
-                        <i class="ri-star{{ $i <= $review->rating ? '-fill' : '-line' }}"></i>
-                    @endfor
-                </div>
-            </div>
-        </div>
-    </div>
-@endforeach
+                                <div class="swiper-slide" data-aos="fade-up" data-aos-duration="2000">
+                                    <div class="cr-testimonial">
+                                        <div class="cr-testimonial-image">
+                                            <img src="{{ asset('assets_client/assets/img/testimonial/default.jpg') }}"
+                                                alt="{{ $review->user->name ?? 'User' }}">
+                                        </div>
+                                        <div class="cr-testimonial-inner">
+                                            <span>{{ $review->user->email ?? 'User' }}</span>
+                                            <h4 class="title">{{ $review->title }}</h4>
+                                            <p>“{{ $review->content }}”</p>
+                                            <div class="cr-star">
+                                                @for ($i = 1; $i <= 5; $i++)
+                                                    <i class="ri-star{{ $i <= $review->rating ? '-fill' : '-line' }}"></i>
+                                                @endfor
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
 
                             <div class="swiper-slide" data-aos="fade-up" data-aos-duration="2000">
                                 <div class="cr-testimonial">
@@ -666,55 +670,55 @@
     </section>
 
     <!-- Blog -->
-   <section class="section-blog padding-b-100">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="mb-30" data-aos="fade-up" data-aos-duration="2000">
-                    <div class="cr-banner">
-                        <h2>Latest News</h2>
+    <section class="section-blog padding-b-100">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="mb-30" data-aos="fade-up" data-aos-duration="2000">
+                        <div class="cr-banner">
+                            <h2>Latest News</h2>
+                        </div>
+                        <div class="cr-banner-sub-title">
+                            <p>Tin tức mới nhất được cập nhật mỗi ngày.</p>
+                        </div>
                     </div>
-                    <div class="cr-banner-sub-title">
-                        <p>Tin tức mới nhất được cập nhật mỗi ngày.</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="cr-blog-slider swiper-container">
+                        <div class="swiper-wrapper">
+                            @foreach ($blogs as $blog)
+                                <div class="swiper-slide" data-aos="fade-up" data-aos-duration="2000">
+                                    <div class="cr-blog">
+                                        <div class="cr-blog-content">
+                                            <span>
+                                                <code>By {{ $blog->user->name ?? 'Admin' }}</code> |
+                                                <a href="#">{{ $blog->category->name ?? 'Uncategorized' }}</a>
+                                            </span>
+                                            <h5>{{ $blog->title }}</h5>
+                                            <a class="read" href="">Read More</a>
+                                        </div>
+
+                                        <div class="cr-blog-image">
+                                            <img src="{{ asset($blog->thumbnail) }}" alt="{{ $blog->title }}"
+                                                style="width: 100%; object-fit: cover;">
+                                            <div class="cr-blog-date">
+                                                <span>
+                                                    {{ optional($blog->created_at)->format('d') }}
+                                                    <code>{{ optional($blog->created_at)->format('M') }}</code>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="cr-blog-slider swiper-container">
-                    <div class="swiper-wrapper">
-                     @foreach ($blogs as $blog)
-    <div class="swiper-slide" data-aos="fade-up" data-aos-duration="2000">
-        <div class="cr-blog">
-            <div class="cr-blog-content">
-                <span>
-                    <code>By {{ $blog->user->name ?? 'Admin' }}</code> |
-                    <a href="#">{{ $blog->category->name ?? 'Uncategorized' }}</a>
-                </span>
-                <h5>{{ $blog->title }}</h5>
-                <a class="read" href="">Read More</a>
-            </div>
-
-            <div class="cr-blog-image">
-<img src="{{ asset($blog->thumbnail) }}" alt="{{ $blog->title }}" style="width: 100%; object-fit: cover;">
-                <div class="cr-blog-date">
-                    <span>
-                        {{ optional($blog->created_at)->format('d') }}
-                        <code>{{ optional($blog->created_at)->format('M') }}</code>
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
-@endforeach
-
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
+    </section>
 @endsection
