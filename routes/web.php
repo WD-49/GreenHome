@@ -31,6 +31,10 @@ use Dom\Comment;
 
 // trang trủ
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/category/{id}', [HomeController::class, 'category'])->name('shop.category');
+Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+Route::get('/products/category-id/{id}', [ProductController::class, 'getProductsByCategoryId']);
+
 // viết tiếp route của các trang tại đây
 // // Route::get('/blog', [HomeController::class, 'blog'])->name('blog'); ví dụ.
 

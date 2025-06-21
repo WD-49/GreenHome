@@ -34,7 +34,7 @@
                         {{ $product->status == 1 ? 'Đang bán' : 'Dừng bán' }}
                     </span>
                 </td>
-                <td>{{ $product->date_of_entry->format('d/m/Y') }}</td>
+<td>{{ optional($product->date_of_entry)->format('d/m/Y') }}</td>
                 <td>
                     <div class="dropdown">
                         <button class="btn btn-light btn-sm me-2" type="button" data-bs-toggle="dropdown"
