@@ -7,40 +7,42 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Brand;
 use Illuminate\Http\Request;
+use App\Models\AttributeValue;
 
 class ShopController extends Controller
 {
     public function index(Request $request)
     {
-        // Lấy các tham số lọc từ request
         $sort = $request->input('sort', 'latest');
         $selectedCategories = (array) $request->input('categories', []);
         $brandId = $request->input('brand_id');
+        $minPrice = $request->input('min_price');
+        $maxPrice = $request->input('max_price');
+        $selectedAttributeValues = (array) $request->input('attribute_values', []);
 
-        // Lấy danh sách danh mục và thương hiệu kèm số lượng sản phẩm
+        // Load danh mục, thương hiệu, và biến thể để hiển thị ở sidebar
         $categories = Category::withCount('products')->get();
         $brands = Brand::withCount('products')->get();
+        $attributeValues = AttributeValue::with('attribute')->get();
 
-        // Khởi tạo query sản phẩm
+        // Query sản phẩm
         $productsQuery = Product::with([
-            'productVariants' => function ($q) {
-                $q->whereNotNull('price');
-            },
-            'brand'
-        ])->where('status', 1);
+            'productVariants.reviews', // Quan hệ lồng để tính review từ variant
+            'brand',
+        ])
+        ->where('status', 1);
 
-        // Lọc theo danh mục nếu có
-        if (!empty(array_filter($selectedCategories))) {
-    $productsQuery->whereIn('category_id', $selectedCategories);
-}
+        // Lọc theo danh mục
+        if (!empty($selectedCategories)) {
+            $productsQuery->whereIn('category_id', $selectedCategories);
+        }
 
-
-        // Lọc theo thương hiệu nếu có
+        // Lọc theo thương hiệu
         if (!empty($brandId)) {
             $productsQuery->where('brand_id', $brandId);
         }
 
-        // Sắp xếp theo lựa chọn
+        // Sắp xếp
         switch ($sort) {
             case 'oldest':
                 $productsQuery->orderBy('date_of_entry', 'asc');
@@ -53,17 +55,39 @@ class ShopController extends Controller
                 break;
         }
 
+        // Lọc theo khoảng giá
+        if ($minPrice !== null || $maxPrice !== null) {
+            $productsQuery->whereHas('productVariants', function ($query) use ($minPrice, $maxPrice) {
+                if ($minPrice !== null) {
+                    $query->where('price', '>=', $minPrice);
+                }
+                if ($maxPrice !== null) {
+                    $query->where('price', '<=', $maxPrice);
+                }
+            });
+        }
+
+        // Lọc theo giá trị biến thể (attribute_value_id)
+        if (!empty($selectedAttributeValues)) {
+            $productsQuery->whereHas('productVariants.productVariantValues', function ($q) use ($selectedAttributeValues) {
+                $q->whereIn('attribute_value_id', $selectedAttributeValues);
+            });
+        }
+
         // Phân trang kết quả
         $products = $productsQuery->paginate(12)->withQueryString();
 
-        // Trả về view với tất cả dữ liệu cần thiết
         return view('client.pages.shop', compact(
             'products',
-            'sort',
             'categories',
             'brands',
+            'attributeValues',
+            'sort',
             'selectedCategories',
-            'brandId'
+            'brandId',
+            'minPrice',
+            'maxPrice',
+            'selectedAttributeValues'
         ));
     }
 }
