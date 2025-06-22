@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Jobs\SendWelcomeEmailJob;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Jobs\SendLoginNotificationMailJob;
 
 class LoginController extends Controller
 {
@@ -60,9 +63,14 @@ class LoginController extends Controller
             'password.required' => 'Vui lòng nhập mật khẩu.',
         ]);
 
-        // Attempt to login
         if (Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
             $request->session()->regenerate();
+
+            $user = Auth::user();
+            $now = Carbon::now()->format('H:i d/m/Y');
+
+            // Gửi email thông báo đăng nhập bằng queue
+            dispatch(new SendLoginNotificationMailJob($user->email, $user->name, $now));
 
             return redirect()->intended($this->redirectTo());
         }

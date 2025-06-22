@@ -53,12 +53,6 @@ Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkE
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('forgot-password.form');
 Route::post('/forgot-password', [ForgotPasswordController::class, 'handle'])->name('forgot-password.handle');
 
-
-Route::get('/test-send-mail', function () {
-    SendTestMailJob::dispatch('your-email@example.com', 'matkhau123');
-    return 'Email đang được gửi qua queue...';
-});
-
 // Auth::routes();// Route cho Registers, Login, Logout... (Laravel UI)
 
 // route của trang admin
