@@ -4,10 +4,14 @@ namespace App\Http\Controllers\Auth;
 
 use App\Models\User;
 use Illuminate\Support\Str;
+use Illuminate\Mail\Mailable;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Auth\ResetsPasswords;
 
 class ResetPasswordController extends Controller

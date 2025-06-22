@@ -3,36 +3,23 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
 
 class LoginController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Login Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles authenticating users for the application and
-    | redirecting them to your home screen. The controller uses a trait
-    | to conveniently provide its functionality to your applications.
-    |
-    */
-
-    use AuthenticatesUsers;
-
     /**
      * Where to redirect users after login.
      *
-     * @var string
+     * @return string
      */
     protected function redirectTo()
     {
         if (Auth::user()->role === 'admin') {
-           return '/admin';
+            return '/admin';
         }
 
-       return '/';
+        return '/';
     }
 
     /**
@@ -43,5 +30,62 @@ class LoginController extends Controller
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
+    }
+
+    /**
+     * Show login form.
+     *
+     * @return \Illuminate\View\View
+     */
+    public function showLoginForm()
+    {
+        return view('auth.login');
+    }
+
+    /**
+     * Handle login request.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function login(Request $request)
+    {
+        // Validate input
+        $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ], [
+            'email.required' => 'Vui lòng nhập email.',
+            'email.email' => 'Email không đúng định dạng.',
+            'password.required' => 'Vui lòng nhập mật khẩu.',
+        ]);
+
+        // Attempt to login
+        if (Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
+            $request->session()->regenerate();
+
+            return redirect()->intended($this->redirectTo());
+        }
+
+        // Failed login
+        return back()->withErrors([
+            'email' => 'Tài khoản hoặc mật khẩu không chính xác.',
+        ])->withInput();
+    }
+
+    /**
+     * Handle logout request.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function logout(Request $request)
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/login');
     }
 }

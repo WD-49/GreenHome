@@ -5,26 +5,28 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
 use App\Http\Controllers\admin\BlogController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\admin\BrandController;
 use App\Http\Controllers\admin\OrderController;
 use App\Http\Controllers\client\HomeController;
 use App\Http\Controllers\admin\BannerController;
 use App\Http\Controllers\admin\ReviewController;
 use App\Http\Controllers\admin\CommentController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\admin\CategoryController;
 use App\Http\Controllers\admin\DiscountController;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\admin\AttributeController;
 use App\Http\Controllers\admin\DashboardController;
 use App\Http\Controllers\admin\OrderStatusController;
+
 use App\Http\Controllers\Admin\BlogCategoryController;
 use App\Http\Controllers\admin\PaymentMethodController;
 
 use App\Http\Controllers\admin\AttributeValueController;
+
 use App\Http\Controllers\admin\Product\ProductController;
-
 use App\Http\Controllers\admin\Account\AccountAdminController;
-
 use App\Http\Controllers\admin\Account\AccountUsersController;
 use App\Http\Controllers\admin\Product\ProductVariantController;
 
@@ -34,7 +36,13 @@ use App\Http\Controllers\admin\Product\ProductVariantController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 // viết tiếp route của các trang tại đây
 // // Route::get('/blog', [HomeController::class, 'blog'])->name('blog'); ví dụ.
-Auth::routes();// Route cho Registers, Login, Logout... (Laravel UI)
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
+Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('/register', [RegisterController::class, 'register']);
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+// Auth::routes();// Route cho Registers, Login, Logout... (Laravel UI)
 
 // route của trang admin
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
