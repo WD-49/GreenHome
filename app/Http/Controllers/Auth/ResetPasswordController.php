@@ -8,6 +8,7 @@ use Illuminate\Mail\Mailable;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use App\Jobs\SendResetPasswordMailJob;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Foundation\Queue\Queueable;
@@ -16,26 +17,13 @@ use Illuminate\Foundation\Auth\ResetsPasswords;
 
 class ResetPasswordController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Password Reset Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller is responsible for handling password reset requests
-    | and uses a simple trait to include this behavior. You're free to
-    | explore this trait and override any methods you wish to tweak.
-    |
-    */
-
     use ResetsPasswords;
 
-    /**
-     * Where to redirect users after resetting their password.
-     *
-     * @var string
-     */
     protected $redirectTo = '/';
 
+    /**
+     * Ghi đè phương thức resetPassword trong trait ResetsPasswords
+     */
     protected function resetPassword(User $user, $password)
     {
         $user->password = Hash::make($password);
@@ -44,25 +32,10 @@ class ResetPasswordController extends Controller
 
         event(new PasswordReset($user));
 
-        // Gửi mail đơn giản qua hàng đợi, không tạo file riêng
-        Mail::to($user->email)->queue(new class($user, $password) extends Mailable implements ShouldQueue {
-            use Queueable, SerializesModels;
+        // Gửi email bằng job đưa vào hàng đợi
+        dispatch(new SendResetPasswordMailJob($user->email, $password));
 
-            public $user, $password;
-
-            public function __construct($user, $password)
-            {
-                $this->user = $user;
-                $this->password = $password;
-            }
-
-            public function build()
-            {
-                return $this->subject('Mật khẩu mới từ GreenHome')
-                            ->text('emails.password_plain'); // dùng file blade text
-            }
-        });
-
+        // Đăng nhập người dùng sau khi reset
         $this->guard()->login($user);
     }
 }

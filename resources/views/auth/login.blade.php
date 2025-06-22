@@ -79,7 +79,7 @@
                                     <input type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
                                     <label for="remember">Ghi nhớ</label>
                                 </span>
-                                {{-- <a class="link" href="{{ route('password.request') }}">Quên mật khẩu?</a> --}}
+                                <a class="link" href="{{ route('forgot-password.form') }}">Quên mật khẩu?</a>
                             </div><br>
                             <div class="login-buttons">
                                 <button type="submit" class="cr-button">Đăng nhập</button>

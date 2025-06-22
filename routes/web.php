@@ -1,6 +1,7 @@
 <?php
 
 use Dom\Comment;
+use App\Jobs\SendTestMailJob;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
@@ -18,13 +19,15 @@ use App\Http\Controllers\admin\DiscountController;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\admin\AttributeController;
 use App\Http\Controllers\admin\DashboardController;
+
 use App\Http\Controllers\admin\OrderStatusController;
-
 use App\Http\Controllers\Admin\BlogCategoryController;
+
+use App\Http\Controllers\Auth\ResetPasswordController;
+
 use App\Http\Controllers\admin\PaymentMethodController;
-
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\admin\AttributeValueController;
-
 use App\Http\Controllers\admin\Product\ProductController;
 use App\Http\Controllers\admin\Account\AccountAdminController;
 use App\Http\Controllers\admin\Account\AccountUsersController;
@@ -41,6 +44,20 @@ Route::post('/login', [LoginController::class, 'login']);
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::get('/password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+
+// Route::get('/password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+// Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('forgot-password.form');
+Route::post('/forgot-password', [ForgotPasswordController::class, 'handle'])->name('forgot-password.handle');
+
+
+Route::get('/test-send-mail', function () {
+    SendTestMailJob::dispatch('your-email@example.com', 'matkhau123');
+    return 'Email đang được gửi qua queue...';
+});
 
 // Auth::routes();// Route cho Registers, Login, Logout... (Laravel UI)
 
