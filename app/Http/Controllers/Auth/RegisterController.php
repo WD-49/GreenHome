@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Jobs\SendWelcomeEmailJob;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -59,6 +60,9 @@ class RegisterController extends Controller
             'email'    => $request->email,
             'password' => Hash::make($request->password),
         ]);
+
+        // Gửi email chào mừng bằng Job đưa vào hàng đợi
+        dispatch(new SendWelcomeEmailJob($user->email, $user->name));
 
         // Tự động đăng nhập sau khi đăng ký
         Auth::login($user);
