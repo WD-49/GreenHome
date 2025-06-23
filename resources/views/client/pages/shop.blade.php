@@ -1,22 +1,6 @@
 @extends('layouts.app')
 
-{{-- @section('head')
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-    <style>
-        #slider-range {
-            margin-top: 10px;
-        }
 
-        .ui-slider-handle {
-            background-color: #007bff;
-            border: none;
-        }
-
-        .ui-widget-content {
-            background: #ddd;
-        }
-    </style>
-@endsection --}}
 
 @section('content')
     <!-- Breadcrumb -->
@@ -109,22 +93,6 @@
                                     class="form-control" placeholder="VD: 500000">
                             </div>
 
-                            {{-- Khoảng giá --}}
-                            {{-- <div class="cr-shop-price mb-4">
-                                <h4 class="cr-shop-sub-title">Khoảng giá (VNĐ)</h4>
-                                <div class="price-range-slider">
-                                    <div id="slider-range" class="range-bar"></div>
-                                    <p class="range-value mt-2">
-                                        <input type="text" id="amount" readonly
-                                            class="form-control border-0 bg-transparent text-center fw-bold">
-                                        <input type="hidden" name="min_price" id="min_price"
-                                            value="{{ request('min_price', 0) }}">
-                                        <input type="hidden" name="max_price" id="max_price"
-                                            value="{{ request('max_price', 10000000) }}">
-                                    </p>
-                                </div>
-
-                            </div> --}}
 
                             {{-- Nút lọc --}}
                             <div class="d-grid gap-2">
@@ -265,37 +233,4 @@
     </section>
 @endsection
 
-{{-- @section('scripts')
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
-    <script>
-        function formatCurrency(amount) {
-            return amount.toLocaleString('vi-VN') + " ₫";
-        }
 
-        $(function() {
-            let minPrice = {{ request('min_price', 0) }};
-            let maxPrice = {{ request('max_price', 10000000) }};
-
-            $("#slider-range").slider({
-                range: true,
-                min: 0,
-                max: 10000000,
-                step: 50000,
-                values: [minPrice, maxPrice],
-                slide: function(event, ui) {
-                    $("#amount").val(
-                        formatCurrency(ui.values[0]) + " - " + formatCurrency(ui.values[1])
-                    );
-                    $("#min_price").val(ui.values[0]);
-                    $("#max_price").val(ui.values[1]);
-                }
-            });
-
-            $("#amount").val(
-                formatCurrency($("#slider-range").slider("values", 0)) + " - " +
-                formatCurrency($("#slider-range").slider("values", 1))
-            );
-        });
-    </script>
-@endsection --}}
