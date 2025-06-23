@@ -55,4 +55,9 @@ class Category extends Model
         //     $category->products()->onlyTrashed()->restore();
         // });
     }
+    public function banners()
+{
+    return $this->hasMany(\App\Models\Banner::class);
+}
+
 }

@@ -27,10 +27,12 @@
                 <div class="col-lg-3">
                     <div class="cr-shop-sideview">
                         <form action="{{ route('shop.index') }}" method="GET" id="filter-form" class="mb-4">
+
                             {{-- Danh mục --}}
                             <div class="mb-3">
                                 <label class="fw-bold">Danh mục:</label>
                                 <select class="form-select" name="categories[]">
+
                                     <option value="">Tất cả</option>
                                     @foreach ($categories as $category)
                                         <option value="{{ $category->id }}"
@@ -39,6 +41,8 @@
                                         </option>
                                     @endforeach
                                 </select>
+
+
                             </div>
 
                             {{-- Thương hiệu --}}
@@ -109,6 +113,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span>Có {{ $products->total() }} sản phẩm được tìm thấy</span>
 
+
                         {{-- Sắp xếp --}}
                         <form method="GET" action="{{ route('shop.index') }}" class="d-flex align-items-center">
                             @foreach (request()->except('sort') as $key => $value)
@@ -128,6 +133,7 @@
                                 <option value="hot" {{ request('sort') == 'hot' ? 'selected' : '' }}>Hot nhất</option>
                             </select>
                         </form>
+
                     </div>
 
                     {{-- Sản phẩm: 4 mỗi hàng --}}
@@ -211,7 +217,11 @@
                                             <p class="cr-price"><span class="new-price">Chưa có giá</span></p>
                                         @endif
 
-                                        <a href=" " class="btn btn-primary mt-2">Xem chi tiết</a>
+                                        <a href="{{ route('productDetail', $product->slug) }}"
+                                            class="btn btn-primary mt-2">
+                                            Xem chi tiết
+                                        </a>
+
                                     </div>
                                 </div>
                             </div>

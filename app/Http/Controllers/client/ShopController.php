@@ -32,8 +32,11 @@ class ShopController extends Controller
         ])
         ->where('status', 1);
 
+
         // Lọc theo danh mục
         if (!empty($selectedCategories)) {
+
+      
             $productsQuery->whereIn('category_id', $selectedCategories);
         }
 
