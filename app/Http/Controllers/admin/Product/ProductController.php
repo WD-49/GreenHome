@@ -61,51 +61,18 @@ class ProductController extends Controller
         $categories = Category::get();
         $brands = Brand::get();
 
-        $query = Product::onlyTrashed()->with([
-            'category' => function ($query) {
-                $query->withTrashed();
-            },
-            'brand' => function ($query) {
-                $query->withTrashed();
-            },
-        ]);
-
-
-
-        if ($request->filled('name')) {
-            $query->where('name', 'LIKE', '%' . $request->name . '%');
+        $products = Product::onlyTrashed()
+            ->with([
+                'category' => fn($q) => $q->withTrashed(),
+                'brand' => fn($q) => $q->withTrashed(),
+            ])
+            ->filter($request) // dùng lại scopeFilter
+            ->orderByDesc('id')
+            ->paginate(4)
+            ->appends($request->except('page'));
+        if ($request->ajax()) {
+            return view('admin.products.table', compact('products'))->render();
         }
-
-        if ($request->filled('category_id')) {
-            $query->where('category_id', $request->category_id);
-        }
-
-        if ($request->filled('brand_id')) {
-            $query->where('brand_id', $request->brand_id);
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status == 1 ? 1 : 0);
-        }
-
-        if ($request->filled('min_date') && $request->filled('max_date')) {
-            $query->whereBetween('date_of_entry', [$request->min_date, $request->max_date]);
-        } elseif ($request->filled('min_date')) {
-            $query->where('date_of_entry', '>=', $request->min_date);
-        } elseif ($request->filled('max_date')) {
-            $query->where('date_of_entry', '<=', $request->max_date);
-        }
-
-        if ($request->filled('min_price') && $request->filled('max_price')) {
-            $query->whereBetween('price', [$request->min_price, $request->max_price]);
-        } elseif ($request->filled('min_price')) {
-            $query->where('price', '>=', $request->min_price);
-        } elseif ($request->filled('max_price')) {
-            $query->where('price', '<=', $request->max_price);
-        }
-
-        $products = $query->orderByDesc('id')->paginate(4)->appends($request->except('page'));
-        // dd($products);
 
         return view('admin.products.trashed', compact('title', 'products', 'categories', 'brands'));
     }
@@ -225,7 +192,6 @@ class ProductController extends Controller
             'simple_price' => 'required_unless:is_variant,1|numeric',
             'simple_quantity' => 'required_unless:is_variant,1|integer',
         ], [
-            // Thông báo lỗi tiếng Việt
             'name.required' => 'Vui lòng nhập tên sản phẩm.',
             'category_id.required' => 'Vui lòng chọn danh mục.',
             'brand_id.required' => 'Vui lòng chọn thương hiệu.',

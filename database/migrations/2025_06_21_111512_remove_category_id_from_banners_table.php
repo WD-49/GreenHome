@@ -9,12 +9,12 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-   public function up()
-{
-    Schema::table('banners', function (Blueprint $table) {
-        $table->dropColumn('category_id');
-    });
-}
+    public function up()
+    {
+        Schema::table('banners', function (Blueprint $table) {
+            $table->dropColumn('category_id');
+        });
+    }
 
 
     /**
