@@ -27,58 +27,32 @@ class ProductController extends Controller
         $categories = Category::get();
         $brands = Brand::get();
 
-        $query = Product::with(['category', 'brand']);
-        // ->whereHas('brand', function ($q) {
-        //     $q->whereNull('deleted_at');
-        // });
-
-
-        if ($request->filled('name')) {
-            $query->where('name', 'LIKE', '%' . $request->name . '%');
-        }
-
-        if ($request->filled('category_id')) {
-            $query->where('category_id', $request->category_id);
-        }
-
-
-        // xóa mềm ko xóa sản phẩm
-        if ($request->filled('brand_id')) {
-            $query->where('brand_id', $request->brand_id)
-                ->whereHas('brand', function ($q) {
-                    $q->whereNull('deleted_at');
-                });
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status == 1 ? 1 : 0);
-        }
-
-        if ($request->filled('min_date') && $request->filled('max_date')) {
-            $query->whereBetween('date_of_entry', [$request->min_date, $request->max_date]);
-        } elseif ($request->filled('min_date')) {
-            $query->where('date_of_entry', '>=', $request->min_date);
-        } elseif ($request->filled('max_date')) {
-            $query->where('date_of_entry', '<=', $request->max_date);
-        }
-
-
-        // if ($request->filled('ngay_nhap')) {
-        //     $query->whereDate('date_of_entry', $request->ngay_nhap);
-        // }
         $perPage = $request->input('per_page', 10);
 
-        $products = $query->orderByDesc('id')->paginate($perPage)->appends($request->except('page'));
+        $products = Product::with([
+            'category' => fn($q) => $q->withTrashed(),
+            'brand' => fn($q) => $q->withTrashed(),
+        ])
+            ->filter($request)
+            ->orderByDesc('id')
+            ->paginate($perPage)
+            ->appends($request->except('page'));
+
         $productAll = Product::whereNull('deleted_at')->get();
         $productTrashed = Product::onlyTrashed()->get();
+
         if ($request->ajax()) {
             return view('admin.products.table', compact('products'));
         }
 
-
-        // dd($productAll);
-
-        return view('admin.products.index', compact('title', 'products', 'productAll', 'productTrashed', 'categories', 'brands'));
+        return view('admin.products.index', compact(
+            'title',
+            'products',
+            'productAll',
+            'productTrashed',
+            'categories',
+            'brands'
+        ));
     }
 
     public function trashed(Request $request)

@@ -26,15 +26,25 @@
 
                 </td>
                 <td>{{ $product->name }}</td>
-                <td>{{ $product->category?->name ?? 'Không có danh mục' }}</td>
+                <td>
+                    @if (is_null($product->category_id))
+                        Không có danh mục
+                    @elseif ($product->category)
+                        {{ $product->category->name }}
+                        @if ($product->category->deleted_at)
+                            <span class="badge text-bg-warning">thùng rác</span>
+                        @endif
+                    @endif
+
+                </td>
                 {{-- Khi xóa vĩnh viễn thương hiệu --}}
-                <td>{{ $product->brand?->name ?? 'Không có thương hiệu' }}</td>  
+                <td>{{ $product->brand?->name ?? 'Không có thương hiệu' }}</td>
                 <td>
                     <span class="badge {{ $product->status == 1 ? 'bg-success' : 'bg-danger' }}">
                         {{ $product->status == 1 ? 'Đang bán' : 'Dừng bán' }}
                     </span>
                 </td>
-<td>{{ optional($product->date_of_entry)->format('d/m/Y') }}</td>
+                <td>{{ optional($product->date_of_entry)->format('d/m/Y') }}</td>
                 <td>
                     <div class="dropdown">
                         <button class="btn btn-light btn-sm me-2" type="button" data-bs-toggle="dropdown"
