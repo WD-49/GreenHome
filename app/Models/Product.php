@@ -90,7 +90,9 @@ public function getReviewsAvgRatingAttribute()
 
 public function getReviewsCountAttribute()
 {
-    return $this->productVariants->flatMap->reviews->count();
+    return $this->productVariants->flatMap(function ($variant) {
+        return $variant->reviews;
+    })->count();
 }
 
 
