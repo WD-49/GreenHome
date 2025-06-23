@@ -45,14 +45,24 @@ $categories2 = Category::with(['products' => function ($query) {
         ->orderBy('created_at', 'desc')
         ->take(6)
         ->get();
+
          $reviews = Review::with(['user']) // lấy thông tin người dùng
         ->whereIn('rating', [4, 5])
         ->where('status', 'approved')
         ->latest()
         ->take(10)
         ->get();
- 
-        return view('client.pages.home', compact('title','blogs','reviews','products', 'banner12', 'banner1', 'banner2', 'banner3', 'banner4', 'banner5', 'banner6', 'banner7', 'banner8', 'banner9', 'banner10', 'categories1', 'categories', 'categories2','randomProducts', 'brands', 'banners', 'banner11', 'banners_mix'));
+        $products1 = Product::with('productVariants')
+    ->has('productVariants') // chỉ lấy sản phẩm có ít nhất 1 biến thể
+    ->get();
+     $categories2 = Category::with([
+        'products' => function ($query) {
+            $query->with('productVariants');
+        }
+    ])->get();
+$dealBanner = Banner::where('priority', 13)->where('status', 1)->first();
+
+        return view('client.pages.home', compact('title','dealBanner','categories2','products1','blogs','reviews','products', 'banner12', 'banner1', 'banner2', 'banner3', 'banner4', 'banner5', 'banner6', 'banner7', 'banner8', 'banner9', 'banner10', 'categories1', 'categories', 'categories2','randomProducts', 'brands', 'banners', 'banner11', 'banners_mix'));
     }
 
 
