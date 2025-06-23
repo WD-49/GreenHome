@@ -17,38 +17,50 @@
                 <td>{{ $index + 1 }}</td>
 
                 <td>
-                    @if ($product->image)
-                        <img src="{{ asset('storage/' . $product->image) }}" width="50" class="rounded"
-                            alt="Hình ảnh sản phẩm">
+                    @if (!empty($product->image))
+                        <img src="{{ asset('storage/' . $product->image) }}" width="50" class="rounded" alt="Hình ảnh sản phẩm">
                     @else
-                        no image
+                        <span class="text-muted">No image</span>
                     @endif
-
                 </td>
-                <td>{{ $product->name }}</td>
-                <td>{{ $product->category->name }}</td>
-                {{-- Khi xóa vĩnh viễn thương hiệu --}}
-                <td>{{ $product->brand?->name ?? 'Không có thương hiệu' }}</td>  
+
+                <td>{{ $product->name ?? 'Chưa có tên' }}</td>
+
+                <td>{{ $product->category?->name ?? 'Không có danh mục' }}</td>
+
+                <td>{{ $product->brand?->name ?? 'Không có thương hiệu' }}</td>
+
                 <td>
                     <span class="badge {{ $product->status == 1 ? 'bg-success' : 'bg-danger' }}">
                         {{ $product->status == 1 ? 'Đang bán' : 'Dừng bán' }}
                     </span>
                 </td>
-                <td>{{ $product->date_of_entry->format('d/m/Y') }}</td>
+
+                <td>
+                    {{ optional($product->date_of_entry)->format('d/m/Y') ?? 'Chưa nhập ngày' }}
+                </td>
+
                 <td>
                     <div class="dropdown">
-                        <button class="btn btn-light btn-sm me-2" type="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
+                        <button class="btn btn-light btn-sm me-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <span class="mdi mdi-settings-helper"></span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item"
-                                    href="{{ route('admin.products.variants.index', $product->id) }}">Chi tiết biến
-                                    thể</a></li>
-                            <li><a class="dropdown-item" href="{{ route('admin.products.show', $product->id) }}">Chi
-                                    tiết</a></li>
-                            <li><a class="dropdown-item" href="{{ route('admin.products.edit', $product->id) }}">Chỉnh
-                                    sửa</a></li>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('admin.products.variants.index', $product->id) }}">
+                                    Chi tiết biến thể
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('admin.products.show', $product->id) }}">
+                                    Chi tiết
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('admin.products.edit', $product->id) }}">
+                                    Chỉnh sửa
+                                </a>
+                            </li>
                             <li>
                                 <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST"
                                     onsubmit="return confirm('Bạn có chắc chắn muốn bỏ sản phẩm này vào thùng rác không?')">
