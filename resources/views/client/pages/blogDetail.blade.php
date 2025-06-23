@@ -1,6 +1,17 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+    .cr-blog-details-image img {
+    width: 400px;
+    height: 640px;
+    object-fit: cover;
+    border-radius: 8px;
+    display: block;
+    margin: 0 auto;
+}
+
+</style>
     <!-- Breadcrumb -->
     <section class="section-breadcrumb">
         <div class="cr-breadcrumb-image">
@@ -25,14 +36,14 @@
                     <div class="cr-blog-details">
                         {{-- Ảnh bìa --}}
                         <div class="cr-blog-details-image">
-                            <img src="{{ asset('storage/' . $blog->thumbnail) }}" alt="{{ $blog->slug }}">
+                            <img src="{{ asset('storage/' . $blog->thumbnail) }}" alt="{{ $blog->slug }}" >
                         </div>
 
                         {{-- Thông tin bài viết --}}
                         <div class="cr-blog-details-content">
                             <div class="cr-admin-date">
                                 {{-- sai --}}
-                                <span><code>By Admin</code> / {{ $blog->created_at->format('d-m-Y') }}</span>
+                                <span><code>Ngày Đăng:</code>{{ $blog->created_at->format('d-m-Y') }}</span>
                             </div>
 
                             <div class="cr-banner">

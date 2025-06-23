@@ -45,7 +45,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
 
-    Route::middleware(['admin'])->group(function () {
+    // Route::middleware(['admin'])->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/dashboard/data', [DashboardController::class, 'data']);
         Route::get('/dashboard/repeat-customer-rate', [DashboardController::class, 'repeatCustomerRate']);
@@ -318,7 +318,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
         });
     });
-});
+// });
 
 
 // route của trang client
