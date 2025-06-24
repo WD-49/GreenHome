@@ -53,67 +53,67 @@
     </style> --}}
 
     <!-- Hero slider -->
-    <section class="section-hero padding-b-100 next">
-        <div class="cr-slider swiper-container">
-            <div class="swiper-wrapper">
+<section class="section-hero padding-b-100 next">
+    <div class="cr-slider swiper-container">
+        <div class="swiper-wrapper">
+
+            {{-- Banner có priority 1 --}}
+            @foreach ($banner1 as $item)
                 <div class="swiper-slide">
-                    <div class="cr-hero-banner cr-banner-image-two">
+                    <div class="cr-hero-banner"
+     style="background-image: url('{{ Storage::url(Str::replaceFirst("storage/", "", $item->img)) }}');
+            background-size: cover;
+            background-position: center;">
+
                         <div class="container">
                             <div class="row">
                                 <div class="col-lg-12">
-                                    <div class="cr-left-side-contain slider-animation">
-                                        <h5><span>100%</span> Organic Fruits</h5>
-
-                                        @foreach ($banner1 as $item)
-                                            <h1>{{ $item->name }}</h1>
-                                            <p>
-                                                {!! $item->description !!}
-                                            </p>
-                                            <div class="cr-last-buttons">
-                                                <a href="{{ $item->link }}" class="cr-button">
-                                                    shop now
-                                                </a>
-                                            </div>
-                                        @endforeach
-
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="swiper-slide">
-                    <div class="cr-hero-banner cr-banner-image-one">
-                        <div class="container">
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <div class="cr-left-side-contain slider-animation">
-                                        <h5><span>100%</span> Organic Fruits</h5>
-
-                                        @foreach ($banner2 as $item)
-                                            <h1>{{ $item->name }}</h1>
-                                            <p>
-                                                {{ $item->description }}
-                                            </p>
-                                            <div class="cr-last-buttons">
-                                                <a href="{{ $item->link }}" class="cr-button">
-                                                    shop now
-                                                </a>
-                                            </div>
-                                        @endforeach
-
-
+                                    <div class="cr-left-side-contain slider-animation text-white">
+                                        <h1>{{ $item->name }}</h1>
+                                        <p>{!! $item->description !!}</p>
+                                        <div class="cr-last-buttons">
+                                            <a href="{{ $item->link }}" class="cr-button">shop now</a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="swiper-pagination"></div>
+            @endforeach
+
+            {{-- Banner có priority 2 --}}
+            @foreach ($banner2 as $item)
+                <div class="swiper-slide">
+                    <div class="cr-hero-banner"
+     style="background-image: url('{{ Storage::url(Str::replaceFirst("storage/", "", $item->img)) }}');
+            background-size: cover;
+            background-position: center;">
+
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="cr-left-side-contain slider-animation text-white">
+                                        <h1>{{ $item->name }}</h1>
+                                        <p>{!! $item->description !!}</p>
+                                        <div class="cr-last-buttons">
+                                            <a href="{{ $item->link }}" class="cr-button">shop now</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+
         </div>
-    </section>
+
+        {{-- Swiper pagination --}}
+        <div class="swiper-pagination"></div>
+    </div>
+</section>
+
     <!-- Categories -->
     <section class="section-categories padding-b-100">
         <div class="container">
@@ -260,7 +260,7 @@
                 {{-- Cột phải: Sản phẩm --}}
                 <div class="col-xl-9 col-lg-8 col-12 mb-24">
                     {{-- Tab All: 8 sản phẩm ngẫu nhiên --}}
-                    <div id="tab-all" class="product-tab-content fade-tab  show">
+                    <div id="tab-all" class="product-tab-content fade-tab show">
                         <div class="row mb-minus-24">
                             @foreach ($randomProducts as $product)
                                 <div class="col-xxl-3 col-xl-4 col-6 cr-product-box mb-24">
@@ -288,8 +288,20 @@
                                                 <a href="#">{{ $product->category->name ?? '' }}</a>
                                             </div>
                                             <a href="#" class="title">{{ $product->name }}</a>
+
+                                            {{-- ✅ Hiển thị đúng giá biến thể đầu tiên --}}
                                             <p class="cr-price">
-                                                <span class="new-price">${{ $product->price }}</span>
+                                                @php
+                                                    $variant = $product->productVariants->first();
+                                                @endphp
+
+                                                @if ($variant)
+                                                    <span class="new-price">
+                                                        {{ number_format($variant->price, 0, ',', '.') }}₫
+                                                    </span>
+                                                @else
+                                                    <span class="new-price text-muted">Chưa có giá</span>
+                                                @endif
                                             </p>
                                         </div>
                                     </div>
@@ -298,9 +310,10 @@
                         </div>
                     </div>
 
+
                     {{-- Tab từng danh mục: 8 sản phẩm mới nhất --}}
                     @foreach ($categories2 as $category)
-                        <div id="tab-cat-{{ $category->id }}" class="product-tab-content " style="display:none;">
+                        <div id="tab-cat-{{ $category->id }}" class="product-tab-content" style="display:none;">
                             <div class="row mb-minus-24">
                                 @foreach ($category->products as $product)
                                     <div class="col-xxl-3 col-xl-4 col-6 cr-product-box mb-24">
@@ -328,8 +341,15 @@
                                                     <a href="#">{{ $category->name }}</a>
                                                 </div>
                                                 <a href="#" class="title">{{ $product->name }}</a>
+
                                                 <p class="cr-price">
-                                                    <span class="new-price">${{ $product->price }}</span>
+                                                    @if ($variant = $product->productVariants->first())
+                                                        <span class="new-price">
+                                                            {{ number_format($variant->price, 0, ',', '.') }}₫
+                                                        </span>
+                                                    @else
+                                                        <span class="new-price text-muted">Chưa có giá</span>
+                                                    @endif
                                                 </p>
                                             </div>
                                         </div>
@@ -338,6 +358,8 @@
                             </div>
                         </div>
                     @endforeach
+
+
                 </div>
             </div>
 
@@ -464,32 +486,44 @@
     </section>
 
     <!-- Deal -->
-    <section class="section-deal padding-b-100">
-        <div class="bg-banner-deal">
-            <div class="container">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="cr-deal-rightside">
-                            <div class="cr-deal-content" data-aos="fade-up" data-aos-duration="2000">
-                                <span><code>35%</code> OFF</span>
-                                <h4 class="cr-deal-title">Great deal on organic food.</h4>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do maecenas accumsan
-                                    lacus vel facilisis.</p>
-                                <div id="timer" class="cr-counter">
-                                    <div class="cr-counter-inner">
-                                        <h4><span id="days"></span> Days</h4>
-                                        <h4><span id="hours"></span> Hrs</h4>
-                                        <h4><span id="minutes"></span> Min</h4>
-                                        <h4><span id="seconds"></span> Sec</h4>
-                                    </div>
+  <section class="section-deal padding-b-100">
+ <div class="bg-banner-deal"
+     style="background-image: url('{{ Storage::url(Str::replaceFirst('storage/', '', $dealBanner->img)) }}');
+            background-size: cover;
+            background-position: center;
+            height: 600px;">
+
+
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="cr-deal-rightside">
+                        <div class="cr-deal-content text-white" data-aos="fade-up" data-aos-duration="2000">
+                            {{-- <span>
+                                <code>{{ $dealBanner->discount ?? '35' }}%</code> OFF
+                            </span> --}}
+                            <h4 class="cr-deal-title">
+                                {{ $dealBanner->name ?? 'Great deal on organic food.' }}
+                            </h4>
+                            <p>
+                                {{ $dealBanner->description ?? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do maecenas accumsan lacus vel facilisis.' }}
+                            </p>
+                            <div id="timer" class="cr-counter">
+                                <div class="cr-counter-inner d-flex gap-3">
+                                    <h4><span id="days"></span> Days</h4>
+                                    <h4><span id="hours"></span> Hrs</h4>
+                                    <h4><span id="minutes"></span> Min</h4>
+                                    <h4><span id="seconds"></span> Sec</h4>
                                 </div>
                             </div>
-                        </div>
-                    </div>
+                        </div> <!-- /.cr-deal-content -->
+                    </div> <!-- /.cr-deal-rightside -->
                 </div>
             </div>
         </div>
-    </section>
+    </div> <!-- /.bg-banner-deal -->
+</section>
+
 
 
 
@@ -538,16 +572,18 @@
                                             {{ $product->name }}
                                         </a>
                                         <p class="cr-price">
-                                            <span class="new-price">${{ $product->sale_price ?? $product->price }}</span>
-                                            @if ($product->sale_price)
-                                                <span class="old-price">${{ $product->price }}</span>
+                                            @if ($variant = $product->productVariants->first())
+                                                <span class="new-price">
+                                                    {{ number_format($variant->price, 0, ',', '.') }}₫
+                                                </span>
+                                            @else
+                                                <span class="new-price text-muted">Chưa có giá</span>
                                             @endif
                                         </p>
                                     </div>
                                 </div>
                             </div>
                         @endforeach
-
                     </div>
                 </div>
 
@@ -555,8 +591,8 @@
                     <div class="cr-products-rightbar position-relative overflow-hidden rounded shadow">
                         @if ($banner12)
                             {{-- Ảnh banner từ DB --}}
-                            <img src="{{ Storage::url($banner12->img) }}" alt="{{ $banner12->name }}"
-                                class="w-100 h-100 object-cover" style="max-height: 400px;">
+                            <img src="{{ asset('storage/' . str_replace('storage/', '', $imgPath)) }}"
+                                alt="{{ $banner12->name }}">
 
                             {{-- Nội dung chèn lên ảnh --}}
                             <div class="cr-products-rightbar-content position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-start text-white p-4"
@@ -603,8 +639,9 @@
                                 <div class="swiper-slide" data-aos="fade-up" data-aos-duration="2000">
                                     <div class="cr-testimonial">
                                         <div class="cr-testimonial-image">
-                                            <img src="{{ asset('assets_client/assets/img/testimonial/default.jpg') }}"
+                                            <img src="{{ Storage::url(\Illuminate\Support\Str::replaceFirst('storage/', '', $review->user->image)) }}"
                                                 alt="{{ $review->user->name ?? 'User' }}">
+
                                         </div>
                                         <div class="cr-testimonial-inner">
                                             <span>{{ $review->user->email ?? 'User' }}</span>
@@ -620,48 +657,7 @@
                                 </div>
                             @endforeach
 
-                            <div class="swiper-slide" data-aos="fade-up" data-aos-duration="2000">
-                                <div class="cr-testimonial">
-                                    <div class="cr-testimonial-image">
-                                        <img src="{{ asset('assets_client/assets/img/testimonial/2.jpg') }}"
-                                            alt="businessman">
-                                    </div>
-                                    <div class="cr-testimonial-inner">
-                                        <span>Manager</span>
-                                        <h4 class="title">Lorem Robinson</h4>
-                                        <p>“eiusmpsu dolor sit amet, conse cte tur ng elit, sed do eiusmod tem lacus vel
-                                            facilisis.”</p>
-                                        <div class="cr-star">
-                                            <i class="ri-star-fill"></i>
-                                            <i class="ri-star-fill"></i>
-                                            <i class="ri-star-fill"></i>
-                                            <i class="ri-star-fill"></i>
-                                            <i class="ri-star-line"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide" data-aos="fade-up" data-aos-duration="2000">
-                                <div class="cr-testimonial">
-                                    <div class="cr-testimonial-image">
-                                        <img src="{{ asset('assets_client/assets/img/testimonial/3.jpg') }}"
-                                            alt="businessman">
-                                    </div>
-                                    <div class="cr-testimonial-inner">
-                                        <span>Team Leader</span>
-                                        <h4 class="title">Saddika Alard</h4>
-                                        <p>“eiusmpsu dolor sit amet, conse cte tur ng elit, sed do eiusmod tem lacus vel
-                                            facilisis.”</p>
-                                        <div class="cr-star">
-                                            <i class="ri-star-fill"></i>
-                                            <i class="ri-star-fill"></i>
-                                            <i class="ri-star-fill"></i>
-                                            <i class="ri-star-fill"></i>
-                                            <i class="ri-star-fill"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -694,7 +690,7 @@
                                     <div class="cr-blog">
                                         <div class="cr-blog-content">
                                             <span>
-                                                <code>By {{ $blog->user->name ?? 'Admin' }}</code> |
+                                                <code>By {{ $blog->author->name ?? 'Admin' }}</code> |
                                                 <a href="#">{{ $blog->category->name ?? 'Uncategorized' }}</a>
                                             </span>
                                             <h5>{{ $blog->title }}</h5>
@@ -702,8 +698,8 @@
                                         </div>
 
                                         <div class="cr-blog-image">
-                                            <img src="{{ asset('storage/' . $blog->thumbnail) }}"
-                                                alt="{{ $blog->title }}" style="width: 100%; object-fit: cover;">
+                                            <img src="{{ Storage::url(\Illuminate\Support\Str::replaceFirst('storage/', '', $blog->thumbnail)) }}"
+                                                alt="{{ $blog->title }}">
                                             <div class="cr-blog-date">
                                                 <span>
                                                     {{ optional($blog->created_at)->format('d') }}

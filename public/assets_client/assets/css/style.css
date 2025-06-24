@@ -3108,7 +3108,7 @@ ul.navbar-nav .dropdown:hover .dropdown-menu {
 }
 
 /* Deal */
-.bg-banner-deal {
+/* .bg-banner-deal {
   width: 100%;
   height: 600px;
   position: relative;
@@ -3116,7 +3116,16 @@ ul.navbar-nav .dropdown:hover .dropdown-menu {
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
+} */
+ .bg-banner-deal {
+  width: 100%;
+  height: 600px;
+  position: relative;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
 }
+
 
 .cr-deal-rightside {
   width: 100%;
