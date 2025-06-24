@@ -407,4 +407,17 @@ class ProductController extends Controller
 
         return redirect()->route('admin.products.index')->with('success', 'Sản phẩm đã được khôi phục thành công');
     }
+
+    public function forceDelete($id)
+    {
+        $product = Product::withTrashed()->findOrFail($id);
+        if ($product) {
+            // Xóa vĩnh viễn các biến thể liên quan
+            ProductVariant::where('product_id', $id)->forceDelete();
+            // Xóa vĩnh viễn sản phẩm
+            $product->forceDelete();
+        }
+
+        return redirect()->route('admin.products.trashed')->with('success', 'Sản phẩm đã được xóa vĩnh viễn');
+    }
 }

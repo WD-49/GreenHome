@@ -125,7 +125,6 @@
                             @include('admin.products.table', ['products' => $products])
                         </x-table-wrapper>
                     </div>
-
                 </div>
             </div>
         </div>
