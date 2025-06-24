@@ -73,4 +73,17 @@ class Product extends Model
             }
         });
     }
+public function reviews()
+{
+    return $this->hasManyThrough(
+        Review::class,
+        ProductVariant::class,
+        'product_id', // Foreign key trên bảng product_variants
+        'product_variant_id', // Foreign key trên bảng reviews  
+        'id', // Local key trên bảng products
+        'id' // Local key trên bảng product_variants
+    );
+}
+
+
 }
