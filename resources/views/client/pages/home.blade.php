@@ -53,66 +53,66 @@
     </style> --}}
 
     <!-- Hero slider -->
-<section class="section-hero padding-b-100 next">
-    <div class="cr-slider swiper-container">
-        <div class="swiper-wrapper">
+    <section class="section-hero padding-b-100 next">
+        <div class="cr-slider swiper-container">
+            <div class="swiper-wrapper">
 
-            {{-- Banner có priority 1 --}}
-            @foreach ($banner1 as $item)
-                <div class="swiper-slide">
-                    <div class="cr-hero-banner"
-     style="background-image: url('{{ Storage::url(Str::replaceFirst("storage/", "", $item->img)) }}');
+                {{-- Banner có priority 1 --}}
+                @foreach ($banner1 as $item)
+                    <div class="swiper-slide">
+                        <div class="cr-hero-banner"
+                            style="background-image: url('{{ Storage::url(Str::replaceFirst('storage/', '', $item->img)) }}');
             background-size: cover;
             background-position: center;">
 
-                        <div class="container">
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <div class="cr-left-side-contain slider-animation text-white">
-                                        <h1>{{ $item->name }}</h1>
-                                        <p>{!! $item->description !!}</p>
-                                        <div class="cr-last-buttons">
-                                            <a href="{{ $item->link }}" class="cr-button">shop now</a>
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="cr-left-side-contain slider-animation text-white">
+                                            <h1>{{ $item->name }}</h1>
+                                            <p>{!! $item->description !!}</p>
+                                            <div class="cr-last-buttons">
+                                                <a href="{{ $item->link }}" class="cr-button">shop now</a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            @endforeach
+                @endforeach
 
-            {{-- Banner có priority 2 --}}
-            @foreach ($banner2 as $item)
-                <div class="swiper-slide">
-                    <div class="cr-hero-banner"
-     style="background-image: url('{{ Storage::url(Str::replaceFirst("storage/", "", $item->img)) }}');
+                {{-- Banner có priority 2 --}}
+                @foreach ($banner2 as $item)
+                    <div class="swiper-slide">
+                        <div class="cr-hero-banner"
+                            style="background-image: url('{{ Storage::url(Str::replaceFirst('storage/', '', $item->img)) }}');
             background-size: cover;
             background-position: center;">
 
-                        <div class="container">
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <div class="cr-left-side-contain slider-animation text-white">
-                                        <h1>{{ $item->name }}</h1>
-                                        <p>{!! $item->description !!}</p>
-                                        <div class="cr-last-buttons">
-                                            <a href="{{ $item->link }}" class="cr-button">shop now</a>
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="cr-left-side-contain slider-animation text-white">
+                                            <h1>{{ $item->name }}</h1>
+                                            <p>{!! $item->description !!}</p>
+                                            <div class="cr-last-buttons">
+                                                <a href="{{ $item->link }}" class="cr-button">shop now</a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            @endforeach
+                @endforeach
 
+            </div>
+
+            {{-- Swiper pagination --}}
+            <div class="swiper-pagination"></div>
         </div>
-
-        {{-- Swiper pagination --}}
-        <div class="swiper-pagination"></div>
-    </div>
-</section>
+    </section>
 
     <!-- Categories -->
     <section class="section-categories padding-b-100">
@@ -419,12 +419,6 @@
             </div>
         </div>
     </section>
-
-
-
-
-
-
     <!-- Services -->
     <section class="section-services padding-b-100">
         <div class="container">
@@ -486,43 +480,43 @@
     </section>
 
     <!-- Deal -->
-  <section class="section-deal padding-b-100">
- <div class="bg-banner-deal"
-     style="background-image: url('{{ Storage::url(Str::replaceFirst('storage/', '', $dealBanner->img)) }}');
+    <section class="section-deal padding-b-100">
+        <div class="bg-banner-deal"
+            style="background-image: url('{{ Storage::url(Str::replaceFirst('storage/', '', $dealBanner->img)) }}');
             background-size: cover;
             background-position: center;
             height: 600px;">
 
 
-        <div class="container">
-            <div class="row">
-                <div class="col-12">
-                    <div class="cr-deal-rightside">
-                        <div class="cr-deal-content text-white" data-aos="fade-up" data-aos-duration="2000">
-                            {{-- <span>
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="cr-deal-rightside">
+                            <div class="cr-deal-content text-white" data-aos="fade-up" data-aos-duration="2000">
+                                {{-- <span>
                                 <code>{{ $dealBanner->discount ?? '35' }}%</code> OFF
                             </span> --}}
-                            <h4 class="cr-deal-title">
-                                {{ $dealBanner->name ?? 'Great deal on organic food.' }}
-                            </h4>
-                            <p>
-                                {{ $dealBanner->description ?? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do maecenas accumsan lacus vel facilisis.' }}
-                            </p>
-                            <div id="timer" class="cr-counter">
-                                <div class="cr-counter-inner d-flex gap-3">
-                                    <h4><span id="days"></span> Days</h4>
-                                    <h4><span id="hours"></span> Hrs</h4>
-                                    <h4><span id="minutes"></span> Min</h4>
-                                    <h4><span id="seconds"></span> Sec</h4>
+                                <h4 class="cr-deal-title">
+                                    {{ $dealBanner->name ?? 'Great deal on organic food.' }}
+                                </h4>
+                                <p>
+                                    {{ $dealBanner->description ?? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do maecenas accumsan lacus vel facilisis.' }}
+                                </p>
+                                <div id="timer" class="cr-counter">
+                                    <div class="cr-counter-inner d-flex gap-3">
+                                        <h4><span id="days"></span> Days</h4>
+                                        <h4><span id="hours"></span> Hrs</h4>
+                                        <h4><span id="minutes"></span> Min</h4>
+                                        <h4><span id="seconds"></span> Sec</h4>
+                                    </div>
                                 </div>
-                            </div>
-                        </div> <!-- /.cr-deal-content -->
-                    </div> <!-- /.cr-deal-rightside -->
+                            </div> <!-- /.cr-deal-content -->
+                        </div> <!-- /.cr-deal-rightside -->
+                    </div>
                 </div>
             </div>
-        </div>
-    </div> <!-- /.bg-banner-deal -->
-</section>
+        </div> <!-- /.bg-banner-deal -->
+    </section>
 
 
 
