@@ -24,9 +24,9 @@
                 <div class="col-lg-3 col-12 md-30">
                     <div class="cr-blog-sideview" data-aos="fade-up" data-aos-duration="2000" data-aos-delay="400">
                         <div class="cr-serch-box">
-                            <form class="cr-search">
-                                <input class="search-input" type="text" placeholder="Tìm kiếm tại đây...">
-                                <a href="javascript:void(0)" class="search-btn">
+                            <form method="GET" action="{{route('blog.index')}}" class="cr-search">
+                                <input class="search" name="search" type="text" placeholder="Tìm kiếm tại đây...">
+                                <a href="" type="submit" class="search-btn">
                                     <i class="ri-search-line"></i>
                                 </a>
                             </form>
@@ -51,7 +51,8 @@
                             <div class="blog-heading">
                                 <h4>Bài viết mới</h4>
                             </div>
-                            <div class="cr-blog-recent-post">
+                           <a href="{{route('blog.show', $slug = $newBlog->slug)}}">
+                             <div class="cr-blog-recent-post">
                                 <div class="cr-blog-recent-image">
                                     <img src="{{ asset('storage/' . $newBlog->thumbnail) }}" alt="blog-1">
                                 </div>
@@ -61,6 +62,7 @@
                                     <p>{{$newBlog->summary}}</p>
                                 </div>
                             </div>
+                           </a>
                         </div>
 
                         {{-- <div class="cr-blog-tags">
@@ -81,49 +83,24 @@
                     </div>
                 </div>
                 <div class="col-lg-9 col-12 md-30">
-                    <div class="container">
-                        <div class="row">
-                            @foreach ($blogs as $blog)
-                                <div class="col-12 mb-4">
-                                    <div
-                                        class="blog-card d-flex shadow-sm rounded overflow-hidden bg-white border hover-shadow">
+                    @foreach ($blogs as $blog)
+    <div class="cr-blog-classic" data-aos="fade-up" data-aos-duration="2000" data-aos-delay="400">
+        <div class="cr-blog-classic-content">
+            <div class="cr-comment">
+                <span>
+                    By {{ $blog->author->name ?? 'Admin' }}
+                </span>
+            </div>
+            <h4>{{ $blog->title }}</h4>
+            <p>{{ $blog->summary }}</p>
+            <a href="{{ route('blog.show', $blog->slug) }}">xem thêm</a>
+        </div>
+        <div class="cr-blog-image">
+            <img src="{{ asset('storage/' . $blog->thumbnail) }}" alt="{{ $blog->slug }}">
+        </div>
+    </div>
+@endforeach
 
-                                        {{-- Ảnh bên trái --}}
-                                        <div class="blog-card-image" style="width: 35%; max-height: 220px; overflow: hidden;">
-                                            <a href="{{ route('blog.show', $blog->slug) }}">
-                                                <img src="{{ asset('storage/' . $blog->thumbnail) }}" alt="{{ $blog->slug }}"
-                                                    class="w-100 h-100 object-fit-cover" style="transition: 0.4s ease;">
-                                            </a>
-                                        </div>
-
-                                        {{-- Gạch dọc xám --}}
-                                        <div class="d-none d-md-block" style="width: 1px; background-color: #d3d3d3;"></div>
-
-                                        {{-- Nội dung bên phải --}}
-                                        <div class="p-3 d-flex flex-column justify-content-between" style="width: 64%;">
-                                            <div>
-                                                <h5 class="fw-bold mb-2">
-                                                    <a href="{{ route('blog.show', $blog->slug) }}"
-                                                        class="text-dark text-decoration-none">
-                                                        {{ Str::limit($blog->title, 100) }}
-                                                    </a>
-                                                </h5>
-                                                <p class="text-muted small mb-3">
-                                                    {{ $blog->created_at->format('d/m/Y') }} —
-                                                    {{ $blog->author->name ?? 'Admin' }}
-                                                </p>
-                                                <p class="mb-3">{{ Str::limit($blog->summary, 150) }}</p>
-                                            </div>
-                                            <a href="{{ route('blog.show', $blog->slug) }}" class="">
-                                                Xem chi tiết
-                                            </a>
-                                        </div>
-
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
 
 
 
