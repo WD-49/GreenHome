@@ -44,16 +44,15 @@ class Product extends Model
 
     // Quan hệ với brand (nhiều-1)
     public function brand()
-{
-    return $this->belongsTo(Brand::class)->withTrashed(); // xóa mềm giữ sản phẩm
-}
+    {
+        return $this->belongsTo(Brand::class)->withTrashed(); // xóa mềm giữ sản phẩm
+    }
 
 
     // Quan hệ với product_variants (1-nhiều)
     public function productVariants()
     {
         return $this->hasMany(ProductVariant::class)->withTrashed();
-
     }
 
     public function comments()
@@ -61,42 +60,39 @@ class Product extends Model
         return $this->hasMany(Comment::class);
     }
 
-   public function reviews()
-{
-    return $this->hasMany(\App\Models\Review::class, 'product_id');
-}
-
-
-public function getReviewsAvgRatingAttribute()
-{
-    $variants = $this->productVariants;
-
-    if ($variants->isEmpty()) {
-        return null;
+    public function reviews()
+    {
+        return $this->hasMany(\App\Models\Review::class, 'product_id');
     }
 
-    $total = 0;
-    $count = 0;
 
-    foreach ($variants as $variant) {
-        foreach ($variant->reviews as $review) {
-            $total += $review->rating;
-            $count++;
+    public function getReviewsAvgRatingAttribute()
+    {
+        $variants = $this->productVariants;
+
+        if ($variants->isEmpty()) {
+            return null;
         }
+
+        $total = 0;
+        $count = 0;
+
+        foreach ($variants as $variant) {
+            foreach ($variant->reviews as $review) {
+                $total += $review->rating;
+                $count++;
+            }
+        }
+
+        return $count > 0 ? round($total / $count, 1) : null;
     }
 
-    return $count > 0 ? round($total / $count, 1) : null;
-}
-
-public function getReviewsCountAttribute()
-{
-    return $this->productVariants->flatMap(function ($variant) {
-        return $variant->reviews;
-    })->count();
-}
-
-
-
+    public function getReviewsCountAttribute()
+    {
+        return $this->productVariants->flatMap(function ($variant) {
+            return $variant->reviews;
+        })->count();
+    }
 
 
     protected static function booted()
@@ -111,17 +107,17 @@ public function getReviewsCountAttribute()
             }
         });
     }
-public function reviews()
-{
-    return $this->hasManyThrough(
-        Review::class,
-        ProductVariant::class,
-        'product_id', // Foreign key trên bảng product_variants
-        'product_variant_id', // Foreign key trên bảng reviews  
-        'id', // Local key trên bảng products
-        'id' // Local key trên bảng product_variants
-    );
-}
+    // public function reviews()
+    // {
+    //     return $this->hasManyThrough(
+    //         Review::class,
+    //         ProductVariant::class,
+    //         'product_id', // Foreign key trên bảng product_variants
+    //         'product_variant_id', // Foreign key trên bảng reviews  
+    //         'id', // Local key trên bảng products
+    //         'id' // Local key trên bảng product_variants
+    //     );
+    // }
 
 
 }
