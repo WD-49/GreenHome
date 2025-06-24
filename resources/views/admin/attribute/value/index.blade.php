@@ -34,9 +34,7 @@
                 </tr>
             @endforelse
         </tbody>
-        <form action="">
-            <input type="text" class="form-control">
-        </form>
+
     </table>
 </div>
 @endsection

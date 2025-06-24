@@ -26,7 +26,7 @@
 
                 </td>
                 <td>{{ $product->name }}</td>
-                <td>{{ $product->category->name }}</td>
+                <td>{{ $product->category?->name ?? 'Không có danh mục' }}</td>
                 {{-- Khi xóa vĩnh viễn thương hiệu --}}
                 <td>{{ $product->brand?->name ?? 'Không có thương hiệu' }}</td>  
                 <td>
@@ -34,7 +34,7 @@
                         {{ $product->status == 1 ? 'Đang bán' : 'Dừng bán' }}
                     </span>
                 </td>
-                <td>{{ $product->date_of_entry->format('d/m/Y') }}</td>
+<td>{{ optional($product->date_of_entry)->format('d/m/Y') }}</td>
                 <td>
                     <div class="dropdown">
                         <button class="btn btn-light btn-sm me-2" type="button" data-bs-toggle="dropdown"

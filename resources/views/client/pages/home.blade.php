@@ -1,23 +1,78 @@
 @extends('layouts.app')
 @section('content')
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script>
+        AOS.init();
+    </script>
+    {{-- <style>
+        .banner-box {
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f9f9f9;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .banner-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .banner-img-wrapper {
+            width: 100%;
+            height: 220px;
+            overflow: hidden;
+        }
+
+        .banner-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .banner-box:hover .banner-img-wrapper img {
+            transform: scale(1.05);
+        }
+
+        .cr-product-banner-contain {
+            padding: 20px;
+            background: white;
+            text-align: center;
+        }
+
+        .cr-product-banner-contain h5 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+    </style> --}}
+
     <!-- Hero slider -->
-    <section class="section-hero padding-b-100 next">
-        <div class="cr-slider swiper-container">
-            <div class="swiper-wrapper">
+<section class="section-hero padding-b-100 next">
+    <div class="cr-slider swiper-container">
+        <div class="swiper-wrapper">
+
+            {{-- Banner có priority 1 --}}
+            @foreach ($banner1 as $item)
                 <div class="swiper-slide">
-                    <div class="cr-hero-banner cr-banner-image-two">
+                    <div class="cr-hero-banner"
+     style="background-image: url('{{ Storage::url(Str::replaceFirst("storage/", "", $item->img)) }}');
+            background-size: cover;
+            background-position: center;">
+
                         <div class="container">
                             <div class="row">
                                 <div class="col-lg-12">
-                                    <div class="cr-left-side-contain slider-animation">
-                                        <h5><span>100%</span> Organic Fruits</h5>
-                                        <h1>Explore fresh & juicy fruits.</h1>
-                                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Amet reiciendis
-                                            beatae consequuntur.</p>
+                                    <div class="cr-left-side-contain slider-animation text-white">
+                                        <h1>{{ $item->name }}</h1>
+                                        <p>{!! $item->description !!}</p>
                                         <div class="cr-last-buttons">
-                                            <a href="shop-left-sidebar.html" class="cr-button">
-                                                shop now
-                                            </a>
+                                            <a href="{{ $item->link }}" class="cr-button">shop now</a>
                                         </div>
                                     </div>
                                 </div>
@@ -25,20 +80,24 @@
                         </div>
                     </div>
                 </div>
+            @endforeach
+
+            {{-- Banner có priority 2 --}}
+            @foreach ($banner2 as $item)
                 <div class="swiper-slide">
-                    <div class="cr-hero-banner cr-banner-image-one">
+                    <div class="cr-hero-banner"
+     style="background-image: url('{{ Storage::url(Str::replaceFirst("storage/", "", $item->img)) }}');
+            background-size: cover;
+            background-position: center;">
+
                         <div class="container">
                             <div class="row">
                                 <div class="col-lg-12">
-                                    <div class="cr-left-side-contain slider-animation">
-                                        <h5><span>100%</span> Organic Vegetables</h5>
-                                        <h1>The best way to stuff your wallet.</h1>
-                                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Amet reiciendis
-                                            beatae consequuntur.</p>
+                                    <div class="cr-left-side-contain slider-animation text-white">
+                                        <h1>{{ $item->name }}</h1>
+                                        <p>{!! $item->description !!}</p>
                                         <div class="cr-last-buttons">
-                                            <a href="shop-left-sidebar.html" class="cr-button">
-                                                shop now
-                                            </a>
+                                            <a href="{{ $item->link }}" class="cr-button">shop now</a>
                                         </div>
                                     </div>
                                 </div>
@@ -46,52 +105,34 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="swiper-pagination"></div>
+            @endforeach
+
         </div>
-    </section>
+
+        {{-- Swiper pagination --}}
+        <div class="swiper-pagination"></div>
+    </div>
+</section>
+
     <!-- Categories -->
     <section class="section-categories padding-b-100">
         <div class="container">
             <div class="row mb-minus-24">
+                {{-- Danh sách tab danh mục --}}
                 <div class="col-lg-4 col-12 mb-24">
                     <div class="cr-categories">
                         <ul class="nav nav-tabs" id="myTab" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active center-categories-inner" id="cake_milk-tab"
-                                    data-bs-toggle="tab" data-bs-target="#cake_milk" type="button" role="tab"
-                                    aria-controls="cake_milk" aria-selected="true">
-                                    Cake & Milk <span>(65 items)</span>
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link center-categories-inner" id="meat-tab" data-bs-toggle="tab"
-                                    data-bs-target="#meat" type="button" role="tab" aria-controls="meat"
-                                    aria-selected="false" tabindex="-1">
-                                    Fresh Meat <span>(30 items)</span>
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link center-categories-inner" id="Vegetables-tab" data-bs-toggle="tab"
-                                    data-bs-target="#Vegetables" type="button" role="tab" aria-controls="Vegetables"
-                                    aria-selected="false" tabindex="-1">
-                                    Vegetables <span>(25 items)</span>
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link center-categories-inner" id="Custard-tab" data-bs-toggle="tab"
-                                    data-bs-target="#Custard" type="button" role="tab" aria-controls="Custard"
-                                    aria-selected="false" tabindex="-1">
-                                    Apple & Mango <span>(45 items)</span>
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link center-categories-inner" id="Strawberry-tab" data-bs-toggle="tab"
-                                    data-bs-target="#Strawberry" type="button" role="tab" aria-controls="Strawberry"
-                                    aria-selected="false" tabindex="-1">
-                                    Strawberry <span>(68 items)</span>
-                                </button>
-                            </li>
+                            @foreach ($categories1 as $index => $category)
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link center-categories-inner {{ $loop->first ? 'active' : '' }}"
+                                        id="tab-{{ $category->id }}" data-bs-toggle="tab"
+                                        data-bs-target="#content-{{ $category->id }}" type="button" role="tab"
+                                        aria-controls="content-{{ $category->id }}"
+                                        aria-selected="{{ $loop->first ? 'true' : 'false' }}">
+                                        {{ $category->name }} <span>({{ $category->products->count() }} items)</span>
+                                    </button>
+                                </li>
+                            @endforeach
                             <li class="nav-item" role="presentation">
                                 <a class="center-categories-inner cr-view-more" href="shop-left-sidebar.html">
                                     View More
@@ -100,254 +141,74 @@
                         </ul>
                     </div>
                 </div>
-                <div class="col-lg-8 col-12 mb-24">
-                    <div class="tab-content" id="myTabContent">
-                        <div class="tab-pane fade active show" id="cake_milk" role="tabpanel"
-                            aria-labelledby="cake_milk-tab">
-                            <div class="row mb-minus-24">
-                                <div class="col-6 cr-categories-box mb-24">
-                                    <div class="cr-side-categories">
-                                        <div class="categories-inner">
-                                            <h4>50
-                                                <span>
-                                                    <small>%</small>
-                                                    <small>Off</small>
-                                                </span>
-                                            </h4>
-                                        </div>
-                                        <div class="categories-contain">
-                                            <div class="categories-text">
-                                                <h5>Cake</h5>
-                                            </div>
-                                            <div class="categories-button">
-                                                <a href="shop-left-sidebar.html" class="cr-button">shop now</a>
-                                            </div>
-                                        </div>
-                                        <img src="{{ asset('assets_client/assets/img/categories/3.jpg') }}"
-                                            alt="categories-3">
-                                    </div>
-                                </div>
-                                <div class="col-6 cr-categories-box mb-24">
-                                    <div class="cr-side-categories">
-                                        <div class="categories-inner">
-                                            <h4>40
-                                                <span>
-                                                    <small>%</small>
-                                                    <small>Off</small>
-                                                </span>
-                                            </h4>
-                                        </div>
-                                        <div class="categories-contain">
-                                            <div class="categories-text">
-                                                <h5>Milk</h5>
-                                            </div>
-                                            <div class="categories-button">
-                                                <a href="shop-left-sidebar.html" class="cr-button">shop now</a>
-                                            </div>
-                                        </div>
-                                        <img src="{{ asset('assets_client/assets/img/categories/4.jpg') }}"
-                                            alt="categories-4">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="meat" role="tabpanel" aria-labelledby="meat-tab">
-                            <div class="row mb-minus-24">
-                                <div class="col-6 cr-categories-box">
-                                    <div class="cr-side-categories">
-                                        <div class="categories-inner">
-                                            <h4>35
-                                                <span>
-                                                    <small>%</small>
-                                                    <small>Off</small>
-                                                </span>
-                                            </h4>
-                                        </div>
-                                        <div class="categories-contain">
-                                            <div class="categories-text">
-                                                <h5>Fish Meat</h5>
-                                            </div>
-                                            <div class="categories-button">
-                                                <a href="shop-left-sidebar.html" class="cr-button">shop now</a>
+
+                {{-- Nội dung tab --}}
+                {{-- filepath: c:\laragon\www\GreenHome-main\resources\views\client\pages\home.blade.php --}}
+                <div class="col-lg-8 col-12 mb-24 d-flex align-items-stretch">
+                    <div class="tab-content w-100" id="myTabContent">
+                        @foreach ($categories as $index => $category)
+                            @php
+                                $start = $index * 2;
+                                $categoryBanners = $banners->slice($start, 2);
+                            @endphp
+
+                            <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}"
+                                id="content-{{ $category->id }}" role="tabpanel"
+                                aria-labelledby="tab-{{ $category->id }}">
+                                <div class="row mb-minus-24 h-100">
+                                    @foreach ($categoryBanners as $banner)
+                                        <div class="col-6 cr-categories-box mb-4 d-flex align-items-stretch">
+                                            <div class="cr-side-categories w-100" style="height:100%;">
+                                                <div
+                                                    style="position:relative; height:100%; width:100%; border-radius:8px; overflow:hidden;">
+                                                    <img src="{{ asset($banner->img) }}" alt="{{ $banner->name }}"
+                                                        style="width:100%;height:100%;object-fit:cover;display:block;position:absolute;top:0;left:0;">
+                                                    <div
+                                                        style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.25);z-index:1;">
+                                                    </div>
+                                                    <div class="categories-inner"
+                                                        style="position:absolute;top:10px;left:10px;z-index:2;">
+                                                        <h4>{{ $category->discount ?? '0' }}
+                                                            <span>
+                                                                <small>%</small>
+                                                                <small>Off</small>
+                                                            </span>
+                                                        </h4>
+                                                    </div>
+                                                    <div class="categories-contain"
+                                                        style="position:absolute;bottom:20px;left:0;width:100%;z-index:2;text-align:center;">
+                                                        <div class="categories-text">
+                                                            <h5 style="color:#fff;text-shadow:0 1px 4px #000;">
+                                                                {{ $category->name }}</h5>
+                                                        </div>
+                                                        <div class="categories-button">
+                                                            <a href="{{ route('shop.category', $category->slug ?? $category->id) }}"
+                                                                class="cr-button">Shop Now</a>
+                                                        </div>
+                                                    </div>
+                                                    <div
+                                                        style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.25);border-radius:8px;z-index:1;">
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                        <img src="{{ asset('assets_client/assets/img/categories/1.jpg') }}"
-                                            alt="categories-1">
-                                    </div>
-                                </div>
-                                <div class="col-6 cr-categories-box">
-                                    <div class="cr-side-categories">
-                                        <div class="categories-inner">
-                                            <h4>24
-                                                <span>
-                                                    <small>%</small>
-                                                    <small>Off</small>
-                                                </span>
-                                            </h4>
-                                        </div>
-                                        <div class="categories-contain">
-                                            <div class="categories-text">
-                                                <h5>Fresh Meat</h5>
-                                            </div>
-                                            <div class="categories-button">
-                                                <a href="shop-left-sidebar.html" class="cr-button">shop now</a>
-                                            </div>
-                                        </div>
-                                        <img src="{{ asset('assets_client/assets/img/categories/2.jpg') }}"
-                                            alt="categories-2">
-                                    </div>
+                                    @endforeach
                                 </div>
                             </div>
-                        </div>
-                        <div class="tab-pane fade" id="Vegetables" role="tabpanel" aria-labelledby="Vegetables-tab">
-                            <div class="row mb-minus-24">
-                                <div class="col-6 cr-categories-box mb-24">
-                                    <div class="cr-side-categories">
-                                        <div class="categories-inner">
-                                            <h4>45
-                                                <span>
-                                                    <small>%</small>
-                                                    <small>Off</small>
-                                                </span>
-                                            </h4>
-                                        </div>
-                                        <div class="categories-contain">
-                                            <div class="categories-text">
-                                                <h5>Coriander</h5>
-                                            </div>
-                                            <div class="categories-button">
-                                                <a href="shop-left-sidebar.html" class="cr-button">shop now</a>
-                                            </div>
-                                        </div>
-                                        <img src="{{ asset('assets_client/assets/img/categories/5.jpg') }}"
-                                            alt="categories-5">
-                                    </div>
-                                </div>
-                                <div class="col-6 cr-categories-box mb-24">
-                                    <div class="cr-side-categories">
-                                        <div class="categories-inner">
-                                            <h4>20
-                                                <span>
-                                                    <small>%</small>
-                                                    <small>Off</small>
-                                                </span>
-                                            </h4>
-                                        </div>
-                                        <div class="categories-contain">
-                                            <div class="categories-text">
-                                                <h5>Broccoli</h5>
-                                            </div>
-                                            <div class="categories-button">
-                                                <a href="shop-left-sidebar.html" class="cr-button">shop now</a>
-                                            </div>
-                                        </div>
-                                        <img src="{{ asset('assets_client/assets/img/categories/6.jpg') }}"
-                                            alt="categories-6">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="Custard" role="tabpanel" aria-labelledby="Custard-tab">
-                            <div class="row mb-minus-24">
-                                <div class="col-6 cr-categories-box mb-24">
-                                    <div class="cr-side-categories">
-                                        <div class="categories-inner">
-                                            <h4>30
-                                                <span>
-                                                    <small>%</small>
-                                                    <small>Off</small>
-                                                </span>
-                                            </h4>
-                                        </div>
-                                        <div class="categories-contain">
-                                            <div class="categories-text">
-                                                <h5>Apple</h5>
-                                            </div>
-                                            <div class="categories-button">
-                                                <a href="shop-left-sidebar.html" class="cr-button">shop now</a>
-                                            </div>
-                                        </div>
-                                        <img src="{{ asset('assets_client/assets/img/categories/7.jpg') }}"
-                                            alt="categories-7">
-                                    </div>
-                                </div>
-                                <div class="col-6 cr-categories-box mb-24">
-                                    <div class="cr-side-categories">
-                                        <div class="categories-inner">
-                                            <h4>25
-                                                <span>
-                                                    <small>%</small>
-                                                    <small>Off</small>
-                                                </span>
-                                            </h4>
-                                        </div>
-                                        <div class="categories-contain">
-                                            <div class="categories-text">
-                                                <h5>Mango</h5>
-                                            </div>
-                                            <div class="categories-button">
-                                                <a href="shop-left-sidebar.html" class="cr-button">shop now</a>
-                                            </div>
-                                        </div>
-                                        <img src="{{ asset('assets_client/assets/img/categories/8.jpg') }}"
-                                            alt="categories-8">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="Strawberry" role="tabpanel" aria-labelledby="Strawberry-tab">
-                            <div class="row mb-minus-24">
-                                <div class="col-6 cr-categories-box mb-24">
-                                    <div class="cr-side-categories">
-                                        <div class="categories-inner">
-                                            <h4>33
-                                                <span>
-                                                    <small>%</small>
-                                                    <small>Off</small>
-                                                </span>
-                                            </h4>
-                                        </div>
-                                        <div class="categories-contain">
-                                            <div class="categories-text">
-                                                <h5>Strawberry</h5>
-                                            </div>
-                                            <div class="categories-button">
-                                                <a href="shop-left-sidebar.html" class="cr-button">shop now</a>
-                                            </div>
-                                        </div>
-                                        <img src="{{ asset('assets_client/assets/img/categories/9.jpg') }}"
-                                            alt="categories-9">
-                                    </div>
-                                </div>
-                                <div class="col-6 cr-categories-box mb-24">
-                                    <div class="cr-side-categories">
-                                        <div class="categories-inner">
-                                            <h4>15
-                                                <span>
-                                                    <small>%</small>
-                                                    <small>Off</small>
-                                                </span>
-                                            </h4>
-                                        </div>
-                                        <div class="categories-contain">
-                                            <div class="categories-text">
-                                                <h5>Strawberry</h5>
-                                            </div>
-                                            <div class="categories-button">
-                                                <a href="shop-left-sidebar.html" class="cr-button">shop now</a>
-                                            </div>
-                                        </div>
-                                        <img src="{{ asset('assets_client/assets/img/categories/10.jpg') }}"
-                                            alt="categories-10">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        @endforeach
                     </div>
                 </div>
+
             </div>
+
+        </div>
         </div>
     </section>
+
+
+
+
+
     <!-- Popular product -->
     <section class="section-popular-product-shape padding-b-100">
         <div class="container" data-aos="fade-up" data-aos-duration="2000">
@@ -364,223 +225,204 @@
                     </div>
                 </div>
             </div>
+            {{-- filepath: c:\laragon\www\GreenHome-main\resources\views\client\pages\home.blade.php --}}
+
             <div class="product-content row mb-minus-24" id="MixItUpDA2FB7">
+                {{-- Cột trái: Danh mục --}}
                 <div class="col-xl-3 col-lg-4 col-12 mb-24">
-                    <div class="row mb-minus-24 sticky">
-                        <div class="col-lg-12 col-sm-6 col-6 cr-product-box mb-24">
-                            <div class="cr-product-tabs">
-                                <ul>
-                                    <li class="active" data-filter="all">All</li>
-                                    <li data-filter=".snack">Snack</li>
-                                    <li data-filter=".vegetable">Vegetable</li>
-                                    <li data-filter=".fruit">Fruit</li>
-                                    <li data-filter=".bakery">Bakery</li>
-                                </ul>
+                    <div class="cr-product-tabs">
+                        <ul>
+                            <li class="active" data-filter="all" onclick="showTab('all')">All</li>
+                            @foreach ($categories as $category)
+                                <li data-filter=".{{ $category->slug }}" onclick="showTab('cat-{{ $category->id }}')">
+                                    {{ $category->name }}
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    @foreach ($banner11 as $item)
+                        <div class="cr-ice-cubes mt-4">
+
+                            <img src="{{ Storage::url(Str::replaceFirst('storage/', '', $item->img)) }}"
+                                alt="{{ $item->name }}" style="width: 100%;">
+
+                            <div class="cr-ice-cubes-contain">
+                                <h4 class="title">{{ $item->name }}</h4>
+                                <h5 class="sub-title">{{ $item->sub_title ?? 'Subtitle' }}</h5>
+                                <span>{{ $item->description }}</span>
+                                <a href="{{ $item->link }}" class="cr-button">Shop Now</a>
                             </div>
                         </div>
-                        <div class="col-lg-12 col-sm-6 col-6 cr-product-box banner-480 mb-24">
-                            <div class="cr-ice-cubes">
-                                <img src="{{ asset('assets_client/assets/img/product/product-banner.jpg') }}"
-                                    alt="product banner">
-                                <div class="cr-ice-cubes-contain">
-                                    <h4 class="title">Juicy </h4>
-                                    <h5 class="sub-title">Fruits</h5>
-                                    <span>100% Natural</span>
-                                    <a href="shop-left-sidebar.html" class="cr-button">Shop Now</a>
+                    @endforeach
+
+                </div>
+
+                {{-- Cột phải: Sản phẩm --}}
+                <div class="col-xl-9 col-lg-8 col-12 mb-24">
+                    {{-- Tab All: 8 sản phẩm ngẫu nhiên --}}
+                    <div id="tab-all" class="product-tab-content fade-tab show">
+                        <div class="row mb-minus-24">
+                            @foreach ($randomProducts as $product)
+                                <div class="col-xxl-3 col-xl-4 col-6 cr-product-box mb-24">
+                                    <div class="cr-product-card">
+                                        <div class="cr-product-image">
+                                            <div class="cr-image-inner zoom-image-hover">
+                                                <img src="{{ Storage::url($product->image) }}"
+                                                    alt="{{ $product->name }}">
+                                            </div>
+                                            <div class="cr-side-view">
+                                                <a href="javascript:void(0)" class="wishlist">
+                                                    <i class="ri-heart-line"></i>
+                                                </a>
+                                                <a class="model-oraganic-product" data-bs-toggle="modal"
+                                                    href="#quickview" role="button">
+                                                    <i class="ri-eye-line"></i>
+                                                </a>
+                                            </div>
+                                            <a class="cr-shopping-bag" href="javascript:void(0)">
+                                                <i class="ri-shopping-bag-line"></i>
+                                            </a>
+                                        </div>
+                                        <div class="cr-product-details">
+                                            <div class="cr-brand">
+                                                <a href="#">{{ $product->category->name ?? '' }}</a>
+                                            </div>
+                                            <a href="#" class="title">{{ $product->name }}</a>
+
+                                            {{-- ✅ Hiển thị đúng giá biến thể đầu tiên --}}
+                                            <p class="cr-price">
+                                                @php
+                                                    $variant = $product->productVariants->first();
+                                                @endphp
+
+                                                @if ($variant)
+                                                    <span class="new-price">
+                                                        {{ number_format($variant->price, 0, ',', '.') }}₫
+                                                    </span>
+                                                @else
+                                                    <span class="new-price text-muted">Chưa có giá</span>
+                                                @endif
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                            @endforeach
                         </div>
                     </div>
-                </div>
-                <div class="col-xl-9 col-lg-8 col-12 mb-24">
-                    <div class="row mb-minus-24">
-                        @php
-                            $products = [
-                                [
-                                    'type' => 'vegetable',
-                                    'img' => '1.jpg',
-                                    'category' => 'Vegetables',
-                                    'title' => 'Fresh organic villa farm lomon 500gm pack',
-                                    'new' => 120.25,
-                                    'old' => 123.25,
-                                    'rating' => '4.5',
-                                ],
-                                [
-                                    'type' => 'snack',
-                                    'img' => '9.jpg',
-                                    'category' => 'Snacks',
-                                    'title' => 'Best snakes with hazel nut pack 200gm',
-                                    'new' => 145,
-                                    'old' => 150,
-                                    'rating' => '5.0',
-                                ],
-                                [
-                                    'type' => 'fruit',
-                                    'img' => '2.jpg',
-                                    'category' => 'Fruits',
-                                    'title' => 'Fresh organic apple 1kg simla marming',
-                                    'new' => 120.25,
-                                    'old' => 123.25,
-                                    'rating' => '4.5',
-                                ],
-                                [
-                                    'type' => 'bakery',
-                                    'img' => '17.jpg',
-                                    'category' => 'Bakery',
-                                    'title' => 'Delicious white baked fresh bread and toast',
-                                    'new' => 20,
-                                    'old' => 22.1,
-                                    'rating' => '5.0',
-                                ],
-                                [
-                                    'type' => 'snack',
-                                    'img' => '11.jpg',
-                                    'category' => 'Snacks',
-                                    'title' => 'Sweet crunchy nut mix 250gm pack',
-                                    'new' => 120.25,
-                                    'old' => 123.25,
-                                    'rating' => '5.0',
-                                ],
-                                [
-                                    'type' => 'fruit',
-                                    'img' => '3.jpg',
-                                    'category' => 'Fruits',
-                                    'title' => 'Organic fresh venila farm watermelon 5kg',
-                                    'new' => 50.3,
-                                    'old' => 72.6,
-                                    'rating' => '3.2',
-                                ],
-                                [
-                                    'type' => 'snack',
-                                    'img' => '10.jpg',
-                                    'category' => 'Snacks',
-                                    'title' => 'Sweet crunchy nut mix 250gm pack',
-                                    'new' => 120.25,
-                                    'old' => 123.25,
-                                    'rating' => '5.0',
-                                ],
-                                [
-                                    'type' => 'bakery',
-                                    'img' => '17.jpg',
-                                    'category' => 'Bakery',
-                                    'title' => 'Delicious white baked fresh bread and toast',
-                                    'new' => 20,
-                                    'old' => 22.1,
-                                    'rating' => '5.0',
-                                ],
-                            ];
-                        @endphp
 
-                        @foreach ($products as $product)
-                            <div class="mix {{ $product['type'] }} col-xxl-3 col-xl-4 col-6 cr-product-box mb-24">
-                                <div class="cr-product-card">
-                                    <div class="cr-product-image">
-                                        <div class="cr-image-inner zoom-image-hover">
-                                            <img src="{{ asset('assets_client/assets/img/product/' . $product['img']) }}"
-                                                alt="product-1">
-                                        </div>
-                                        <div class="cr-side-view">
-                                            <a href="javascript:void(0)" class="wishlist">
-                                                <i class="ri-heart-line"></i>
-                                            </a>
-                                            <a class="model-oraganic-product" data-bs-toggle="modal" href="#quickview"
-                                                role="button">
-                                                <i class="ri-eye-line"></i>
-                                            </a>
-                                        </div>
-                                        <a class="cr-shopping-bag" href="javascript:void(0)">
-                                            <i class="ri-shopping-bag-line"></i>
-                                        </a>
-                                    </div>
-                                    <div class="cr-product-details">
-                                        <div class="cr-brand">
-                                            <a href="shop-left-sidebar.html">{{ $product['category'] }}</a>
-                                            <div class="cr-star">
-                                                @php
-                                                    $rating = floor($product['rating']);
-                                                    $half = $product['rating'] - $rating >= 0.5;
-                                                    $empty = 5 - $rating - ($half ? 1 : 0);
-                                                @endphp
-                                                @for ($i = 0; $i < $rating; $i++)
-                                                    <i class="ri-star-fill"></i>
-                                                @endfor
-                                                @if ($half)
-                                                    <i class="ri-star-line"></i>
-                                                @endif
-                                                @for ($i = 0; $i < $empty; $i++)
-                                                    <i class="ri-star-line"></i>
-                                                @endfor
-                                                <p>({{ $product['rating'] }})</p>
+
+                    {{-- Tab từng danh mục: 8 sản phẩm mới nhất --}}
+                    @foreach ($categories2 as $category)
+                        <div id="tab-cat-{{ $category->id }}" class="product-tab-content" style="display:none;">
+                            <div class="row mb-minus-24">
+                                @foreach ($category->products as $product)
+                                    <div class="col-xxl-3 col-xl-4 col-6 cr-product-box mb-24">
+                                        <div class="cr-product-card">
+                                            <div class="cr-product-image">
+                                                <div class="cr-image-inner zoom-image-hover">
+                                                    <img src="{{ Storage::url($product->image) }}"
+                                                        alt="{{ $product->name }}">
+                                                </div>
+                                                <div class="cr-side-view">
+                                                    <a href="javascript:void(0)" class="wishlist">
+                                                        <i class="ri-heart-line"></i>
+                                                    </a>
+                                                    <a class="model-oraganic-product" data-bs-toggle="modal"
+                                                        href="#quickview" role="button">
+                                                        <i class="ri-eye-line"></i>
+                                                    </a>
+                                                </div>
+                                                <a class="cr-shopping-bag" href="javascript:void(0)">
+                                                    <i class="ri-shopping-bag-line"></i>
+                                                </a>
+                                            </div>
+                                            <div class="cr-product-details">
+                                                <div class="cr-brand">
+                                                    <a href="#">{{ $category->name }}</a>
+                                                </div>
+                                                <a href="#" class="title">{{ $product->name }}</a>
+
+                                                <p class="cr-price">
+                                                    @if ($variant = $product->productVariants->first())
+                                                        <span class="new-price">
+                                                            {{ number_format($variant->price, 0, ',', '.') }}₫
+                                                        </span>
+                                                    @else
+                                                        <span class="new-price text-muted">Chưa có giá</span>
+                                                    @endif
+                                                </p>
                                             </div>
                                         </div>
-                                        <a href="product-left-sidebar.html" class="title">{{ $product['title'] }}</a>
-                                        <p class="cr-price"><span class="new-price">${{ $product['new'] }}</span>
-                                            <span class="old-price">${{ $product['old'] }}</span>
-                                        </p>
                                     </div>
-                                </div>
+                                @endforeach
                             </div>
-                        @endforeach
+                        </div>
+                    @endforeach
 
-                    </div>
+
                 </div>
             </div>
+
+            <script>
+                function showTab(tabId) {
+                    document.querySelectorAll('.product-tab-content').forEach(el => el.style.display = 'none');
+                    document.getElementById('tab-' + tabId).style.display = 'block';
+                    document.querySelectorAll('.cr-product-tabs ul li').forEach(el => el.classList.remove('active'));
+                    if (tabId === 'all') {
+                        document.querySelector('.cr-product-tabs ul li[data-filter="all"]').classList.add('active');
+                    } else {
+                        document.querySelector('.cr-product-tabs ul li[data-filter=".cat-' + tabId.split('-')[1] + '"]').classList
+                            .add('active');
+                    }
+                }
+                document.addEventListener('DOMContentLoaded', function() {
+                    showTab('all');
+                });
+            </script>
         </div>
     </section>
 
     <!-- Product banner -->
+    @php use Illuminate\Support\Str; @endphp
+
     <section class="section-product-banner padding-b-100">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
                     <div class="cr-banner-slider swiper-container">
                         <div class="swiper-wrapper">
-                            @php
-                                $banners = [
-                                    [
-                                        'img' => '1.jpg',
-                                        'title' => 'Healthy <br> Bakery Products',
-                                        'percent' => '30%',
-                                        'text' => 'on first order',
-                                    ],
-                                    [
-                                        'img' => '2.jpg',
-                                        'title' => 'Fresh <br>Snacks & Sweets',
-                                        'percent' => '20%',
-                                        'text' => 'on first order',
-                                    ],
-                                    [
-                                        'img' => '3.jpg',
-                                        'title' => 'Fresh & healthy <br> Organic Fruits',
-                                        'percent' => '35%',
-                                        'text' => 'on first order',
-                                    ],
-                                ];
-                            @endphp
+                            @foreach ($banners_mix as $banner)
+                                @php
+                                    $imgPath = Str::replaceFirst('storage/', '', $banner->img);
+                                @endphp
+                                <div class="swiper-slide" data-aos="fade-up" data-aos-duration="1000">
+                                    <div class="position-relative rounded overflow-hidden shadow" style="height: 300px;">
 
-                            @foreach ($banners as $banner)
-                                <div class="swiper-slide" data-aos="fade-up" data-aos-duration="2000">
-                                    <div class="cr-product-banner-image">
-                                        <img src="{{ asset('assets_client/assets/img/product-banner/' . $banner['img']) }}"
-                                            alt="product-banner">
-                                        <div class="cr-product-banner-contain">
-                                            <h5>{!! $banner['title'] !!}</h5>
-                                            <p><span class="percent">{{ $banner['percent'] }}</span> Off <span
-                                                    class="text">{{ $banner['text'] }}</span></p>
-                                            <div class="cr-product-banner-buttons">
-                                                <a href="shop-left-sidebar.html" class="cr-button">shop now</a>
-                                            </div>
+                                        {{-- Ảnh banner --}}
+                                        <img src="{{ Storage::url($imgPath) }}" alt="{{ $banner->name }}"
+                                            class="w-100 h-100 object-cover">
+
+                                        {{-- Chữ và nút chồng lên ảnh --}}
+                                        <div class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center text-center text-white p-3"
+                                            style="background: rgba(0, 0, 0, 0.3);">
+                                            <h5 class="fw-bold" style="font-size: 24px;">{!! $banner->name !!}</h5>
+                                            <p>{{ $banner->sub_title ?? '' }}</p>
+                                            <a href="{{ $banner->link ?? '#' }}" class="cr-button mt-2">Shop now</a>
                                         </div>
+
                                     </div>
                                 </div>
                             @endforeach
-
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+
+
+
+
 
 
     <!-- Services -->
@@ -644,32 +486,48 @@
     </section>
 
     <!-- Deal -->
-    <section class="section-deal padding-b-100">
-        <div class="bg-banner-deal">
-            <div class="container">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="cr-deal-rightside">
-                            <div class="cr-deal-content" data-aos="fade-up" data-aos-duration="2000">
-                                <span><code>35%</code> OFF</span>
-                                <h4 class="cr-deal-title">Great deal on organic food.</h4>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do maecenas accumsan
-                                    lacus vel facilisis.</p>
-                                <div id="timer" class="cr-counter">
-                                    <div class="cr-counter-inner">
-                                        <h4><span id="days"></span> Days</h4>
-                                        <h4><span id="hours"></span> Hrs</h4>
-                                        <h4><span id="minutes"></span> Min</h4>
-                                        <h4><span id="seconds"></span> Sec</h4>
-                                    </div>
+  <section class="section-deal padding-b-100">
+ <div class="bg-banner-deal"
+     style="background-image: url('{{ Storage::url(Str::replaceFirst('storage/', '', $dealBanner->img)) }}');
+            background-size: cover;
+            background-position: center;
+            height: 600px;">
+
+
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="cr-deal-rightside">
+                        <div class="cr-deal-content text-white" data-aos="fade-up" data-aos-duration="2000">
+                            {{-- <span>
+                                <code>{{ $dealBanner->discount ?? '35' }}%</code> OFF
+                            </span> --}}
+                            <h4 class="cr-deal-title">
+                                {{ $dealBanner->name ?? 'Great deal on organic food.' }}
+                            </h4>
+                            <p>
+                                {{ $dealBanner->description ?? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do maecenas accumsan lacus vel facilisis.' }}
+                            </p>
+                            <div id="timer" class="cr-counter">
+                                <div class="cr-counter-inner d-flex gap-3">
+                                    <h4><span id="days"></span> Days</h4>
+                                    <h4><span id="hours"></span> Hrs</h4>
+                                    <h4><span id="minutes"></span> Min</h4>
+                                    <h4><span id="seconds"></span> Sec</h4>
                                 </div>
                             </div>
-                        </div>
-                    </div>
+                        </div> <!-- /.cr-deal-content -->
+                    </div> <!-- /.cr-deal-rightside -->
                 </div>
             </div>
         </div>
-    </section>
+    </div> <!-- /.bg-banner-deal -->
+</section>
+
+
+
+
+
 
     <!-- Popular product -->
     <section class="section-popular margin-b-100">
@@ -677,13 +535,13 @@
             <div class="row">
                 <div class="col-xxl-7 col-xl-6 col-lg-6 col-md-12" data-aos="fade-up" data-aos-duration="2000">
                     <div class="cr-twocolumns-product">
-                        @foreach (['9.jpg', '10.jpg', '1.jpg', '2.jpg', '3.jpg'] as $index => $image)
+                        @foreach ($products as $product)
                             <div class="slick-slide">
                                 <div class="cr-product-card">
                                     <div class="cr-product-image">
                                         <div class="cr-image-inner zoom-image-hover">
-                                            <img src="{{ asset('assets_client/assets/img/product/' . $image) }}"
-                                                alt="product-{{ $index + 1 }}">
+                                            <img src="{{ asset('storage/' . $product->image) }}"
+                                                alt="{{ $product->name }}">
                                         </div>
                                         <div class="cr-side-view">
                                             <a href="javascript:void(0)" class="wishlist"><i
@@ -699,22 +557,28 @@
                                     </div>
                                     <div class="cr-product-details">
                                         <div class="cr-brand">
-                                            <a href="shop-left-sidebar.html">Snacks</a>
+                                            <a
+                                                href="shop-left-sidebar.html">{{ $product->category->name ?? 'Category' }}</a>
                                             <div class="cr-star">
                                                 <i class="ri-star-fill"></i>
                                                 <i class="ri-star-fill"></i>
                                                 <i class="ri-star-fill"></i>
                                                 <i class="ri-star-fill"></i>
-                                                <i class="{{ $index % 2 == 0 ? 'ri-star-line' : 'ri-star-fill' }}"></i>
-                                                <p>({{ $index % 2 == 0 ? '4.5' : '5.0' }})</p>
+                                                <i class="ri-star-line"></i>
+                                                <p>(4.0)</p>
                                             </div>
                                         </div>
                                         <a href="product-left-sidebar.html" class="title">
-                                            {{ $index % 2 == 0 ? 'Best snakes with hazel nut mix pack 200gm' : 'Sweet snakes crunchy nut mix 250gm pack' }}
+                                            {{ $product->name }}
                                         </a>
                                         <p class="cr-price">
-                                            <span class="new-price">${{ $index % 2 == 0 ? '120.25' : '100.00' }}</span>
-                                            <span class="old-price">${{ $index % 2 == 0 ? '123.25' : '110.00' }}</span>
+                                            @if ($variant = $product->productVariants->first())
+                                                <span class="new-price">
+                                                    {{ number_format($variant->price, 0, ',', '.') }}₫
+                                                </span>
+                                            @else
+                                                <span class="new-price text-muted">Chưa có giá</span>
+                                            @endif
                                         </p>
                                     </div>
                                 </div>
@@ -724,20 +588,29 @@
                 </div>
 
                 <div class="col-xxl-5 col-xl-6 col-lg-6 col-md-12" data-aos="fade-up" data-aos-duration="2000">
-                    <div class="cr-products-rightbar">
-                        <img src="{{ asset('assets_client/assets/img/product/products-rightview.jpg') }}"
-                            alt="products-rightview">
-                        <div class="cr-products-rightbar-content">
-                            <h4>Organic & Healthy <br> Vegetables</h4>
-                            <div class="cr-off">
-                                <span>25% <code>OFF</code></span>
+                    <div class="cr-products-rightbar position-relative overflow-hidden rounded shadow">
+                        @if ($banner12)
+                            {{-- Ảnh banner từ DB --}}
+                            <img src="{{ asset('storage/' . str_replace('storage/', '', $imgPath)) }}"
+                                alt="{{ $banner12->name }}">
+
+                            {{-- Nội dung chèn lên ảnh --}}
+                            <div class="cr-products-rightbar-content position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-start text-white p-4"
+                                style="background: rgba(0, 0, 0, 0.3);">
+                                <h4>{!! $banner12->name !!}</h4>
+                                <div class="cr-off">
+                                    <span>{{ $banner12->discount ?? '25%' }} <code>OFF</code></span>
+                                </div>
+                                <div class="rightbar-buttons mt-2">
+                                    <a href="{{ $banner12->link ?? '#' }}" class="cr-button">Shop Now</a>
+                                </div>
                             </div>
-                            <div class="rightbar-buttons">
-                                <a href="shop-left-sidebar.html" class="cr-button">shop now</a>
-                            </div>
-                        </div>
+                        @else
+                            <p class="text-danger">Banner with priority 12 not found.</p>
+                        @endif
                     </div>
                 </div>
+
             </div>
         </div>
     </section>
@@ -762,69 +635,29 @@
                 <div class="col-lg-12">
                     <div class="cr-testimonial-slider swiper-container">
                         <div class="swiper-wrapper cr-testimonial-pt-50">
-                            <div class="swiper-slide" data-aos="fade-up" data-aos-duration="2000">
-                                <div class="cr-testimonial">
-                                    <div class="cr-testimonial-image">
-                                        <img src="{{ asset('assets_client/assets/img/testimonial/1.jpg') }}"
-                                            alt="businessman">
-                                    </div>
-                                    <div class="cr-testimonial-inner">
-                                        <span>Co Founder</span>
-                                        <h4 class="title">Stephen Smith</h4>
-                                        <p>“eiusmpsu dolor sit amet, conse cte tur ng elit, sed do eiusmod tem lacus vel
-                                            facilisis.”</p>
-                                        <div class="cr-star">
-                                            <i class="ri-star-fill"></i>
-                                            <i class="ri-star-fill"></i>
-                                            <i class="ri-star-fill"></i>
-                                            <i class="ri-star-fill"></i>
-                                            <i class="ri-star-fill"></i>
+                            @foreach ($reviews as $review)
+                                <div class="swiper-slide" data-aos="fade-up" data-aos-duration="2000">
+                                    <div class="cr-testimonial">
+                                        <div class="cr-testimonial-image">
+                                            <img src="{{ Storage::url(\Illuminate\Support\Str::replaceFirst('storage/', '', $review->user->image)) }}"
+                                                alt="{{ $review->user->name ?? 'User' }}">
+
+                                        </div>
+                                        <div class="cr-testimonial-inner">
+                                            <span>{{ $review->user->email ?? 'User' }}</span>
+                                            <h4 class="title">{{ $review->title }}</h4>
+                                            <p>“{{ $review->content }}”</p>
+                                            <div class="cr-star">
+                                                @for ($i = 1; $i <= 5; $i++)
+                                                    <i class="ri-star{{ $i <= $review->rating ? '-fill' : '-line' }}"></i>
+                                                @endfor
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="swiper-slide" data-aos="fade-up" data-aos-duration="2000">
-                                <div class="cr-testimonial">
-                                    <div class="cr-testimonial-image">
-                                        <img src="{{ asset('assets_client/assets/img/testimonial/2.jpg') }}"
-                                            alt="businessman">
-                                    </div>
-                                    <div class="cr-testimonial-inner">
-                                        <span>Manager</span>
-                                        <h4 class="title">Lorem Robinson</h4>
-                                        <p>“eiusmpsu dolor sit amet, conse cte tur ng elit, sed do eiusmod tem lacus vel
-                                            facilisis.”</p>
-                                        <div class="cr-star">
-                                            <i class="ri-star-fill"></i>
-                                            <i class="ri-star-fill"></i>
-                                            <i class="ri-star-fill"></i>
-                                            <i class="ri-star-fill"></i>
-                                            <i class="ri-star-line"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide" data-aos="fade-up" data-aos-duration="2000">
-                                <div class="cr-testimonial">
-                                    <div class="cr-testimonial-image">
-                                        <img src="{{ asset('assets_client/assets/img/testimonial/3.jpg') }}"
-                                            alt="businessman">
-                                    </div>
-                                    <div class="cr-testimonial-inner">
-                                        <span>Team Leader</span>
-                                        <h4 class="title">Saddika Alard</h4>
-                                        <p>“eiusmpsu dolor sit amet, conse cte tur ng elit, sed do eiusmod tem lacus vel
-                                            facilisis.”</p>
-                                        <div class="cr-star">
-                                            <i class="ri-star-fill"></i>
-                                            <i class="ri-star-fill"></i>
-                                            <i class="ri-star-fill"></i>
-                                            <i class="ri-star-fill"></i>
-                                            <i class="ri-star-fill"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            @endforeach
+
+
                         </div>
                     </div>
                 </div>
@@ -842,76 +675,42 @@
                             <h2>Latest News</h2>
                         </div>
                         <div class="cr-banner-sub-title">
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-                                ut labore lacus vel facilisis. </p>
+                            <p>Tin tức mới nhất được cập nhật mỗi ngày.</p>
                         </div>
                     </div>
                 </div>
             </div>
+
             <div class="row">
                 <div class="col-lg-12">
                     <div class="cr-blog-slider swiper-container">
                         <div class="swiper-wrapper">
-                            <div class="swiper-slide" data-aos="fade-up" data-aos-duration="2000">
-                                <div class="cr-blog">
-                                    <div class="cr-blog-content">
-                                        <span><code>By Admin</code> | <a href="blog-left-sidebar.html">Snacks</a></span>
-                                        <h5>Urna pretium elit mauris cursus at elit Vestibulum.</h5>
-                                        <a class="read" href="blog-detail-left-sidebar.html">Read More</a>
-                                    </div>
-                                    <div class="cr-blog-image">
-                                        <img src="{{ asset('assets_client/assets/img/blog/2.jpg') }}" alt="blog-2">
-                                        <div class="cr-blog-date">
-                                            <span>10 <code>oct</code></span>
+                            @foreach ($blogs as $blog)
+                                <div class="swiper-slide" data-aos="fade-up" data-aos-duration="2000">
+                                    <div class="cr-blog">
+                                        <div class="cr-blog-content">
+                                            <span>
+                                                <code>By {{ $blog->author->name ?? 'Admin' }}</code> |
+                                                <a href="#">{{ $blog->category->name ?? 'Uncategorized' }}</a>
+                                            </span>
+                                            <h5>{{ $blog->title }}</h5>
+                                            <a class="read" href="">Read More</a>
+                                        </div>
+
+                                        <div class="cr-blog-image">
+                                            <img src="{{ Storage::url(\Illuminate\Support\Str::replaceFirst('storage/', '', $blog->thumbnail)) }}"
+                                                alt="{{ $blog->title }}">
+                                            <div class="cr-blog-date">
+                                                <span>
+                                                    {{ optional($blog->created_at)->format('d') }}
+                                                    <code>{{ optional($blog->created_at)->format('M') }}</code>
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="swiper-slide" data-aos="fade-up" data-aos-duration="2000">
-                                <div class="cr-blog">
-                                    <div class="cr-blog-content">
-                                        <span><code>By Admin</code> | <a href="blog-left-sidebar.html">Food</a></span>
-                                        <h5>Best guide to Shopping for organic ingredients.</h5>
-                                        <a class="read" href="blog-detail-left-sidebar.html">Read More</a>
-                                    </div>
-                                    <div class="cr-blog-image">
-                                        <img src="{{ asset('assets_client/assets/img/blog/1.jpg') }}" alt="blog-1">
-                                        <div class="cr-blog-date">
-                                            <span>09 <code>sep</code></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide" data-aos="fade-up" data-aos-duration="2000">
-                                <div class="cr-blog">
-                                    <div class="cr-blog-content">
-                                        <span><code>By Admin</code> | <a href="blog-left-sidebar.html">Snacks</a></span>
-                                        <h5>Cursus at elit vestibulum urna pretium elit mauris.</h5>
-                                        <a class="read" href="blog-detail-left-sidebar.html">Read More</a>
-                                    </div>
-                                    <div class="cr-blog-image">
-                                        <img src="{{ asset('assets_client/assets/img/blog/3.jpg') }}" alt="blog-2">
-                                        <div class="cr-blog-date">
-                                            <span>12 <code>oct</code></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide" data-aos="fade-up" data-aos-duration="2000">
-                                <div class="cr-blog">
-                                    <div class="cr-blog-content">
-                                        <span><code>By Admin</code> | <a href="blog-left-sidebar.html">Vegetable</a></span>
-                                        <h5>Condimentum Nam enim bestMorbi odio sodales.</h5>
-                                        <a class="read" href="blog-detail-left-sidebar.html">Read More</a>
-                                    </div>
-                                    <div class="cr-blog-image">
-                                        <img src="{{ asset('assets_client/assets/img/blog/2.jpg') }}" alt="blog-3">
-                                        <div class="cr-blog-date">
-                                            <span>22 <code>jan</code></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            @endforeach
+
                         </div>
                     </div>
                 </div>
