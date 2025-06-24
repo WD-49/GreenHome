@@ -1,7 +1,12 @@
 <?php
 
+use Dom\Comment;
+use App\Jobs\SendTestMailJob;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
+use App\Http\Controllers\admin\BlogController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\admin\BrandController;
 use App\Http\Controllers\admin\OrderController;
 use App\Http\Controllers\client\HomeController;
@@ -9,23 +14,34 @@ use App\Http\Controllers\client\HomeController;
 use App\Http\Controllers\client\ProductClientController;
 use App\Http\Controllers\Client\ShopController;
 use App\Http\Controllers\admin\BannerController;
+use App\Http\Controllers\admin\ReviewController;
 use App\Http\Controllers\admin\CommentController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\admin\CategoryController;
 use App\Http\Controllers\admin\DiscountController;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\admin\AttributeController;
 use App\Http\Controllers\admin\DashboardController;
+
 use App\Http\Controllers\admin\OrderStatusController;
+use App\Http\Controllers\Admin\BlogCategoryController;
+
+use App\Http\Controllers\Auth\ResetPasswordController;
+
 use App\Http\Controllers\admin\PaymentMethodController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\admin\AttributeValueController;
 use App\Http\Controllers\admin\Product\ProductController;
 use App\Http\Controllers\admin\Account\AccountAdminController;
 use App\Http\Controllers\admin\Account\AccountUsersController;
+use App\Http\Controllers\admin\Product\ProductVariantController;
 use App\Http\Controllers\admin\BlogController;
 use App\Http\Controllers\admin\CategoryController;
 use App\Http\Controllers\admin\Product\ProductVariantController;
 use App\Http\Controllers\admin\ReviewController;
 use App\Http\Controllers\Admin\BlogCategoryController;
 use Dom\Comment;
+use App\Http\Controllers\client\BlogController as ClientBlogController;
 
 // route của trang client
 
@@ -36,9 +52,25 @@ Route::get('/products/category-id/{id}', [ProductController::class, 'getProducts
 
 // viết tiếp route của các trang tại đây
 // // Route::get('/blog', [HomeController::class, 'blog'])->name('blog'); ví dụ.
-use App\Http\Controllers\client\BlogController as ClientBlogController;
+
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
+Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('/register', [RegisterController::class, 'register']);
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::get('/password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+
+// Route::get('/password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+// Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('forgot-password.form');
+Route::post('/forgot-password', [ForgotPasswordController::class, 'handle'])->name('forgot-password.handle');
+
+// Auth::routes();// Route cho Registers, Login, Logout... (Laravel UI)
+
 // route của trang admin
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
 
     Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login-submit', [AdminAuthController::class, 'login'])->name('login.submit');
@@ -318,7 +350,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
         });
     });
-// });
+
+});
+
+
+
+
 
 
 // route của trang client
@@ -333,3 +370,4 @@ Route::get('/san-pham/{slug}', [ProductClientController::class, 'show'])->name('
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 
 Route::get('/blog/{slug}', [App\Http\Controllers\client\BlogDetailController::class, 'show'])->name('blog.detail');
+

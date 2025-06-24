@@ -26,17 +26,25 @@
                                 <i class="ri-user-3-line"></i>
                                 <span>Account</span>
                             </a>
+                            
                             <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="register.html">Register</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="checkout.html">Checkout</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="login.html">Login</a>
-                                </li>
+                                @guest
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('register') }}">Đăng ký</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('login') }}">Đăng nhập</a>
+                                    </li>
+                                @else
+                                    <li>
+                                        <form action="{{ route('logout') }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="dropdown-item">Đăng xuất</button>
+                                        </form>
+                                    </li>
+                                @endguest
                             </ul>
+
                         </li>
                     </ul>
                     <a href="wishlist.html" class="cr-right-bar-item">
