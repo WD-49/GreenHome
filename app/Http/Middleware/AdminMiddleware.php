@@ -9,21 +9,17 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AdminMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check()) {
-            // Nếu chưa đăng nhập, redirect về route login admin
-            return redirect()->route('admin.login');
+        if (!Auth::check()) {
+            // Chưa đăng nhập
+            return redirect()->route('login')->with('error', 'Vui lòng đăng nhập');
         }
 
-        if (auth()->user()->role !== 'admin') {
-            return redirect()->route('admin.login');
-
+        if (Auth::user()->role !== 'admin') {
+            // Không phải admin
+            Auth::logout(); // đề phòng client đang login
+            return redirect()->route('login')->with('error', 'Bạn không có quyền truy cập');
         }
 
         return $next($request);

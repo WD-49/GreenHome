@@ -42,7 +42,7 @@ class ProductVariant extends Model
     // Quan hệ với product_variant_values (1-nhiều)
     public function productVariantValues()
     {
-        return $this->hasMany(ProductVariantValue::class);
+        return $this->hasMany(ProductVariantValue::class)->whereNull('deleted_at');
     }
     //quan hệ với user (nhiều-nhiều)
     public function users()

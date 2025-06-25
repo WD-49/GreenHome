@@ -71,4 +71,9 @@ class User extends Authenticatable
             }
         });
     }
+
+    public function sendPasswordResetNotification($token)
+    {
+        // Ghi đè để không gửi email mặc định của Laravel
+    }
 }

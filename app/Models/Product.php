@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 
 class Product extends Model
 {
@@ -60,6 +61,35 @@ class Product extends Model
     }
 
 
+    public function getReviewsAvgRatingAttribute()
+    {
+        $variants = $this->productVariants;
+
+        if ($variants->isEmpty()) {
+            return null;
+        }
+
+        $total = 0;
+        $count = 0;
+
+        foreach ($variants as $variant) {
+            foreach ($variant->reviews as $review) {
+                $total += $review->rating;
+                $count++;
+            }
+        }
+
+        return $count > 0 ? round($total / $count, 1) : null;
+    }
+
+    public function getReviewsCountAttribute()
+    {
+        return $this->productVariants->flatMap(function ($variant) {
+            return $variant->reviews;
+        })->count();
+    }
+
+
     protected static function booted()
     {
         // Xử lý khi xóa mềm Product
@@ -100,5 +130,16 @@ class Product extends Model
         }
 
         return $query;
+    }
+    public function reviews()
+    {
+        return $this->hasManyThrough(
+            Review::class,
+            ProductVariant::class,
+            'product_id', // Foreign key trên bảng product_variants
+            'product_variant_id', // Foreign key trên bảng reviews  
+            'id', // Local key trên bảng products
+            'id' // Local key trên bảng product_variants
+        );
     }
 }

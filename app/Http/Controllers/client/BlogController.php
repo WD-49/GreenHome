@@ -9,20 +9,29 @@ use Illuminate\Http\Request;
 
 class BlogController extends Controller
 {
-    public function index($slugCategory = null)
+    public function index(Request $request, $slugCategory = null)
     {
-        $blogs = Blog::paginate(2);
+        $query = Blog::query();
         if ($slugCategory) {
             $category = BlogCategory::where('slug', $slugCategory)->firstOrFail();
-            $blogs = Blog::where('blog_category_id', $category->id)->latest()->paginate(6);
+            $query->where('blog_category_id', $category->id);
         } else {
             $category = null;
-            $blogs = Blog::latest()->paginate(2);
         }
+        if ($request->filled('search')) {
+            $keyword = $request->input('search');
+            $query->where(function ($q) use ($keyword) {
+                $q->where('title', 'like', "%$keyword%")
+                    ->orWhere('summary', 'like', "%$keyword%");
+            });
+        }
+        $blogs = $query->latest()->paginate(6)->appends($request->all());
         $newBlog = Blog::orderBy('created_at', 'desc')->first();
-        $blogCategories = BlogCategory::all();
-        return view('client.pages.blogCategory', compact('blogCategories', 'newBlog', 'blogs'));
+        $blogCategories = BlogCategory::withCount('blogs')->get();
+
+        return view('client.pages.blogCategory', compact('blogCategories', 'newBlog', 'blogs', 'category'));
     }
+
     public function show($slug)
     {
         $blog = Blog::where('slug', $slug)->firstOrFail();
