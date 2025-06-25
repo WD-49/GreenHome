@@ -18,14 +18,21 @@ class BlogController extends Controller
         } else {
             $category = null;
         }
+
         if ($request->filled('search')) {
             $keyword = $request->input('search');
             $query->where(function ($q) use ($keyword) {
                 $q->where('title', 'like', "%$keyword%")
                     ->orWhere('summary', 'like', "%$keyword%");
             });
+            if ($request->sort === 'oldest') {
+                $query->orderBy('created_at', 'asc');
+            } else {
+                // Mặc định hoặc newest
+                $query->orderBy('created_at', 'desc');
+            }
         }
-        $blogs = $query->latest()->paginate(6)->appends($request->all());
+        $blogs = $query->paginate(6)->appends($request->all());
         $newBlog = Blog::orderBy('created_at', 'desc')->first();
         $blogCategories = BlogCategory::withCount('blogs')->get();
 
