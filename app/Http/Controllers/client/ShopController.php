@@ -7,63 +7,82 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Brand;
 use Illuminate\Http\Request;
+use App\Models\AttributeValue;
 
 class ShopController extends Controller
 {
     public function index(Request $request)
-    {
-        // Lấy các tham số lọc từ request
-        $sort = $request->input('sort', 'latest');
-        $selectedCategories = (array) $request->input('categories', []);
-        $brandId = $request->input('brand_id');
+{
+    $productsQuery = Product::query()
+        ->with(['brand', 'productVariants.productVariantValues', 'productVariants.reviews'])
+        ->where('status', 1);
 
-        // Lấy danh sách danh mục và thương hiệu kèm số lượng sản phẩm
-        $categories = Category::withCount('products')->get();
-        $brands = Brand::withCount('products')->get();
-
-        // Khởi tạo query sản phẩm
-        $productsQuery = Product::with([
-            'productVariants' => function ($q) {
-                $q->whereNotNull('price');
-            },
-            'brand'
-        ])->where('status', 1);
-
-        // Lọc theo danh mục nếu có
-        if (!empty(array_filter($selectedCategories))) {
+   // Lọc danh mục
+$selectedCategories = array_filter($request->input('categories', []));
+if (!empty($selectedCategories)) {
     $productsQuery->whereIn('category_id', $selectedCategories);
 }
 
+// Lọc thương hiệu
+$selectedBrandId = $request->input('brand_id');
+if (!empty($selectedBrandId)) {
+    $productsQuery->where('brand_id', $selectedBrandId);
+}
 
-        // Lọc theo thương hiệu nếu có
-        if (!empty($brandId)) {
-            $productsQuery->where('brand_id', $brandId);
+
+    // Lọc theo biến thể
+    if ($request->filled('attribute_values')) {
+        $attributeValueIds = $request->input('attribute_values');
+
+        // Cần lọc theo tất cả các thuộc tính được chọn
+        foreach ($attributeValueIds as $valueId) {
+            $productsQuery->whereHas('productVariants.productVariantValues', function ($q) use ($valueId) {
+                $q->where('attribute_value_id', $valueId);
+            });
         }
-
-        // Sắp xếp theo lựa chọn
-        switch ($sort) {
-            case 'oldest':
-                $productsQuery->orderBy('date_of_entry', 'asc');
-                break;
-            case 'hot':
-                $productsQuery->orderBy('view', 'desc');
-                break;
-            default:
-                $productsQuery->orderBy('date_of_entry', 'desc');
-                break;
-        }
-
-        // Phân trang kết quả
-        $products = $productsQuery->paginate(12)->withQueryString();
-
-        // Trả về view với tất cả dữ liệu cần thiết
-        return view('client.pages.shop', compact(
-            'products',
-            'sort',
-            'categories',
-            'brands',
-            'selectedCategories',
-            'brandId'
-        ));
     }
+
+    // Lọc theo khoảng giá
+   // ✅ Lọc theo khoảng giá (price nằm trong productVariants)
+$min = $request->input('min_price');
+$max = $request->input('max_price');
+
+if ($min !== null || $max !== null) {
+    $min = is_numeric($min) ? floatval($min) : 0;
+    $max = is_numeric($max) && floatval($max) > 0 ? floatval($max) : 1000000000;
+
+    // Nếu người dùng nhập nhầm min > max thì hoán đổi
+    if ($min > $max) {
+        [$min, $max] = [$max, $min];
+    }
+
+    $productsQuery->whereHas('productVariants', function ($q) use ($min, $max) {
+        $q->whereBetween('price', [$min, $max]);
+    });
+}
+
+
+    // Sắp xếp
+    switch ($request->input('sort')) {
+        case 'oldest':
+            $productsQuery->oldest();
+            break;
+        case 'hot':
+            $productsQuery->orderByDesc('view');
+            break;
+        default:
+            $productsQuery->latest();
+    }
+
+    // Kết quả
+    $products = $productsQuery->paginate(12);
+
+    // Dữ liệu cho filter
+    $categories = Category::withCount('products')->get();
+    $brands = Brand::withCount('products')->get();
+    $attributeValues = AttributeValue::with('attribute')->get();
+
+    return view('client.pages.shop', compact('products', 'categories', 'brands', 'attributeValues'));
+}
+
 }
