@@ -70,20 +70,26 @@
                     @endphp
 
                     <div class="cr-size-and-weight">
-                        <div class="cr-review-star">
-                            <div class="cr-star">
+                        <div class="cr-review-star d-flex align-items-center mb-3">
+                            <div class="cr-star d-flex align-items-center">
                                 @for ($i = 1; $i <= 5; $i++)
-                                    <i class="ri-star-{{ $i <= $avgRating ? 'fill' : 'line' }}"></i>
+                                    <i class="ri-star-{{ $i <= round($avgRating) ? 'fill' : 'line' }}"
+                                        style="color: #ffc107; font-size: 20px; margin-right: 2px;"></i>
                                 @endfor
                             </div>
-                            <p>({{ $totalReviews }} lượt đánh giá | {{ $avgRating }}★ | {{ $totalStar }} sao tổng)
-                            </p>
+                            <span class="ms-2" style="font-size: 14px; color: #333;">
+                                <strong>{{ number_format($avgRating, 1) }}★</strong>
+                                từ <strong>{{ $totalReviews }}</strong> đánh giá
+                                (<strong>{{ $totalStar }}</strong> sao tổng)
+                            </span>
                         </div>
+
+
                         <div class="list">
                             <ul>
                                 <li><label>Thương Hiệu <span>:</span></label>{{ $product->brand->name ?? '' }}</li>
                                 <li><label>Danh Mục <span>:</span></label>{{ $product->category->name ?? '' }}</li>
-                                <li><label>Số lượng <span>:</span></label>{{ $totalQuantity ?? 'N/A' }}</li>
+                                <li><label>Tổng số lượng <span>:</span></label>{{ $totalQuantity ?? 'N/A' }}</li>
                                 <li><label>Lượt xem <span>:</span></label>{{ $product->view ?? 0 }}</li>
                             </ul>
                         </div>
@@ -108,7 +114,8 @@
                                     <ul>
                                         @foreach ($product->productVariants as $index => $variant)
                                             <li class="variant-option{{ $index == 0 ? ' active-color' : '' }}"
-                                                data-price="{{ $variant->price }}"
+                                                data-id="{{ $variant->id }}" data-price="{{ $variant->price }}"
+                                                data-quantity="{{ $variant->quantity }}"
                                                 data-image="{{ asset('storage/' . $variant->image) }}">
                                                 {{ $variant->attribute_name }}
                                             </li>
@@ -116,6 +123,7 @@
                                     </ul>
                                 </div>
                             </div>
+                            <div id="variant-stock" class="mt-2" style="color: #28a745; font-weight: 500;"></div>
                         @endif
 
                         <div class="cr-add-card">
@@ -139,10 +147,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- TAB -->
-            <div class="row" data-aos="fade-up" data-aos-duration="2000" data-aos-delay="600">
+                <div class="row" data-aos="fade-up" data-aos-duration="2000" data-aos-delay="600">
                 <div class="col-12 pt-5">
                     <div class="cr-paking-delivery">
                         <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -192,7 +197,7 @@
                                                 </div>
                                             </div>
                                             @if ($review->title)
-                                                <h5>{{ $review->title }}</h5>
+                                                <p>{{ $review->title }}</p>
                                             @endif
                                             @if ($review->content)
                                                 <p>{{ $review->content }}</p>
@@ -273,7 +278,10 @@
                 </div>
             </div>
 
+
+            </div>
         </div>
+        
     </section>
 
     <!-- Related Products -->
@@ -298,8 +306,7 @@
                                 <div class="cr-brand">
                                     <a href="#">{{ $item->category->name ?? '' }}</a>
                                 </div>
-                                <a href="{{ route('productDetail', $item->slug) }}"
-                                    class="title">{{ $item->name }}</a>
+                                <a href="{{ route('productDetail', $item->slug) }}" class="title">{{ $item->name }}</a>
                                 @php
                                     $prices = $item->productVariants->pluck('price')->filter();
                                     $minPrice = $prices->min();
@@ -315,6 +322,7 @@
                                         Liên hệ
                                     @endif
                                 </p>
+
                             </div>
                         </div>
                     </div>
@@ -326,16 +334,29 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                document.querySelectorAll('.variant-option').forEach(function(li) {
-                    li.addEventListener('click', function() {
+                const variantOptions = document.querySelectorAll('.variant-option');
+                const stockDisplay = document.getElementById('variant-stock');
+                const priceDisplay = document.getElementById('variant-price');
+
+                variantOptions.forEach(function(option) {
+                    option.addEventListener('click', function() {
                         document.querySelectorAll('.variant-option').forEach(e => e.classList.remove(
                             'active-color'));
                         this.classList.add('active-color');
-                        let gia = Number(this.dataset.price);
-                        document.getElementById('variant-price').textContent = gia.toLocaleString(
-                            'vi-VN') + '₫';
+
+                        const quantity = parseInt(this.getAttribute('data-quantity'));
+                        const price = parseFloat(this.getAttribute('data-price'));
+
+                        stockDisplay.innerHTML = quantity > 0 ?
+                            `Còn ${quantity} sản phẩm` :
+                            '<span style="color:red">Hết hàng</span>';
+
+                        priceDisplay.textContent = price.toLocaleString('vi-VN') + '₫';
                     });
                 });
+
+                const first = document.querySelector('.variant-option');
+                if (first) first.click();
             });
         </script>
     @endpush
