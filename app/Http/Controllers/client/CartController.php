@@ -3,6 +3,7 @@
 
 namespace App\Http\Controllers\client;
 
+use Log;
 use App\Models\Cart;
 use App\Models\CartItem;
 use Illuminate\Http\Request;
@@ -64,7 +65,6 @@ class CartController extends Controller
             }
 
             // Cập nhật tổng tiền cart
-            $cart->total_amount = $cart->items()->sum('total_price');
             $cart->save();
 
 
@@ -96,5 +96,59 @@ class CartController extends Controller
         $cartItem->save();
 
         return response()->json(['success' => true]);
+    }
+
+    public function deleteMultiple(Request $request)
+    {
+        if (!Auth::check()) {
+            return response()->json(['success' => false, 'message' => 'Chưa đăng nhập']);
+        }
+
+        $ids = $request->input('ids');
+
+        if (!is_array($ids) || empty($ids)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dữ liệu không hợp lệ!',
+            ]);
+        }
+
+        // Lấy danh sách cart_id của user hiện tại
+        $cartIds = Cart::where('user_id', Auth::id())->pluck('id')->toArray();
+
+        if (empty($cartIds)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy giỏ hàng của người dùng.',
+            ]);
+        }
+
+        // Lấy cart_id các cart_items sẽ bị xóa
+        $affectedCartIds = CartItem::whereIn('id', $ids)
+            ->whereIn('cart_id', $cartIds)
+            ->pluck('cart_id')
+            ->unique()
+            ->toArray();
+
+        // Xóa cứng các cart_items có id nằm trong danh sách và cart_id thuộc user đó
+        $deleted = CartItem::whereIn('id', $ids)
+            ->whereIn('cart_id', $cartIds)
+            ->forceDelete();
+
+        foreach ($affectedCartIds as $cartId) {
+            $cart = Cart::find($cartId);
+            if (!$cart) continue;
+
+            $totalAmount = $cart->items()->sum('total_price') ?? 0;
+
+            // Cập nhật total_amount
+            $cart->total_amount = $totalAmount;
+            $cart->save();
+        }
+
+        return response()->json([
+            'success' => $deleted > 0,
+            'message' => $deleted > 0 ? null : 'Không thể xoá sản phẩm!',
+        ]);
     }
 }

@@ -362,8 +362,12 @@ Route::get('/san-pham/{slug}', [ProductClientController::class, 'show'])->name('
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 
 // giỏ hàng
-Route::get('/cart/data', [CartController::class, 'getCartData'])->name('cart.data');
-Route::post('/cart/add', [CartController::class, 'addToCart'])->middleware('auth')->name('cart.add');
-Route::get('/cart/view', [CartController::class, 'viewCart'])->middleware('auth')->name('cart.view');
-Route::post('/cart/updateQuantity/{id}', [CartController::class, 'updateQuantity'])->name('cart.updateQuantity');
+route::prefix('cart')->middleware('auth')->name('cart.')->group(function () {
+    Route::get('/', [CartController::class, 'viewCart'])->name('view');
+    Route::get('/data', [CartController::class, 'getCartData'])->name('data');
+    Route::post('/add', [CartController::class, 'addToCart'])->name('add');
+    Route::post('/update-quantity/{id}', [CartController::class, 'updateQuantity'])->name('updateQuantity');
+    Route::post('/delete-multiple', [CartController::class, 'deleteMultiple'])->name('deleteMultiple');
+});
+
 Route::get('/blog/{slug}', [App\Http\Controllers\client\BlogDetailController::class, 'show'])->name('blog.detail');

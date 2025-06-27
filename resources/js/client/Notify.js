@@ -14,5 +14,5 @@ window.showNotify = function (message, type = 'success') {
     notify.style.display = 'block';
     setTimeout(() => {
         notify.style.display = 'none';
-    }, 2000);
+    }, 4000);
 }

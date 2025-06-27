@@ -2,6 +2,7 @@
 
 @section('content')
     <!-- Breadcrumb -->
+
     <section class="section-breadcrumb">
         <div class="cr-breadcrumb-image">
             <div class="container">
@@ -30,11 +31,13 @@
                                     <table>
                                         <thead>
                                             <tr>
-                                                <th>Product</th>
-                                                <th>Price</th>
-                                                <th class="text-center">Quantity</th>
-                                                <th>Total</th>
-                                                <th>Action</th>
+                                                <th><input type="checkbox" id="select-all"></th>
+                                                <th>Sản phẩm</th>
+                                                <th>Loại</th>
+                                                <th>Giá</th>
+                                                <th class="text-center">Số lượng</th>
+                                                <th>Tổng giá</th>
+                                                <th></th>
                                             </tr>
                                         </thead>
                                         <tbody id="cart-body">
@@ -46,10 +49,15 @@
                                     <div class="col-lg-12">
                                         <div class="cr-cart-update-bottom">
                                             <a href="{{ route('shop.index') }}" class="cr-links">Tiếp tục mua sắm</a>
-                                            <a href="" class="cr-button">Thanh toán</a>
+                                            <a href="" id="checkout-selected" class="cr-button">Thanh toán</a>
+                                            <div class="cr-btn-ds" data-aos="fade-up" data-aos-duration="2000"
+                                                data-aos-delay="400">
+                                                <button type="button" id="delete-selected" class="btn btn-danger">Xoá mục
+                                                    đã
+                                                    chọn</button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
                             </form>
                         </div>
                         <div id="cart-empty" style="display: none;" class="text-center">
@@ -97,11 +105,15 @@
 
                         html += `
                         <tr data-id="${item.id}" data-price="${price}">
+                        <td><input type="checkbox" class="cart-checkbox" value="${item.id}"></td>
                             <td class="cr-cart-name">
-                                <a href="/product/${product.slug}">
+                                <a href="/san-pham/${product.slug}">
                                     <img src="/storage/${image}" alt="${product.name}" class="cr-cart-img">
                                     ${product.name}
                                 </a>
+                            </td>
+                           <td >
+                                    ${variant.attribute_name || ''}
                             </td>
                             <td class="cr-cart-price"><span class="amount">${formatVND(price)}</span></td>
                             <td class="cr-cart-qty">
@@ -123,6 +135,60 @@
 
                     tbody.innerHTML = html;
                     document.getElementById('cart-content').style.display = 'block';
+
+                    // Chọn tất cả
+                    document.getElementById('select-all').addEventListener('change', function() {
+                        document.querySelectorAll('.cart-checkbox').forEach(cb => {
+                            cb.checked = this.checked;
+                        });
+                    });
+
+                    document.getElementById('delete-selected').addEventListener('click', function() {
+                        const selectedIds = Array.from(document.querySelectorAll(
+                                '.cart-checkbox:checked'))
+                            .map(cb => cb.value);
+
+                        console.log('Selected IDs to delete:', selectedIds);
+
+                        if (!selectedIds.length) {
+                            alert('Vui lòng chọn ít nhất một sản phẩm để xoá.');
+                            return;
+                        }
+
+                        if (!confirm('Bạn có chắc muốn xoá các sản phẩm đã chọn không?')) {
+                            return;
+                        }
+
+                        fetch(`{{ route('cart.deleteMultiple') }}`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': @json(csrf_token())
+                                },
+                                body: JSON.stringify({
+                                    ids: selectedIds
+                                })
+                            })
+                            .then(async res => {
+                                console.log('Fetch response status:', res.status);
+                                const data = await res.json().catch(() => {
+                                    throw new Error(
+                                        'Server trả về không phải JSON hợp lệ');
+                                });
+
+                                if (res.ok && data.success) {
+                                    // console.log('Response data:', data);
+                                    alert('Đã xoá sản phẩm thành công!');
+                                    location.reload();
+                                } else {
+                                    throw new Error(data.message || 'Lỗi xoá sản phẩm');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Delete selected error:', error);
+                                alert(error.message || 'Không thể xoá sản phẩm!');
+                            });
+                    });
 
                     // Bind + and - buttons
                     tbody.querySelectorAll('.plus').forEach(btn => {
