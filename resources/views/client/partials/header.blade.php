@@ -26,7 +26,7 @@
                                 <i class="ri-user-3-line"></i>
                                 <span>Account</span>
                             </a>
-                            
+
                             <ul class="dropdown-menu">
                                 @guest
                                     <li>
@@ -36,6 +36,11 @@
                                         <a class="dropdown-item" href="{{ route('login') }}">Đăng nhập</a>
                                     </li>
                                 @else
+                                    <li>
+                                        <a class="dropdown-item"
+                                            style="display: block; width: 100%; padding: 0.5rem 1rem; color: #212529; text-align: inherit; background-color: transparent; border: 0; font-size: 1rem;"
+                                            href="{{ route('profile.index') }}">Tài khoản của tôi</a>
+                                    </li>
                                     <li>
                                         <form action="{{ route('logout') }}" method="POST">
                                             @csrf
@@ -362,7 +367,7 @@
                             </ul>
                         </li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="{{route('blog.index')}}">
+                            <a class="nav-link dropdown-toggle" href="{{ route('blog.index') }}">
                                 Bài viết
                             </a>
                             <ul class="dropdown-menu">

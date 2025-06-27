@@ -74,6 +74,8 @@ class LoginController extends Controller
 
             return redirect()->intended($this->redirectTo());
         }
+        dd(Auth::check(), Auth::user());
+
 
         // Failed login
         return back()->withErrors([

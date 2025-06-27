@@ -11,7 +11,6 @@ use App\Http\Controllers\admin\BrandController;
 use App\Http\Controllers\admin\OrderController;
 use App\Http\Controllers\client\HomeController;
 
-use App\Http\Controllers\client\ProductClientController;
 use App\Http\Controllers\Client\ShopController;
 use App\Http\Controllers\admin\BannerController;
 use App\Http\Controllers\admin\ReviewController;
@@ -20,22 +19,26 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\admin\CategoryController;
 use App\Http\Controllers\admin\DiscountController;
 use App\Http\Controllers\Auth\AdminAuthController;
+use App\Http\Controllers\Client\ProfileController;
 use App\Http\Controllers\admin\AttributeController;
 use App\Http\Controllers\admin\DashboardController;
 
 use App\Http\Controllers\admin\OrderStatusController;
+use App\Http\Controllers\client\BlogDetailController;
+
 use App\Http\Controllers\Admin\BlogCategoryController;
 
 use App\Http\Controllers\Auth\ResetPasswordController;
-
 use App\Http\Controllers\admin\PaymentMethodController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\admin\AttributeValueController;
+use App\Http\Controllers\client\ProductClientController;
 use App\Http\Controllers\admin\Product\ProductController;
 use App\Http\Controllers\admin\Account\AccountAdminController;
 use App\Http\Controllers\admin\Account\AccountUsersController;
 use App\Http\Controllers\admin\Product\ProductVariantController;
 use App\Http\Controllers\client\BlogController as ClientBlogController;
+use Doctrine\DBAL\Schema\Index;
 
 // route của trang client
 
@@ -56,12 +59,11 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('/password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
 Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 
-// Route::get('/password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
-// Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('forgot-password.form');
 Route::post('/forgot-password', [ForgotPasswordController::class, 'handle'])->name('forgot-password.handle');
 
-// Auth::routes();// Route cho Registers, Login, Logout... (Laravel UI)
+Route::get('/profile/{tab?}', [ProfileController::class, 'index'])->name('profile.index');
+Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 
 // route của trang admin
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
