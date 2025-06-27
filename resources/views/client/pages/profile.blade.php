@@ -1094,7 +1094,7 @@
                         );
                         detailRow.slideDown();
                         let fetchDetailUrl =
-                            "{{ route('admin.account.comment.detailWithProduct', ['comment' => ':commentId']) }}";
+                            "{{ route('detailWithProduct', ['comment' => ':commentId']) }}";
                         fetchDetailUrl = fetchDetailUrl.replace(':commentId', commentId);
                         console.log('Fetching comment detail from:', fetchDetailUrl);
                         $.ajax({

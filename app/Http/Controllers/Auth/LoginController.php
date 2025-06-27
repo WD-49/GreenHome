@@ -63,7 +63,7 @@ class LoginController extends Controller
             'password.required' => 'Vui lòng nhập mật khẩu.',
         ]);
 
-        if (Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
+        if (Auth::attempt($request->only('email', 'password'), true, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
             $user = Auth::user();
@@ -74,7 +74,7 @@ class LoginController extends Controller
 
             return redirect()->intended($this->redirectTo());
         }
-        dd(Auth::check(), Auth::user());
+        // dd(Auth::check(), Auth::user());
 
 
         // Failed login
