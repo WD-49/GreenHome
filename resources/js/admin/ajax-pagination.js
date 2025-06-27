@@ -26,35 +26,33 @@ $(document).ready(function () {
             }
         });
     }
-    // Bắt sự kiện submit form filter
-    filterForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-        const url = filterForm.getAttribute('action');
-        let formData = $(filterForm).serializeArray();
-        // Lấy giá trị per_page hiện tại từ select (nếu có)
-        const perPage = $('#perPage').val();
-        if (perPage) {
-            // Xóa per_page cũ nếu có
-            formData = formData.filter(item => item.name !== 'per_page');
-            formData.push({ name: 'per_page', value: perPage });
-        }
-        fetchTableData(url, $.param(formData));
-    });
-    filterForm.addEventListener('reset', function (e) {
-        e.preventDefault();
-        // Reset tất cả input, select, textarea về mặc định
-        setTimeout(function () {
-            $('#filter-form').find('input[type="text"], input[type="date"], select').val('');
-            $('#filter-form').find('select').prop('selectedIndex', 0);
-            // Nếu có select2 hoặc plugin khác thì cần trigger('change') nữa
-
-            // Gửi lại AJAX với chỉ per_page
+    if (filterForm) {
+        filterForm.addEventListener('submit', function (e) {
+            e.preventDefault();
             const url = filterForm.getAttribute('action');
+            let formData = $(filterForm).serializeArray();
+            // Lấy giá trị per_page hiện tại từ select (nếu có)
             const perPage = $('#perPage').val();
-            let params = perPage ? 'per_page=' + perPage : '';
-            fetchTableData(url, params);
-        }, 0);
-    });
+            if (perPage) {
+                // Xóa per_page cũ nếu có
+                formData = formData.filter(item => item.name !== 'per_page');
+                formData.push({ name: 'per_page', value: perPage });
+            }
+            fetchTableData(url, $.param(formData));
+        });
+
+        filterForm.addEventListener('reset', function (e) {
+            e.preventDefault();
+            setTimeout(function () {
+                $('#filter-form').find('input[type="text"], input[type="date"], select').val('');
+                $('#filter-form').find('select').prop('selectedIndex', 0);
+                const url = filterForm.getAttribute('action');
+                const perPage = $('#perPage').val();
+                let params = perPage ? 'per_page=' + perPage : '';
+                fetchTableData(url, params);
+            }, 0);
+        });
+    }
 
     // function setupAjaxPagination(wrapperId, contentId) {
     //     $(document).on('click', `${wrapperId} .pagination a`, function (e) {

@@ -9,9 +9,9 @@ use App\Http\Controllers\admin\BlogController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\admin\BrandController;
 use App\Http\Controllers\admin\OrderController;
-use App\Http\Controllers\client\HomeController;
+use App\Http\Controllers\client\CartController;
 
-use App\Http\Controllers\client\ProductClientController;
+use App\Http\Controllers\client\HomeController;
 use App\Http\Controllers\Client\ShopController;
 use App\Http\Controllers\admin\BannerController;
 use App\Http\Controllers\admin\ReviewController;
@@ -31,6 +31,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\admin\PaymentMethodController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\admin\AttributeValueController;
+use App\Http\Controllers\client\ProductClientController;
 use App\Http\Controllers\admin\Product\ProductController;
 use App\Http\Controllers\admin\Account\AccountAdminController;
 use App\Http\Controllers\admin\Account\AccountUsersController;
@@ -360,4 +361,7 @@ Route::get('/blog/detail/{slug}', [ClientBlogController::class, 'show'])->name('
 Route::get('/san-pham/{slug}', [ProductClientController::class, 'show'])->name('productDetail');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 
+// giỏ hàng
+Route::get('/cart/data', [CartController::class, 'getCartData'])->name('cart.data');
+Route::post('/cart/add', [CartController::class, 'addToCart'])->middleware('auth')->name('cart.add');
 Route::get('/blog/{slug}', [App\Http\Controllers\client\BlogDetailController::class, 'show'])->name('blog.detail');
