@@ -80,4 +80,21 @@ class CartController extends Controller
             ], 500);
         }
     }
+
+    public function viewCart(Request $request)
+    {
+        return view('client.pages.viewCart');
+    }
+
+    public function updateQuantity(Request $request, $id)
+    {
+        $quantity = $request->input('quantity');
+        $cartItem = CartItem::findOrFail($id);
+        $total_price = $cartItem->unit_price * $quantity;
+        $cartItem->quantity = $quantity;
+        $cartItem->total_price = $total_price;
+        $cartItem->save();
+
+        return response()->json(['success' => true]);
+    }
 }

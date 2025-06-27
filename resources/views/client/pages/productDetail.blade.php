@@ -388,12 +388,12 @@
                                 showNotify('Đã thêm sản phẩm vào giỏ hàng!', 'success');
 
                                 console.log('Cập nhật giỏ hàng:', data.cart);
-                                if (data.cart) {
-                                    updateMiniCart(data.cart);
-                                } else {
-                                    // Nếu server không trả cart, bạn có thể gọi lại loadMiniCart để fetch dữ liệu mới
-                                    loadMiniCart();
-                                }
+                                // if (data.cart) {
+                                //     updateMiniCart(data.cart);
+                                // } else {
+                                // Nếu server không trả cart, bạn có thể gọi lại loadMiniCart để fetch dữ liệu mới
+                                loadMiniCart();
+                                // }
                             } else {
                                 showNotify(data.message || 'Có lỗi xảy ra!', 'error');
 
