@@ -19,7 +19,7 @@ class ProductClientController extends Controller
 
         $product->increment('view');
 
-        $relatedProducts = Product::with(['productVariants', 'category', 'comments', 'reviews'])
+        $relatedProducts = Product::with(['productVariants', 'category', 'comments'])
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->take(8)
@@ -32,7 +32,16 @@ class ProductClientController extends Controller
             ->unique()
             ->values();
 
-        $reviews = $product->reviews()->with('user')->get();
+        // ✅ Lấy các review dựa vào product_variant_id
+        $variantIds = $product->productVariants->pluck('id');
+        $reviews = Review::with([
+            'user',
+            'productVariant.productVariantValues.attributeValue',
+        ])
+            ->whereIn('product_variant_id', $variantIds)
+            ->get();
+
+
         $totalReviews = $reviews->count();
         $avgRating = $totalReviews > 0 ? round($reviews->avg('rating'), 1) : 0;
         $totalStar = $reviews->sum('rating');

@@ -70,18 +70,28 @@
                     @endphp
 
                     <div class="cr-size-and-weight">
-                        <div class="cr-review-star d-flex align-items-center mb-3">
-                            <div class="cr-star d-flex align-items-center">
-                                @for ($i = 1; $i <= 5; $i++)
-                                    <i class="ri-star-{{ $i <= round($avgRating) ? 'fill' : 'line' }}"
-                                        style="color: #ffc107; font-size: 20px; margin-right: 2px;"></i>
-                                @endfor
-                            </div>
-                            <span class="ms-2" style="font-size: 14px; color: #333;">
-                                <strong>{{ number_format($avgRating, 1) }}★</strong>
-                                từ <strong>{{ $totalReviews }}</strong> đánh giá
-                                (<strong>{{ $totalStar }}</strong> sao tổng)
-                            </span>
+                        @php
+                            $avg = $product->reviews_avg_rating ?? 0;
+                            $count = $product->reviews_count ?? 0;
+                            $fullStars = floor($avg);
+                            $halfStar = $avg - $fullStars >= 0.5;
+                            $emptyStars = 5 - $fullStars - ($halfStar ? 1 : 0);
+                        @endphp
+                        <div class="cr-star d-flex align-items-center gap-1">
+                            @for ($i = 0; $i < $fullStars; $i++)
+                                <i class="ri-star-fill text-warning"></i>
+                            @endfor
+
+                            @if ($halfStar)
+                                <i class="ri-star-half-line text-warning"></i>
+                            @endif
+
+                            @for ($i = 0; $i < $emptyStars; $i++)
+                                <i class="ri-star-line text-warning"></i>
+                            @endfor
+
+                            <span class="ms-2 text-muted">({{ $avg }} / {{ $count }}
+                                đánh giá)</span>
                         </div>
 
 
@@ -97,9 +107,10 @@
                         <div class="cr-product-price">
                             <span class="new-price" id="variant-price">
                                 @if ($prices->count())
-                                    {{ number_format($minPrice, 0, ',', '.') }}₫
-                                    @if ($minPrice != $maxPrice)
-                                        - {{ number_format($maxPrice, 0, ',', '.') }}₫
+                                    @if ($minPrice == $maxPrice)
+                                        {{ number_format($minPrice, 0, ',', '.') }}₫
+                                    @else
+                                        {{ number_format($minPrice, 0, ',', '.') }}₫ - {{ number_format($maxPrice, 0, ',', '.') }}₫
                                     @endif
                                 @else
                                     Liên hệ
@@ -148,140 +159,153 @@
                     </div>
                 </div>
                 <div class="row" data-aos="fade-up" data-aos-duration="2000" data-aos-delay="600">
-                <div class="col-12 pt-5">
-                    <div class="cr-paking-delivery">
-                        <ul class="nav nav-tabs" id="myTab" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="description-tab" data-bs-toggle="tab"
-                                    data-bs-target="#description" type="button" role="tab">Description</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#review"
-                                    type="button" role="tab">Review</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="comment-tab" data-bs-toggle="tab" data-bs-target="#comment"
-                                    type="button" role="tab">Comment</button>
-                            </li>
-                        </ul>
+                    <div class="col-12 pt-5">
+                        <div class="cr-paking-delivery">
+                            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="description-tab" data-bs-toggle="tab"
+                                        data-bs-target="#description" type="button" role="tab">Description</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#review"
+                                        type="button" role="tab">Review</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="comment-tab" data-bs-toggle="tab"
+                                        data-bs-target="#comment" type="button" role="tab">Comment</button>
+                                </li>
+                            </ul>
 
-                        <div class="tab-content" id="myTabContent">
-                            <!-- Description -->
-                            <div class="tab-pane fade show active" id="description" role="tabpanel">
-                                <div class="cr-tab-content">
-                                    <div class="cr-description">
-                                        <p>{!! $product->description !!}</p>
+                            <div class="tab-content" id="myTabContent">
+                                <!-- Description -->
+                                <div class="tab-pane fade show active" id="description" role="tabpanel">
+                                    <div class="cr-tab-content">
+                                        <div class="cr-description">
+                                            <p>{!! $product->description !!}</p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Review -->
-                            <div class="tab-pane fade" id="review" role="tabpanel">
-                                <div class="cr-tab-content-from">
-                                    <div class="post">
-                                        @forelse ($reviews as $review)
-                                            <div class="content {{ !$loop->first ? 'mt-30' : '' }}">
-                                                <img src="{{ asset('storage/' . ($review->user->avatar ?? 'default-avatar.jpg')) }}"
-                                                    alt="review"
-                                                    onerror="if(!this.dataset.error) { this.dataset.error = true; this.src='{{ asset('images/default-avatar.jpg') }}'; }">
-                                                <div class="details">
-                                                    <span
-                                                        class="date">{{ \Carbon\Carbon::parse($review->created_at)->locale('vi')->isoFormat('D [tháng] M, YYYY') }}</span>
-                                                    <span class="name">{{ $review->user->name ?? 'Guest' }}</span>
+                                <!-- Review -->
+                                <div class="tab-pane fade" id="review" role="tabpanel">
+                                    <div class="cr-tab-content-from">
+                                        <div class="post">
+                                            @forelse ($reviews as $review)
+                                                <div class="content {{ !$loop->first ? 'mt-30' : '' }}">
+                                                    <img src="{{ asset('storage/' . ($review->user->avatar ?? 'default-avatar.jpg')) }}"
+                                                        alt="review"
+                                                        onerror="if(!this.dataset.error) { this.dataset.error = true; this.src='{{ asset('images/default-avatar.jpg') }}'; }">
+                                                    <div class="details">
+                                                        <span class="date">
+                                                            {{ \Carbon\Carbon::parse($review->created_at)->locale('vi')->isoFormat('D [tháng] M, YYYY') }}
+                                                        </span>
+                                                        <span class="name">{{ $review->user->name ?? 'Guest' }}</span>
+                                                        @php
+                                                            $variantAttributes = optional(
+                                                                $review->productVariant->productVariantValues ??
+                                                                    collect(),
+                                                            )
+                                                                ->map(fn($v) => $v->attributeValue->value ?? '')
+                                                                ->implode(' / ');
+                                                        @endphp
+                                                        @if ($variantAttributes)
+                                                            <div class="text-muted small">Biến thể:
+                                                                {{ $variantAttributes }}</div>
+                                                        @endif
+                                                    </div>
+
+                                                    <div class="cr-t-review-rating mt-1">
+                                                        @for ($i = 1; $i <= 5; $i++)
+                                                            <i
+                                                                class="ri-star-s-{{ $i <= $review->rating ? 'fill' : 'line' }}"></i>
+                                                        @endfor
+                                                    </div>
                                                 </div>
+
+                                                @if ($review->title)
+                                                    <p>{{ $review->title }}</p>
+                                                @endif
+                                                @if ($review->content)
+                                                    <p>{{ $review->content }}</p>
+                                                @endif
+                                            @empty
+                                                <div class="no-reviews">
+                                                    <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+                                                </div>
+                                            @endforelse
+                                        </div>
+
+                                        <h4 class="heading">Add a Review</h4>
+                                        <form action="javascript:void(0)">
+                                            <div class="cr-ratting-star">
+                                                <span>Your rating :</span>
                                                 <div class="cr-t-review-rating">
                                                     @for ($i = 1; $i <= 5; $i++)
-                                                        <i
-                                                            class="ri-star-s-{{ $i <= $review->rating ? 'fill' : 'line' }}"></i>
+                                                        <i class="ri-star-s-line"></i>
                                                     @endfor
                                                 </div>
                                             </div>
-                                            @if ($review->title)
-                                                <p>{{ $review->title }}</p>
-                                            @endif
-                                            @if ($review->content)
-                                                <p>{{ $review->content }}</p>
-                                            @endif
-                                        @empty
-                                            <div class="no-reviews">
-                                                <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+                                            <div class="cr-ratting-input">
+                                                <input name="your-name" placeholder="Name" type="text">
                                             </div>
-                                        @endforelse
-
+                                            <div class="cr-ratting-input">
+                                                <input name="your-email" placeholder="Email*" type="email" required>
+                                            </div>
+                                            <div class="cr-ratting-input form-submit">
+                                                <textarea name="your-comment" placeholder="Enter Your Comment"></textarea>
+                                                <button class="cr-button" type="submit">Submit</button>
+                                            </div>
+                                        </form>
                                     </div>
-
-                                    <!-- Debug info (xóa sau khi test) -->
-
-
-                                    <h4 class="heading">Add a Review</h4>
-                                    <form action="javascript:void(0)">
-                                        <div class="cr-ratting-star">
-                                            <span>Your rating :</span>
-                                            <div class="cr-t-review-rating">
-                                                @for ($i = 1; $i <= 5; $i++)
-                                                    <i class="ri-star-s-line"></i>
-                                                @endfor
-                                            </div>
-                                        </div>
-                                        <div class="cr-ratting-input">
-                                            <input name="your-name" placeholder="Name" type="text">
-                                        </div>
-                                        <div class="cr-ratting-input">
-                                            <input name="your-email" placeholder="Email*" type="email" required="">
-                                        </div>
-                                        <div class="cr-ratting-input form-submit">
-                                            <textarea name="your-comment" placeholder="Enter Your Comment"></textarea>
-                                            <button class="cr-button" type="submit">Submit</button>
-                                        </div>
-                                    </form>
                                 </div>
-                            </div>
 
-                            <!-- Comment -->
-                            <div class="tab-pane fade" id="comment" role="tabpanel">
-                                <div class="cr-tab-content-from">
-                                    <div class="post">
-                                        @php $comments = $product->comments->whereNull('rating'); @endphp
-                                        @forelse ($comments as $comment)
-                                            <div class="content {{ !$loop->first ? 'mt-30' : '' }}">
-                                                <img src="{{ asset('storage/' . ($comment->user->avatar ?? 'default-avatar.jpg')) }}"
-                                                    alt="comment">
-                                                <div class="details">
-                                                    <span
-                                                        class="date">{{ \Carbon\Carbon::parse($comment->created_at)->locale('vi')->isoFormat('D [tháng] M, YYYY') }}</span>
-                                                    <span class="name">{{ $comment->user->name ?? 'Guest' }}</span>
+
+                                <!-- Comment -->
+                                <div class="tab-pane fade" id="comment" role="tabpanel">
+                                    <div class="cr-tab-content-from">
+                                        <div class="post">
+                                            @php $comments = $product->comments->whereNull('rating'); @endphp
+                                            @forelse ($comments as $comment)
+                                                <div class="content {{ !$loop->first ? 'mt-30' : '' }}">
+                                                    <img src="{{ asset('storage/' . ($comment->user->avatar ?? 'default-avatar.jpg')) }}"
+                                                        alt="comment">
+                                                    <div class="details">
+                                                        <span
+                                                            class="date">{{ \Carbon\Carbon::parse($comment->created_at)->locale('vi')->isoFormat('D [tháng] M, YYYY') }}</span>
+                                                        <span class="name">{{ $comment->user->name ?? 'Guest' }}</span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <p>{{ $comment->content }}</p>
-                                        @empty
-                                            <p>Chưa có bình luận nào.</p>
-                                        @endforelse
+                                                <p>{{ $comment->content }}</p>
+                                            @empty
+                                                <p>Chưa có bình luận nào.</p>
+                                            @endforelse
 
+                                        </div>
+                                        <h4 class="heading">Add a Comment</h4>
+                                        <form action="javascript:void(0)">
+                                            <div class="cr-ratting-input">
+                                                <input name="your-name" placeholder="Name" type="text">
+                                            </div>
+                                            <div class="cr-ratting-input">
+                                                <input name="your-email" placeholder="Email*" type="email"
+                                                    required="">
+                                            </div>
+                                            <div class="cr-ratting-input form-submit">
+                                                <textarea name="your-comment" placeholder="Enter Your Comment"></textarea>
+                                                <button class="cr-button" type="submit">Submit</button>
+                                            </div>
+                                        </form>
                                     </div>
-                                    <h4 class="heading">Add a Comment</h4>
-                                    <form action="javascript:void(0)">
-                                        <div class="cr-ratting-input">
-                                            <input name="your-name" placeholder="Name" type="text">
-                                        </div>
-                                        <div class="cr-ratting-input">
-                                            <input name="your-email" placeholder="Email*" type="email" required="">
-                                        </div>
-                                        <div class="cr-ratting-input form-submit">
-                                            <textarea name="your-comment" placeholder="Enter Your Comment"></textarea>
-                                            <button class="cr-button" type="submit">Submit</button>
-                                        </div>
-                                    </form>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
 
             </div>
         </div>
-        
+
     </section>
 
     <!-- Related Products -->
@@ -298,36 +322,82 @@
                         <div class="cr-product-card">
                             <div class="cr-product-image">
                                 <div class="cr-image-inner zoom-image-hover">
-                                    <img src="{{ asset('storage/' . ($item->productVariants->first()->image ?? 'default.jpg')) }}"
-                                        alt="{{ $item->name }}">
+                                    <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}">
                                 </div>
+                                <div class="cr-side-view">
+                                    <a href="#" class="wishlist"><i class="ri-heart-line"></i></a>
+                                    <a class="model-oraganic-product" data-bs-toggle="modal" href="#quickview"><i
+                                            class="ri-eye-line"></i></a>
+                                </div>
+                                <a class="cr-shopping-bag" href="#"><i class="ri-shopping-bag-line"></i></a>
                             </div>
+
                             <div class="cr-product-details">
                                 <div class="cr-brand">
-                                    <a href="#">{{ $item->category->name ?? '' }}</a>
-                                </div>
-                                <a href="{{ route('productDetail', $item->slug) }}" class="title">{{ $item->name }}</a>
-                                @php
-                                    $prices = $item->productVariants->pluck('price')->filter();
-                                    $minPrice = $prices->min();
-                                    $maxPrice = $prices->max();
-                                @endphp
-                                <p class="cr-price">
-                                    @if ($prices->count())
-                                        {{ number_format($minPrice, 0, ',', '.') }}₫
-                                        @if ($minPrice != $maxPrice)
-                                            - {{ number_format($maxPrice, 0, ',', '.') }}₫
+                                    <a href="#">{{ $item->brand->name ?? 'Không có thương hiệu' }}</a>
+
+                                    {{-- ⭐️ Hiển thị sao từ reviews --}}
+                                    @php
+                                        $avg = $item->reviews_avg_rating ?? 0;
+                                        $count = $item->reviews_count ?? 0;
+                                        $fullStars = floor($avg);
+                                        $halfStar = $avg - $fullStars >= 0.5;
+                                        $emptyStars = 5 - $fullStars - ($halfStar ? 1 : 0);
+                                    @endphp
+                                    <div class="cr-star">
+                                        @for ($i = 0; $i < $fullStars; $i++)
+                                            <i class="ri-star-fill"></i>
+                                        @endfor
+
+                                        @if ($halfStar)
+                                            <i class="ri-star-half-line"></i>
                                         @endif
-                                    @else
-                                        Liên hệ
-                                    @endif
-                                </p>
+
+                                        @for ($i = 0; $i < $emptyStars; $i++)
+                                            <i class="ri-star-line"></i>
+                                        @endfor
+
+                                        <p>({{ $avg }} / {{ $count }} đánh giá)</p>
+                                    </div>
+                                </div>
+
+                                <a href="{{ route('productDetail', $item->slug) }}"
+                                    class="title">{{ $item->name }}</a>
+
+                                <p class="text">Sản phẩm chất lượng cao, giá tốt nhất thị trường.</p>
+
+                                <ul class="list">
+                                    <li><label>Brand :</label> {{ $item->brand->name ?? 'Không rõ' }}</li>
+                                </ul>
+
+                                {{-- Nếu có giá thì hiển thị --}}
+                                @php
+                                    $itemPrices = optional($item->productVariants)->pluck('price')->filter();
+                                @endphp
+                                @if ($itemPrices->isNotEmpty())
+                                    <p class="cr-price">
+                                        <span class="new-price">
+                                            @php
+                                                $itemMin = $itemPrices->min();
+                                                $itemMax = $itemPrices->max();
+                                            @endphp
+                                            @if ($itemMin == $itemMax)
+                                                {{ number_format($itemMin, 0, ',', '.') }}₫
+                                            @else
+                                                {{ number_format($itemMin, 0, ',', '.') }}₫ - {{ number_format($itemMax, 0, ',', '.') }}₫
+                                            @endif
+                                        </span>
+                                    </p>
+                                @else
+                                    <p class="cr-price"><span class="new-price">Chưa có giá</span></p>
+                                @endif
 
                             </div>
                         </div>
                     </div>
                 @endforeach
             </div>
+
         </div>
     </section>
 
