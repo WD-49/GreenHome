@@ -21,81 +21,92 @@
         </ul>
     </div>
 @endif
-@push('styles')
-    <style>
-        .avatar-xxl {
-            width: 150px;
-            height: 150px;
-            object-fit: cover;
-            border: 3px solid #e9ecef;
-        }
 
-        .table-sm th,
-        .table-sm td {
-            padding: 0.5rem;
-        }
+<style>
+    .avatar-xxl {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border: 3px solid #e9ecef;
+    }
 
-        /* Đảm bảo các badge màu sắc tương tự Bootstrap 4/5 */
-        .badge.bg-success {
-            background-color: #28a745 !important;
-        }
+    .table-sm th,
+    .table-sm td {
+        padding: 0.5rem;
+    }
 
-        .badge.bg-info.text-dark {
-            background-color: #17a2b8 !important;
-            color: #212529 !important;
-        }
+    /* Đảm bảo các badge màu sắc tương tự Bootstrap 4/5 */
+    .badge.bg-success {
+        background-color: #28a745 !important;
+    }
 
-        .badge.bg-danger {
-            background-color: #dc3545 !important;
-        }
+    .badge.bg-info.text-dark {
+        background-color: #17a2b8 !important;
+        color: #64B496 !important;
+    }
 
-        .badge.bg-secondary {
-            background-color: #6c757d !important;
-        }
+    .badge.bg-danger {
+        background-color: #dc3545 !important;
+    }
 
-        .badge.bg-primary {
-            background-color: #007bff !important;
-        }
+    .badge.bg-secondary {
+        background-color: #6c757d !important;
+    }
 
-        .badge.bg-warning.text-dark {
-            background-color: #ffc107 !important;
-            color: #212529 !important;
-        }
+    .badge.bg-primary {
+        background-color: #007bff !important;
+    }
 
-        .btn-xs {
-            padding: .25rem .5rem;
-            font-size: .75rem;
-            line-height: 1.5;
-            border-radius: .2rem;
-        }
+    .badge.bg-warning.text-dark {
+        background-color: #ffc107 !important;
+        color: #64B496 !important;
+    }
 
-        /* Thêm CSS cho tab tùy chỉnh */
-        .tab-content-item {
-            display: none;
-            /* Mặc định ẩn tất cả các tab content */
-        }
+    .btn-xs {
+        padding: .25rem .5rem;
+        font-size: .75rem;
+        line-height: 1.5;
+        border-radius: .2rem;
+    }
 
-        .tab-content-item.active {
-            display: block;
-            /* Chỉ hiển thị tab content đang active */
-        }
+    /* Thêm CSS cho tab tùy chỉnh */
+    .tab-content-item {
+        display: none;
+        /* Mặc định ẩn tất cả các tab content */
+    }
 
-        .nav-link {
-            cursor: pointer;
-            /* Cho biết các tab có thể click được */
-        }
+    .tab-content-item.active {
+        display: block;
+        /* Chỉ hiển thị tab content đang active */
+    }
 
-        /* Style cho rating stars */
-        .rating-stars .fas.fa-star {
-            color: gold;
-        }
+    .nav-link {
+        cursor: pointer;
+        /* Cho biết các tab có thể click được */
+    }
 
-        .rating-stars .far.fa-star {
-            /* empty star */
-            color: lightgray;
-        }
-    </style>
-@endpush
+    .nav-link {
+        color: #000000;
+        /* Màu xanh dương nhạt */
+    }
+
+    .nav-link.active {
+        color: #64B496 !important;
+        /* Ví dụ: màu hồng khi active */
+        font-weight: bold;
+    }
+
+    /* Style cho rating stars */
+    .rating-stars .fas.fa-star {
+        color: gold;
+    }
+
+    .rating-stars .far.fa-star {
+        /* empty star */
+        color: lightgray;
+    }
+</style>
+
 
 @section('content')
 
@@ -109,14 +120,6 @@
             <div class="flex-grow-1">
                 <h4 class="fs-18 fw-semibold m-0">Trang cá nhân của <b>{{ $user->name }}</b></h4>
             </div>
-
-            {{-- Nút "Quay lại danh sách" này có lẽ không cần thiết ở trang Profile cá nhân của user --}}
-            {{-- Nếu đây là trang admin xem chi tiết user thì giữ lại, nếu là trang user tự xem profile thì bỏ đi --}}
-            {{-- <div class="ms-auto">
-                <a href="{{ route('admin.account.listUsers') }}" class="btn btn-sm btn-outline-secondary shadow-sm">
-                    <i class="fas fa-arrow-left fa-sm text-gray-700 me-1"></i> Quay lại danh sách
-                </a>
-            </div> --}}
         </div>
 
         <div class="row">
@@ -125,12 +128,8 @@
                     <div class="card-body">
                         <div class="align-items-center">
                             <div class="d-flex align-items-center">
-                                {{-- Kiểm tra `user_image` từ profile và dùng asset() --}}
-                                {{-- <img src="{{ $user->profile && $user->profile->user_image ? asset($user->profile->user_image) : 'https://cdn2.iconfinder.com/data/icons/audio-16/96/user_avatar_profile_login_button_account_member-512.png' }}" --}}
-                                {{-- class="rounded-circle avatar-xxl img-thumbnail float-start" alt=""> --}}
-
                                 <img src="{{ $user->profile && $user->profile->user_image ? asset('storage/' . $user->profile->user_image) : 'https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740' }}"
-                                    class="rounded-circle avatar-xxl img-thumbnail float-start" alt="image profile">
+                                        class="rounded-circle avatar-xxl img-thumbnail float-start" alt="Ảnh đại diện">
 
                                 <div class="overflow-hidden ms-4">
                                     <h4 class="m-0 text-dark fs-20">{{ $user->name }}</h4>
@@ -163,14 +162,14 @@
                                     @if ($user->profile)
                                         <div class="mt-3 text-start">
                                             <p class="mb-1 small"><strong><i
-                                                        class="fas fa-phone me-2 text-primary"></i>SĐT:</strong>
+                                                        class="fas fa-phone me-2 text-success"></i>SĐT:</strong>
                                                 {{ $user->profile->phone ?: 'Chưa cập nhật' }}</p>
                                             <p class="mb-1 small"><strong><i
-                                                        class="fas fa-map-marker-alt me-2 text-primary"></i>Địa
+                                                        class="fas fa-map-marker-alt me-2 text-success"></i>Địa
                                                     chỉ:</strong>
                                                 {{ $user->profile->address ?: 'Chưa cập nhật' }}</p>
                                             <p class="mb-0 small"><strong><i
-                                                        class="fas fa-venus-mars me-2 text-primary"></i>Giới tính:</strong>
+                                                        class="fas fa-venus-mars me-2 text-success"></i>Giới tính:</strong>
                                                 @if ($user->profile->gender == 'male' || $user->profile->gender == 'nam')
                                                     Nam
                                                 @elseif($user->profile->gender == 'female' || $user->profile->gender == 'nu')
@@ -194,13 +193,13 @@
                         <ul class="nav nav-underline border-bottom pt-2" id="userProfileTabs" role="tablist">
                             <li class="nav-item" role="presentation">
                                 {{-- Dùng data-tab thay vì data-bs-toggle="tab" để tự xử lý JS --}}
-                                <a class="nav-link p-2" data-tab="info">
+                                <a class="nav-link p-2" data-tab="info" style="color: #000000;">
                                     <span class="d-block d-sm-none"><i class="mdi mdi-information"></i></span>
                                     <span class="d-none d-sm-block">Thông tin</span>
                                 </a>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <a class="nav-link p-2" data-tab="orders">
+                                <a class="nav-link p-2" data-tab="orders" style="color: #000000;">
                                     <span class="d-block d-sm-none"><i class="fas fa-receipt"></i></span>
                                     <span class="d-none d-sm-block">Đơn hàng
                                         @if (isset($data['orders']) && $data['orders']->count() > 0)
@@ -211,7 +210,7 @@
                                 </a>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <a class="nav-link p-2" data-tab="reviews">
+                                <a class="nav-link p-2" data-tab="reviews" style="color: #000000;">
                                     <span class="d-block d-sm-none"><i class="fas fa-star"></i></span>
                                     <span class="d-none d-sm-block">Đánh giá
                                         @if (isset($data['reviews']) && $data['reviews']->count() > 0)
@@ -222,7 +221,7 @@
                                 </a>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <a class="nav-link p-2" data-tab="cart">
+                                <a class="nav-link p-2" data-tab="cart" style="color: #000000;">
                                     <span class="d-block d-sm-none"><i class="fas fa-shopping-cart"></i></span>
                                     <span class="d-none d-sm-block">Giỏ hàng
                                         @if (isset($data['cart']) && $data['cart'] && $data['cart']->items && $data['cart']->items->count() > 0)
@@ -234,7 +233,7 @@
                                 </a>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <a class="nav-link p-2" data-tab="comments">
+                                <a class="nav-link p-2" data-tab="comments" style="color: #000000;">
                                     <span class="d-block d-sm-none"><i class="fas fa-comments"></i></span>
                                     <span class="d-none d-sm-block">Bình luận
                                         @php $totalCommentsCount = isset($data['comments']) ? $data['comments']->count() : 0; @endphp
@@ -246,7 +245,7 @@
                                 </a>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <a class="nav-link p-2" data-tab="wishlist">
+                                <a class="nav-link p-2" data-tab="wishlist" style="color: #000000;">
                                     <span class="d-block d-sm-none"><i class="fas fa-heart"></i></span>
                                     <span class="d-none d-sm-block">Yêu thích
                                         @if (isset($data['wishlistItems']) && $data['wishlistItems']->count() > 0)
@@ -264,7 +263,7 @@
                             {{-- Tab Content - Thông tin cá nhân (Info) --}}
                             {{-- Sử dụng $tab == 'info' để xác định tab active ban đầu từ controller --}}
                             <div id="info" class="tab-content-item {{ $tab == 'info' ? 'active' : '' }}">
-                                <h3>Thông tin cá nhân</h3>
+                                <h3 style="color: #64B496;">Thông tin cá nhân</h3>
                                 <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
                                     @csrf
 
@@ -352,19 +351,19 @@
                                             </div>
                                         @enderror
                                     </div>
-                                    <button type="submit" class="btn btn-primary">Cập nhật thông tin</button>
+                                    <button type="submit" class="btn btn-success">Cập nhật thông tin</button>
                                 </form>
                             </div>
 
                             {{-- Tab Content - Đơn hàng của tôi (Orders) --}}
                             <div id="orders" class="tab-content-item {{ $tab == 'orders' ? 'active' : '' }}">
-                                <h3>Đơn hàng của tôi</h3>
+                                <h3 style="color: #64B496;">Đơn hàng của tôi</h3>
                                 @if (isset($data['orders']) && $data['orders']->isNotEmpty())
                                     <div class="accordion" id="ordersAccordion">
                                         @foreach ($data['orders'] as $order)
-                                            <div class="card mb-2 order-card-collapsible"> {{-- Giữ class này để JS có thể nhận diện --}}
+                                            <div class="card mb-2 order-card-collapsible">
                                                 <div class="card-header p-3 cursor-pointer d-flex justify-content-between align-items-center"
-                                                    {{-- Điều chỉnh padding --}} data-bs-toggle="collapse"
+                                                    {{-- Điều chỉnh padding --}} data-bs-toggle="collapse" style="background-color: #E0F2F1"
                                                     data-bs-target="#orderCollapse{{ $order->id }}"
                                                     aria-expanded="false"
                                                     aria-controls="orderCollapse{{ $order->id }}">
@@ -421,9 +420,15 @@
                                                             {{ $order->shipping_address }}</p>
                                                         <p class="mb-1 small"><strong>Phương thức thanh toán:</strong>
                                                             {{ $order->payment_method_name }}</p>
-                                                        <p class="mb-1 small"><strong>Trạng thái thanh toán:</strong> <span
-                                                                class="badge {{ $order->payment_status == 'paid' ? 'bg-success' : ($order->payment_status == 'pending' ? 'bg-warning text-dark' : 'bg-danger') }}">{{ $order->payment_status }}</span>
+                                                        <p class="mb-1 small">
+                                                            <strong>Trạng thái thanh toán:</strong>
+                                                            <span
+                                                                class="badge {{ $order->payment_status == 'paid' ? 'bg-success' : ($order->payment_status == 'pending' ? 'bg-warning text-dark' : 'bg-danger') }}">
+                                                                {{ $order->payment_status == 'paid' ? 'Đã thanh toán' : ($order->payment_status == 'pending' ? 'Đang chờ' : 'Thất bại') }}
+                                                            </span>
                                                         </p>
+
+
 
                                                         @if ($order->note)
                                                             <p class="mb-1 small"><strong>Ghi chú đơn hàng:</strong>
@@ -485,7 +490,7 @@
                                                                                 <td>{{ $item->quantity }}</td>
                                                                                 <td>{{ number_format($item->unit_price, 0, ',', '.') }}
                                                                                     VNĐ</td>
-                                                                                <td>{{ number_format($item->total_price, 0, ',', '.') }}
+                                                                                <td>{{ number_format($subtotalBeforeDiscount, 0, ',', '.') }}
                                                                                     VNĐ</td> {{-- total_price đã là giá sau giảm giá của item --}}
                                                                             </tr>
                                                                         @endforeach
@@ -564,12 +569,12 @@
 
                             {{-- Tab Content - Đánh giá sản phẩm (Reviews) --}}
                             <div id="reviews" class="tab-content-item {{ $tab == 'reviews' ? 'active' : '' }}">
-                                <h3>Đánh giá sản phẩm của tôi</h3>
+                                <h3 style="color: #64B496;">Đánh giá sản phẩm của tôi</h3>
                                 @if (isset($data['reviews']) && $data['reviews']->isNotEmpty())
                                     <div class="list-group">
                                         @foreach ($data['reviews'] as $review)
                                             <div class="list-group-item mb-3">
-                                                <h5 class="mb-1">{{ $review->title }}</h5>
+                                                <h5 class="mb-1" style="color: #64B496;">{{ $review->title }}</h5>
                                                 <p class="mb-1"><strong>Sản phẩm:</strong>
                                                     {{ optional(optional($review->productVariant)->product)->name ?? 'N/A' }}
                                                     ({{ optional($review->productVariant)->attribute_name ?? 'N/A' }})
@@ -606,10 +611,9 @@
                                 @endif
                             </div>
 
-
                             {{-- Tab Content - Giỏ hàng (Cart) --}}
                             <div id="cart" class="tab-content-item {{ $tab == 'cart' ? 'active' : '' }}">
-                                <h5 class="mb-3">Sản phẩm trong Giỏ hàng</h5>
+                                <h5 class="mb-3" style="color: #64B496;">Sản phẩm trong Giỏ hàng</h5>
                                 {{-- Đảm bảo $data['cart'] không null, và $data['cart']->items không rỗng --}}
                                 @if (optional($data['cart'])->items?->isNotEmpty()) {{-- Đã sửa dùng optional() và ?-> --}}
                                     <div class="table-responsive">
@@ -671,7 +675,7 @@
                             {{-- Tab Content - Bình luận (Comments) --}}
                             <div id="comments" class="tab-content-item {{ $tab == 'comments' ? 'active' : '' }}">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h5>Danh sách Bình luận</h5>
+                                    <h5 style="color: #64B496;">Danh sách Bình luận</h5>
                                     {{-- Nút "Thùng rác bình luận" cần được thêm vào nếu bạn muốn chức năng này --}}
                                     {{-- Ví dụ: --}}
                                     {{-- <button id="toggleTrashedCommentsBtn" class="btn btn-sm btn-outline-danger"
@@ -792,7 +796,7 @@
 
                                 {{-- Tab Content - Sản phẩm yêu thích (Wishlist) --}}
                                 <div id="wishlist" class="tab-content-item {{ $tab == 'wishlist' ? 'active' : '' }}">
-                                    <h3>Sản phẩm yêu thích của tôi</h3>
+                                    <h3 style="color: #64B496;">Sản phẩm yêu thích của tôi</h3>
                                     @if (isset($data['wishlistItems']) && $data['wishlistItems']->isNotEmpty())
                                         <div class="list-group">
                                             @foreach ($data['wishlistItems'] as $wishlistItem)
@@ -805,7 +809,7 @@
                                                                 style="width: 50px; height: 50px; object-fit: cover;">
                                                         </div>
                                                         <div class="col-md-7">
-                                                            <h5 class="mb-1">
+                                                            <h5 class="mb-1" style="color: #64B496;">
                                                                 {{ optional($wishlistItem->product)->name ?? 'N/A' }}</h5>
                                                             <p class="mb-1 text-muted">
                                                                 Thêm vào:
@@ -861,11 +865,9 @@
         </div> {{-- End container-xxl --}}
     @endsection
 
+    {{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> --}}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     @push('scripts')
-        {{-- Đảm bảo jQuery được tải trước Bootstrap JS nếu chưa có trong layouts.app --}}
-        {{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> --}}
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-
         <script>
             $(document).ready(function() {
                 const csrfTokenGlobal = $('meta[name="csrf-token"]').attr('content');
