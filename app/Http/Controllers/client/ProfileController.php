@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\client;
+namespace App\Http\Controllers\Client;
 
 use App\Models\Cart;
 use App\Models\User;
@@ -12,15 +12,19 @@ use App\Models\UserProfile;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Auth\Events\Validated;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class ProfileController extends Controller
 {
     public function index($tab = 'info') // $tab vẫn được dùng để xác định tab nào active ban đầu
     {
         $user = Auth::user();
-        dd($user);
+        // dd($user);
         if (!$user) {
             return redirect()->route('login')->with('error', 'Bạn cần đăng nhập để xem trang cá nhân.');
         }
@@ -66,8 +70,7 @@ class ProfileController extends Controller
         // Trả về view chính của trang profile
         return view('client.pages.profile', compact('user', 'tab', 'data'));
     }
-
-    // Phương thức update giữ nguyên như đã cung cấp trước đó
+    
     public function update(Request $request)
     {
         $user = Auth::user();
@@ -75,7 +78,8 @@ class ProfileController extends Controller
             return redirect()->route('login')->with('error', 'Bạn cần đăng nhập để chỉnh sửa thông tin.');
         }
 
-        $request->validate([
+        // Tạo Validator thủ công
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'phone' => ['nullable', 'string', 'max:20', Rule::unique('user_profiles')->ignore($user->profile->id ?? null, 'id')],
@@ -85,27 +89,47 @@ class ProfileController extends Controller
             'user_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Max 2MB
         ]);
 
-        $user->name = $request->input('name');
-        $user->email = $request->input('email');
-        $user->save();
-
-        $profile = $user->profile ?: new UserProfile(['user_id' => $user->id]);
-        $profile->phone = $request->input('phone');
-        $profile->address = $request->input('address');
-        $profile->gender = $request->input('gender');
-        $profile->birth_date = $request->input('birth_date');
-
-        if ($request->hasFile('user_image')) {
-            if ($profile->user_image && file_exists(public_path($profile->user_image))) {
-                unlink(public_path($profile->user_image));
-            }
-            $imageName = time().'.'.$request->user_image->extension();
-            $request->user_image->move(public_path('images/users'), $imageName);
-            $profile->user_image = 'images/users/' . $imageName;
+        // KIỂM TRA LỖI VALIDATION VÀ CHUYỂN HƯỚNG VỚI LỖI
+        if ($validator->fails()) {
+            return redirect()->back() // Chuyển hướng về trang trước đó
+                ->withErrors($validator) // Đính kèm các lỗi vào session
+                ->withInput(); // Giữ lại dữ liệu đã nhập vào form
         }
 
-        $profile->save();
+        // Nếu validation thành công, code sẽ chạy tiếp từ đây
+        try {
+            $user->name = $request->input('name');
+            $user->email = $request->input('email');
+            $user->save();
 
-        return redirect()->route('profile.index', ['tab' => 'info'])->with('success', 'Thông tin cá nhân đã được cập nhật thành công!');
+            $profile = $user->profile ?: new UserProfile(['user_id' => $user->id]);
+            $profile->phone = $request->input('phone');
+            $profile->address = $request->input('address');
+            $profile->gender = $request->input('gender');
+            $profile->birth_date = $request->input('birth_date');
+           
+            if ($request->hasFile('user_image')) {
+                // Xóa ảnh cũ (nếu có và nếu nó được lưu theo cách CŨ hoặc theo cách MỚI)
+                // Nếu ảnh cũ lưu trong public_path:
+                if ($profile->user_image && file_exists(public_path($profile->user_image))) {
+                    unlink(public_path($profile->user_image));
+                }
+                // Nếu ảnh cũ lưu trong storage/app/public (cách chuẩn):
+                if ($profile->user_image && Storage::disk('public')->exists($profile->user_image)) {
+                    Storage::disk('public')->delete($profile->user_image);
+                }
+
+                $imagePath = $request->file('user_image')->store('images/users', 'public'); // Lưu vào storage/app/public/images/users
+                $profile->user_image = $imagePath; // Đường dẫn trong DB sẽ là 'images/users/ten_file.png'
+            }
+
+            $profile->save();
+
+            return redirect()->route('profile.index', ['tab' => 'info'])->with('success', 'Thông tin cá nhân đã được cập nhật thành công!');
+        } catch (\Exception $e) {
+            // Log lỗi hoặc hiển thị thông báo lỗi chung
+            Log::error('Update Profile Error: ' . $e->getMessage(), ['user_id' => $user->id, 'request' => $request->all()]);
+            return redirect()->back()->withInput()->with('error', 'Có lỗi xảy ra khi cập nhật thông tin: ' . $e->getMessage());
+        }
     }
 }

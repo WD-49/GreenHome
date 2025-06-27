@@ -1,6 +1,26 @@
 @extends('layouts.app')
 @section('title', 'Thông tin cá nhân của ' . $user->name) {{-- Thay đổi tiêu đề cho phù hợp với trang cá nhân --}}
-
+{{-- Đặt ở đầu phần nội dung chính của trang --}}
+@if (session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
+@if (session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+@endif
+{{-- Đây là khối chung để hiển thị tất cả lỗi validation nếu bạn có --}}
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 @push('styles')
     <style>
         .avatar-xxl {
@@ -115,26 +135,30 @@
                                 <div class="overflow-hidden ms-4">
                                     <h4 class="m-0 text-dark fs-20">{{ $user->name }}</h4>
                                     <p class="my-1 text-muted fs-16">{{ $user->email }}</p>
-
-                                    <span class="fs-15">
-                                        <i class="mdi mdi-account-group me-2 align-middle"></i>Vai trò:
-                                        <span>
-                                            @if ($user->role == 'admin' || $user->role == 'superadmin')
-                                                <span class="badge bg-success">{{ ucfirst($user->role) }}</span>
-                                            @else
-                                                <span class="badge bg-info text-dark">{{ ucfirst($user->role) }}</span>
-                                            @endif
-                                            <span class="badge bg-primary-subtle text-primary px-2 py-1 fs-13 fw-normal">
-                                                @if ($user->status == 1)
-                                                    <span class="badge bg-success"><i
-                                                            class="fas fa-check-circle me-1"></i>Hoạt động</span>
+                                    @if ($user->role == 'admin' || $user->role == 'superadmin')
+                                        <span class="fs-15">
+                                            <i class="mdi mdi-account-group me-2 align-middle"></i>Vai trò:
+                                            <span>
+                                                @if ($user->role == 'admin' || $user->role == 'superadmin')
+                                                    <span class="badge bg-success">{{ ucfirst($user->role) }}</span>
                                                 @else
-                                                    <span class="badge bg-danger"><i
-                                                            class="fas fa-times-circle me-1"></i>Ngừng hoạt động</span>
+                                                    <span class="badge bg-info text-dark">{{ ucfirst($user->role) }}</span>
                                                 @endif
+                                                <span
+                                                    class="badge bg-primary-subtle text-primary px-2 py-1 fs-13 fw-normal">
+                                                    @if ($user->status == 1)
+                                                        <span class="badge bg-success"><i
+                                                                class="fas fa-check-circle me-1"></i>Hoạt động</span>
+                                                    @else
+                                                        <span class="badge bg-danger"><i
+                                                                class="fas fa-times-circle me-1"></i>Ngừng hoạt động</span>
+                                                    @endif
+                                                </span>
                                             </span>
                                         </span>
-                                    </span>
+                                    @else
+                                        {{-- <span class="badge bg-info text-dark">{{ ucfirst($user->role) }}</span> --}}
+                                    @endif
                                     {{-- Phần thông tin ngắn gọn này có thể giữ hoặc bỏ tùy ý, vì sẽ có tab "Thông tin cá nhân" chi tiết hơn --}}
                                     @if ($user->profile)
                                         <div class="mt-3 text-start">
@@ -243,25 +267,46 @@
                                 <h3>Thông tin cá nhân</h3>
                                 <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
                                     @csrf
+
                                     <div class="form-group mb-3"> {{-- Thêm mb-3 cho khoảng cách --}}
                                         <label for="name">Tên của bạn:</label>
                                         <input type="text" class="form-control" id="name" name="name"
                                             value="{{ old('name', $user->name) }}">
+                                        @error('name')
+                                            <div class="invalid-feedback">
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
                                     </div>
                                     <div class="form-group mb-3">
                                         <label for="email">Email:</label>
                                         <input type="email" class="form-control" id="email" name="email"
                                             value="{{ old('email', $user->email) }}">
+                                        @error('email')
+                                            <div class="invalid-feedback">
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
                                     </div>
                                     <div class="form-group mb-3">
                                         <label for="phone">Số điện thoại:</label>
                                         <input type="text" class="form-control" id="phone" name="phone"
                                             value="{{ old('phone', $data['profile']->phone ?? '') }}">
+                                        @error('phone')
+                                            <div class="invalid-feedback">
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
                                     </div>
                                     <div class="form-group mb-3">
                                         <label for="address">Địa chỉ:</label>
                                         <input type="text" class="form-control" id="address" name="address"
                                             value="{{ old('address', $data['profile']->address ?? '') }}">
+                                        @error('address')
+                                            <div class="invalid-feedback">
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
                                     </div>
                                     <div class="form-group mb-3">
                                         <label for="gender">Giới tính:</label>
@@ -276,23 +321,36 @@
                                                 {{ old('gender', $data['profile']->gender ?? '') == 'khac' ? 'selected' : '' }}>
                                                 Khác</option>
                                         </select>
+                                        @error('gender')
+                                            <div class="invalid-feedback">
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
                                     </div>
                                     <div class="form-group mb-3">
                                         <label for="birth_date">Ngày sinh:</label>
-                                        <input type="date" class="form-control" id="birth_date" name="birth_date"
-                                            value="{{ old('birth_date', $data['profile']->birth_date ?? '') }}">
+                                        <input type="date"
+                                            class="form-control @error('birth_date') is-invalid @enderror" id="birth_date"
+                                            name="birth_date"
+                                            value="{{ old('birth_date', optional($data['profile']->birth_date)->format('Y-m-d')) }}">
+                                        {{-- Sửa dòng này --}}
+                                        @error('birth_date')
+                                            <div class="invalid-feedback">
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
                                     </div>
                                     <div class="form-group mb-3">
                                         <label for="user_image">Ảnh đại diện:</label>
                                         <input type="file" class="form-control-file" id="user_image"
                                             name="user_image">
-                                        {{-- @if ($data['profile'] && $data['profile']->user_image)
-                                            <img src="{{ asset($user->profile->user_image) }}" alt="" class="img-thumbnail mt-2" width="100">
-                                        @endif --}}
-
                                         <img src="{{ $user->profile && $user->profile->user_image ? asset('storage/' . $user->profile->user_image) : 'https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740' }}"
                                             class="img-thumbnail mt-2" alt="" width="100">
-                                        {{-- <img src="https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740" alt="" class="img-thumbnail mt-2" width="100"> --}}
+                                        @error('user_image')
+                                            <div class="invalid-feedback">
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
                                     </div>
                                     <button type="submit" class="btn btn-primary">Cập nhật thông tin</button>
                                 </form>
@@ -742,8 +800,8 @@
                                                     <div class="row align-items-center">
                                                         <div class="col-md-2">
                                                             <img src="{{ optional($wishlistItem->product)->image ? asset('storage/' . $wishlistItem->product->image) : 'https://spencil.vn/wp-content/uploads/2024/11/chup-anh-san-pham-SPencil-Agency-1.jpg' }}"
-                                                                alt=""
-                                                                {{-- Alt text nên dựa trên variant hoặc product --}} class="img-fluid rounded"
+                                                                alt="" {{-- Alt text nên dựa trên variant hoặc product --}}
+                                                                class="img-fluid rounded"
                                                                 style="width: 50px; height: 50px; object-fit: cover;">
                                                         </div>
                                                         <div class="col-md-7">
@@ -806,7 +864,7 @@
     @push('scripts')
         {{-- Đảm bảo jQuery được tải trước Bootstrap JS nếu chưa có trong layouts.app --}}
         {{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> --}}
-        {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script> --}}
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
         <script>
             $(document).ready(function() {

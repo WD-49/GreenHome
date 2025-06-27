@@ -346,11 +346,6 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     });
 });
 
-
-
-
-
-
 // route của trang client
 
 // trang trủ
