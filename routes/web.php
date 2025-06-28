@@ -340,12 +340,16 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/edit/{id}', [OrderController::class, 'edit'])->name('edit');
         Route::put('/update/{id}', [OrderController::class, 'update'])->name('update');
         Route::get('/show/{id}', [OrderController::class, 'show'])->name('show');
-        Route::put('/{id}/update-status', [OrderController::class, 'updateStatus'])->name('updateStatus');
+        // Các route cập nhật trạng thái
+        Route::put('/{order}/update-status', [OrderController::class, 'updateStatus'])->name('updateStatus'); // Đổi {id} thành {order} để nhất quán
         Route::put('/{order}/updatePaymentStatus', [OrderController::class, 'updatePaymentStatus'])->name('updatePaymentStatus');
+
         Route::delete('/destroy/{id}', [OrderController::class, 'destroy'])->name('destroy');
         Route::get('/trash', [OrderController::class, 'trash'])->name('trash');
         Route::post('/restore/{id}', [OrderController::class, 'restore'])->name('restore');
-        Route::post('{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
+        
+        // Đề xuất dùng PUT/PATCH cho việc hủy đơn hàng để phù hợp hơn với ngữ nghĩa RESTful
+        Route::put('{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
     });
 });
 
