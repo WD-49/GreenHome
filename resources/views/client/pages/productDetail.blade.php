@@ -110,7 +110,8 @@
                                     @if ($minPrice == $maxPrice)
                                         {{ number_format($minPrice, 0, ',', '.') }}₫
                                     @else
-                                        {{ number_format($minPrice, 0, ',', '.') }}₫ - {{ number_format($maxPrice, 0, ',', '.') }}₫
+                                        {{ number_format($minPrice, 0, ',', '.') }}₫ -
+                                        {{ number_format($maxPrice, 0, ',', '.') }}₫
                                     @endif
                                 @else
                                     Liên hệ
@@ -194,13 +195,17 @@
                                                 <div class="content {{ !$loop->first ? 'mt-30' : '' }}">
                                                     <img src="{{ asset('storage/' . ($review->user->avatar ?? 'default-avatar.jpg')) }}"
                                                         alt="review"
-                                                        onerror="if(!this.dataset.error) { this.dataset.error = true; this.src='{{ asset('images/default-avatar.jpg') }}'; }">
+                                                        onerror="if(!this.dataset.error){ this.dataset.error = true; this.src='{{ asset('images/default-avatar.jpg') }}'; }">
+
                                                     <div class="details">
                                                         <span class="date">
                                                             {{ \Carbon\Carbon::parse($review->created_at)->locale('vi')->isoFormat('D [tháng] M, YYYY') }}
                                                         </span>
                                                         <span class="name">{{ $review->user->name ?? 'Guest' }}</span>
                                                         @php
+                                                            $productName = optional(
+                                                                optional($review->productVariant)->product,
+                                                            )->name;
                                                             $variantAttributes = optional(
                                                                 $review->productVariant->productVariantValues ??
                                                                     collect(),
@@ -208,6 +213,12 @@
                                                                 ->map(fn($v) => $v->attributeValue->value ?? '')
                                                                 ->implode(' / ');
                                                         @endphp
+
+                                                        @if ($productName)
+                                                            <div class="text-muted small">Sản phẩm: {{ $productName }}
+                                                            </div>
+                                                        @endif
+
                                                         @if ($variantAttributes)
                                                             <div class="text-muted small">Biến thể:
                                                                 {{ $variantAttributes }}</div>
@@ -235,29 +246,36 @@
                                             @endforelse
                                         </div>
 
-                                        <h4 class="heading">Add a Review</h4>
+                                        {{-- Form thêm đánh giá (chỉ UI) --}}
+                                        <h4 class="heading">Thêm đánh giá của bạn</h4>
                                         <form action="javascript:void(0)">
-                                            <div class="cr-ratting-star">
-                                                <span>Your rating :</span>
+                                            <div class="cr-ratting-star mb-3">
+                                                <span>Đánh giá của bạn:</span>
                                                 <div class="cr-t-review-rating">
                                                     @for ($i = 1; $i <= 5; $i++)
                                                         <i class="ri-star-s-line"></i>
                                                     @endfor
                                                 </div>
                                             </div>
+
                                             <div class="cr-ratting-input">
-                                                <input name="your-name" placeholder="Name" type="text">
+                                                <input name="your-name" placeholder="Tên của bạn" type="text">
                                             </div>
                                             <div class="cr-ratting-input">
                                                 <input name="your-email" placeholder="Email*" type="email" required>
                                             </div>
+                                            <div class="cr-ratting-input">
+                                                <input name="your-title" placeholder="Tiêu đề đánh giá" type="text">
+                                            </div>
                                             <div class="cr-ratting-input form-submit">
-                                                <textarea name="your-comment" placeholder="Enter Your Comment"></textarea>
-                                                <button class="cr-button" type="submit">Submit</button>
+                                                <textarea name="your-comment" placeholder="Nội dung đánh giá"></textarea>
+                                                <button class="cr-button" type="submit">Gửi đánh giá</button>
                                             </div>
                                         </form>
                                     </div>
                                 </div>
+
+
 
 
                                 <!-- Comment -->
@@ -270,15 +288,20 @@
                                                     <img src="{{ asset('storage/' . ($comment->user->avatar ?? 'default-avatar.jpg')) }}"
                                                         alt="comment">
                                                     <div class="details">
-                                                        <span
-                                                            class="date">{{ \Carbon\Carbon::parse($comment->created_at)->locale('vi')->isoFormat('D [tháng] M, YYYY') }}</span>
+                                                        <span class="date">
+                                                            {{ \Carbon\Carbon::parse($comment->created_at)->locale('vi')->isoFormat('D [tháng] M, YYYY') }}
+                                                        </span>
                                                         <span class="name">{{ $comment->user->name ?? 'Guest' }}</span>
+                                                        <div class="product-name text-muted" style="font-size: 0.9rem;">
+                                                            Sản phẩm: {{ $product->name }}
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <p>{{ $comment->content }}</p>
                                             @empty
                                                 <p>Chưa có bình luận nào.</p>
                                             @endforelse
+
 
                                         </div>
                                         <h4 class="heading">Add a Comment</h4>
@@ -384,7 +407,8 @@
                                             @if ($itemMin == $itemMax)
                                                 {{ number_format($itemMin, 0, ',', '.') }}₫
                                             @else
-                                                {{ number_format($itemMin, 0, ',', '.') }}₫ - {{ number_format($itemMax, 0, ',', '.') }}₫
+                                                {{ number_format($itemMin, 0, ',', '.') }}₫ -
+                                                {{ number_format($itemMax, 0, ',', '.') }}₫
                                             @endif
                                         </span>
                                     </p>
