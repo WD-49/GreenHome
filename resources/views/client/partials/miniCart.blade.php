@@ -61,6 +61,7 @@
                 subtotal += total;
 
                 html += `
+
                     <li>
                         <a href="/product/${product.slug}" class="crside_pro_img">
                             <img src="/storage/${image}" alt="${product.name}">
@@ -164,3 +165,4 @@
     // Gọi khi mở cart hoặc khi trang load
     document.addEventListener('DOMContentLoaded', loadMiniCart);
 </script>
+

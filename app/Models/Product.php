@@ -115,4 +115,11 @@ class Product extends Model
             'id' // Local key trên bảng product_variants
         );
     }
+
+    public function wishlists()
+{
+    return $this->hasMany(WishList::class);
+}
+
+    
 }

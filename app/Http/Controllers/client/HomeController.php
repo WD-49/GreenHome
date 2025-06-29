@@ -2,18 +2,21 @@
 
 namespace App\Http\Controllers\client;
 
-use App\Http\Controllers\Controller;
-use App\Models\Banner;
 use App\Models\Blog;
 use App\Models\Brand;
-use App\Models\Category;
-use App\Models\Product;
+use App\Models\Banner;
 use App\Models\Review;
+use Illuminate\Support\Facades\DB;
+use App\Models\Product;
+use App\Models\Category;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
     public function index()
     {
+        dd(Auth::user());
         $title = 'Home';
          $banner1 = Banner::where('priority', 1)->get();
         $banner2 = Banner::where('priority', 2)->get();
@@ -61,8 +64,16 @@ $categories2 = Category::with(['products' => function ($query) {
         }
     ])->get();
 $dealBanner = Banner::where('priority', 13)->where('status', 1)->first();
+$webInfos = DB::table('web_infos')->get()->pluck('value', 'key');
+ $categories3 = DB::table('categories')
+        ->where('status', 1)
+        ->whereNull('deleted_at')
+        ->orderBy('created_at', 'desc') // Mới nhất
+        ->limit(5)                      // Giới hạn 5 bản ghi
+        ->get();
 
-        return view('client.pages.home', compact('title','dealBanner','categories2','products1','blogs','reviews','products', 'banner12', 'banner1', 'banner2', 'banner3', 'banner4', 'banner5', 'banner6', 'banner7', 'banner8', 'banner9', 'banner10', 'categories1', 'categories', 'categories2','randomProducts', 'brands', 'banners', 'banner11', 'banners_mix'));
+
+        return view('client.pages.home', compact('title','dealBanner','categories2','products1','blogs','reviews','products', 'banner12', 'banner1', 'banner2', 'banner3', 'banner4', 'banner5', 'banner6', 'banner7', 'banner8', 'banner9', 'banner10', 'categories1', 'categories', 'categories2','randomProducts', 'brands', 'banners', 'banner11', 'banners_mix','webInfos','categories3'));
     }
 
 
