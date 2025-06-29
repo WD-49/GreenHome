@@ -486,6 +486,7 @@
             background-size: cover;
             background-position: center;
             height: 600px;">
+            
 
 
             <div class="container">

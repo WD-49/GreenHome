@@ -41,6 +41,124 @@
                     </div>
                 </div>
 
+                {{-- Trạng thái đơn hàng & Trạng thái thanh toán --}}
+                <div class="d-flex flex-wrap gap-5 mb-4">
+
+                    {{-- Trạng thái đơn hàng --}}
+                    <div>
+                        <h5 class="mb-3">📌 Trạng thái đơn hàng</h5>
+                        <form id="orderStatusForm" method="POST"
+                            action="{{ route('admin.orders.updateStatus', $order->id) }}">
+                            @csrf
+                            @method('PUT')
+                            <div class="d-flex align-items-center gap-3">
+                                <select name="order_status" id="order_status_select" class="form-select w-auto">
+                                    @php
+                                        // Định nghĩa trực tiếp các giá trị enum và tên hiển thị tiếng Việt cho order_status
+                                        $orderStatuses = [
+                                            'Chưa xác nhận' => 'Chưa xác nhận',
+                                            'Xác nhận' => 'Xác nhận',
+                                            'Đang vận chuyển' => 'Đang vận chuyển',
+                                            'Giao hàng thành công' => 'Giao hàng thành công',
+                                            'Hủy đơn' => 'Hủy đơn',
+                                        ];
+                                        // Lấy trạng thái hiện tại của đơn hàng từ đối tượng $order
+                                        $currentOrderStatus = $order->order_status;
+
+                                        // Xác định các trạng thái không thể hủy từ canBeCancelled() logic (trong Order model)
+                                        $cancellableStatuses = ['Chưa xác nhận', 'Xác nhận']; // Giả định từ Order model canBeCancelled()
+                                    @endphp
+                                    @foreach ($orderStatuses as $enumValue => $displayName)
+                                        @php
+                                            $isDisabled = false;
+                                            $isAlreadySelected = $currentOrderStatus === $enumValue;
+
+                                            // Logic để làm mờ các trạng thái lùi hoặc trạng thái không thể chuyển đến
+                                            $currentStatusIndex = array_search(
+                                                $currentOrderStatus,
+                                                array_keys($orderStatuses),
+                                            );
+                                            $enumValueIndex = array_search($enumValue, array_keys($orderStatuses));
+
+                                            // Không cho phép lùi trạng thái nếu không phải hủy đơn
+                                            if ($enumValue !== 'Hủy đơn' && $enumValueIndex < $currentStatusIndex) {
+                                                $isDisabled = true;
+                                            }
+
+                                            // Nếu trạng thái hiện tại là 'Giao hàng thành công' hoặc 'Hủy đơn', không cho thay đổi
+                                            // (Trừ khi bạn muốn cho phép chuyển từ 'Hủy đơn' về trạng thái khác, điều này cần logic riêng)
+                                            if (
+                                                $currentOrderStatus === 'Giao hàng thành công' &&
+                                                $enumValue !== 'Giao hàng thành công'
+                                            ) {
+                                                $isDisabled = true;
+                                            }
+                                            if ($currentOrderStatus === 'Hủy đơn' && $enumValue !== 'Hủy đơn') {
+                                                $isDisabled = true;
+                                            }
+
+                                            // Nếu trạng thái là 'Hủy đơn' nhưng đơn hàng không thể hủy
+                                            if (
+                                                $enumValue === 'Hủy đơn' &&
+                                                !in_array($currentOrderStatus, $cancellableStatuses)
+                                            ) {
+                                                $isDisabled = true;
+                                            }
+
+                                        @endphp
+                                        <option value="{{ $enumValue }}" {{ $isAlreadySelected ? 'selected' : '' }}
+                                            {{ $isDisabled ? 'disabled' : '' }}>
+                                            {{ $displayName }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-arrow-repeat me-1"></i> Cập nhật
+                                </button>
+                            </div>
+                        </form>
+
+                        @if ($order->order_status === 'Hủy đơn' && $order->cancel_reason)
+                            <div class="mt-2 text-danger">
+                                <strong>❌ Lý do huỷ:</strong> {{ $order->cancel_reason }}
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Trạng thái thanh toán --}}
+                    <div>
+                        <h5 class="mb-3">💳 Trạng thái thanh toán</h5>
+                        <form id="paymentStatusForm" method="POST"
+                            action="{{ route('admin.orders.updatePaymentStatus', $order->id) }}">
+                            @csrf
+                            @method('PUT')
+                            <div class="d-flex align-items-center gap-3">
+                                <select name="payment_status" class="form-select w-auto">
+                                    {{-- Lấy trạng thái thanh toán hiện tại --}}
+                                    @php
+                                        $currentPaymentStatus = $order->payment_status;
+                                        $paymentStatuses = [
+                                            'pending' => 'Chờ thanh toán',
+                                            'paid' => 'Đã thanh toán',
+                                            'failed' => 'Thanh toán thất bại',
+                                        ];
+                                    @endphp
+                                    @foreach ($paymentStatuses as $enumValue => $displayName)
+                                        <option value="{{ $enumValue }}"
+                                            {{ $currentPaymentStatus === $enumValue ? 'selected' : '' }}
+                                            {{-- Bạn có thể thêm logic disabled tại đây nếu cần (ví dụ: không cho chuyển từ 'paid' về 'pending') --}} {{-- Ví dụ: nếu đã thanh toán, không cho quay lại chờ thanh toán --}}
+                                            @if ($currentPaymentStatus === 'paid' && $enumValue === 'pending') disabled @endif>
+                                            {{ $displayName }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-secondary">
+                                    <i class="bi bi-arrow-repeat me-1"></i> Cập nhật
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
 
 
                 @php
@@ -196,7 +314,8 @@
                 </div>
                 <div class="modal-body">
                     <p>Bạn đang chọn hủy đơn hàng này. Vui lòng nhập lý do hủy:</p>
-                    <textarea class="form-control" id="cancel_reason_text" rows="3" placeholder="Nhập lý do hủy đơn hàng..."></textarea>
+                    <textarea class="form-control" id="cancel_reason_text" name="cancel_reason_modal" rows="3"
+                        placeholder="Nhập lý do hủy đơn hàng..."></textarea>
                     <small id="cancelReasonError" class="text-danger d-none">Vui lòng nhập lý do hủy.</small>
                 </div>
                 <div class="modal-footer">
@@ -207,3 +326,68 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const orderStatusSelect = document.getElementById('order_status_select');
+            const orderStatusForm = document.getElementById('orderStatusForm');
+            const cancelReasonModal = new bootstrap.Modal(document.getElementById('cancelReasonModal'));
+            const cancelReasonTextarea = document.getElementById('cancel_reason_text');
+            const confirmCancelOrderBtn = document.getElementById('confirmCancelOrderBtn');
+            const cancelReasonError = document.getElementById('cancelReasonError');
+
+            // Lưu trữ trạng thái gốc khi trang được tải
+            let originalOrderStatus = orderStatusSelect.value;
+
+            orderStatusSelect.addEventListener('change', function() {
+                // Khi chọn 'Hủy đơn', hiện modal
+                if (this.value === 'Hủy đơn') {
+                    cancelReasonTextarea.value = ''; // Xóa lý do cũ
+                    cancelReasonError.classList.add('d-none'); // Ẩn lỗi
+                    cancelReasonModal.show();
+                } else {
+                    // Nếu thay đổi sang trạng thái khác 'Hủy đơn', đảm bảo không có hidden input 'cancel_reason'
+                    const existingReasonInput = orderStatusForm.querySelector(
+                        'input[name="cancel_reason"]');
+                    if (existingReasonInput) {
+                        existingReasonInput.remove();
+                    }
+                    // Tự động submit form nếu không phải là 'Hủy đơn'
+                    orderStatusForm.submit();
+                }
+            });
+
+            confirmCancelOrderBtn.addEventListener('click', function() {
+                const reason = cancelReasonTextarea.value.trim();
+                if (reason.length < 1) { // Kiểm tra độ dài tối thiểu
+                    cancelReasonError.textContent = 'Vui lòng nhập lý do hủy.';
+                    cancelReasonError.classList.remove('d-none');
+                } else {
+                    cancelReasonError.classList.add('d-none');
+                    // Tạo hoặc cập nhật hidden input cho cancel_reason
+                    let hiddenInput = orderStatusForm.querySelector('input[name="cancel_reason"]');
+                    if (!hiddenInput) {
+                        hiddenInput = document.createElement('input');
+                        hiddenInput.type = 'hidden';
+                        hiddenInput.name = 'cancel_reason';
+                        orderStatusForm.appendChild(hiddenInput);
+                    }
+                    hiddenInput.value = reason;
+
+                    cancelReasonModal.hide();
+                    orderStatusForm.submit(); // Gửi form
+                }
+            });
+
+            // Khi modal đóng, nếu người dùng đã mở modal nhưng không xác nhận hủy,
+            // đặt lại trạng thái dropdown về trạng thái ban đầu.
+            cancelReasonModal._element.addEventListener('hidden.bs.modal', function() {
+                if (orderStatusSelect.value === 'Hủy đơn' && !orderStatusForm.querySelector(
+                        'input[name="cancel_reason"]')) {
+                    orderStatusSelect.value = originalOrderStatus;
+                }
+            });
+        });
+    </script>
+@endpush

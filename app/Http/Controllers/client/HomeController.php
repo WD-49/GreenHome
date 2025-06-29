@@ -2,20 +2,21 @@
 
 namespace App\Http\Controllers\client;
 
-use App\Http\Controllers\Controller;
-use App\Models\Banner;
 use App\Models\Blog;
 use App\Models\Brand;
-use App\Models\Category;
-use App\Models\Product;
+use App\Models\Banner;
 use App\Models\Review;
 use Illuminate\Support\Facades\DB;
-
+use App\Models\Product;
+use App\Models\Category;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
     public function index()
     {
+        dd(Auth::user());
         $title = 'Home';
          $banner1 = Banner::where('priority', 1)->get();
         $banner2 = Banner::where('priority', 2)->get();
