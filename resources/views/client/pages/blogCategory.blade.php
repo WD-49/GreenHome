@@ -31,6 +31,27 @@
                                 </a>
                             </form>
                         </div>
+
+                        <div class="cr-blog-sorting">
+                            <div class="blog-heading">
+                                <h4>Lọc bài viết</h4>
+                            </div>
+                            <div class="cr-blog-categories-content">
+        <form method="GET" action="{{ route('blog.index') }}">
+            {{-- Preserve search term if it exists --}}
+            @if(request('search'))
+                <input type="hidden" name="search" value="{{ request('search') }}">
+            @endif
+
+            <select name="sort" onchange="this.form.submit()" class="form-select w-100">
+                <option value="">Sắp xếp theo</option>
+                <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>Mới nhất</option>
+                <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Cũ nhất</option>
+            </select>
+        </form>
+                            </div>
+                        </div>
+
                         <div class="cr-blog-categories">
                             <div class="blog-heading">
                                 <h4>Danh mục</h4>
