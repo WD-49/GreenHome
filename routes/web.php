@@ -374,7 +374,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/blog/{slugCategory?}', [ClientBlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/detail/{slug}', [ClientBlogController::class, 'show'])->name('blog.show');
 
-Route::get('/san-pham/{slug}', [ProductClientController::class, 'show'])->name('productDetail');
+Route::get('/san-pham/{slug}', [ProductClientController::class, 'show'])->middleware('auth')->name('productDetail');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 
 Route::get('/blog/{slug}', [App\Http\Controllers\client\BlogDetailController::class, 'show'])->name('blog.detail');
