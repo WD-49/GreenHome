@@ -9,6 +9,8 @@ use App\Http\Controllers\admin\BlogController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\admin\BrandController;
 use App\Http\Controllers\admin\OrderController;
+use App\Http\Controllers\client\CartController;
+
 use App\Http\Controllers\client\HomeController;
 
 use App\Http\Controllers\Client\ShopController;
@@ -393,6 +395,15 @@ Route::get('/blog/detail/{slug}', [ClientBlogController::class, 'show'])->name('
 
 Route::get('/san-pham/{slug}', [ProductClientController::class, 'show'])->middleware('auth')->name('productDetail');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
+
+// giỏ hàng
+route::prefix('cart')->middleware('auth')->name('cart.')->group(function () {
+    Route::get('/', [CartController::class, 'viewCart'])->name('view');
+    Route::get('/data', [CartController::class, 'getCartData'])->name('data');
+    Route::post('/add', [CartController::class, 'addToCart'])->name('add');
+    Route::post('/update-quantity/{id}', [CartController::class, 'updateQuantity'])->name('updateQuantity');
+    Route::post('/delete-multiple', [CartController::class, 'deleteMultiple'])->name('deleteMultiple');
+});
 
 Route::get('/blog/{slug}', [App\Http\Controllers\client\BlogDetailController::class, 'show'])->name('blog.detail');
 // footer

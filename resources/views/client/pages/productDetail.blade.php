@@ -126,6 +126,8 @@
                                     <ul>
                                         @foreach ($product->productVariants as $index => $variant)
                                             <li class="variant-option{{ $index == 0 ? ' active-color' : '' }}"
+                                                data-variant-id="{{ $variant->id }}" data-price="{{ $variant->price }}"
+                                                // check lỗi conflict
                                                 data-id="{{ $variant->id }}" data-price="{{ $variant->price }}"
                                                 data-quantity="{{ $variant->quantity }}"
                                                 data-image="{{ asset('storage/' . $variant->image) }}">
@@ -135,7 +137,12 @@
                                     </ul>
                                 </div>
                             </div>
+                        @else
+                            <input type="hidden" class="variant-option"
+                                data-variant-id="{{ $product->productVariants->first()->id }}"
+                                value="{{ $product->productVariants->first()->id }}">
                             <div id="variant-stock" class="mt-2" style="color: #28a745; font-weight: 500;"></div>
+
                         @endif
 
                         <div class="cr-add-card">
@@ -146,7 +153,7 @@
                                 <button type="button" class="minus">-</button>
                             </div>
                             <div class="cr-add-button">
-                                <button type="button" class="cr-button cr-shopping-bag">Add to cart</button>
+                                <button type="button" class="cr-button add-to-cart">Add to cart</button>
                             </div>
                             <div class="cr-card-icon">
                                 <a href="javascript:void(0)" class="wishlist">
@@ -449,6 +456,66 @@
                     });
                 });
 
+                // Thêm vào giỏ hàng
+                document.querySelector('.add-to-cart').addEventListener('click', function() {
+                    let activeVariant = document.querySelector('.variant-option.active-color');
+
+                    // Nếu không có thẻ .variant-option nào (tức là sản phẩm đơn), thì lấy từ thẻ input ẩn
+                    if (!activeVariant) {
+                        activeVariant = document.querySelector('.variant-option');
+                    }
+
+                    // Sau khi có thẻ, lấy ID
+                    let variantId = activeVariant ? activeVariant.getAttribute('data-variant-id') :
+                        activeVariant?.value;
+                    let quantity = document.querySelector('.quantity').value;
+                    console.log('Variant ID:', variantId, 'Quantity:', quantity);
+
+                    if (!variantId) {
+                        alert('Vui lòng chọn loại sản phẩm!');
+                        return;
+                    }
+
+                    fetch('{{ route('cart.add') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                product_variant_id: variantId,
+                                quantity: quantity
+                            })
+                        })
+                        .then(response => {
+                            if (response.redirected) {
+                                // Trường hợp chưa đăng nhập, Laravel redirect về login
+                                window.location.href = response.url;
+                                alert('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!');
+                                return;
+                            }
+                            return response.json();
+                        })
+
+                        .then(data => {
+                            if (data.success) {
+                                console.log('Thêm vào giỏ hàng thành công:');
+                                showNotify('Đã thêm sản phẩm vào giỏ hàng!', 'success');
+
+                                console.log('Cập nhật giỏ hàng:', data.cart);
+                                // if (data.cart) {
+                                //     updateMiniCart(data.cart);
+                                // } else {
+                                // Nếu server không trả cart, bạn có thể gọi lại loadMiniCart để fetch dữ liệu mới
+                                loadMiniCart();
+                                // }
+                            } else {
+                                showNotify(data.message || 'Có lỗi xảy ra!', 'error');
+
+                            }
+                        })
+                        .catch((error) => showNotify(data.message || 'Có lỗi xảy ra!', 'error'));
+                });
                 const first = document.querySelector('.variant-option');
                 if (first) first.click();
             });

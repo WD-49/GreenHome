@@ -39,7 +39,7 @@
     <!-- CSRF Token cho AJAX -->
 <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
-@stack('scripts')
+
 <body class="body-bg-6">
 
     <!-- Loader -->
@@ -138,68 +138,8 @@
     <!-- Tab to top -->
     @include('client.partials.tabToTop')
 
-    <!-- Modal -->
-    <div class="modal fade quickview-modal" id="quickview" aria-hidden="true" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered cr-modal-dialog">
-            <div class="modal-content">
-                <button type="button" class="cr-close-model btn-close" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-5 col-sm-12 col-xs-12">
-                            <div class="zoom-image-hover modal-border-image">
-                                <img src="{{ asset('assets_client/assets/img/product/tab-1.jpg') }}"
-                                    alt="product-tab-2" class="product-image">
-                            </div>
-                        </div>
-                        <div class="col-md-7 col-sm-12 col-xs-12">
-                            <div class="cr-size-and-weight-contain">
-                                <h2 class="heading">Peach Seeds Of Change Oraganic Quinoa, Brown fruit</h2>
-                                <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry...</p>
-                            </div>
-                            <div class="cr-size-and-weight">
-                                <div class="cr-review-star">
-                                    <div class="cr-star">
-                                        <i class="ri-star-fill"></i>
-                                        <i class="ri-star-fill"></i>
-                                        <i class="ri-star-fill"></i>
-                                        <i class="ri-star-fill"></i>
-                                        <i class="ri-star-fill"></i>
-                                    </div>
-                                    <p>( 75 Review )</p>
-                                </div>
-                                <div class="cr-product-price">
-                                    <span class="new-price">$120.25</span>
-                                    <span class="old-price">$123.25</span>
-                                </div>
-                                <div class="cr-size-weight">
-                                    <h5><span>Size</span>/<span>Weight</span> :</h5>
-                                    <div class="cr-kg">
-                                        <ul>
-                                            <li class="active-color">500gm</li>
-                                            <li>1kg</li>
-                                            <li>2kg</li>
-                                            <li>5kg</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="cr-add-card">
-                                    <div class="cr-qty-main">
-                                        <input type="text" value="1" class="quantity">
-                                        <button type="button" id="add_model" class="plus">+</button>
-                                        <button type="button" id="sub_model" class="minus">-</button>
-                                    </div>
-                                    <div class="cr-add-button">
-                                        <button type="button" class="cr-button">Add to cart</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
+    @include('client.partials.modalProduct')
 
 
     <!-- Cart -->
@@ -208,6 +148,12 @@
     <!-- Side-tool -->
     @include('client.partials.sideTool')
 
+    <!-- Global Notify -->
+    <div id="global-notify" style="display:none;position:fixed;z-index:9999;bottom:40px;right:40px;min-width:220px;">
+        <div class="cr-cart-notify">
+            <p class="compare-note" id="global-notify-message"></p>
+        </div>
+    </div>
 
     <!-- Các phần còn lại bạn thay đổi tương tự: -->
     <!-- Đổi tất cả các src="assets/..." thành src="{{ asset('assets_client/assets/...') }}" -->
@@ -225,6 +171,9 @@
 
     <!-- Main Custom -->
     <script src="{{ asset('assets_client/assets/js/main.js') }}"></script>
+
+    {{-- js cho thông báo --}}
+    @Vite(['resources/js/app.js']);
     @stack('scripts')
 </body>
 

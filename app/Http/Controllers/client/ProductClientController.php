@@ -15,6 +15,7 @@ class ProductClientController extends Controller
             'category',
             'productVariants.productVariantValues.attributeValue',
             'comments.user',
+
         ])->where('slug', $slug)->firstOrFail();
 
         $product->increment('view');
