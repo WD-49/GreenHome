@@ -35,7 +35,9 @@ use App\Http\Controllers\admin\Product\ProductController;
 use App\Http\Controllers\admin\Account\AccountAdminController;
 use App\Http\Controllers\admin\Account\AccountUsersController;
 use App\Http\Controllers\admin\Product\ProductVariantController;
+use App\Http\Controllers\Admin\WebInfoController;
 use App\Http\Controllers\client\BlogController as ClientBlogController;
+
 
 // route của trang client
 
@@ -343,6 +345,15 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::post('{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
     });
 });
+// webinfor 
+
+
+// Hiển thị thông tin cấu hình website
+Route::get('/admin/webinfor', [WebInfoController::class, 'show'])->name('admin.web_info.show');
+Route::get('/admin/webinfor/edit', [WebInfoController::class, 'edit'])->name('admin.web_info.edit');
+Route::post('/admin/webinfor/update', [WebInfoController::class, 'update'])->name('admin.web_info.update');
+
+
 
 
 
@@ -361,3 +372,7 @@ Route::get('/san-pham/{slug}', [ProductClientController::class, 'show'])->name('
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 
 Route::get('/blog/{slug}', [App\Http\Controllers\client\BlogDetailController::class, 'show'])->name('blog.detail');
+// footer
+// Route::get('/footer', [WebInfoController::class, 'showFooter']);
+Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');
+
