@@ -283,33 +283,30 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav">
                         <li class="nav-item">
-                            <a class="nav-link" href="index.html">
+                            <a class="nav-link" href="{{ route('home') }}">
                                 Home
                             </a>
                         </li>
-                        <li class="nav-item dropdown">
+                       <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="javascript:void(0)">
-                                Category
+                                Danh Mục
                             </a>
                             <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="shop-left-sidebar.html">Shop Left
-                                        sidebar</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="shop-right-sidebar.html">Shop
-                                        Right
-                                        sidebar</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="shop-full-width.html">Full
-                                        Width</a>
-                                </li>
+                                @isset($categories3)
+                                @foreach ($categories3 as $category)
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('category.show', $category->slug) }}">
+                                            {{ $category->name }}
+                                        </a>
+                                    </li>
+                                @endforeach
+                                @endisset
                             </ul>
                         </li>
+
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="javascript:void(0)">
-                                Products
+                                Sản Phẩm
                             </a>
                             <ul class="dropdown-menu">
                                 <li>
@@ -383,7 +380,7 @@
                                 </li>
                             </ul>
                         </li>
-                        <li class="nav-item dropdown">
+                        {{-- <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="javascript:void(0)">
                                 Elements
                             </a>
@@ -398,7 +395,7 @@
                                     <a class="dropdown-item" href="elements-buttons.html">Buttons</a>
                                 </li>
                             </ul>
-                        </li>
+                        </li> --}}
                     </ul>
                 </div>
             </nav>
