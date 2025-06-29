@@ -1,17 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-<style>
-    .cr-blog-details-image img {
-    width: 400px;
-    height: 640px;
-    object-fit: cover;
-    border-radius: 8px;
-    display: block;
-    margin: 0 auto;
-}
-
-</style>
+    <style>
+        img {
+            width: 800px;
+            height: auto;
+            display: block;
+            margin: 10px auto;
+        }
+    </style>
     <!-- Breadcrumb -->
     <section class="section-breadcrumb">
         <div class="cr-breadcrumb-image">
@@ -36,7 +33,7 @@
                     <div class="cr-blog-details">
                         {{-- Ảnh bìa --}}
                         <div class="cr-blog-details-image">
-                            <img src="{{ asset('storage/' . $blog->thumbnail) }}" alt="{{ $blog->slug }}" >
+                            <img src="{{ asset('storage/' . $blog->thumbnail) }}" alt="{{ $blog->slug }}">
                         </div>
 
                         {{-- Thông tin bài viết --}}
@@ -75,9 +72,13 @@
                                 </div>
                             </div>
                         </div> --}}
-                        <div class="cr-blog-details-message">
-                            <p>{{ Str::limit(strip_tags($blog->content), 300) }}</p>
-                            <h5 class="title"> Admin</h5>
+                        <div class="blog-post">
+                            <div id="blog-content">
+                                <p class="post-content">
+                                    {{ Str::limit($blog->content, 300) }}
+                                </p>
+                                <h5 class="title">Admin</h5>
+                            </div>
                         </div>
                         <div class="cr-blog-details-paragrap">
                             <p>Đây là nội dung phụ hoặc thêm của bài viết.</p>

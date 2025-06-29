@@ -52,10 +52,11 @@
 
                         </li>
                     </ul>
-                    <a href="wishlist.html" class="cr-right-bar-item">
+                    <a href="{{ route('wishlist.index') }}" class="cr-right-bar-item">
                         <i class="ri-heart-3-line"></i>
                         <span>Wishlist</span>
                     </a>
+
                     <a href="javascript:void(0)" class="cr-right-bar-item Shopping-toggle">
                         <i class="ri-shopping-cart-line"></i>
                         <span>Cart</span>

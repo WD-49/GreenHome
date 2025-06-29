@@ -107,6 +107,12 @@ class Product extends Model
             }
         });
     }
+
+    public function wishlists()
+{
+    return $this->hasMany(WishList::class);
+}
+
     // public function reviews()
     // {
     //     return $this->hasManyThrough(
