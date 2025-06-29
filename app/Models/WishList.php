@@ -11,6 +11,7 @@ class WishList extends Model
     public $timestamps = false; 
     use HasFactory, SoftDeletes;
 
+
     protected $table = 'wishlists'; // 🛠️ CHÍNH XÁC tên bảng trong migration của bạn
 
     protected $fillable = ['user_id', 'product_id', 'add_at', 'notify_on_sale', 'priority'];

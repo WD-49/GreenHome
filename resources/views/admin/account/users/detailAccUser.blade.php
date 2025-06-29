@@ -2,7 +2,6 @@
 @section('title', 'Chi tiết người dùng')
 
 @push('styles')
-    1233
     <style>
         .avatar-xxl {
             width: 150px;
@@ -593,26 +592,6 @@
     @endsection
 
     @push('scripts')
-        {{-- <script src="path/to/third-party-library.js"></script>
-    <script src="{{ asset('js/path/to/language-file-vi.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@some-library/language-vi.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> --}}
-
-        {{-- DÒNG NÀY CÓ THỂ ĐÃ ĐƯỢC TẢI TRONG LAYOUT CHÍNH (layouts/admin.blade.php) --}}
-        {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> --}}
-
-        {{-- ĐẢM BẢO CÁC ĐƯỜNG DẪN NÀY ĐÚNG VỚI ASSETS CỦA BẠN --}}
-        {{-- <script src="../../../assets/libs/jquery/jquery.min.js"></script>  <-- TRÙNG LẶP VỚI CDN JQUERY --}}
-        {{-- <script src="../../../assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script> <-- TRÙNG LẶP VỚI CDN BOOTSTRAP --}}
-        {{-- <script src="../../../assets/libs/simplebar/simplebar.min.js"></script>
-    <script src="../../../assets/libs/node-waves/waves.min.js"></script>
-    <script src="../../../assets/libs/waypoints/lib/jquery.waypoints.min.js"></script>
-    <script src="../../../assets/libs/jquery.counterup/jquery.counterup.min.js"></script>
-    <script src="../../../assets/libs/feather-icons/feather.min.js"></script> --}}
-
-        {{-- <script src="../../../assets/js/app.js"></script> --}}
-
-
         <script>
             $(document).ready(function() {
                 const csrfTokenGlobal = $('meta[name="csrf-token"]').attr('content');

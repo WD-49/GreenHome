@@ -37,6 +37,11 @@
                                     </li>
                                 @else
                                     <li>
+                                        <a class="dropdown-item"
+                                            style="display: block; width: 100%; padding: 0.5rem 1rem; color: #212529; text-align: inherit; background-color: transparent; border: 0; font-size: 1rem;"
+                                            href="{{ route('profile.index') }}">Tài khoản của tôi</a>
+                                    </li>
+                                    <li>
                                         <form action="{{ route('logout') }}" method="POST">
                                             @csrf
                                             <button type="submit" class="dropdown-item">Đăng xuất</button>

@@ -1,4 +1,4 @@
-    <!-- Side-tool -->
+    {{-- <!-- Side-tool -->
     <div class="cr-tool-overlay"></div>
     <div class="cr-tool">
         <div class="cr-tool-btn">
@@ -66,4 +66,4 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}

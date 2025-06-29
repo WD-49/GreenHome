@@ -1,4 +1,4 @@
-    <!-- Cart -->
+    {{-- <!-- Cart -->
     <div class="cr-cart-overlay"></div>
     <div class="cr-cart-view">
         <div class="cr-cart-inner">
@@ -86,4 +86,4 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
