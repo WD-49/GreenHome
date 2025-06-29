@@ -35,6 +35,7 @@ use App\Http\Controllers\admin\Product\ProductController;
 use App\Http\Controllers\admin\Account\AccountAdminController;
 use App\Http\Controllers\admin\Account\AccountUsersController;
 use App\Http\Controllers\admin\Product\ProductVariantController;
+use App\Http\Controllers\client\WishlistController;
 use App\Http\Controllers\client\BlogController as ClientBlogController;
 
 // route của trang client
@@ -43,6 +44,22 @@ use App\Http\Controllers\client\BlogController as ClientBlogController;
 Route::get('/category/{id}', [HomeController::class, 'category'])->name('shop.category');
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/category-id/{id}', [ProductController::class, 'getProductsByCategoryId']);
+
+//wishlist 
+
+
+Route::middleware('auth')->prefix('wishlist')->group(function () {
+    Route::get('/', [WishlistController::class, 'index'])->name('wishlist.index');
+    Route::post('/add', [WishlistController::class, 'add'])->name('wishlist.add');
+    Route::post('/remove', [WishlistController::class, 'remove'])->name('wishlist.remove');
+});
+
+Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+Route::post('/wishlist/update-options', [WishlistController::class, 'updateOptions'])->name('wishlist.updateOptions');
+
+
+
+
 
 // viết tiếp route của các trang tại đây
 // // Route::get('/blog', [HomeController::class, 'blog'])->name('blog'); ví dụ.

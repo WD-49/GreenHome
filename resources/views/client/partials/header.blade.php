@@ -26,7 +26,7 @@
                                 <i class="ri-user-3-line"></i>
                                 <span>Account</span>
                             </a>
-                            
+
                             <ul class="dropdown-menu">
                                 @guest
                                     <li>
@@ -47,10 +47,11 @@
 
                         </li>
                     </ul>
-                    <a href="wishlist.html" class="cr-right-bar-item">
+                    <a href="{{ route('wishlist.index') }}" class="cr-right-bar-item">
                         <i class="ri-heart-3-line"></i>
                         <span>Wishlist</span>
                     </a>
+
                     <a href="javascript:void(0)" class="cr-right-bar-item Shopping-toggle">
                         <i class="ri-shopping-cart-line"></i>
                         <span>Cart</span>
@@ -362,7 +363,7 @@
                             </ul>
                         </li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="{{route('blog.index')}}">
+                            <a class="nav-link dropdown-toggle" href="{{ route('blog.index') }}">
                                 Bài viết
                             </a>
                             <ul class="dropdown-menu">
