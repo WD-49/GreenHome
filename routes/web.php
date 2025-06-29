@@ -78,12 +78,15 @@ Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkE
 
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('forgot-password.form');
 Route::post('/forgot-password', [ForgotPasswordController::class, 'handle'])->name('forgot-password.handle');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile/{tab?}', [ProfileController::class, 'index'])->name('profile.index');
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::get('/{comment}/details-with-product', [CommentController::class, 'getCommentDetailsWithProduct'])
-                ->name('detailWithProduct');
+        ->name('detailWithProduct');
 });
+
+     
 
 // route của trang admin
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
@@ -232,8 +235,6 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         // Route::post('toggleUserRole/{admin}', [AccountAdminController::class, 'toggleUserRole'])->name('toggleUserRole');
     });
 
-
-
     //quản lí đánh giá 
     Route::prefix('reviews')->name('reviews.')->group(function () {
         Route::get('/', [ReviewController::class, 'index'])->name('index');
@@ -357,12 +358,16 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/edit/{id}', [OrderController::class, 'edit'])->name('edit');
         Route::put('/update/{id}', [OrderController::class, 'update'])->name('update');
         Route::get('/show/{id}', [OrderController::class, 'show'])->name('show');
-        Route::put('/{id}/update-status', [OrderController::class, 'updateStatus'])->name('updateStatus');
+
+        // Các route cập nhật trạng thái
+        Route::put('/{order}/update-status', [OrderController::class, 'updateStatus'])->name('updateStatus'); // Đổi {id} thành {order} để nhất quán
         Route::put('/{order}/updatePaymentStatus', [OrderController::class, 'updatePaymentStatus'])->name('updatePaymentStatus');
+
         Route::delete('/destroy/{id}', [OrderController::class, 'destroy'])->name('destroy');
         Route::get('/trash', [OrderController::class, 'trash'])->name('trash');
         Route::post('/restore/{id}', [OrderController::class, 'restore'])->name('restore');
-        Route::post('{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
+        // Đề xuất dùng PUT/PATCH cho việc hủy đơn hàng để phù hợp hơn với ngữ nghĩa RESTful
+        Route::put('{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
     });
 });
 
