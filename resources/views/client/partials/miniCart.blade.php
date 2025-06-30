@@ -161,8 +161,10 @@
     //         </tr>
     //     `;
     // }
-
-    // Gọi khi mở cart hoặc khi trang load
-    document.addEventListener('DOMContentLoaded', loadMiniCart);
 </script>
 
+@auth
+    <script>
+        document.addEventListener('DOMContentLoaded', loadMiniCart);
+    </script>
+@endauth

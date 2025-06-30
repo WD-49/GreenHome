@@ -90,7 +90,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('detailWithProduct');
 });
 
-     
+
 
 // route của trang admin
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
@@ -374,14 +374,16 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         // Đề xuất dùng PUT/PATCH cho việc hủy đơn hàng để phù hợp hơn với ngữ nghĩa RESTful
         Route::put('{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
     });
+
+    // Hiển thị thông tin cấu hình website
+    Route::get('/webinfor', [WebInfoController::class, 'show'])->name('web_info.show');
+    Route::get('/webinfor/edit', [WebInfoController::class, 'edit'])->name('web_info.edit');
+    Route::post('/webinfor/update', [WebInfoController::class, 'update'])->name('web_info.update');
 });
 // webinfor 
 
 
-// Hiển thị thông tin cấu hình website
-Route::get('/admin/webinfor', [WebInfoController::class, 'show'])->name('admin.web_info.show');
-Route::get('/admin/webinfor/edit', [WebInfoController::class, 'edit'])->name('admin.web_info.edit');
-Route::post('/admin/webinfor/update', [WebInfoController::class, 'update'])->name('admin.web_info.update');
+
 
 
 
@@ -393,7 +395,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/blog/{slugCategory?}', [ClientBlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/detail/{slug}', [ClientBlogController::class, 'show'])->name('blog.show');
 
-Route::get('/san-pham/{slug}', [ProductClientController::class, 'show'])->middleware('auth')->name('productDetail');
+Route::get('/san-pham/{slug}', [ProductClientController::class, 'show'])->name('productDetail');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 
 // giỏ hàng
@@ -406,7 +408,5 @@ route::prefix('cart')->middleware('auth')->name('cart.')->group(function () {
 });
 
 Route::get('/blog/{slug}', [App\Http\Controllers\client\BlogDetailController::class, 'show'])->name('blog.detail');
-// footer
-// Route::get('/footer', [WebInfoController::class, 'showFooter']);
-Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');
 
+Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');
