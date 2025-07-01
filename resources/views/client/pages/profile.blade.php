@@ -134,6 +134,19 @@
                                 <div class="overflow-hidden ms-4">
                                     <h4 class="m-0 text-dark fs-20">{{ $user->name }}</h4>
                                     <p class="my-1 text-muted fs-16">{{ $user->email }}</p>
+                                    {{-- Trạng thái xác minh Email --}}
+                                    <p class="my-1 text-muted fs-16">
+                                        {{ $user->email }}
+                                        @if ($user->email_verified_at)
+                                            <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Đã xác
+                                                thực</span>
+                                        @else
+                                            <span class="badge bg-danger"><i class="fas fa-times-circle me-1"></i>Chưa xác
+                                                thực</span>
+                                            {{-- <a href="{{ route('verification.notice') }}"
+                                                class="btn btn-sm btn-warning ms-2">Xác nhận email</a> --}}
+                                        @endif
+                                    </p>
                                     @if ($user->role == 'admin' || $user->role == 'superadmin')
                                         <span class="fs-15">
                                             <i class="mdi mdi-account-group me-2 align-middle"></i>Vai trò:
@@ -311,6 +324,9 @@
                                     <div class="form-group mb-3">
                                         <label for="gender">Giới tính:</label>
                                         <select class="form-control" id="gender" name="gender">
+                                            <option value=""
+                                                {{ old('gender', $data['profile']->gender ?? '') == '' ? 'selected' : '' }}>
+                                                -- Chọn giới tính --</option>
                                             <option value="nam"
                                                 {{ old('gender', $data['profile']->gender ?? '') == 'nam' ? 'selected' : '' }}>
                                                 Nam</option>
@@ -327,13 +343,13 @@
                                             </div>
                                         @enderror
                                     </div>
+
                                     <div class="form-group mb-3">
                                         <label for="birth_date">Ngày sinh:</label>
                                         <input type="date"
                                             class="form-control @error('birth_date') is-invalid @enderror" id="birth_date"
                                             name="birth_date"
-                                            value="{{ old('birth_date', optional($data['profile']->birth_date)->format('Y-m-d')) }}">
-                                        {{-- Sửa dòng này --}}
+                                            value="{{ old('birth_date', optional($data['profile']?->birth_date)->format('Y-m-d') ?? '') }}">
                                         @error('birth_date')
                                             <div class="invalid-feedback">
                                                 {{ $message }}
@@ -483,7 +499,7 @@
                                                                                 <td>
                                                                                     {{ $item->product_name }}
                                                                                     @if ($item->product_attribute)
-                                                                                        <br><small class="text-muted">
+                                                                                        <br><small class="text-muted">Phân
                                                                                             loại:
                                                                                             ({{ $item->product_attribute }})
                                                                                         </small>
