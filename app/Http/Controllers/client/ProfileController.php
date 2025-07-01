@@ -99,6 +99,10 @@ class ProfileController extends Controller
         // Nếu validation thành công, code sẽ chạy tiếp từ đây
         try {
             $user->name = $request->input('name');
+            // Nếu email bị thay đổi, đặt lại email_verified_at thành null
+            if ($user->isDirty('email')) {
+                $user->email_verified_at = null;
+            }
             $user->email = $request->input('email');
             $user->save();
 

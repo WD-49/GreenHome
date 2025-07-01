@@ -3,16 +3,18 @@
 namespace App\Models;
 
 use App\Models\WishList;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Notifications\VerifyEmail as VerifyEmailNotification;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use SoftDeletes, HasFactory, Notifiable;
+    use SoftDeletes, HasFactory, Notifiable, MustVerifyEmail;
 
     protected $dates = ['deleted_at'];
 
@@ -88,4 +90,10 @@ class User extends Authenticatable
     {
         // Ghi đè để không gửi email mặc định của Laravel
     }
+
+    // public function sendEmailVerificationNotification()
+    // {
+    //     // Sử dụng Notification tùy chỉnh của bạn
+    //     $this->notify(new VerifyEmailNotification);
+    // }
 }

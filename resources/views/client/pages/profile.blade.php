@@ -133,7 +133,7 @@
 
                                 <div class="overflow-hidden ms-4">
                                     <h4 class="m-0 text-dark fs-20">{{ $user->name }}</h4>
-                                    <p class="my-1 text-muted fs-16">{{ $user->email }}</p>
+                                    {{-- <p class="my-1 text-muted fs-16">{{ $user->email }}</p> --}}
                                     {{-- Trạng thái xác minh Email --}}
                                     <p class="my-1 text-muted fs-16">
                                         {{ $user->email }}
@@ -143,8 +143,8 @@
                                         @else
                                             <span class="badge bg-danger"><i class="fas fa-times-circle me-1"></i>Chưa xác
                                                 thực</span>
-                                            {{-- <a href="{{ route('verification.notice') }}"
-                                                class="btn btn-sm btn-warning ms-2">Xác nhận email</a> --}}
+                                            <a href="{{ route('verification.notice') }}"
+                                                class="btn btn-sm btn-warning ms-2">Xác nhận email</a>
                                         @endif
                                     </p>
                                     @if ($user->role == 'admin' || $user->role == 'superadmin')
