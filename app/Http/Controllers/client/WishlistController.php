@@ -19,18 +19,16 @@ class WishlistController extends Controller
 
 
     public function index()
-    {
+{
+    $wishlists = WishList::with('product')
+        ->where('user_id', Auth::id())
+        ->orderByRaw("FIELD(priority, 'High', 'Medium', 'Low')") // ← sắp theo priority
+        ->orderByDesc('id') // ← ưu tiên mới nhất nếu trùng priority
+        ->paginate(12);
 
+    return view('client.pages.wishlist', compact('wishlists'));
+}
 
-        $wishlists = \App\Models\WishList::with('product')
-            ->where('user_id', Auth::id()) // ✅ gọi thẳng Auth::id()
-            ->orderBy('id', 'desc')
-            ->paginate(12);
-
-
-
-        return view('client.pages.wishlist', compact('wishlists'));
-    }
 
     public function add(Request $request)
     {

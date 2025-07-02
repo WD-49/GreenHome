@@ -109,5 +109,6 @@ class ShopController extends Controller
             'attributeValues',
             'wishlistProductIds'
         ));
+
     }
 }

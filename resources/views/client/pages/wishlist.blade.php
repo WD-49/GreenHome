@@ -133,24 +133,24 @@
         });
 
         // Toggle wishlist
-        $(document).on('click', '.wishlist-button', function(e) {
+        $(document).on('click', '.wishlist-button', function (e) {
             e.preventDefault();
             const button = $(this);
             const productId = button.data('product-id');
 
             $.post('{{ route('wishlist.toggle') }}', {
                 product_id: productId
-            }, function(res) {
+            }, function (res) {
                 if (!res.added) {
                     button.closest('.cr-product-box').fadeOut();
                 }
-            }).fail(function(xhr) {
+            }).fail(function (xhr) {
                 alert(xhr.status === 401 ? 'Bạn cần đăng nhập.' : 'Lỗi khi cập nhật wishlist.');
             });
         });
 
         // Toggle notify_on_sale
-        $(document).on('click', '.toggle-notify', function() {
+        $(document).on('click', '.toggle-notify', function () {
             const button = $(this);
             const productId = button.data('product-id');
             const current = button.data('current') == '1';
@@ -159,15 +159,16 @@
                 product_id: productId,
                 field: 'notify_on_sale',
                 value: current ? 0 : 1
-            }, function() {
+            }, function () {
                 button.data('current', current ? 0 : 1);
                 button.find('i').toggleClass(
-                    'ri-notification-off-line ri-notification-3-fill text-success');
+                    'ri-notification-off-line ri-notification-3-fill text-success'
+                );
             });
         });
 
-        // Update priority
-        $(document).on('change', '.select-priority', function() {
+        // Cập nhật priority và tự động sắp xếp lại danh sách
+        $(document).on('change', '.select-priority', function () {
             const select = $(this);
             const productId = select.data('product-id');
             const value = select.val();
@@ -176,7 +177,31 @@
                 product_id: productId,
                 field: 'priority',
                 value: value
+            }, function () {
+                // Sắp xếp lại sau khi cập nhật
+                sortWishlistByPriority();
             });
         });
+
+        // Hàm sắp xếp danh sách wishlist theo priority
+        function sortWishlistByPriority() {
+            const priorityOrder = {
+                'High': 1,
+                'Medium': 2,
+                'Low': 3
+            };
+
+            const items = $('.cr-product-box').get();
+
+            items.sort(function (a, b) {
+                const priorityA = $(a).find('.select-priority').val();
+                const priorityB = $(b).find('.select-priority').val();
+
+                return priorityOrder[priorityA] - priorityOrder[priorityB];
+            });
+
+            $('.row.col-100.mb-minus-24').empty().append(items);
+        }
     </script>
 @endpush
+
