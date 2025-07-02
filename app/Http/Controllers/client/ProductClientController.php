@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Review;
 use App\Models\AttributeValue;
+use App\Models\Category;
+use App\Models\Discount;
+use Illuminate\Http\Client\Request as ClientRequest;
+use Illuminate\Support\Facades\Request;
 
 class ProductClientController extends Controller
 {
@@ -47,4 +51,7 @@ class ProductClientController extends Controller
 
         return view('client.pages.productDetail', compact('product', 'relatedProducts', 'attributes', 'reviews'));
     }
+    // app/Http/Controllers/VoucherController.php
+
+
 }

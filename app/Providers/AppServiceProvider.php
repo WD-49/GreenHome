@@ -1,7 +1,10 @@
 <?php
 
 namespace App\Providers;
+
+use App\Models\Discount;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -20,5 +23,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::useBootstrap();
+        View::composer('*', function ($view) {
+        $vouchers = Discount::where('end_date', '>=', now())->get();
+
+
+        $view->with('vouchers', $vouchers);
+    });
     }
 }
