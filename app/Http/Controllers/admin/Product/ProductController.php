@@ -27,58 +27,32 @@ class ProductController extends Controller
         $categories = Category::get();
         $brands = Brand::get();
 
-        $query = Product::with(['category', 'brand']);
-        // ->whereHas('brand', function ($q) {
-        //     $q->whereNull('deleted_at');
-        // });
-
-
-        if ($request->filled('name')) {
-            $query->where('name', 'LIKE', '%' . $request->name . '%');
-        }
-
-        if ($request->filled('category_id')) {
-            $query->where('category_id', $request->category_id);
-        }
-
-
-        // xóa mềm ko xóa sản phẩm
-        if ($request->filled('brand_id')) {
-            $query->where('brand_id', $request->brand_id)
-                ->whereHas('brand', function ($q) {
-                    $q->whereNull('deleted_at');
-                });
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status == 1 ? 1 : 0);
-        }
-
-        if ($request->filled('min_date') && $request->filled('max_date')) {
-            $query->whereBetween('date_of_entry', [$request->min_date, $request->max_date]);
-        } elseif ($request->filled('min_date')) {
-            $query->where('date_of_entry', '>=', $request->min_date);
-        } elseif ($request->filled('max_date')) {
-            $query->where('date_of_entry', '<=', $request->max_date);
-        }
-
-
-        // if ($request->filled('ngay_nhap')) {
-        //     $query->whereDate('date_of_entry', $request->ngay_nhap);
-        // }
         $perPage = $request->input('per_page', 10);
 
-        $products = $query->orderByDesc('id')->paginate($perPage)->appends($request->except('page'));
+        $products = Product::with([
+            'category' => fn($q) => $q->withTrashed(),
+            'brand' => fn($q) => $q->withTrashed(),
+        ])
+            ->filter($request)
+            ->orderByDesc('id')
+            ->paginate($perPage)
+            ->appends($request->except('page'));
+
         $productAll = Product::whereNull('deleted_at')->get();
         $productTrashed = Product::onlyTrashed()->get();
+
         if ($request->ajax()) {
             return view('admin.products.table', compact('products'));
         }
 
-
-        // dd($productAll);
-
-        return view('admin.products.index', compact('title', 'products', 'productAll', 'productTrashed', 'categories', 'brands'));
+        return view('admin.products.index', compact(
+            'title',
+            'products',
+            'productAll',
+            'productTrashed',
+            'categories',
+            'brands'
+        ));
     }
 
     public function trashed(Request $request)
@@ -87,51 +61,18 @@ class ProductController extends Controller
         $categories = Category::get();
         $brands = Brand::get();
 
-        $query = Product::onlyTrashed()->with([
-            'category' => function ($query) {
-                $query->withTrashed();
-            },
-            'brand' => function ($query) {
-                $query->withTrashed();
-            },
-        ]);
-
-
-
-        if ($request->filled('name')) {
-            $query->where('name', 'LIKE', '%' . $request->name . '%');
+        $products = Product::onlyTrashed()
+            ->with([
+                'category' => fn($q) => $q->withTrashed(),
+                'brand' => fn($q) => $q->withTrashed(),
+            ])
+            ->filter($request) // dùng lại scopeFilter
+            ->orderByDesc('id')
+            ->paginate(4)
+            ->appends($request->except('page'));
+        if ($request->ajax()) {
+            return view('admin.products.table', compact('products'))->render();
         }
-
-        if ($request->filled('category_id')) {
-            $query->where('category_id', $request->category_id);
-        }
-
-        if ($request->filled('brand_id')) {
-            $query->where('brand_id', $request->brand_id);
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status == 1 ? 1 : 0);
-        }
-
-        if ($request->filled('min_date') && $request->filled('max_date')) {
-            $query->whereBetween('date_of_entry', [$request->min_date, $request->max_date]);
-        } elseif ($request->filled('min_date')) {
-            $query->where('date_of_entry', '>=', $request->min_date);
-        } elseif ($request->filled('max_date')) {
-            $query->where('date_of_entry', '<=', $request->max_date);
-        }
-
-        if ($request->filled('min_price') && $request->filled('max_price')) {
-            $query->whereBetween('price', [$request->min_price, $request->max_price]);
-        } elseif ($request->filled('min_price')) {
-            $query->where('price', '>=', $request->min_price);
-        } elseif ($request->filled('max_price')) {
-            $query->where('price', '<=', $request->max_price);
-        }
-
-        $products = $query->orderByDesc('id')->paginate(4)->appends($request->except('page'));
-        // dd($products);
 
         return view('admin.products.trashed', compact('title', 'products', 'categories', 'brands'));
     }
@@ -224,6 +165,7 @@ class ProductController extends Controller
             'brand_id' => 'required|exists:brands,id',
             'status' => 'required|in:0,1',
             'date_of_entry' => 'required|date',
+            'sort_des' => 'nullable|string',
             'description' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'is_variant' => 'required|boolean',
@@ -245,13 +187,12 @@ class ProductController extends Controller
             'variants.*.price' => 'required_if:is_variant,1|numeric',
             'variants.*.quantity' => 'required_if:is_variant,1|integer',
             'variants.*.sku' => 'nullable|string|max:100',
-            'variants.*.image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'variants.*.image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
 
             // Nếu là sản phẩm đơn
             'simple_price' => 'required_unless:is_variant,1|numeric',
             'simple_quantity' => 'required_unless:is_variant,1|integer',
         ], [
-            // Thông báo lỗi tiếng Việt
             'name.required' => 'Vui lòng nhập tên sản phẩm.',
             'category_id.required' => 'Vui lòng chọn danh mục.',
             'brand_id.required' => 'Vui lòng chọn thương hiệu.',
@@ -288,7 +229,9 @@ class ProductController extends Controller
                 // Upload ảnh sản phẩm
                 $productImagePath = null;
                 if ($request->hasFile('image')) {
-                    $productImagePath = $request->file('image')->store('images/products', 'public');
+                    $image = $request->file('image');
+                    $filename = Str::slug($request->input('name')) . '-' . time() . '.' . $image->getClientOriginalExtension();
+                    $productImagePath = $image->storeAs('images/products', $filename, 'public');
                 }
 
                 // Tạo sản phẩm
@@ -299,6 +242,7 @@ class ProductController extends Controller
                 $product->brand_id = $request->input('brand_id');
                 $product->status = $request->input('status');
                 $product->date_of_entry = $request->input('date_of_entry');
+                $product->sort_des = $request->input('sort_des');
                 $product->description = $request->input('description');
                 $product->image = $productImagePath;
                 $product->quantity = 0;
@@ -349,7 +293,8 @@ class ProductController extends Controller
 
                         if ($request->hasFile("variants.$index.image")) {
                             $variantImage = $request->file("variants.$index.image");
-                            $newVariant->image = $variantImage->store('images/products/variants', 'public');
+                            $filename = Str::slug($product->name . '-' .  $index) . '-' . time() . '.' . $variantImage->getClientOriginalExtension();
+                            $newVariant->image = $variantImage->storeAs('images/products/variants', $filename, 'public');
                         }
 
                         $newVariant->save();
@@ -428,17 +373,24 @@ class ProductController extends Controller
             'brand_id' => 'required|exists:brands,id',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:2048',
             'date_of_entry' => 'required|date',
+            'sort_des' => 'nullable|string',
             'description' => 'nullable|string',
             'status' => 'required|in:0,1',
         ]);
 
         // Xử lý hình ảnh nếu có upload mới
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('images/products', 'public');
-            $dataValidate['image'] = $imagePath;
+            // Lưu tên file ảnh cũ
+            $oldImage = $product->image;
 
-            if ($product->image) {
-                Storage::disk('public')->delete($product->image);
+            // Lưu file mới
+            $image = $request->file('image');
+            $filename = Str::slug($request->input('name')) . '-' . time() . '.' . $image->getClientOriginalExtension();
+            $dataValidate['image'] = $image->storeAs('images/products', $filename, 'public');
+
+            // Xóa ảnh cũ nếu có
+            if ($oldImage) {
+                Storage::disk('public')->delete($oldImage);
             }
         }
 
@@ -466,5 +418,18 @@ class ProductController extends Controller
         }
 
         return redirect()->route('admin.products.index')->with('success', 'Sản phẩm đã được khôi phục thành công');
+    }
+
+    public function forceDelete($id)
+    {
+        $product = Product::withTrashed()->findOrFail($id);
+        if ($product) {
+            // Xóa vĩnh viễn các biến thể liên quan
+            ProductVariant::where('product_id', $id)->forceDelete();
+            // Xóa vĩnh viễn sản phẩm
+            $product->forceDelete();
+        }
+
+        return redirect()->route('admin.products.trashed')->with('success', 'Sản phẩm đã được xóa vĩnh viễn');
     }
 }

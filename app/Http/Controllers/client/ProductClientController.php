@@ -27,7 +27,7 @@ class ProductClientController extends Controller
         $product->increment('view');
 
         // Lấy sản phẩm cùng danh mục (trừ sản phẩm hiện tại)
-        $relatedProducts = Product::with(['productVariants', 'category', 'comments', 'reviews'])
+        $relatedProducts = Product::with(['productVariants', 'category', 'brand'])
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->take(8)
