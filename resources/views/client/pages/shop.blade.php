@@ -1,8 +1,4 @@
 @extends('layouts.app')
-<<<<<<< HEAD
-
-=======
->>>>>>> 3438f56d36084319e64985b777a2b686622988a6
 @section('content')
     <style>
         .rating-wrapper {
@@ -56,7 +52,7 @@
                     <div class="cr-shop-sideview">
                         <form action="{{ route('shop.index') }}" method="GET" id="filter-form" class="mb-4">
                             <div class="mb-3">
-                                 {{-- Lọc Theo Danh Mục----------------------------------------------------------- --}}
+                                {{-- Lọc Theo Danh Mục----------------------------------------------------------- --}}
                                 <label class="fw-bold">Danh mục:</label>
                                 <select class="form-select" name="categories[]">
                                     <option value="">Tất cả</option>
@@ -68,6 +64,8 @@
                                     @endforeach
                                 </select>
                             </div>
+
+
                             <div class="mb-3">
                                 {{-- Lọc Thương hiệu -------------------------------------- --}}
                                 <label class="fw-bold">Thương hiệu:</label>
@@ -80,31 +78,55 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                 {{-- Lọc Theo Biến Thể ----------------------------------------------------------- --}}
+                                {{-- Lọc Theo Biến Thể ----------------------------------------------------------- --}}
                             </div>
-                            @php
+                            {{-- @php
+                                // use Illuminate\Support\Str;
+
                                 $selectedValues = collect(request()->input('attribute_values', []))->map(
                                     fn($id) => (int) $id,
                                 );
                                 $grouped = $attributeValues->groupBy(fn($v) => $v->attribute->name);
+                            @endphp --}}
+
+                            @php
+                                use Illuminate\Support\Str;
+
+                                // Các giá trị đã chọn từ request
+                                $selectedValues = collect(request()->input('attribute_values', []))->map(
+                                    fn($id) => (int) $id,
+                                );
+
+                                // Group theo tên thuộc tính (attribute)
+                                $grouped = $attributeValues->groupBy(fn($v) => $v->attribute->name);
                             @endphp
 
                             @foreach ($grouped as $attrName => $values)
+                                @php
+                                    $dropdownId = 'dropdown-' . Str::slug($attrName);
+
+                                    // Lấy các label đang được chọn để hiển thị sau tên
+                                    $selectedLabels = $values
+                                        ->filter(fn($v) => $selectedValues->contains($v->id))
+                                        ->pluck('value')
+                                        ->implode(', ');
+                                @endphp
+
                                 <div class="dropdown mb-3">
-                                    <button class="btn btn-outline-secondary w-100 text-start dropdown-toggle"
-                                        type="button" data-bs-toggle="dropdown">
-                                        {{ $attrName }}
-                                        @php
-                                            $selectedLabels = $values
-                                                ->filter(fn($v) => $selectedValues->contains($v->id))
-                                                ->pluck('value')
-                                                ->implode(', ');
-                                        @endphp
-                                        @if ($selectedLabels)
-                                            <span class="text-primary small">: {{ $selectedLabels }}</span>
-                                        @endif
+                                    <button
+                                        class="btn btn-outline-secondary w-100 text-start dropdown-toggle attribute-dropdown"
+                                        type="button" id="{{ $dropdownId }}" data-bs-toggle="dropdown"
+                                        aria-expanded="false" data-attribute-name="{{ $attrName }}">
+                                        <strong>{{ strtoupper($attrName) }}</strong>
+                                        <span class="selected-label text-primary small">
+                                            @if ($selectedLabels)
+                                                : {{ $selectedLabels }}
+                                            @endif
+                                        </span>
                                     </button>
-                                    <ul class="dropdown-menu px-3" style="width: 100%;">
+
+
+                                    <ul class="dropdown-menu w-100 px-3" aria-labelledby="{{ $dropdownId }}">
                                         @foreach ($values as $value)
                                             <li>
                                                 <div class="form-check">
@@ -121,6 +143,9 @@
                                     </ul>
                                 </div>
                             @endforeach
+
+
+
                             {{-- Lọc Theo Review----------------------------------------------------------- --}}
                             <div class="mb-3">
                                 <label class="fw-bold d-block mb-2">Đánh giá:</label>
@@ -131,7 +156,7 @@
                                         <label for="star{{ $i }}"><i class="ri-star-fill"></i></label>
                                     @endfor
                                 </div>
-                             {{-- Lọc Theo Giá   ----------------------------------------------------------- --}}
+                                {{-- Lọc Theo Giá   ----------------------------------------------------------- --}}
                             </div>
                             <div class="mb-3">
                                 <label class="fw-bold">Giá từ (VNĐ):</label>
@@ -173,13 +198,13 @@
                                 </div>
                                 {{-- Hiển thị tổng sản phẩm --}}
                                 <div class="center-content mb-2 mb-lg-0">
-                                    <span>Có {{ $products->total() }} sản phẩm được tìm thấy!</span>
+                                    <span id="product-count">Có {{ $products->total() }} sản phẩm được tìm thấy!</span>
                                 </div>
+
                                 {{-- Sắp xếp --}}
                                 <div class="cr-select">
-                                    <form method="GET" action="{{ route('shop.index') }}"
+                                    <form id="sort-form" method="GET" action="{{ route('shop.index') }}"
                                         class="d-flex align-items-center gap-2">
-                                        {{-- Sắp Xếp --}}
                                         <label>Sắp Xếp Theo:</label>
                                         @foreach (request()->except('sort') as $key => $value)
                                             @if (is_array($value))
@@ -192,7 +217,7 @@
                                                     value="{{ $value }}">
                                             @endif
                                         @endforeach
-                                        <select class="form-select" name="sort" onchange="this.form.submit()">
+                                        <select class="form-select" name="sort" id="sort-select">
                                             <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Mới
                                                 nhất</option>
                                             <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Cũ
@@ -203,226 +228,259 @@
                                     </form>
                                 </div>
 
+
                             </div>
                         </div>
                     </div>
                     {{-- Sản phẩm: 4 mỗi hàng --}}
-                    <div class="row col-100 mb-minus-24">
-                        @foreach ($products as $product)
-                            <div class="col-xxl-3 col-xl-4 col-6 cr-product-box mb-24">
-                                <div class="cr-product-card">
-                                    <div class="cr-product-image">
-                                        <div class="cr-image-inner zoom-image-hover">
-                                            <img src="{{ asset('storage/' . $product->image) }}"
-                                                alt="{{ $product->name }}">
+                    <div id="product-list-wrapper">
+                        {{-- Danh sách sản phẩm --}}
+                        <div class="row col-100 mb-minus-24" id="product-list">
+                            @foreach ($products as $product)
+                                <div class="col-xxl-3 col-xl-4 col-6 cr-product-box mb-24">
+                                    <div class="cr-product-card">
+                                        <div class="cr-product-image">
+                                            <div class="cr-image-inner zoom-image-hover">
+                                                <img src="{{ asset('storage/' . $product->image) }}"
+                                                    alt="{{ $product->name }}">
+                                            </div>
+                                            <div class="cr-side-view">
+                                                <a href="javascript:void(0);" class="wishlist-button"
+                                                    data-product-id="{{ $product->id }}">
+                                                    @if (in_array($product->id, $wishlistProductIds ?? []))
+                                                        <i class="ri-heart-fill text-danger"></i>
+                                                    @else
+                                                        <i class="ri-heart-line"></i>
+                                                    @endif
+                                                </a>
+                                            </div>
+                                            <a class="cr-shopping-bag" href="#"><i
+                                                    class="ri-shopping-bag-line"></i></a>
                                         </div>
-                                        <div class="cr-side-view">
-                                            <a href="javascript:void(0);" class="wishlist-button"
-                                                data-product-id="{{ $product->id }}">
-                                                @if (in_array($product->id, $wishlistProductIds ?? []))
-                                                    <i class="ri-heart-fill text-danger"></i> {{-- đã yêu thích --}}
-                                                @else
-                                                    <i class="ri-heart-line"></i> {{-- chưa yêu thích --}}
-                                                @endif
-                                            </a>
-                                            {{-- <a class="model-oraganic-product" data-bs-toggle="modal" href="#quickview"><i
-                                                    class="ri-eye-line"></i></a> --}}
-                                        </div>
-                                        <a class="cr-shopping-bag" href="#"><i
-                                                class="ri-shopping-bag-line"></i></a>
-                                    </div>
 
-                                    <div class="cr-product-details">
-                                        <div class="cr-brand">
-                                            <a href="#">{{ $product->brand->name ?? 'Không có thương hiệu' }}</a>
+                                        <div class="cr-product-details">
+                                            <div class="cr-brand">
+                                                <a
+                                                    href="#">{{ $product->brand->name ?? 'Không có thương hiệu' }}</a>
 
-                                            {{--  Hiển thị sao từ reviews --}}
-                                            @php
-                                                $avg = round($product->reviews_avg_rating ?? 0, 1); // ví dụ: 4.2
-                                                $fullStars = floor($avg);
-                                                $halfStar = $avg - $fullStars >= 0.5 ? 1 : 0;
-                                                $emptyStars = 5 - $fullStars - $halfStar;
-                                            @endphp
-                                            <div class="cr-star">
+                                                {{-- Hiển thị sao --}}
                                                 @php
-                                                    $avg = $product->reviews_avg_rating ?? 0;
-                                                    $count = $product->reviews_count ?? 0;
+                                                    $avg = round($product->reviews_avg_rating ?? 0, 1);
                                                     $fullStars = floor($avg);
                                                     $halfStar = $avg - $fullStars >= 0.5;
                                                     $emptyStars = 5 - $fullStars - ($halfStar ? 1 : 0);
+                                                    $count = $product->reviews_count ?? 0;
                                                 @endphp
 
-                                                @for ($i = 0; $i < $fullStars; $i++)
-                                                    <i class="ri-star-fill"></i>
-                                                @endfor
-
-                                                @if ($halfStar)
-                                                    <i class="ri-star-half-line"></i>
-                                                @endif
-
-                                                @for ($i = 0; $i < $emptyStars; $i++)
-                                                    <i class="ri-star-line"></i>
-                                                @endfor
-
-                                                <p>({{ $avg }} / {{ $count }} đánh giá)</p>
+                                                <div class="cr-star">
+                                                    @for ($i = 0; $i < $fullStars; $i++)
+                                                        <i class="ri-star-fill"></i>
+                                                    @endfor
+                                                    @if ($halfStar)
+                                                        <i class="ri-star-half-line"></i>
+                                                    @endif
+                                                    @for ($i = 0; $i < $emptyStars; $i++)
+                                                        <i class="ri-star-line"></i>
+                                                    @endfor
+                                                    <p>({{ $avg }} / {{ $count }} đánh giá)</p>
+                                                </div>
                                             </div>
+
+                                            <a href="{{ route('productDetail', $product->slug) }}" class="title">
+                                                {{ $product->name }}
+                                            </a>
+                                            <p class="text">Sản phẩm chất lượng cao, giá tốt nhất thị trường.</p>
+
+                                            <ul class="list">
+                                                <li><label>Brand :</label> {{ $product->brand->name ?? 'Không rõ' }}</li>
+                                            </ul>
+
+                                            {{-- Giá --}}
+                                            @php
+                                                $prices = optional($product->productVariants)->pluck('price')->filter();
+                                            @endphp
+                                            @if ($prices->isNotEmpty())
+                                                <p class="cr-price">
+                                                    <span class="new-price">
+                                                        @php
+                                                            $min = $prices->min();
+                                                            $max = $prices->max();
+                                                        @endphp
+                                                        {{ $min === $max
+                                                            ? number_format($min, 0, ',', '.') . ' đ'
+                                                            : number_format($min, 0, ',', '.') . ' đ - ' . number_format($max, 0, ',', '.') . ' đ' }}
+                                                    </span>
+                                                </p>
+                                            @else
+                                                <p class="cr-price"><span class="new-price">Chưa có giá</span></p>
+                                            @endif
                                         </div>
-                                        <a href="{{ route('productDetail', $product->slug) }}" class="title">
-                                            {{ $product->name }}
-                                        </a>
-                                        <p class="text">Sản phẩm chất lượng cao, giá tốt nhất thị trường.</p>
-                                        <ul class="list">
-                                            <li><label>Brand :</label> {{ $product->brand->name ?? 'Không rõ' }}</li>
-                                        </ul>
-                                        {{-- Nếu có giá thì hiển thị --}}
-                                        @php
-                                            $prices = optional($product->productVariants)->pluck('price')->filter();
-                                        @endphp
-                                        @if ($prices->isNotEmpty())
-                                            <p class="cr-price">
-                                                <span class="new-price">
-                                                    @php
-                                                        $min = $prices->min();
-                                                        $max = $prices->max();
-                                                    @endphp
-                                                    {{ $min === $max ? number_format($min, 0, ',', '.') . ' đ' : number_format($min, 0, ',', '.') . ' đ - ' . number_format($max, 0, ',', '.') . ' đ' }}
-                                                </span>
-                                            </p>
-                                        @else
-                                            <p class="cr-price"><span class="new-price">Chưa có giá</span></p>
-                                        @endif
                                     </div>
                                 </div>
-                            </div>
-                        @endforeach
+                            @endforeach
+                        </div>
+
+                        {{-- Phân trang --}}
+                        <div id="pagination-wrapper" class="mt-4">
+                            {{ $products->appends(request()->except('page'))->links('pagination::bootstrap-5') }}
+                        </div>
                     </div>
 
                 </div>
-                <div class="mt-4">
-                    {{ $products->appends(request()->except('page'))->links('pagination::bootstrap-5') }}
-                </div>
             </div>
-        </div>
         </div>
     </section>
 @endsection
 @push('scripts')
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-        $(document).ready(function() {
-            // Cấu hình Ajax để gửi kèm CSRF Token + Session Cookie
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                xhrFields: {
-                    withCredentials: true
+    $(document).ready(function () {
+        // CSRF setup cho Ajax
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            xhrFields: {
+                withCredentials: true
+            }
+        });
+
+        // ==============================
+        // ✅ Wishlist Toggle
+        $(document).on('click', '.wishlist-button', function (e) {
+            e.preventDefault();
+            const $btn = $(this);
+            const productId = $btn.data('product-id');
+
+            $.post('{{ route('wishlist.toggle') }}', { product_id: productId }, function (res) {
+                if (res.added) {
+                    $btn.find('i').removeClass('ri-heart-line').addClass('ri-heart-fill text-danger');
+                } else {
+                    $btn.find('i').removeClass('ri-heart-fill text-danger').addClass('ri-heart-line');
                 }
-            });
-            // 1. Wishlist toggle
-            $(document).on('click', '.wishlist-button', function(e) {
-                e.preventDefault();
-                let $btn = $(this);
-                let productId = $btn.data('product-id');
-                $.ajax({
-                    url: '{{ route('wishlist.toggle') }}',
-                    method: 'POST',
-                    data: {
-                        product_id: productId
-                    },
-                    success: function(res) {
-                        if (res.added) {
-                            $btn.find('i').removeClass('ri-heart-line').addClass(
-                                'ri-heart-fill text-danger');
-                        } else {
-                            $btn.find('i').removeClass('ri-heart-fill text-danger').addClass(
-                                'ri-heart-line');
-                        }
-                        alert(res.message);
-                    },
-                    error: function(xhr) {
-                        if (xhr.status === 401) {
-                            alert('Vui lòng đăng nhập để thêm vào wishlist');
-                        } else {
-                            alert('Đã có lỗi xảy ra!');
-                        }
-                    }
-                });
-            });
-            // 2. AJAX lọc sản phẩm
-            $('#filter-form').on('submit', function(e) {
-                e.preventDefault();
-                console.log(' Form lọc đang được submit!');
-                const $form = $(this);
-                const url = $form.attr('action');
-                const data = $form.serialize();
-                console.log(' Dữ liệu gửi đi:', data);
-
-                $.get(url, data, function(response) {
-                    let $html = $('<div>').html(response);
-                    let newContent = $html.find('.col-lg-9').html();
-
-                    if (newContent) {
-                        $('.col-lg-9').html(newContent);
-                        window.history.pushState({}, '', `${url}?${data}`);
-                        console.log(' Nội dung đã được cập nhật!');
-                    } else {
-                        console.warn(' Không tìm thấy phần nội dung mới!');
-                    }
-                }).fail(function() {
-                    alert('Đã có lỗi xảy ra khi tải dữ liệu lọc.');
-                });
-            });
-            // 3. Toggle hiển thị Grid / List
-            $(document).on('click', '.gridCol', function() {
-                $(this).addClass('active-grid');
-                $('.gridRow').removeClass('active-grid');
-
-                $('.cr-product-box').removeClass('col-12').addClass('col-xxl-3 col-xl-4 col-6');
-                $('.cr-product-card').removeClass('d-flex flex-row gap-3');
-            });
-            $(document).on('click', '.gridRow', function() {
-                $(this).addClass('active-grid');
-                $('.gridCol').removeClass('active-grid');
-                $('.cr-product-box').removeClass('col-xxl-3 col-xl-4 col-6').addClass('col-12');
-                $('.cr-product-card').addClass('d-flex flex-row gap-3');
+                alert(res.message);
+            }).fail(function (xhr) {
+                alert(xhr.status === 401 ? 'Vui lòng đăng nhập để thêm vào wishlist' : 'Đã có lỗi xảy ra!');
             });
         });
-        // Xử lý sự kiện khi nhấn vào nút wishlist
-        $(document).on('click', '.wishlist-button', function(e) {
+
+        // ==============================
+        // ✅ Hàm cập nhật label dropdown biến thể
+        function updateDropdownLabels() {
+            let selectedMap = {};
+
+            $('input[name="attribute_values[]"]:checked').each(function () {
+                const label = $(this).closest('li').find('label').text().trim();
+                const attrGroup = $(this).closest('.dropdown').find('.attribute-dropdown').data('attribute-name');
+                if (!selectedMap[attrGroup]) selectedMap[attrGroup] = [];
+                selectedMap[attrGroup].push(label);
+            });
+
+            $('.attribute-dropdown').each(function () {
+                const attrName = $(this).data('attribute-name');
+                const labels = selectedMap[attrName] || [];
+                $(this).find('.selected-label').text(labels.length ? ': ' + labels.join(', ') : '');
+            });
+        }
+
+        // ==============================
+        // ✅ Hàm cập nhật nội dung khi AJAX thành công
+        function updateContent($html) {
+            const newProductList = $html.find('#product-list').html();
+            const newPagination = $html.find('#pagination-wrapper').html();
+            const newCount = $html.find('#product-count').text();
+
+            $('#product-list').html(newProductList);
+            $('#pagination-wrapper').html(newPagination);
+            $('#product-count').text(newCount);
+
+            updateDropdownLabels();
+
+            // Khởi tạo lại Bootstrap dropdown sau khi AJAX
+            document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(function (el) {
+                new bootstrap.Dropdown(el);
+            });
+        }
+
+        // ==============================
+        // ✅ AJAX lọc sản phẩm
+        $('#filter-form').on('submit', function (e) {
             e.preventDefault();
-            let $btn = $(this);
-            let productId = $btn.data('product-id');
-            let isInWishlist = $btn.find('i').hasClass('ri-heart-fill'); // Kiểm tra có đang màu đỏ hay không
+            const $form = $(this);
+            const url = $form.attr('action');
+            const data = $form.serialize();
+
+            $.get(url, data, function (response) {
+                const $html = $('<div>').html(response);
+                updateContent($html);
+                window.history.pushState({}, '', `${url}?${data}`);
+            }).fail(function () {
+                alert('Đã có lỗi xảy ra khi lọc sản phẩm.');
+            });
+        });
+
+        // ==============================
+        // ✅ AJAX phân trang
+        $(document).on('click', '#pagination-wrapper .page-link', function (e) {
+            e.preventDefault();
+            const url = $(this).attr('href');
+            if (!url) return;
 
             $.ajax({
-                url: '{{ route('wishlist.toggle') }}', // cần thêm route này ở backend
-                method: 'POST',
-                data: {
-                    product_id: productId
+                url: url,
+                type: 'GET',
+                beforeSend: function () {
+                    $('#product-list').html('<div class="text-center w-100 py-5">Đang tải sản phẩm...</div>');
                 },
-                success: function(res) {
-                    // Cập nhật icon
-                    if (res.added) {
-                        $btn.find('i')
-                            .removeClass('ri-heart-line')
-                            .addClass('ri-heart-fill text-danger');
-                    } else {
-                        $btn.find('i')
-                            .removeClass('ri-heart-fill text-danger')
-                            .addClass('ri-heart-line');
-                    }
-
-                    // Hiển thị thông báo
-                    alert(res.message);
+                success: function (response) {
+                    const $html = $('<div>').html(response);
+                    updateContent($html);
+                    window.history.pushState({}, '', url);
                 },
-                error: function(xhr) {
-                    if (xhr.status === 401) {
-                        alert('Vui lòng đăng nhập để thêm vào wishlist');
-                    } else {
-                        alert('Đã có lỗi xảy ra!');
-                    }
+                error: function () {
+                    alert('Không thể tải dữ liệu phân trang.');
                 }
             });
         });
-    </script>
+
+        // ==============================
+        // ✅ AJAX sắp xếp sản phẩm
+        $(document).on('change', '#sort-select', function () {
+            const $form = $('#sort-form');
+            const url = $form.attr('action');
+            const data = $form.serialize();
+
+            $.get(url, data, function (response) {
+                const $html = $('<div>').html(response);
+                updateContent($html);
+                window.history.pushState({}, '', `${url}?${data}`);
+            }).fail(function () {
+                alert('Không thể sắp xếp sản phẩm.');
+            });
+        });
+
+        // ==============================
+        // ✅ Toggle Grid / List view
+        $(document).on('click', '.gridCol', function () {
+            $(this).addClass('active-grid');
+            $('.gridRow').removeClass('active-grid');
+            $('.cr-product-box').removeClass('col-12').addClass('col-xxl-3 col-xl-4 col-6');
+            $('.cr-product-card').removeClass('d-flex flex-row gap-3');
+        });
+
+        $(document).on('click', '.gridRow', function () {
+            $(this).addClass('active-grid');
+            $('.gridCol').removeClass('active-grid');
+            $('.cr-product-box').removeClass('col-xxl-3 col-xl-4 col-6').addClass('col-12');
+            $('.cr-product-card').addClass('d-flex flex-row gap-3');
+        });
+
+        // ✅ Gọi lần đầu khi load trang
+        updateDropdownLabels();
+    });
+</script>
+
 @endpush

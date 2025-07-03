@@ -49,14 +49,23 @@ class ShopController extends Controller
         }
 
         // Lọc theo biến thể
-        if ($request->filled('attribute_values')) {
-            $attributeValueIds = $request->input('attribute_values');
-            foreach ($attributeValueIds as $valueId) {
-                $productsQuery->whereHas('productVariants.productVariantValues', function ($q) use ($valueId) {
-                    $q->where('attribute_value_id', $valueId);
-                });
-            }
-        }
+      if ($request->filled('attribute_values')) {
+    $attributeValueIds = collect($request->input('attribute_values', []))->map(fn($id) => (int) $id);
+
+    // Lấy danh sách Attribute ID và group lại theo thuộc tính
+    $attributeValues = \App\Models\AttributeValue::with('attribute')->whereIn('id', $attributeValueIds)->get();
+
+    $groupedByAttr = $attributeValues->groupBy(fn($val) => $val->attribute->id);
+
+    foreach ($groupedByAttr as $attributeId => $values) {
+        $valueIds = $values->pluck('id')->toArray();
+
+        $productsQuery->whereHas('productVariants.productVariantValues', function ($q) use ($valueIds) {
+            $q->whereIn('attribute_value_id', $valueIds);
+        });
+    }
+}
+
 
         // Lọc theo khoảng giá
         $min = $request->input('min_price');
