@@ -26,23 +26,23 @@
                     <div class="vehicle-detail-banner banner-content clearfix">
                         <div class="banner-slider">
                             <div class="slider slider-for">
-                                @foreach ($product->productVariants as $variant)
-                                    <div class="slider-banner-image">
-                                        <div class="zoom-image-hover">
-                                            <img src="{{ asset('storage/' . ($variant->image ?? 'default.jpg')) }}"
-                                                alt="{{ $variant->attribute_name }}" class="product-image">
-                                        </div>
+                                <div class="slider-banner-image">
+                                    <div class="zoom-image-hover">
+                                        <img src="{{ asset('storage/' . ($product->image ?? 'default.jpg')) }}"
+                                            alt="{{ $product->name }}" class="product-image">
                                     </div>
-                                @endforeach
+                                </div>
                             </div>
                             <div class="slider slider-nav thumb-image">
                                 @foreach ($product->productVariants as $variant)
-                                    <div class="thumbnail-image">
-                                        <div class="thumbImg">
-                                            <img src="{{ asset('storage/' . $variant->image) }}"
-                                                alt="{{ $variant->attribute_name }}">
+                                    @if ($variant->image)
+                                        <div class="thumbnail-image">
+                                            <div class="thumbImg">
+                                                <img src="{{ asset('storage/' . $variant->image) }}"
+                                                    alt="{{ $variant->attribute_name }}">
+                                            </div>
                                         </div>
-                                    </div>
+                                    @endif
                                 @endforeach
                             </div>
                         </div>
@@ -294,8 +294,7 @@
                         <div class="cr-product-card">
                             <div class="cr-product-image">
                                 <div class="cr-image-inner zoom-image-hover">
-                                    <img src="{{ asset('storage/' . ($item->productVariants->first()->image ?? 'default.jpg')) }}"
-                                        alt="{{ $item->name }}">
+                                    <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}">
                                 </div>
                             </div>
                             <div class="cr-product-details">
@@ -310,14 +309,16 @@
                                     $maxPrice = $prices->max();
                                 @endphp
                                 <p class="cr-price">
-                                    @if ($prices->count())
-                                        {{ number_format($minPrice, 0, ',', '.') }}₫
-                                        @if ($minPrice != $maxPrice)
-                                            - {{ number_format($maxPrice, 0, ',', '.') }}₫
+                                    <span class="new-price">
+                                        @if ($prices->count())
+                                            {{ number_format($minPrice, 0, ',', '.') }}₫
+                                            @if ($minPrice != $maxPrice)
+                                                - {{ number_format($maxPrice, 0, ',', '.') }}₫
+                                            @endif
+                                        @else
+                                            Liên hệ
                                         @endif
-                                    @else
-                                        Liên hệ
-                                    @endif
+                                    </span>
                                 </p>
                             </div>
                         </div>
