@@ -1,6 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+      .product-img {
+            width: 100%;
+            height: 260px;
+            object-fit: cover;
+            border-radius: 6px;
+            display: block;
+        }
+</style>
     <div class="container py-5">
         <h2 class="mb-4">Danh sách yêu thích</h2>
 
@@ -23,7 +32,8 @@
                         <div class="cr-product-card">
                             <div class="cr-product-image">
                                 <div class="cr-image-inner zoom-image-hover">
-                                    <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}">
+                                    <img src="{{ asset('storage/' . $product->image) }}"
+                                                        alt="{{ $product->name }}" class="product-img">
                                 </div>
                                 <div class="cr-side-view d-flex flex-column align-items-end gap-2"
                                     style="position: absolute; top: 10px; right: 10px;">
@@ -70,18 +80,31 @@
                             <div class="cr-product-details">
                                 <div class="cr-brand">
                                     <a href="#">{{ $product->brand->name ?? 'Không có thương hiệu' }}</a>
-                                    <div class="cr-star">
-                                        @for ($i = 0; $i < $fullStars; $i++)
-                                            <i class="ri-star-fill"></i>
-                                        @endfor
-                                        @if ($halfStar)
-                                            <i class="ri-star-half-line"></i>
-                                        @endif
-                                        @for ($i = 0; $i < $emptyStars; $i++)
-                                            <i class="ri-star-line"></i>
-                                        @endfor
-                                        <p>({{ $avg }} / {{ $count }} đánh giá)</p>
-                                    </div>
+                                     @php
+                                                    $avg = round($product->reviews_avg_rating ?? 0, 1);
+                                                    $fullStars = floor($avg);
+                                                    $halfStar = $avg - $fullStars >= 0.5;
+                                                    $emptyStars = 5 - $fullStars - ($halfStar ? 1 : 0);
+                                                    $count = $product->reviews_count ?? 0;
+                                                @endphp
+                                                <div class="text-center" style="line-height: 1.2;">
+                                                    {{-- Dòng sao --}}
+                                                    <div class="mb-1">
+                                                        @for ($i = 0; $i < $fullStars; $i++)
+                                                            <i class="ri-star-fill text-warning"></i>
+                                                        @endfor
+                                                        @if ($halfStar)
+                                                            <i class="ri-star-half-line text-warning"></i>
+                                                        @endif
+                                                        @for ($i = 0; $i < $emptyStars; $i++)
+                                                            <i class="ri-star-line text-warning"></i>
+                                                        @endfor
+                                                    </div>
+                                                    {{-- Dòng số đánh giá --}}
+                                                    <div class="text-muted small">
+                                                        ({{ $avg }} / {{ $count }} đánh giá)
+                                                    </div>
+                                                </div>
                                 </div>
 
                                 <a href="{{ route('productDetail', $product->slug) }}" class="title">
@@ -124,6 +147,9 @@
 @endsection
 
 @push('scripts')
+ <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         $.ajaxSetup({
             headers: {

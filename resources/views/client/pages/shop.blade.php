@@ -25,6 +25,40 @@
         .rating-wrapper label:hover~label {
             color: #ffc107;
         }
+
+        /* Ảnh mặc định trong Grid View */
+        .product-img {
+            width: 100%;
+            height: 225px;
+            object-fit: cover;
+            border-radius: 6px;
+            display: block;
+        }
+
+        /* Khi ở chế độ List View */
+        .grid-row-active .product-img {
+            width: 150px;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        /* List View bố cục 2 bên */
+        .grid-row-active .cr-product-card {
+            display: flex !important;
+            flex-direction: row;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        /* Đảm bảo ảnh không chiếm hết chỗ */
+        .grid-row-active .cr-left {
+            flex-shrink: 0;
+        }
+
+        /* Chi tiết chiếm phần còn lại */
+        .grid-row-active .cr-product-details {
+            flex-grow: 1;
+        }
     </style>
 
     <!-- Breadcrumb -->
@@ -80,15 +114,6 @@
                                 </select>
                                 {{-- Lọc Theo Biến Thể ----------------------------------------------------------- --}}
                             </div>
-                            {{-- @php
-                                // use Illuminate\Support\Str;
-
-                                $selectedValues = collect(request()->input('attribute_values', []))->map(
-                                    fn($id) => (int) $id,
-                                );
-                                $grouped = $attributeValues->groupBy(fn($v) => $v->attribute->name);
-                            @endphp --}}
-
                             @php
                                 use Illuminate\Support\Str;
 
@@ -237,30 +262,33 @@
                             @foreach ($products as $product)
                                 <div class="col-xxl-3 col-xl-4 col-6 cr-product-box mb-24">
                                     <div class="cr-product-card">
-                                        <div class="cr-product-image">
-                                            <div class="cr-image-inner zoom-image-hover">
-                                                <img src="{{ asset('storage/' . $product->image) }}"
-                                                    alt="{{ $product->name }}">
+                                        {{-- Bọc toàn bộ bên trái (ảnh) --}}
+                                        <div class="cr-left">
+                                            <div class="cr-product-image">
+                                                <div class="cr-image-inner zoom-image-hover">
+                                                    <img src="{{ asset('storage/' . $product->image) }}"
+                                                        alt="{{ $product->name }}" class="product-img">
+                                                </div>
+                                                <div class="cr-side-view">
+                                                    <a href="javascript:void(0);" class="wishlist-button"
+                                                        data-product-id="{{ $product->id }}">
+                                                        @if (in_array($product->id, $wishlistProductIds ?? []))
+                                                            <i class="ri-heart-fill text-danger"></i>
+                                                        @else
+                                                            <i class="ri-heart-line"></i>
+                                                        @endif
+                                                    </a>
+                                                </div>
+                                                <a class="cr-shopping-bag" href="#"><i
+                                                        class="ri-shopping-bag-line"></i></a>
                                             </div>
-                                            <div class="cr-side-view">
-                                                <a href="javascript:void(0);" class="wishlist-button"
-                                                    data-product-id="{{ $product->id }}">
-                                                    @if (in_array($product->id, $wishlistProductIds ?? []))
-                                                        <i class="ri-heart-fill text-danger"></i>
-                                                    @else
-                                                        <i class="ri-heart-line"></i>
-                                                    @endif
-                                                </a>
-                                            </div>
-                                            <a class="cr-shopping-bag" href="#"><i
-                                                    class="ri-shopping-bag-line"></i></a>
                                         </div>
 
-                                        <div class="cr-product-details">
+                                        {{-- Bọc toàn bộ bên phải (chi tiết) --}}
+                                        <div class="cr-product-details flex-grow-1">
                                             <div class="cr-brand">
                                                 <a
                                                     href="#">{{ $product->brand->name ?? 'Không có thương hiệu' }}</a>
-
                                                 @php
                                                     $avg = round($product->reviews_avg_rating ?? 0, 1);
                                                     $fullStars = floor($avg);
@@ -268,9 +296,7 @@
                                                     $emptyStars = 5 - $fullStars - ($halfStar ? 1 : 0);
                                                     $count = $product->reviews_count ?? 0;
                                                 @endphp
-
                                                 <div class="text-center" style="line-height: 1.2;">
-                                                    {{-- Dòng sao --}}
                                                     <div class="mb-1">
                                                         @for ($i = 0; $i < $fullStars; $i++)
                                                             <i class="ri-star-fill text-warning"></i>
@@ -282,22 +308,19 @@
                                                             <i class="ri-star-line text-warning"></i>
                                                         @endfor
                                                     </div>
-
-                                                    {{-- Dòng số đánh giá --}}
                                                     <div class="text-muted small">
                                                         ({{ $avg }} / {{ $count }} đánh giá)
                                                     </div>
                                                 </div>
-
-
-
-
                                             </div>
 
                                             <a href="{{ route('productDetail', $product->slug) }}" class="title">
                                                 {{ $product->name }}
                                             </a>
-                                            <p class="text">Sản phẩm chất lượng cao, giá tốt nhất thị trường.</p>
+                                            <p class="text">
+                                                {!! $product->description !!}
+                                            </p>
+
 
                                             <ul class="list">
                                                 <li><label>Brand :</label> {{ $product->brand->name ?? 'Không rõ' }}</li>
