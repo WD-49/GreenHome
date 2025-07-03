@@ -86,14 +86,14 @@ class User extends Authenticatable
         });
     }
 
-    public function sendPasswordResetNotification($token)
-    {
-        // Ghi đè để không gửi email mặc định của Laravel
-    }
-
-    // public function sendEmailVerificationNotification() //hàm này sẽ đưa xác thực mail vào queue nhưng link trả ra lại not found
+    // public function sendPasswordResetNotification($token)
     // {
-    //     // Sử dụng Notification tùy chỉnh của bạn
-    //     $this->notify(new VerifyEmailNotification);
+    //     // Ghi đè để không gửi email mặc định của Laravel
     // }
+
+    public function sendEmailVerificationNotification()
+    {
+        // Sử dụng Notification tùy chỉnh của bạn
+        $this->notify(new VerifyEmailNotification);
+    }
 }
