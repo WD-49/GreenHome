@@ -32,4 +32,8 @@ class Review extends Model
     {
         return \Database\Factories\ReviewFactory::new();
     }
+    public function images()
+    {
+        return $this->hasMany(\App\Models\ReviewImage::class);
+    }
 }

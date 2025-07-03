@@ -53,9 +53,7 @@
                 <div class="col-xxl-8 col-xl-7 col-md-6 col-12 mb-24">
                     <div class="cr-size-and-weight-contain">
                         <h2 class="heading">{{ $product->name }}</h2>
-                        @if ($product->sortDes)
-                            <p>{{ $product->sortDes }}</p>
-                        @endif
+                        <p>{{ $product->sortDes ?? '' }}</p>
                     </div>
 
                     @php
@@ -66,7 +64,6 @@
                         $prices = $product->productVariants->pluck('price')->filter();
                         $minPrice = $prices->min();
                         $maxPrice = $prices->max();
-                        $totalQuantity = $product->productVariants->sum('quantity') ?: $product->quantity;
                     @endphp
 
                     <div class="cr-size-and-weight">
@@ -83,7 +80,9 @@
                             <ul>
                                 <li><label>Thương Hiệu <span>:</span></label>{{ $product->brand->name ?? '' }}</li>
                                 <li><label>Danh Mục <span>:</span></label>{{ $product->category->name ?? '' }}</li>
-                                <li><label>Số lượng <span>:</span></label>{{ $totalQuantity ?? 'N/A' }}</li>
+                                <li><label>Số lượng còn <span>:</span></label><span
+                                        id="variant-quantity">{{ $product->quantity }}</span></li>
+
                                 <li><label>Lượt xem <span>:</span></label>{{ $product->view ?? 0 }}</li>
                             </ul>
                         </div>
@@ -107,9 +106,11 @@
                                 <div class="cr-kg">
                                     <ul>
                                         @foreach ($product->productVariants as $index => $variant)
-                                            <li class="variant-option{{ $index == 0 ? ' active-color' : '' }}"
-                                                data-variant-id="{{ $variant->id }}" data-price="{{ $variant->price }}"
-                                                data-image="{{ asset('storage/' . $variant->image) }}">
+                                            <li class="variant-option" data-variant-id="{{ $variant->id }}"
+                                                data-price="{{ $variant->price }}"
+                                                data-image="{{ asset('storage/' . $variant->image) }}"
+                                                data-quantity="{{ $variant->quantity }}">
+
                                                 {{ $variant->attribute_name }}
                                             </li>
                                         @endforeach
@@ -187,19 +188,28 @@
                                                     <span
                                                         class="date">{{ \Carbon\Carbon::parse($review->created_at)->locale('vi')->isoFormat('D [tháng] M, YYYY') }}</span>
                                                     <span class="name">{{ $review->user->name ?? 'Guest' }}</span>
+                                                    <span class="name">{{ $review->title ?? '' }}</span>
+
                                                 </div>
                                                 <div class="cr-t-review-rating">
                                                     @for ($i = 1; $i <= 5; $i++)
                                                         <i
                                                             class="ri-star-s-{{ $i <= $review->rating ? 'fill' : 'line' }}"></i>
                                                     @endfor
+
                                                 </div>
                                             </div>
-                                            @if ($review->title)
-                                                <h5>{{ $review->title }}</h5>
-                                            @endif
-                                            @if ($review->content)
-                                                <p>{{ $review->content }}</p>
+                                            <p>{{ $review->content }}</p>
+                                            @if ($review->images && $review->images->count())
+                                                <div class="review-images mt-2">
+                                                    @foreach ($review->images as $image)
+                                                        <img src="{{ asset('storage/' . $image->image) }}"
+                                                            alt="Review Image"
+                                                            style="width: 100px; height: auto; border-radius: 6px; margin-right: 8px;"
+                                                            loading="lazy"
+                                                            onerror="this.src='{{ asset('images/default-image.jpg') }}'">
+                                                    @endforeach
+                                                </div>
                                             @endif
                                         @empty
                                             <div class="no-reviews">
@@ -339,6 +349,9 @@
                         let gia = Number(this.dataset.price);
                         document.getElementById('variant-price').textContent = gia.toLocaleString(
                             'vi-VN') + '₫';
+
+                        let soLuong = this.dataset.quantity || 0;
+                        document.getElementById('variant-quantity').textContent = soLuong;
                     });
                 });
 
