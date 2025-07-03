@@ -1,7 +1,8 @@
+{{-- resources/views/auth/passwords/email.blade.php --}}
+
 @extends('layouts.app')
 
 @section('content')
-    <!-- Breadcrumb -->
     <section class="section-breadcrumb">
         <div class="cr-breadcrumb-image">
             <div class="container">
@@ -17,7 +18,6 @@
         </div>
     </section>
 
-    <!-- Forgot page -->
     <section class="section-login padding-tb-100">
         <div class="container">
             <div class="row d-none">
@@ -70,6 +70,5 @@
         </div>
     </section>
 
-    <!-- Footer -->
     @include('client.partials.sideTool')
 @endsection
