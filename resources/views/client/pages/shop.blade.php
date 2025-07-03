@@ -26,37 +26,35 @@
             color: #ffc107;
         }
 
-       /* Ảnh mặc định cho Grid View */
-.product-img {
-    width: 100%;
-    height: 225px;
-    object-fit: cover;
-    border-radius: 6px;
-    display: block;
-}
+        /* Ảnh mặc định cho Grid View */
+        .product-img {
+            width: 100%;
+            height: 225px;
+            object-fit: cover;
+            border-radius: 6px;
+            display: block;
+        }
 
-/* Cha chứa ảnh - Grid View */
-.cr-left,
-.cr-product-image {
-    width: 100%;
-    height: 225px;
-}
+        /* Cha chứa ảnh - Grid View */
+        .cr-left,
+        .cr-product-image {
+            width: 100%;
+            height: 225px;
+        }
 
-/* List View - Kích thước cố định */
-.grid-row-active .cr-left,
-.grid-row-active .cr-product-image {
-    width: 350px;
-    height: 280px;
-    flex-shrink: 0;
-}
+        /* List View - Kích thước cố định */
+        .grid-row-active .cr-left,
+        .grid-row-active .cr-product-image {
+            width: 350px;
+            height: 280px;
+            flex-shrink: 0;
+        }
 
-.grid-row-active .product-img {
-    width: 350px;
-    height: 280px;
-    object-fit: cover;
-}
-
-
+        .grid-row-active .product-img {
+            width: 350px;
+            height: 280px;
+            object-fit: cover;
+        }
     </style>
 
     <!-- Breadcrumb -->
@@ -316,9 +314,11 @@
                                             <a href="{{ route('productDetail', $product->slug) }}" class="title">
                                                 {{ $product->name }}
                                             </a>
-                                            <p class="text">
+                                            <div class="text product-description d-none">
                                                 {!! $product->description !!}
-                                            </p>
+                                            </div>
+
+
 
 
                                             <ul class="list">
@@ -368,7 +368,7 @@
 
     <script>
         $(document).ready(function() {
-            // CSRF setup cho Ajax
+            // CSRF setup
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -378,8 +378,7 @@
                 }
             });
 
-            // ==============================
-            // ✅ Wishlist Toggle
+            // ✅ Wishlist toggle
             $(document).on('click', '.wishlist-button', function(e) {
                 e.preventDefault();
                 const $btn = $(this);
@@ -402,8 +401,7 @@
                 });
             });
 
-            // ==============================
-            // ✅ Hàm cập nhật label dropdown biến thể
+            // ✅ Update dropdown labels
             function updateDropdownLabels() {
                 let selectedMap = {};
 
@@ -422,27 +420,38 @@
                 });
             }
 
-            // ==============================
-            // ✅ Hàm cập nhật nội dung khi AJAX thành công
-            function updateContent($html) {
-                const newProductList = $html.find('#product-list').html();
-                const newPagination = $html.find('#pagination-wrapper').html();
-                const newCount = $html.find('#product-count').text();
+            // ✅ Áp dụng kiểu hiển thị Grid/List
+            function applyViewMode() {
+                const isListView = $('.gridRow').hasClass('active-grid');
+                const $productList = $('#product-list');
 
-                $('#product-list').html(newProductList);
-                $('#pagination-wrapper').html(newPagination);
-                $('#product-count').text(newCount);
-
-                updateDropdownLabels();
-
-                // Khởi tạo lại Bootstrap dropdown sau khi AJAX
-                document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(function(el) {
-                    new bootstrap.Dropdown(el);
-                });
+                if (isListView) {
+                    $productList.find('.product-description').removeClass('d-none');
+                    $productList.addClass('grid-row-active');
+                    $productList.find('.cr-product-box').removeClass('col-xxl-3 col-xl-4 col-6').addClass('col-12');
+                    $productList.find('.cr-product-card').addClass('d-flex flex-row gap-3');
+                } else {
+                    $productList.find('.product-description').addClass('d-none');
+                    $productList.removeClass('grid-row-active');
+                    $productList.find('.cr-product-box').removeClass('col-12').addClass('col-xxl-3 col-xl-4 col-6');
+                    $productList.find('.cr-product-card').removeClass('d-flex flex-row gap-3');
+                }
             }
 
-            // ==============================
-            // ✅ AJAX lọc sản phẩm
+            // ✅ Cập nhật lại nội dung khi AJAX thành công
+            function updateContent($html) {
+                $('#product-list').html($html.find('#product-list').html());
+                $('#pagination-wrapper').html($html.find('#pagination-wrapper').html());
+                $('#product-count').text($html.find('#product-count').text());
+
+                updateDropdownLabels();
+                applyViewMode();
+
+                // Re-init Bootstrap dropdown
+                document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(el => new bootstrap.Dropdown(el));
+            }
+
+            // ✅ Lọc sản phẩm
             $('#filter-form').on('submit', function(e) {
                 e.preventDefault();
                 const $form = $(this);
@@ -458,8 +467,7 @@
                 });
             });
 
-            // ==============================
-            // ✅ AJAX phân trang
+            // ✅ Phân trang
             $(document).on('click', '#pagination-wrapper .page-link', function(e) {
                 e.preventDefault();
                 const url = $(this).attr('href');
@@ -471,7 +479,7 @@
                     beforeSend: function() {
                         $('#product-list').html(
                             '<div class="text-center w-100 py-5">Đang tải sản phẩm...</div>'
-                        );
+                            );
                     },
                     success: function(response) {
                         const $html = $('<div>').html(response);
@@ -484,8 +492,7 @@
                 });
             });
 
-            // ==============================
-            // ✅ AJAX sắp xếp sản phẩm
+            // ✅ Sắp xếp
             $(document).on('change', '#sort-select', function() {
                 const $form = $('#sort-form');
                 const url = $form.attr('action');
@@ -500,28 +507,26 @@
                 });
             });
 
-            // ==============================
-           // ✅ Toggle sang Grid View
-$(document).on('click', '.gridCol', function () {
-    $(this).addClass('active-grid');
-    $('.gridRow').removeClass('active-grid');
+            // ✅ Toggle sang Grid View
+            $(document).on('click', '.gridCol', function() {
+                $(this).addClass('active-grid');
+                $('.gridRow').removeClass('active-grid');
+                applyViewMode();
+            });
 
-    $('.cr-product-box').removeClass('col-12').addClass('col-xxl-3 col-xl-4 col-6');
-    $('.cr-product-card').removeClass('d-flex flex-row gap-3');
+            // ✅ Toggle sang List View
+            $(document).on('click', '.gridRow', function() {
+                $(this).addClass('active-grid');
+                $('.gridCol').removeClass('active-grid');
+                applyViewMode();
+            });
 
-    $('#product-list').removeClass('grid-row-active');
-});
-
-// ✅ Toggle sang List View
-$(document).on('click', '.gridRow', function () {
-    $(this).addClass('active-grid');
-    $('.gridCol').removeClass('active-grid');
-    $('.cr-product-box').removeClass('col-xxl-3 col-xl-4 col-6').addClass('col-12');
-    $('.cr-product-card').addClass('d-flex flex-row gap-3');
-    $('#product-list').addClass('grid-row-active');
-});
-            // ✅ Gọi lần đầu khi load trang
+            // ✅ Gọi lần đầu
             updateDropdownLabels();
+            applyViewMode(); // <- đảm bảo ẩn mô tả nếu đang ở Grid view
+
+            console.log('View mode:', isListView ? 'List' : 'Grid');
+
         });
     </script>
 @endpush

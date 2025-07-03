@@ -1,22 +1,23 @@
 @extends('layouts.app')
 
 @section('content')
-<style>
-      .product-img {
+    <style>
+        .product-img {
             width: 100%;
             height: 260px;
             object-fit: cover;
             border-radius: 6px;
             display: block;
         }
-</style>
+    </style>
+
     <div class="container py-5">
         <h2 class="mb-4">Danh sách yêu thích</h2>
 
         @if ($wishlists->isEmpty())
             <p>Bạn chưa có sản phẩm nào trong danh sách yêu thích.</p>
         @else
-            <div class="row col-100 mb-minus-24">
+            <div class="row gx-4 gy-4">
                 @foreach ($wishlists as $item)
                     @php
                         $product = $item->product;
@@ -28,50 +29,48 @@
                         $emptyStars = 5 - $fullStars - ($halfStar ? 1 : 0);
                     @endphp
 
-                    <div class="col-xxl-3 col-xl-4 col-6 cr-product-box mb-24">
+                    <div class="col-xxl-3 col-xl-4 col-md-6 col-12">
                         <div class="cr-product-card">
-                            <div class="cr-product-image">
+                            <div class="cr-product-image position-relative">
                                 <div class="cr-image-inner zoom-image-hover">
                                     <img src="{{ asset('storage/' . $product->image) }}"
-                                                        alt="{{ $product->name }}" class="product-img">
+                                        alt="{{ $product->name }}" class="product-img">
                                 </div>
-                                <div class="cr-side-view d-flex flex-column align-items-end gap-2"
-                                    style="position: absolute; top: 10px; right: 10px;">
-                                    <div class="cr-side-view d-flex flex-column align-items-end gap-2"
-                                        style="position: absolute; top: 10px; right: 10px;">
-                                        {{-- Toggle wishlist --}}
-                                        <a href="javascript:void(0);"
-                                            class="wishlist-button d-flex align-items-center justify-content-center rounded-circle bg-white shadow"
-                                            data-product-id="{{ $product->id }}" style="width: 40px; height: 40px;">
-                                            <i class="ri-heart-fill text-danger fs-5"></i>
-                                        </a>
 
-                                        {{-- Toggle notify_on_sale --}}
-                                        <button type="button"
+                                <div class="cr-side-view d-flex flex-column align-items-end gap-2 position-absolute"
+                                     style="top: 10px; right: 10px;">
+                                    <!-- Wishlist -->
+                                    <a href="javascript:void(0);"
+                                       class="wishlist-button d-flex align-items-center justify-content-center rounded-circle bg-white shadow"
+                                       data-product-id="{{ $product->id }}"
+                                       style="width: 40px; height: 40px;">
+                                        <i class="ri-heart-fill text-danger fs-5"></i>
+                                    </a>
+
+                                    <!-- Notify -->
+                                    <button type="button"
                                             class="toggle-notify d-flex align-items-center justify-content-center rounded-circle bg-white shadow border-0"
                                             data-product-id="{{ $product->id }}"
                                             data-current="{{ $item->notify_on_sale ? '1' : '0' }}"
                                             style="width: 40px; height: 40px;">
-                                            @if ($item->notify_on_sale)
-                                                <i class="ri-notification-3-fill text-success fs-5"></i>
-                                            @else
-                                                <i class="ri-notification-off-line text-muted fs-5"></i>
-                                            @endif
-                                        </button>
-                                        {{-- Select priority --}}
-                                        <select class="form-select form-select-sm select-priority mt-1"
-                                            data-product-id="{{ $product->id }}" style="width: 80px; font-size: 13px;">
-                                            @foreach (['Low', 'Medium', 'High'] as $level)
-                                                <option value="{{ $level }}"
-                                                    {{ $item->priority === $level ? 'selected' : '' }}>
-                                                    {{ $level }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+                                        @if ($item->notify_on_sale)
+                                            <i class="ri-notification-3-fill text-success fs-5"></i>
+                                        @else
+                                            <i class="ri-notification-off-line text-muted fs-5"></i>
+                                        @endif
+                                    </button>
 
-
-
+                                    <!-- Priority -->
+                                    <select class="form-select form-select-sm select-priority mt-1"
+                                            data-product-id="{{ $product->id }}"
+                                            style="width: 80px; font-size: 13px;">
+                                        @foreach (['Low', 'Medium', 'High'] as $level)
+                                            <option value="{{ $level }}"
+                                                {{ $item->priority === $level ? 'selected' : '' }}>
+                                                {{ $level }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
 
                                 <a class="cr-shopping-bag" href="#"><i class="ri-shopping-bag-line"></i></a>
@@ -80,31 +79,22 @@
                             <div class="cr-product-details">
                                 <div class="cr-brand">
                                     <a href="#">{{ $product->brand->name ?? 'Không có thương hiệu' }}</a>
-                                     @php
-                                                    $avg = round($product->reviews_avg_rating ?? 0, 1);
-                                                    $fullStars = floor($avg);
-                                                    $halfStar = $avg - $fullStars >= 0.5;
-                                                    $emptyStars = 5 - $fullStars - ($halfStar ? 1 : 0);
-                                                    $count = $product->reviews_count ?? 0;
-                                                @endphp
-                                                <div class="text-center" style="line-height: 1.2;">
-                                                    {{-- Dòng sao --}}
-                                                    <div class="mb-1">
-                                                        @for ($i = 0; $i < $fullStars; $i++)
-                                                            <i class="ri-star-fill text-warning"></i>
-                                                        @endfor
-                                                        @if ($halfStar)
-                                                            <i class="ri-star-half-line text-warning"></i>
-                                                        @endif
-                                                        @for ($i = 0; $i < $emptyStars; $i++)
-                                                            <i class="ri-star-line text-warning"></i>
-                                                        @endfor
-                                                    </div>
-                                                    {{-- Dòng số đánh giá --}}
-                                                    <div class="text-muted small">
-                                                        ({{ $avg }} / {{ $count }} đánh giá)
-                                                    </div>
-                                                </div>
+                                    <div class="text-center" style="line-height: 1.2;">
+                                        <div class="mb-1">
+                                            @for ($i = 0; $i < $fullStars; $i++)
+                                                <i class="ri-star-fill text-warning"></i>
+                                            @endfor
+                                            @if ($halfStar)
+                                                <i class="ri-star-half-line text-warning"></i>
+                                            @endif
+                                            @for ($i = 0; $i < $emptyStars; $i++)
+                                                <i class="ri-star-line text-warning"></i>
+                                            @endfor
+                                        </div>
+                                        <div class="text-muted small">
+                                            ({{ $avg }} / {{ $count }} đánh giá)
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <a href="{{ route('productDetail', $product->slug) }}" class="title">
@@ -124,7 +114,9 @@
                                                 $min = $prices->min();
                                                 $max = $prices->max();
                                             @endphp
-                                            {{ $min === $max ? number_format($min, 0, ',', '.') . ' đ' : number_format($min, 0, ',', '.') . ' đ - ' . number_format($max, 0, ',', '.') . ' đ' }}
+                                            {{ $min === $max
+                                                ? number_format($min, 0, ',', '.') . ' đ'
+                                                : number_format($min, 0, ',', '.') . ' đ - ' . number_format($max, 0, ',', '.') . ' đ' }}
                                         </span>
                                     </p>
                                 @else
@@ -135,10 +127,8 @@
                     </div>
                 @endforeach
             </div>
-   
 
-
-            {{-- Phân trang --}}
+            <!-- Pagination -->
             <div class="mt-4">
                 {{ $wishlists->appends(request()->except('page'))->links('pagination::bootstrap-5') }}
             </div>
@@ -147,17 +137,16 @@
 @endsection
 
 @push('scripts')
- <!-- Bootstrap 5 -->
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
-            xhrFields: {
-                withCredentials: true
-            }
+            xhrFields: { withCredentials: true }
         });
 
         // Toggle wishlist
@@ -170,7 +159,7 @@
                 product_id: productId
             }, function (res) {
                 if (!res.added) {
-                    button.closest('.cr-product-box').fadeOut();
+                    button.closest('.col-xxl-3').fadeOut();
                 }
             }).fail(function (xhr) {
                 alert(xhr.status === 401 ? 'Bạn cần đăng nhập.' : 'Lỗi khi cập nhật wishlist.');
@@ -195,7 +184,7 @@
             });
         });
 
-        // Cập nhật priority và tự động sắp xếp lại danh sách
+        // Update priority and auto-sort
         $(document).on('change', '.select-priority', function () {
             const select = $(this);
             const productId = select.data('product-id');
@@ -206,12 +195,11 @@
                 field: 'priority',
                 value: value
             }, function () {
-                // Sắp xếp lại sau khi cập nhật
                 sortWishlistByPriority();
             });
         });
 
-        // Hàm sắp xếp danh sách wishlist theo priority
+        // Sort by priority
         function sortWishlistByPriority() {
             const priorityOrder = {
                 'High': 1,
@@ -219,17 +207,15 @@
                 'Low': 3
             };
 
-            const items = $('.cr-product-box').get();
+            const items = $('.col-xxl-3').get();
 
             items.sort(function (a, b) {
                 const priorityA = $(a).find('.select-priority').val();
                 const priorityB = $(b).find('.select-priority').val();
-
                 return priorityOrder[priorityA] - priorityOrder[priorityB];
             });
 
-            $('.row.col-100.mb-minus-24').empty().append(items);
+            $('.row.gx-4').empty().append(items);
         }
     </script>
 @endpush
-
