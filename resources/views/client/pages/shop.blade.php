@@ -26,45 +26,43 @@
             color: #ffc107;
         }
 
-        /* Ảnh mặc định trong Grid View */
-        .product-img {
-            width: 100%;
-            height: 225px;
-            object-fit: cover;
-            border-radius: 6px;
-            display: block;
-        }
+       /* Ảnh mặc định cho Grid View */
+.product-img {
+    width: 100%;
+    height: 225px;
+    object-fit: cover;
+    border-radius: 6px;
+    display: block;
+}
 
-        /* Khi ở chế độ List View */
-        .grid-row-active .product-img {
-            width: 150px;
-            height: 180px;
-            object-fit: cover;
-        }
+/* Cha chứa ảnh - Grid View */
+.cr-left,
+.cr-product-image {
+    width: 100%;
+    height: 225px;
+}
 
-        /* List View bố cục 2 bên */
-        .grid-row-active .cr-product-card {
-            display: flex !important;
-            flex-direction: row;
-            gap: 16px;
-            align-items: flex-start;
-        }
+/* List View - Kích thước cố định */
+.grid-row-active .cr-left,
+.grid-row-active .cr-product-image {
+    width: 350px;
+    height: 280px;
+    flex-shrink: 0;
+}
 
-        /* Đảm bảo ảnh không chiếm hết chỗ */
-        .grid-row-active .cr-left {
-            flex-shrink: 0;
-        }
+.grid-row-active .product-img {
+    width: 350px;
+    height: 280px;
+    object-fit: cover;
+}
 
-        /* Chi tiết chiếm phần còn lại */
-        .grid-row-active .cr-product-details {
-            flex-grow: 1;
-        }
+
     </style>
 
     <!-- Breadcrumb -->
     <section class="section-breadcrumb">
         <div class="cr-breadcrumb-image">
-            <div class="container">
+            <div class="container-fluid">
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="cr-breadcrumb-title">
@@ -79,7 +77,8 @@
 
     <!-- Shop -->
     <section class="section-shop padding-tb-100">
-        <div class="container">
+        <div class="container-xl">
+
             <div class="row">
                 {{-- Sidebar --}}
                 <div class="col-lg-3">
@@ -502,21 +501,25 @@
             });
 
             // ==============================
-            // ✅ Toggle Grid / List view
-            $(document).on('click', '.gridCol', function() {
-                $(this).addClass('active-grid');
-                $('.gridRow').removeClass('active-grid');
-                $('.cr-product-box').removeClass('col-12').addClass('col-xxl-3 col-xl-4 col-6');
-                $('.cr-product-card').removeClass('d-flex flex-row gap-3');
-            });
+           // ✅ Toggle sang Grid View
+$(document).on('click', '.gridCol', function () {
+    $(this).addClass('active-grid');
+    $('.gridRow').removeClass('active-grid');
 
-            $(document).on('click', '.gridRow', function() {
-                $(this).addClass('active-grid');
-                $('.gridCol').removeClass('active-grid');
-                $('.cr-product-box').removeClass('col-xxl-3 col-xl-4 col-6').addClass('col-12');
-                $('.cr-product-card').addClass('d-flex flex-row gap-3');
-            });
+    $('.cr-product-box').removeClass('col-12').addClass('col-xxl-3 col-xl-4 col-6');
+    $('.cr-product-card').removeClass('d-flex flex-row gap-3');
 
+    $('#product-list').removeClass('grid-row-active');
+});
+
+// ✅ Toggle sang List View
+$(document).on('click', '.gridRow', function () {
+    $(this).addClass('active-grid');
+    $('.gridCol').removeClass('active-grid');
+    $('.cr-product-box').removeClass('col-xxl-3 col-xl-4 col-6').addClass('col-12');
+    $('.cr-product-card').addClass('d-flex flex-row gap-3');
+    $('#product-list').addClass('grid-row-active');
+});
             // ✅ Gọi lần đầu khi load trang
             updateDropdownLabels();
         });
