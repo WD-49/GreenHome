@@ -227,8 +227,6 @@
                                         </select>
                                     </form>
                                 </div>
-
-
                             </div>
                         </div>
                     </div>
@@ -263,7 +261,6 @@
                                                 <a
                                                     href="#">{{ $product->brand->name ?? 'Không có thương hiệu' }}</a>
 
-                                                {{-- Hiển thị sao --}}
                                                 @php
                                                     $avg = round($product->reviews_avg_rating ?? 0, 1);
                                                     $fullStars = floor($avg);
@@ -272,18 +269,29 @@
                                                     $count = $product->reviews_count ?? 0;
                                                 @endphp
 
-                                                <div class="cr-star">
-                                                    @for ($i = 0; $i < $fullStars; $i++)
-                                                        <i class="ri-star-fill"></i>
-                                                    @endfor
-                                                    @if ($halfStar)
-                                                        <i class="ri-star-half-line"></i>
-                                                    @endif
-                                                    @for ($i = 0; $i < $emptyStars; $i++)
-                                                        <i class="ri-star-line"></i>
-                                                    @endfor
-                                                    <p>({{ $avg }} / {{ $count }} đánh giá)</p>
+                                                <div class="text-center" style="line-height: 1.2;">
+                                                    {{-- Dòng sao --}}
+                                                    <div class="mb-1">
+                                                        @for ($i = 0; $i < $fullStars; $i++)
+                                                            <i class="ri-star-fill text-warning"></i>
+                                                        @endfor
+                                                        @if ($halfStar)
+                                                            <i class="ri-star-half-line text-warning"></i>
+                                                        @endif
+                                                        @for ($i = 0; $i < $emptyStars; $i++)
+                                                            <i class="ri-star-line text-warning"></i>
+                                                        @endfor
+                                                    </div>
+
+                                                    {{-- Dòng số đánh giá --}}
+                                                    <div class="text-muted small">
+                                                        ({{ $avg }} / {{ $count }} đánh giá)
+                                                    </div>
                                                 </div>
+
+
+
+
                                             </div>
 
                                             <a href="{{ route('productDetail', $product->slug) }}" class="title">
@@ -337,150 +345,157 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-    $(document).ready(function () {
-        // CSRF setup cho Ajax
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            xhrFields: {
-                withCredentials: true
-            }
-        });
-
-        // ==============================
-        // ✅ Wishlist Toggle
-        $(document).on('click', '.wishlist-button', function (e) {
-            e.preventDefault();
-            const $btn = $(this);
-            const productId = $btn.data('product-id');
-
-            $.post('{{ route('wishlist.toggle') }}', { product_id: productId }, function (res) {
-                if (res.added) {
-                    $btn.find('i').removeClass('ri-heart-line').addClass('ri-heart-fill text-danger');
-                } else {
-                    $btn.find('i').removeClass('ri-heart-fill text-danger').addClass('ri-heart-line');
-                }
-                alert(res.message);
-            }).fail(function (xhr) {
-                alert(xhr.status === 401 ? 'Vui lòng đăng nhập để thêm vào wishlist' : 'Đã có lỗi xảy ra!');
-            });
-        });
-
-        // ==============================
-        // ✅ Hàm cập nhật label dropdown biến thể
-        function updateDropdownLabels() {
-            let selectedMap = {};
-
-            $('input[name="attribute_values[]"]:checked').each(function () {
-                const label = $(this).closest('li').find('label').text().trim();
-                const attrGroup = $(this).closest('.dropdown').find('.attribute-dropdown').data('attribute-name');
-                if (!selectedMap[attrGroup]) selectedMap[attrGroup] = [];
-                selectedMap[attrGroup].push(label);
-            });
-
-            $('.attribute-dropdown').each(function () {
-                const attrName = $(this).data('attribute-name');
-                const labels = selectedMap[attrName] || [];
-                $(this).find('.selected-label').text(labels.length ? ': ' + labels.join(', ') : '');
-            });
-        }
-
-        // ==============================
-        // ✅ Hàm cập nhật nội dung khi AJAX thành công
-        function updateContent($html) {
-            const newProductList = $html.find('#product-list').html();
-            const newPagination = $html.find('#pagination-wrapper').html();
-            const newCount = $html.find('#product-count').text();
-
-            $('#product-list').html(newProductList);
-            $('#pagination-wrapper').html(newPagination);
-            $('#product-count').text(newCount);
-
-            updateDropdownLabels();
-
-            // Khởi tạo lại Bootstrap dropdown sau khi AJAX
-            document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(function (el) {
-                new bootstrap.Dropdown(el);
-            });
-        }
-
-        // ==============================
-        // ✅ AJAX lọc sản phẩm
-        $('#filter-form').on('submit', function (e) {
-            e.preventDefault();
-            const $form = $(this);
-            const url = $form.attr('action');
-            const data = $form.serialize();
-
-            $.get(url, data, function (response) {
-                const $html = $('<div>').html(response);
-                updateContent($html);
-                window.history.pushState({}, '', `${url}?${data}`);
-            }).fail(function () {
-                alert('Đã có lỗi xảy ra khi lọc sản phẩm.');
-            });
-        });
-
-        // ==============================
-        // ✅ AJAX phân trang
-        $(document).on('click', '#pagination-wrapper .page-link', function (e) {
-            e.preventDefault();
-            const url = $(this).attr('href');
-            if (!url) return;
-
-            $.ajax({
-                url: url,
-                type: 'GET',
-                beforeSend: function () {
-                    $('#product-list').html('<div class="text-center w-100 py-5">Đang tải sản phẩm...</div>');
+        $(document).ready(function() {
+            // CSRF setup cho Ajax
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                success: function (response) {
+                xhrFields: {
+                    withCredentials: true
+                }
+            });
+
+            // ==============================
+            // ✅ Wishlist Toggle
+            $(document).on('click', '.wishlist-button', function(e) {
+                e.preventDefault();
+                const $btn = $(this);
+                const productId = $btn.data('product-id');
+
+                $.post('{{ route('wishlist.toggle') }}', {
+                    product_id: productId
+                }, function(res) {
+                    if (res.added) {
+                        $btn.find('i').removeClass('ri-heart-line').addClass(
+                            'ri-heart-fill text-danger');
+                    } else {
+                        $btn.find('i').removeClass('ri-heart-fill text-danger').addClass(
+                            'ri-heart-line');
+                    }
+                    alert(res.message);
+                }).fail(function(xhr) {
+                    alert(xhr.status === 401 ? 'Vui lòng đăng nhập để thêm vào wishlist' :
+                        'Đã có lỗi xảy ra!');
+                });
+            });
+
+            // ==============================
+            // ✅ Hàm cập nhật label dropdown biến thể
+            function updateDropdownLabels() {
+                let selectedMap = {};
+
+                $('input[name="attribute_values[]"]:checked').each(function() {
+                    const label = $(this).closest('li').find('label').text().trim();
+                    const attrGroup = $(this).closest('.dropdown').find('.attribute-dropdown').data(
+                        'attribute-name');
+                    if (!selectedMap[attrGroup]) selectedMap[attrGroup] = [];
+                    selectedMap[attrGroup].push(label);
+                });
+
+                $('.attribute-dropdown').each(function() {
+                    const attrName = $(this).data('attribute-name');
+                    const labels = selectedMap[attrName] || [];
+                    $(this).find('.selected-label').text(labels.length ? ': ' + labels.join(', ') : '');
+                });
+            }
+
+            // ==============================
+            // ✅ Hàm cập nhật nội dung khi AJAX thành công
+            function updateContent($html) {
+                const newProductList = $html.find('#product-list').html();
+                const newPagination = $html.find('#pagination-wrapper').html();
+                const newCount = $html.find('#product-count').text();
+
+                $('#product-list').html(newProductList);
+                $('#pagination-wrapper').html(newPagination);
+                $('#product-count').text(newCount);
+
+                updateDropdownLabels();
+
+                // Khởi tạo lại Bootstrap dropdown sau khi AJAX
+                document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(function(el) {
+                    new bootstrap.Dropdown(el);
+                });
+            }
+
+            // ==============================
+            // ✅ AJAX lọc sản phẩm
+            $('#filter-form').on('submit', function(e) {
+                e.preventDefault();
+                const $form = $(this);
+                const url = $form.attr('action');
+                const data = $form.serialize();
+
+                $.get(url, data, function(response) {
                     const $html = $('<div>').html(response);
                     updateContent($html);
-                    window.history.pushState({}, '', url);
-                },
-                error: function () {
-                    alert('Không thể tải dữ liệu phân trang.');
-                }
+                    window.history.pushState({}, '', `${url}?${data}`);
+                }).fail(function() {
+                    alert('Đã có lỗi xảy ra khi lọc sản phẩm.');
+                });
             });
-        });
 
-        // ==============================
-        // ✅ AJAX sắp xếp sản phẩm
-        $(document).on('change', '#sort-select', function () {
-            const $form = $('#sort-form');
-            const url = $form.attr('action');
-            const data = $form.serialize();
+            // ==============================
+            // ✅ AJAX phân trang
+            $(document).on('click', '#pagination-wrapper .page-link', function(e) {
+                e.preventDefault();
+                const url = $(this).attr('href');
+                if (!url) return;
 
-            $.get(url, data, function (response) {
-                const $html = $('<div>').html(response);
-                updateContent($html);
-                window.history.pushState({}, '', `${url}?${data}`);
-            }).fail(function () {
-                alert('Không thể sắp xếp sản phẩm.');
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    beforeSend: function() {
+                        $('#product-list').html(
+                            '<div class="text-center w-100 py-5">Đang tải sản phẩm...</div>'
+                        );
+                    },
+                    success: function(response) {
+                        const $html = $('<div>').html(response);
+                        updateContent($html);
+                        window.history.pushState({}, '', url);
+                    },
+                    error: function() {
+                        alert('Không thể tải dữ liệu phân trang.');
+                    }
+                });
             });
+
+            // ==============================
+            // ✅ AJAX sắp xếp sản phẩm
+            $(document).on('change', '#sort-select', function() {
+                const $form = $('#sort-form');
+                const url = $form.attr('action');
+                const data = $form.serialize();
+
+                $.get(url, data, function(response) {
+                    const $html = $('<div>').html(response);
+                    updateContent($html);
+                    window.history.pushState({}, '', `${url}?${data}`);
+                }).fail(function() {
+                    alert('Không thể sắp xếp sản phẩm.');
+                });
+            });
+
+            // ==============================
+            // ✅ Toggle Grid / List view
+            $(document).on('click', '.gridCol', function() {
+                $(this).addClass('active-grid');
+                $('.gridRow').removeClass('active-grid');
+                $('.cr-product-box').removeClass('col-12').addClass('col-xxl-3 col-xl-4 col-6');
+                $('.cr-product-card').removeClass('d-flex flex-row gap-3');
+            });
+
+            $(document).on('click', '.gridRow', function() {
+                $(this).addClass('active-grid');
+                $('.gridCol').removeClass('active-grid');
+                $('.cr-product-box').removeClass('col-xxl-3 col-xl-4 col-6').addClass('col-12');
+                $('.cr-product-card').addClass('d-flex flex-row gap-3');
+            });
+
+            // ✅ Gọi lần đầu khi load trang
+            updateDropdownLabels();
         });
-
-        // ==============================
-        // ✅ Toggle Grid / List view
-        $(document).on('click', '.gridCol', function () {
-            $(this).addClass('active-grid');
-            $('.gridRow').removeClass('active-grid');
-            $('.cr-product-box').removeClass('col-12').addClass('col-xxl-3 col-xl-4 col-6');
-            $('.cr-product-card').removeClass('d-flex flex-row gap-3');
-        });
-
-        $(document).on('click', '.gridRow', function () {
-            $(this).addClass('active-grid');
-            $('.gridCol').removeClass('active-grid');
-            $('.cr-product-box').removeClass('col-xxl-3 col-xl-4 col-6').addClass('col-12');
-            $('.cr-product-card').addClass('d-flex flex-row gap-3');
-        });
-
-        // ✅ Gọi lần đầu khi load trang
-        updateDropdownLabels();
-    });
-</script>
-
+    </script>
 @endpush
