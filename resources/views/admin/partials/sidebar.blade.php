@@ -149,6 +149,13 @@
                 <span> bài viết </span>
             </a>
         </li>
+            <li>
+                <a class='tp-link' href='{{ route('admin.web_info.show') }}'>
+                    <i data-feather="settings"></i>
+                    <span> Webinfos </span>
+                </a>
+            </li>
+
 
 
         {{-- <li>

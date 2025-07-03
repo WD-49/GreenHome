@@ -9,9 +9,10 @@ use App\Http\Controllers\admin\BlogController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\admin\BrandController;
 use App\Http\Controllers\admin\OrderController;
+use App\Http\Controllers\client\CartController;
+
 use App\Http\Controllers\client\HomeController;
 
-use App\Http\Controllers\client\ProductClientController;
 use App\Http\Controllers\Client\ShopController;
 use App\Http\Controllers\admin\BannerController;
 use App\Http\Controllers\admin\ReviewController;
@@ -20,22 +21,29 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\admin\CategoryController;
 use App\Http\Controllers\admin\DiscountController;
 use App\Http\Controllers\Auth\AdminAuthController;
+use App\Http\Controllers\Client\ProfileController;
 use App\Http\Controllers\admin\AttributeController;
 use App\Http\Controllers\admin\DashboardController;
 
 use App\Http\Controllers\admin\OrderStatusController;
+use App\Http\Controllers\client\BlogDetailController;
+
 use App\Http\Controllers\Admin\BlogCategoryController;
 
 use App\Http\Controllers\Auth\ResetPasswordController;
-
 use App\Http\Controllers\admin\PaymentMethodController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\admin\AttributeValueController;
+use App\Http\Controllers\client\ProductClientController;
 use App\Http\Controllers\admin\Product\ProductController;
 use App\Http\Controllers\admin\Account\AccountAdminController;
 use App\Http\Controllers\admin\Account\AccountUsersController;
 use App\Http\Controllers\admin\Product\ProductVariantController;
+use App\Http\Controllers\Admin\WebInfoController;
+use App\Http\Controllers\client\WishlistController;
 use App\Http\Controllers\client\BlogController as ClientBlogController;
+use Doctrine\DBAL\Schema\Index;
+
 
 // route của trang client
 
@@ -43,6 +51,22 @@ use App\Http\Controllers\client\BlogController as ClientBlogController;
 Route::get('/category/{id}', [HomeController::class, 'category'])->name('shop.category');
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/category-id/{id}', [ProductController::class, 'getProductsByCategoryId']);
+
+//wishlist 
+
+
+Route::middleware('auth')->prefix('wishlist')->group(function () {
+    Route::get('/', [WishlistController::class, 'index'])->name('wishlist.index');
+    Route::post('/add', [WishlistController::class, 'add'])->name('wishlist.add');
+    Route::post('/remove', [WishlistController::class, 'remove'])->name('wishlist.remove');
+});
+
+Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+Route::post('/wishlist/update-options', [WishlistController::class, 'updateOptions'])->name('wishlist.updateOptions');
+
+
+
+
 
 // viết tiếp route của các trang tại đây
 // // Route::get('/blog', [HomeController::class, 'blog'])->name('blog'); ví dụ.
@@ -56,12 +80,17 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('/password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
 Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 
-// Route::get('/password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
-// Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('forgot-password.form');
 Route::post('/forgot-password', [ForgotPasswordController::class, 'handle'])->name('forgot-password.handle');
 
-// Auth::routes();// Route cho Registers, Login, Logout... (Laravel UI)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile/{tab?}', [ProfileController::class, 'index'])->name('profile.index');
+    Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/{comment}/details-with-product', [CommentController::class, 'getCommentDetailsWithProduct'])
+        ->name('detailWithProduct');
+});
+
+
 
 // route của trang admin
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
@@ -210,8 +239,6 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         // Route::post('toggleUserRole/{admin}', [AccountAdminController::class, 'toggleUserRole'])->name('toggleUserRole');
     });
 
-
-
     //quản lí đánh giá 
     Route::prefix('reviews')->name('reviews.')->group(function () {
         Route::get('/', [ReviewController::class, 'index'])->name('index');
@@ -335,14 +362,25 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/edit/{id}', [OrderController::class, 'edit'])->name('edit');
         Route::put('/update/{id}', [OrderController::class, 'update'])->name('update');
         Route::get('/show/{id}', [OrderController::class, 'show'])->name('show');
-        Route::put('/{id}/update-status', [OrderController::class, 'updateStatus'])->name('updateStatus');
+
+        // Các route cập nhật trạng thái
+        Route::put('/{order}/update-status', [OrderController::class, 'updateStatus'])->name('updateStatus'); // Đổi {id} thành {order} để nhất quán
         Route::put('/{order}/updatePaymentStatus', [OrderController::class, 'updatePaymentStatus'])->name('updatePaymentStatus');
+
         Route::delete('/destroy/{id}', [OrderController::class, 'destroy'])->name('destroy');
         Route::get('/trash', [OrderController::class, 'trash'])->name('trash');
         Route::post('/restore/{id}', [OrderController::class, 'restore'])->name('restore');
-        Route::post('{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
+
+        // Đề xuất dùng PUT/PATCH cho việc hủy đơn hàng để phù hợp hơn với ngữ nghĩa RESTful
+        Route::put('{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
     });
+
+    // Hiển thị thông tin cấu hình website
+    Route::get('/webinfor', [WebInfoController::class, 'show'])->name('web_info.show');
+    Route::get('/webinfor/edit', [WebInfoController::class, 'edit'])->name('web_info.edit');
+    Route::post('/webinfor/update', [WebInfoController::class, 'update'])->name('web_info.update');
 });
+// webinfor 
 
 
 
@@ -360,4 +398,15 @@ Route::get('/blog/detail/{slug}', [ClientBlogController::class, 'show'])->name('
 Route::get('/san-pham/{slug}', [ProductClientController::class, 'show'])->name('productDetail');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 
+// giỏ hàng
+route::prefix('cart')->middleware('auth')->name('cart.')->group(function () {
+    Route::get('/', [CartController::class, 'viewCart'])->name('view');
+    Route::get('/data', [CartController::class, 'getCartData'])->name('data');
+    Route::post('/add', [CartController::class, 'addToCart'])->name('add');
+    Route::post('/update-quantity/{id}', [CartController::class, 'updateQuantity'])->name('updateQuantity');
+    Route::post('/delete-multiple', [CartController::class, 'deleteMultiple'])->name('deleteMultiple');
+});
+
 Route::get('/blog/{slug}', [App\Http\Controllers\client\BlogDetailController::class, 'show'])->name('blog.detail');
+
+Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');

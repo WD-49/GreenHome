@@ -481,11 +481,9 @@
 
     <!-- Deal -->
     <section class="section-deal padding-b-100">
-        <div class="bg-banner-deal"
-            style="background-image: url('{{ Storage::url(Str::replaceFirst('storage/', '', $dealBanner->img)) }}');
-            background-size: cover;
-            background-position: center;
-            height: 600px;">
+        <div class="bg-banner-deal" {{-- style="background-image: url('{{ Storage::url(Str::replaceFirst('storage/', '', $dealBanner->img)) }}'); --}} background-size: cover; background-position: center; height:
+            600px;">
+
 
 
             <div class="container">

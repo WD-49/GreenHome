@@ -36,8 +36,11 @@ use Database\Factories\ProductFactory;
 class DatabaseSeeder extends Seeder
 {
 
+
+
     public function run()
     {
+
 
         // fake dữ liệu cho sản phẩm
 
@@ -62,11 +65,12 @@ class DatabaseSeeder extends Seeder
         //         'deleted_at' => null,
         //     ]);
         // }
-        $userIds = \App\Models\User::pluck('id')->toArray();
+        // $userIds = \App\Models\User::pluck('id')->toArray();
 
-        $data = [];
+        // $data = [];
 
         // 10 reviews với product_variant_id liên quan đến product_id = 4 (giả sử bạn đã có các variant_id) 
+
         // for ($i = 1; $i <= 10; $i++) {
         //     $data[] = [
         //         'user_id' => $userIds[array_rand($userIds)],
@@ -80,7 +84,8 @@ class DatabaseSeeder extends Seeder
         //     ];
         // }
 
-        // // 10 reviews cho các product_variant_id khác
+
+        // 10 reviews cho các product_variant_id khác
         // $userIds = \App\Models\User::pluck('id')->toArray();
         // $variantIds = \App\Models\ProductVariant::pluck('id')->toArray();
 

@@ -61,6 +61,7 @@ class Product extends Model
     }
 
 
+
     public function getReviewsAvgRatingAttribute()
     {
         $variants = $this->productVariants;
@@ -131,6 +132,7 @@ class Product extends Model
 
         return $query;
     }
+
     public function reviews()
     {
         return $this->hasManyThrough(
@@ -141,5 +143,10 @@ class Product extends Model
             'id', // Local key trên bảng products
             'id' // Local key trên bảng product_variants
         );
+    }
+
+    public function wishlists()
+    {
+        return $this->hasMany(WishList::class);
     }
 }

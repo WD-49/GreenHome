@@ -17,17 +17,17 @@ class ProductClientController extends Controller
             'category',
             'productVariants.productVariantValues.attributeValue',
             'comments.user',
-          
-            
         ])
             ->where('slug', $slug)
             ->firstOrFail();
+
+        // dd($product);
 
         // Tăng lượt xem
         $product->increment('view');
 
         // Lấy sản phẩm cùng danh mục (trừ sản phẩm hiện tại)
-        $relatedProducts = Product::with(['productVariants', 'category', 'comments','reviews'])
+        $relatedProducts = Product::with(['productVariants', 'category', 'comments', 'reviews'])
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->take(8)

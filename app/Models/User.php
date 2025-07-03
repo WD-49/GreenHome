@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\WishList;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -41,6 +42,7 @@ class User extends Authenticatable
     {
         return $this->hasOne(UserProfile::class);
     }
+
     public function comments()
     {
         return $this->hasMany(Comment::class);
@@ -54,13 +56,23 @@ class User extends Authenticatable
     public function cartItems()
     {
         return $this->hasManyThrough(
-            CartItem::class, // Model cuối cùng bạn muốn truy cập (CartItem)
-            Cart::class,     // Model trung gian (Cart)
-            'user_id',       // Khóa ngoại trên bảng trung gian (carts.user_id) liên kết với User
-            'cart_id',       // Khóa ngoại trên bảng cuối cùng (cart_items.cart_id) liên kết với Cart
-            'id',            // Khóa chính của User (users.id)
-            'id'             // Khóa chính của bảng trung gian (carts.id)
+            CartItem::class,
+            Cart::class,
+            'user_id',
+            'cart_id',
+            'id',
+            'id'
         );
+    }
+
+    /**
+     * Get the wishlists of the user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function wishlists(): HasMany
+    {
+        return $this->hasMany(WishList::class, 'user_id');
     }
 
     protected static function booted()
