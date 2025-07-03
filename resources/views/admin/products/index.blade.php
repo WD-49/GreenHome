@@ -74,6 +74,18 @@
                                         </select>
                                     </div>
                                     <div class="col-md-4">
+                                        <label for="brand_id" class="form-label">Thương hiệu</label>
+                                        <select class="form-select" name="brand_id">
+                                            <option value="">Tất cả</option>
+                                            @foreach ($brands as $brand)
+                                                <option value="{{ $brand->id }}"
+                                                    {{ request('brand_id') == $brand->id ? 'selected' : '' }}>
+                                                    {{ $brand->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
                                         <label for="status" class="form-label">Trạng thái</label>
                                         <select class="form-select" name="status">
                                             <option value="">Tất cả</option>
@@ -113,7 +125,6 @@
                             @include('admin.products.table', ['products' => $products])
                         </x-table-wrapper>
                     </div>
-
                 </div>
             </div>
         </div>

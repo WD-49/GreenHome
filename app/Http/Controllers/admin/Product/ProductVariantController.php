@@ -18,15 +18,18 @@ class ProductVariantController extends Controller
     public function index(Request $request, Product $product)
     {
         $title = 'Quản lý biến thể';
-
+        $perPage = $request->input('per_page', 10);
         $variants = $product->productVariants()
-            ->with(['product', 'productVariantValues.attributeValue.attribute']) // Load cả value & attribute
-            ->whereNull('deleted_at') // Chỉ lấy các bản ghi không bị xóa mềm
+            ->with(['product', 'productVariantValues.attributeValue.attribute'])
+            ->filter($request) // <-- sử dụng scopeFilter vừa tạo
             ->orderByDesc('id')
-            ->paginate(10)
+            ->paginate(5)
             ->appends($request->except('page'));
-        // dd($variants);
         $variantTrashed = $product->productVariants()->onlyTrashed()->get();
+
+        if ($request->ajax()) {
+            return view('admin.products.variants.partials.table', compact('variants', 'product'))->render();
+        }
 
         return view('admin.products.variants.index', compact('title', 'variants', 'variantTrashed', 'product'));
     }
