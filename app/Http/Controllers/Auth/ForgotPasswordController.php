@@ -41,9 +41,9 @@ class ForgotPasswordController extends Controller
         }
 
         // 3. Check email verification
-        if (is_null($user->email_verified_at)) {
-            return back()->withErrors(['email' => 'Email này chưa được xác thực ở hệ thống. Vui lòng xác thực email của bạn trước khi khôi phục mật khẩu.']);
-        }
+        // if (is_null($user->email_verified_at)) {
+        //     return back()->withErrors(['email' => 'Email này chưa được xác thực ở hệ thống. Vui lòng xác thực email của bạn trước khi khôi phục mật khẩu.']);
+        // }
 
         // 4. Create password reset token
         // Sử dụng broker của Laravel để tạo token và lưu vào bảng password_reset_tokens
