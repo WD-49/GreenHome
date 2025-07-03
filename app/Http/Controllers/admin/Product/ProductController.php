@@ -165,6 +165,7 @@ class ProductController extends Controller
             'brand_id' => 'required|exists:brands,id',
             'status' => 'required|in:0,1',
             'date_of_entry' => 'required|date',
+            'sort_des' => 'nullable|string',
             'description' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'is_variant' => 'required|boolean',
@@ -186,7 +187,7 @@ class ProductController extends Controller
             'variants.*.price' => 'required_if:is_variant,1|numeric',
             'variants.*.quantity' => 'required_if:is_variant,1|integer',
             'variants.*.sku' => 'nullable|string|max:100',
-            'variants.*.image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'variants.*.image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
 
             // Nếu là sản phẩm đơn
             'simple_price' => 'required_unless:is_variant,1|numeric',
@@ -228,7 +229,9 @@ class ProductController extends Controller
                 // Upload ảnh sản phẩm
                 $productImagePath = null;
                 if ($request->hasFile('image')) {
-                    $productImagePath = $request->file('image')->store('images/products', 'public');
+                    $image = $request->file('image');
+                    $filename = Str::slug($request->input('name')) . '-' . time() . '.' . $image->getClientOriginalExtension();
+                    $productImagePath = $image->storeAs('images/products', $filename, 'public');
                 }
 
                 // Tạo sản phẩm
@@ -239,6 +242,7 @@ class ProductController extends Controller
                 $product->brand_id = $request->input('brand_id');
                 $product->status = $request->input('status');
                 $product->date_of_entry = $request->input('date_of_entry');
+                $product->sort_des = $request->input('sort_des');
                 $product->description = $request->input('description');
                 $product->image = $productImagePath;
                 $product->quantity = 0;
@@ -289,7 +293,8 @@ class ProductController extends Controller
 
                         if ($request->hasFile("variants.$index.image")) {
                             $variantImage = $request->file("variants.$index.image");
-                            $newVariant->image = $variantImage->store('images/products/variants', 'public');
+                            $filename = Str::slug($product->name . '-' .  $index) . '-' . time() . '.' . $variantImage->getClientOriginalExtension();
+                            $newVariant->image = $variantImage->storeAs('images/products/variants', $filename, 'public');
                         }
 
                         $newVariant->save();
@@ -368,17 +373,24 @@ class ProductController extends Controller
             'brand_id' => 'required|exists:brands,id',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:2048',
             'date_of_entry' => 'required|date',
+            'sort_des' => 'nullable|string',
             'description' => 'nullable|string',
             'status' => 'required|in:0,1',
         ]);
 
         // Xử lý hình ảnh nếu có upload mới
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('images/products', 'public');
-            $dataValidate['image'] = $imagePath;
+            // Lưu tên file ảnh cũ
+            $oldImage = $product->image;
 
-            if ($product->image) {
-                Storage::disk('public')->delete($product->image);
+            // Lưu file mới
+            $image = $request->file('image');
+            $filename = Str::slug($request->input('name')) . '-' . time() . '.' . $image->getClientOriginalExtension();
+            $dataValidate['image'] = $image->storeAs('images/products', $filename, 'public');
+
+            // Xóa ảnh cũ nếu có
+            if ($oldImage) {
+                Storage::disk('public')->delete($oldImage);
             }
         }
 

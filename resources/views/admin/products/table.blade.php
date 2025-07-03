@@ -6,6 +6,7 @@
             <th>Tên sản phẩm</th>
             <th>Danh mục</th>
             <th>Thương hiệu</th>
+            <th>Số lượng</th>
             <th>Trạng thái</th>
             <th>Ngày nhập</th>
             <th></th>
@@ -39,6 +40,7 @@
                 </td>
                 {{-- Khi xóa vĩnh viễn thương hiệu --}}
                 <td>{{ $product->brand?->name ?? 'Không có thương hiệu' }}</td>
+                <td>{{ $product->quantity ?? 'hết hàng' }}</td>
                 <td>
                     <span class="badge {{ $product->status == 1 ? 'bg-success' : 'bg-danger' }}">
                         {{ $product->status == 1 ? 'Đang bán' : 'Dừng bán' }}

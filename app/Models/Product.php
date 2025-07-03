@@ -17,6 +17,7 @@ class Product extends Model
         'name',
         'description',
         'slug',
+        'sort_des',
         'quantity',
         'date_of_entry',
         'status',
