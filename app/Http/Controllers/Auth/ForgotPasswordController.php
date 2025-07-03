@@ -28,6 +28,11 @@ class ForgotPasswordController extends Controller
             return back()->withErrors(['email' => 'Email không tồn tại.']);
         }
 
+        // 2. THÊM KIỂM TRA XÁC THỰC EMAIL
+        if (is_null($user->email_verified_at)) {
+            return back()->withErrors(['email' => 'Email này chưa được xác thực ở hệ thống. Vui lòng xác thực email của bạn trước khi khôi phục mật khẩu.']);
+        }
+
         // Tạo mật khẩu mới
         $newPassword = Str::random(8);
         $user->password = Hash::make($newPassword);
