@@ -129,7 +129,7 @@
                         <div class="align-items-center">
                             <div class="d-flex align-items-center">
                                 <img src="{{ $user->profile && $user->profile->user_image ? asset('storage/' . $user->profile->user_image) : 'https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740' }}"
-                                        class="rounded-circle avatar-xxl img-thumbnail float-start" alt="Ảnh đại diện">
+                                    class="rounded-circle avatar-xxl img-thumbnail float-start" alt="Ảnh đại diện">
 
                                 <div class="overflow-hidden ms-4">
                                     <h4 class="m-0 text-dark fs-20">{{ $user->name }}</h4>
@@ -264,7 +264,8 @@
                             {{-- Sử dụng $tab == 'info' để xác định tab active ban đầu từ controller --}}
                             <div id="info" class="tab-content-item {{ $tab == 'info' ? 'active' : '' }}">
                                 <h3 style="color: #64B496;">Thông tin cá nhân</h3>
-                                <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
+                                <form action="{{ route('profile.update') }}" method="POST"
+                                    enctype="multipart/form-data">
                                     @csrf
 
                                     <div class="form-group mb-3"> {{-- Thêm mb-3 cho khoảng cách --}}
@@ -363,7 +364,8 @@
                                         @foreach ($data['orders'] as $order)
                                             <div class="card mb-2 order-card-collapsible">
                                                 <div class="card-header p-3 cursor-pointer d-flex justify-content-between align-items-center"
-                                                    {{-- Điều chỉnh padding --}} data-bs-toggle="collapse" style="background-color: #E0F2F1"
+                                                    {{-- Điều chỉnh padding --}} data-bs-toggle="collapse"
+                                                    style="background-color: #E0F2F1"
                                                     data-bs-target="#orderCollapse{{ $order->id }}"
                                                     aria-expanded="false"
                                                     aria-controls="orderCollapse{{ $order->id }}">
@@ -481,7 +483,7 @@
                                                                                 <td>
                                                                                     {{ $item->product_name }}
                                                                                     @if ($item->product_attribute)
-                                                                                        <br><small class="text-muted">Phân
+                                                                                        <br><small class="text-muted">
                                                                                             loại:
                                                                                             ({{ $item->product_attribute }})
                                                                                         </small>

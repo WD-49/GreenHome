@@ -37,7 +37,7 @@
     <link rel="stylesheet" href="{{ asset('assets_client/assets/css/style.css') }}">
     @stack('styles')
     <!-- CSRF Token cho AJAX -->
-<meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body class="body-bg-6">

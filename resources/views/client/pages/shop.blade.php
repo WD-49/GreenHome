@@ -1,5 +1,8 @@
 @extends('layouts.app')
+<<<<<<< HEAD
 
+=======
+>>>>>>> 3438f56d36084319e64985b777a2b686622988a6
 @section('content')
     <style>
         .rating-wrapper {
@@ -382,6 +385,43 @@
                 $('.gridCol').removeClass('active-grid');
                 $('.cr-product-box').removeClass('col-xxl-3 col-xl-4 col-6').addClass('col-12');
                 $('.cr-product-card').addClass('d-flex flex-row gap-3');
+            });
+        });
+        // Xử lý sự kiện khi nhấn vào nút wishlist
+        $(document).on('click', '.wishlist-button', function(e) {
+            e.preventDefault();
+            let $btn = $(this);
+            let productId = $btn.data('product-id');
+            let isInWishlist = $btn.find('i').hasClass('ri-heart-fill'); // Kiểm tra có đang màu đỏ hay không
+
+            $.ajax({
+                url: '{{ route('wishlist.toggle') }}', // cần thêm route này ở backend
+                method: 'POST',
+                data: {
+                    product_id: productId
+                },
+                success: function(res) {
+                    // Cập nhật icon
+                    if (res.added) {
+                        $btn.find('i')
+                            .removeClass('ri-heart-line')
+                            .addClass('ri-heart-fill text-danger');
+                    } else {
+                        $btn.find('i')
+                            .removeClass('ri-heart-fill text-danger')
+                            .addClass('ri-heart-line');
+                    }
+
+                    // Hiển thị thông báo
+                    alert(res.message);
+                },
+                error: function(xhr) {
+                    if (xhr.status === 401) {
+                        alert('Vui lòng đăng nhập để thêm vào wishlist');
+                    } else {
+                        alert('Đã có lỗi xảy ra!');
+                    }
+                }
             });
         });
     </script>
