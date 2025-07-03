@@ -91,7 +91,7 @@ class User extends Authenticatable
         // Ghi đè để không gửi email mặc định của Laravel
     }
 
-    // public function sendEmailVerificationNotification()
+    // public function sendEmailVerificationNotification() //hàm này sẽ đưa xác thực mail vào queue nhưng link trả ra lại not found
     // {
     //     // Sử dụng Notification tùy chỉnh của bạn
     //     $this->notify(new VerifyEmailNotification);

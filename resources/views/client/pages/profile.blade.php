@@ -144,7 +144,7 @@
                                             <span class="badge bg-danger"><i class="fas fa-times-circle me-1"></i>Chưa xác
                                                 thực</span>
                                             <a href="{{ route('verification.notice') }}"
-                                                class="btn btn-sm btn-warning ms-2">Xác nhận email</a>
+                                                class="btn btn-outline-warning">Xác nhận email</a>
                                         @endif
                                     </p>
                                     @if ($user->role == 'admin' || $user->role == 'superadmin')
