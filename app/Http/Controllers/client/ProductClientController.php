@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Review;
 use App\Models\AttributeValue;
+use Illuminate\Http\Request;
+use App\Models\Comment;
+use Illuminate\Support\Facades\Auth;
+
 
 class ProductClientController extends Controller
 {
@@ -46,5 +50,42 @@ class ProductClientController extends Controller
 
 
         return view('client.pages.productDetail', compact('product', 'relatedProducts', 'attributes', 'reviews'));
+    }
+     public function submitReview(Request $request)
+    {
+        $request->validate([
+            'product_variant_id' => 'required|exists:product_variants,id',
+            'rating' => 'required|integer|min:1|max:5',
+            'title' => 'required|string|max:150',
+            'content' => 'required|string|max:1000',
+        ]);
+
+        Review::create([
+            'user_id' => Auth::id(),
+            'product_variant_id' => $request->product_variant_id,
+            'rating' => $request->rating,
+            'title' => $request->title,
+            'content' => $request->content,
+            'status' => 'pending',
+        ]);
+
+        return redirect()->back()->with('success', 'Đánh giá của bạn đã được gửi và đang chờ duyệt.');
+    }
+
+    // Xử lý gửi bình luận
+    public function submitComment(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'content' => 'required|string|max:1000',
+        ]);
+
+        Comment::create([
+            'user_id' => Auth::id(),
+            'product_id' => $request->product_id,
+            'content' => $request->content,
+        ]);
+
+        return redirect()->back()->with('success', 'Bình luận đã được gửi.');
     }
 }

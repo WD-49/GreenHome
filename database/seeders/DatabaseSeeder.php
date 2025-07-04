@@ -40,7 +40,8 @@ class DatabaseSeeder extends Seeder
 
     public function run()
     {
-
+     $this->call(CategorySeeder::class);
+     $this->call(AttributeSeeder::class);
 
         // fake dữ liệu cho sản phẩm
 

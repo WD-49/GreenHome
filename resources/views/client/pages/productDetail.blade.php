@@ -267,19 +267,26 @@
                                         @endforelse
 
                                     </div>
-                                    <h4 class="heading">Add a Comment</h4>
-                                    <form action="javascript:void(0)">
+                                    <h4 class="heading">Thêm bình luận</h4>
+                                    <form action="{{ route('client.comment.submit') }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+
                                         <div class="cr-ratting-input">
-                                            <input name="your-name" placeholder="Name" type="text">
+                                            <input name="your-name" placeholder="Tên của bạn" type="text"
+                                                value="{{ Auth::user()->name ?? '' }}" disabled>
                                         </div>
                                         <div class="cr-ratting-input">
-                                            <input name="your-email" placeholder="Email*" type="email" required="">
+                                            <input name="your-email" placeholder="Email của bạn" type="email"
+                                                value="{{ Auth::user()->email ?? '' }}" disabled>
                                         </div>
+
                                         <div class="cr-ratting-input form-submit">
-                                            <textarea name="your-comment" placeholder="Enter Your Comment"></textarea>
-                                            <button class="cr-button" type="submit">Submit</button>
+                                            <textarea name="content" placeholder="Nhập nội dung bình luận" required></textarea>
+                                            <button class="cr-button" type="submit">Gửi bình luận</button>
                                         </div>
                                     </form>
+
                                 </div>
                             </div>
                         </div>

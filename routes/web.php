@@ -445,3 +445,6 @@ Route::get('/blog/{slug}', [App\Http\Controllers\client\BlogDetailController::cl
 Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');
 
 
+Route::post('/review/submit', [ProductClientController::class, 'submitReview'])->name('client.review.submit');
+Route::post('/comment/submit', [ProductClientController::class, 'submitComment'])->name('client.comment.submit');
+
