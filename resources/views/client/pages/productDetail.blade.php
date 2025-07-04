@@ -222,7 +222,11 @@
                                     <!-- Debug info (xóa sau khi test) -->
 
 
-                                    <h4 class="heading">Add a Review</h4>
+                                    <h4 class="heading">Thêm đánh giá </h4>
+                                    @if (session('success'))
+                                        <div class="alert alert-success">{{ session('success') }}</div>
+                                    @endif
+
                                     @php
                                         $variant = $product->productVariants->first();
                                     @endphp
@@ -231,6 +235,7 @@
                                         enctype="multipart/form-data">
                                         @csrf
                                         <input type="hidden" name="product_variant_id" value="{{ $variant->id }}">
+
                                         <div class="cr-ratting-star mb-2">
                                             <span>Đánh giá:</span>
                                             <div class="cr-t-review-rating d-flex">
@@ -255,16 +260,15 @@
                                                 placeholder="Email của bạn">
                                         </div>
 
-
-
                                         <div class="cr-ratting-input">
                                             <input name="title" placeholder="Tiêu đề (ví dụ: Rất hài lòng)"
                                                 type="text" maxlength="150" required>
                                         </div>
-
-                                        <div class="cr-ratting-input">
+                                        <div class="cr-ratting-input mb-3">
                                             <label for="images">Ảnh đính kèm :</label>
-                                            <input type="file" name="images[]" multiple accept="image/*">
+                                            <input type="file" name="images[]" id="imageInput" multiple
+                                                accept="image/*" class="form-control">
+                                            <div id="preview" class="mt-2 d-flex flex-wrap gap-2"></div>
                                         </div>
 
                                         <div class="cr-ratting-input form-submit">
@@ -272,6 +276,7 @@
                                             <button class="cr-button" type="submit">Gửi đánh giá</button>
                                         </div>
                                     </form>
+
 
 
 
@@ -300,24 +305,41 @@
 
                                     </div>
                                     <h4 class="heading">Thêm bình luận</h4>
-                                    <form action="{{ route('client.comment.submit') }}" method="POST">
+                                    @if (session('success'))
+                                        <div class="alert alert-success">
+                                            {{ session('success') }}
+                                        </div>
+                                    @endif
+
+                                    <form action="{{ route('client.comment.submit') }}" method="POST" class="mt-4">
                                         @csrf
                                         <input type="hidden" name="product_id" value="{{ $product->id }}">
 
-                                        <div class="cr-ratting-input">
-                                            <input name="your-name" placeholder="Tên của bạn" type="text"
-                                                value="{{ Auth::user()->name ?? '' }}" disabled>
+                                        <div class="mb-3">
+                                            <label class="form-label">Tên của bạn</label>
+                                            <input type="text" class="form-control"
+                                                value="{{ Auth::user()->name ?? 'Khách' }}" disabled>
                                         </div>
-                                        <div class="cr-ratting-input">
-                                            <input name="your-email" placeholder="Email của bạn" type="email"
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Email</label>
+                                            <input type="email" class="form-control"
                                                 value="{{ Auth::user()->email ?? '' }}" disabled>
                                         </div>
 
-                                        <div class="cr-ratting-input form-submit">
-                                            <textarea name="content" placeholder="Nhập nội dung bình luận" required></textarea>
-                                            <button class="cr-button" type="submit">Gửi bình luận</button>
+                                        <div class="mb-3">
+                                            <label for="content" class="form-label">Nội dung bình luận</label>
+                                            <textarea name="content" class="form-control @error('content') is-invalid @enderror" rows="4"
+                                                placeholder="Nhập nội dung bình luận..." required>{{ old('content') }}</textarea>
+                                            @error('content')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
                                         </div>
+
+                                        <button type="submit" class="cr-button">Gửi bình luận</button>
                                     </form>
+
+
 
                                 </div>
                             </div>
@@ -479,6 +501,30 @@
                             }
                         }
                     });
+                });
+                document.getElementById('imageInput').addEventListener('change', function(e) {
+                    const preview = document.getElementById('preview');
+                    preview.innerHTML = ''; // clear preview
+
+                    const files = e.target.files;
+                    if (files.length === 0) return;
+
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+
+                        if (!file.type.startsWith('image/')) continue;
+
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            const img = document.createElement('img');
+                            img.src = event.target.result;
+                            img.classList.add('img-thumbnail');
+                            img.style.maxWidth = '120px';
+                            img.style.maxHeight = '120px';
+                            preview.appendChild(img);
+                        };
+                        reader.readAsDataURL(file);
+                    }
                 });
             });
         </script>
