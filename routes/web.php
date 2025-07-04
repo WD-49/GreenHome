@@ -410,3 +410,6 @@ route::prefix('cart')->middleware('auth')->name('cart.')->group(function () {
 Route::get('/blog/{slug}', [App\Http\Controllers\client\BlogDetailController::class, 'show'])->name('blog.detail');
 
 Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');
+
+Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show');
+

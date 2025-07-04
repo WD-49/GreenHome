@@ -13,18 +13,35 @@ class HeaderComposer
     {
         $categories = Category::where('status', 1)
             ->whereNull('deleted_at')
+            ->take(7) // phần dùng cho footer
             ->get();
 
-        $brands = Brand::where('status', 1)
+        $categories3 = Category::where('status', 1)
             ->whereNull('deleted_at')
+            ->orderBy('created_at', 'desc')
+            ->limit(5) // phần dùng cho dropdown header
             ->get();
+
+        $brands = Brand::whereNull('deleted_at')->get();
 
         $user = Auth::user();
+
+          // Danh mục cha kèm sản phẩm (dạng menu dọc)
+        $menuCategories = Category::with(['products' => function ($q) {
+            $q->where('status', 1)->take(5);
+        }])
+        ->whereNull('deleted_at')
+        ->where('status', 1)
+        ->orderBy('created_at', 'desc')
+        ->take(4)
+        ->get();
 
         $view->with([
             'headerCategories' => $categories,
             'headerBrands' => $brands,
             'authUser' => $user,
+            'categories3' => $categories3, // ✅ Truyền thêm biến này
+             'menuCategories'   => $menuCategories, // ✅ Thêm menu có sản phẩm
         ]);
     }
 }
