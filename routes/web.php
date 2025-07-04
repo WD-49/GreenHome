@@ -394,6 +394,8 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
 Route::get('/', [HomeController::class, 'index'])->name('home');
 // routes/web.php
 Route::get('/voucher/{code}/eligible-products', [ClientDiscountController::class, 'showEligibleProducts'])->name('voucher.products');
+Route::get('/voucher/{code}/detail', [ClientDiscountController::class, 'showDetail'])->name('voucherDetail');
+
 
 // viết tiếp route của các trang tại đây
 Route::get('/blog/{slugCategory?}', [ClientBlogController::class, 'index'])->name('blog.index');

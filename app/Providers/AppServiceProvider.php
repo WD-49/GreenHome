@@ -23,11 +23,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::useBootstrap();
-        View::composer('*', function ($view) {
-        $vouchers = Discount::where('end_date', '>=', now())->get();
+       View::composer('*', function ($view) {
+    $vouchers = Discount::where('end_date', '>=', now())
+                        ->where('status', 'active')
+                        ->get();
 
+    $view->with('vouchers', $vouchers);
+});
 
-        $view->with('vouchers', $vouchers);
-    });
     }
 }
