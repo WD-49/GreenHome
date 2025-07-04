@@ -223,26 +223,58 @@
 
 
                                     <h4 class="heading">Add a Review</h4>
-                                    <form action="javascript:void(0)">
-                                        <div class="cr-ratting-star">
-                                            <span>Your rating :</span>
-                                            <div class="cr-t-review-rating">
+                                    @php
+                                        $variant = $product->productVariants->first();
+                                    @endphp
+
+                                    <form action="{{ route('client.review.submit') }}" method="POST"
+                                        enctype="multipart/form-data">
+                                        @csrf
+                                        <input type="hidden" name="product_variant_id" value="{{ $variant->id }}">
+                                        <div class="cr-ratting-star mb-2">
+                                            <span>Đánh giá:</span>
+                                            <div class="cr-t-review-rating d-flex">
                                                 @for ($i = 1; $i <= 5; $i++)
-                                                    <i class="ri-star-s-line"></i>
+                                                    <label class="rating-label"
+                                                        style="cursor: pointer; margin-right: 4px;">
+                                                        <input type="radio" name="rating" value="{{ $i }}"
+                                                            style="display: none;" required>
+                                                        <i class="ri-star-s-line fs-5 text-warning"></i>
+                                                    </label>
                                                 @endfor
                                             </div>
                                         </div>
+
                                         <div class="cr-ratting-input">
-                                            <input name="your-name" placeholder="Name" type="text">
+                                            <input type="text" value="{{ Auth::user()->name ?? '' }}" disabled
+                                                placeholder="Tên của bạn">
                                         </div>
+
                                         <div class="cr-ratting-input">
-                                            <input name="your-email" placeholder="Email*" type="email" required="">
+                                            <input type="email" value="{{ Auth::user()->email ?? '' }}" disabled
+                                                placeholder="Email của bạn">
                                         </div>
+
+
+
+                                        <div class="cr-ratting-input">
+                                            <input name="title" placeholder="Tiêu đề (ví dụ: Rất hài lòng)"
+                                                type="text" maxlength="150" required>
+                                        </div>
+
+                                        <div class="cr-ratting-input">
+                                            <label for="images">Ảnh đính kèm :</label>
+                                            <input type="file" name="images[]" multiple accept="image/*">
+                                        </div>
+
                                         <div class="cr-ratting-input form-submit">
-                                            <textarea name="your-comment" placeholder="Enter Your Comment"></textarea>
-                                            <button class="cr-button" type="submit">Submit</button>
+                                            <textarea name="content" placeholder="Nhận xét chi tiết của bạn về sản phẩm" required></textarea>
+                                            <button class="cr-button" type="submit">Gửi đánh giá</button>
                                         </div>
                                     </form>
+
+
+
                                 </div>
                             </div>
 
@@ -421,6 +453,32 @@
                             }
                         })
                         .catch((error) => showNotify(data.message || 'Có lỗi xảy ra!', 'error'));
+                });
+                const ratingLabels = document.querySelectorAll('.rating-label');
+
+                ratingLabels.forEach((label, index) => {
+                    label.addEventListener('click', function() {
+                        const radio = this.querySelector('input[type=radio]');
+                        if (radio) radio.checked = true;
+
+                        // Reset toàn bộ sao
+                        ratingLabels.forEach(l => {
+                            const star = l.querySelector('i');
+                            if (star) {
+                                star.classList.remove('ri-star-s-fill');
+                                star.classList.add('ri-star-s-line');
+                            }
+                        });
+
+                        // Fill từ sao đầu đến sao đang chọn
+                        for (let i = 0; i <= index; i++) {
+                            const star = ratingLabels[i].querySelector('i');
+                            if (star) {
+                                star.classList.remove('ri-star-s-line');
+                                star.classList.add('ri-star-s-fill');
+                            }
+                        }
+                    });
                 });
             });
         </script>

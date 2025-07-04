@@ -26,7 +26,9 @@ class ProductClientController extends Controller
             ->firstOrFail();
 
         // dd($product);
-
+    if ($product->productVariants->isEmpty()) {
+        abort(404, 'Sản phẩm chưa có biến thể để đánh giá.');
+    }
         // Tăng lượt xem
         $product->increment('view');
 
@@ -51,26 +53,38 @@ class ProductClientController extends Controller
 
         return view('client.pages.productDetail', compact('product', 'relatedProducts', 'attributes', 'reviews'));
     }
-     public function submitReview(Request $request)
-    {
-        $request->validate([
-            'product_variant_id' => 'required|exists:product_variants,id',
-            'rating' => 'required|integer|min:1|max:5',
-            'title' => 'required|string|max:150',
-            'content' => 'required|string|max:1000',
-        ]);
+public function submitReview(Request $request)
+{
+    $request->validate([
+        'product_variant_id' => 'required|exists:product_variants,id',
+        'rating' => 'required|integer|min:1|max:5',
+        'title' => 'required|string|max:150',
+        'content' => 'required|string|max:1000',
+        'images.*' => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:2048',
+    ]);
 
-        Review::create([
-            'user_id' => Auth::id(),
-            'product_variant_id' => $request->product_variant_id,
-            'rating' => $request->rating,
-            'title' => $request->title,
-            'content' => $request->content,
-            'status' => 'pending',
-        ]);
+    $review = Review::create([
+        'user_id' => Auth::id(),
+        'product_variant_id' => $request->product_variant_id,
+        'rating' => $request->rating,
+        'title' => $request->title,
+        'content' => $request->content,
+        'status' => 'approved',
+    ]);
 
-        return redirect()->back()->with('success', 'Đánh giá của bạn đã được gửi và đang chờ duyệt.');
+    if ($request->hasFile('images')) {
+        foreach ($request->file('images') as $file) {
+            $path = $file->store('review_images', 'public');
+
+            $review->images()->create([
+                'image' => $path,
+            ]);
+        }
     }
+
+    return redirect()->back()->with('success', 'Đánh giá của bạn đã được gửi.');
+}
+
 
     // Xử lý gửi bình luận
     public function submitComment(Request $request)
