@@ -28,8 +28,9 @@ use App\Http\Controllers\Client\ProfileController;
 use App\Http\Controllers\admin\AttributeController;
 use App\Http\Controllers\admin\DashboardController;
 
-use App\Http\Controllers\client\WishlistController;
+use App\Http\Controllers\client\CheckoutController;
 
+use App\Http\Controllers\client\WishlistController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\admin\OrderStatusController;
 use App\Http\Controllers\client\BlogDetailController;
@@ -120,7 +121,7 @@ Route::middleware(['auth'])->group(function () {
     // *** THAY ĐỔI LỚN TẠI ĐÂY: DÙNG CONTROLLER THAY VÌ CLOSURE ***
     Route::post('/email/verification-notification', [EmailVerificationPromptController::class, 'sendVerificationEmail'])
         ->middleware(['throttle:6,1']) // Middleware throttle vẫn được giữ nguyên
-        ->name('verification.send');//throttle:6,1 giới hạn người dùng gửi yêu cầu xác thực email 6 lần trong 1 phút
+        ->name('verification.send'); //throttle:6,1 giới hạn người dùng gửi yêu cầu xác thực email 6 lần trong 1 phút
 });
 
 
@@ -439,9 +440,11 @@ route::prefix('cart')->middleware('auth')->name('cart.')->group(function () {
     Route::post('/update-quantity/{id}', [CartController::class, 'updateQuantity'])->name('updateQuantity');
     Route::post('/delete-multiple', [CartController::class, 'deleteMultiple'])->name('deleteMultiple');
 });
+route::get('/checkout', [CheckoutController::class, 'index'])->middleware('auth')->name('checkout.index');
+Route::get('/checkout/data', [CheckoutController::class, 'getCheckoutData'])->middleware('auth')->name('checkout.data');
+Route::post('/checkout/submit', [CheckoutController::class, 'submit'])->name('checkout.submit');
+
 
 Route::get('/blog/{slug}', [App\Http\Controllers\client\BlogDetailController::class, 'show'])->name('blog.detail');
 
 Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');
-
-
