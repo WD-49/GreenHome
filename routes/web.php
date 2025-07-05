@@ -451,3 +451,6 @@ Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('categ
 
 Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show');
 
+Route::post('/review/submit', [ProductClientController::class, 'submitReview'])->name('client.review.submit');
+Route::post('/comment/submit', [ProductClientController::class, 'submitComment'])->name('client.comment.submit');
+

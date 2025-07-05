@@ -222,27 +222,64 @@
                                     <!-- Debug info (xóa sau khi test) -->
 
 
-                                    <h4 class="heading">Add a Review</h4>
-                                    <form action="javascript:void(0)">
-                                        <div class="cr-ratting-star">
-                                            <span>Your rating :</span>
-                                            <div class="cr-t-review-rating">
+                                    <h4 class="heading">Thêm đánh giá </h4>
+                                    @if (session('success'))
+                                        <div class="alert alert-success">{{ session('success') }}</div>
+                                    @endif
+
+                                    @php
+                                        $variant = $product->productVariants->first();
+                                    @endphp
+
+                                    <form action="{{ route('client.review.submit') }}" method="POST"
+                                        enctype="multipart/form-data">
+                                        @csrf
+                                        <input type="hidden" name="product_variant_id" value="{{ $variant->id }}">
+
+                                        <div class="cr-ratting-star mb-2">
+                                            <span>Đánh giá:</span>
+                                            <div class="cr-t-review-rating d-flex">
                                                 @for ($i = 1; $i <= 5; $i++)
-                                                    <i class="ri-star-s-line"></i>
+                                                    <label class="rating-label"
+                                                        style="cursor: pointer; margin-right: 4px;">
+                                                        <input type="radio" name="rating" value="{{ $i }}"
+                                                            style="display: none;" required>
+                                                        <i class="ri-star-s-line fs-5 text-warning"></i>
+                                                    </label>
                                                 @endfor
                                             </div>
                                         </div>
+
                                         <div class="cr-ratting-input">
-                                            <input name="your-name" placeholder="Name" type="text">
+                                            <input type="text" value="{{ Auth::user()->name ?? '' }}" disabled
+                                                placeholder="Tên của bạn">
                                         </div>
+
                                         <div class="cr-ratting-input">
-                                            <input name="your-email" placeholder="Email*" type="email" required="">
+                                            <input type="email" value="{{ Auth::user()->email ?? '' }}" disabled
+                                                placeholder="Email của bạn">
                                         </div>
+
+                                        <div class="cr-ratting-input">
+                                            <input name="title" placeholder="Tiêu đề (ví dụ: Rất hài lòng)"
+                                                type="text" maxlength="150" required>
+                                        </div>
+                                        <div class="cr-ratting-input mb-3">
+                                            <label for="images">Ảnh đính kèm :</label>
+                                            <input type="file" name="images[]" id="imageInput" multiple
+                                                accept="image/*" class="form-control">
+                                            <div id="preview" class="mt-2 d-flex flex-wrap gap-2"></div>
+                                        </div>
+
                                         <div class="cr-ratting-input form-submit">
-                                            <textarea name="your-comment" placeholder="Enter Your Comment"></textarea>
-                                            <button class="cr-button" type="submit">Submit</button>
+                                            <textarea name="content" placeholder="Nhận xét chi tiết của bạn về sản phẩm" required></textarea>
+                                            <button class="cr-button" type="submit">Gửi đánh giá</button>
                                         </div>
                                     </form>
+
+
+
+
                                 </div>
                             </div>
 
@@ -267,19 +304,43 @@
                                         @endforelse
 
                                     </div>
-                                    <h4 class="heading">Add a Comment</h4>
-                                    <form action="javascript:void(0)">
-                                        <div class="cr-ratting-input">
-                                            <input name="your-name" placeholder="Name" type="text">
+                                    <h4 class="heading">Thêm bình luận</h4>
+                                    @if (session('success'))
+                                        <div class="alert alert-success">
+                                            {{ session('success') }}
                                         </div>
-                                        <div class="cr-ratting-input">
-                                            <input name="your-email" placeholder="Email*" type="email" required="">
+                                    @endif
+
+                                    <form action="{{ route('client.comment.submit') }}" method="POST" class="mt-4">
+                                        @csrf
+                                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Tên của bạn</label>
+                                            <input type="text" class="form-control"
+                                                value="{{ Auth::user()->name ?? 'Khách' }}" disabled>
                                         </div>
-                                        <div class="cr-ratting-input form-submit">
-                                            <textarea name="your-comment" placeholder="Enter Your Comment"></textarea>
-                                            <button class="cr-button" type="submit">Submit</button>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Email</label>
+                                            <input type="email" class="form-control"
+                                                value="{{ Auth::user()->email ?? '' }}" disabled>
                                         </div>
+
+                                        <div class="mb-3">
+                                            <label for="content" class="form-label">Nội dung bình luận</label>
+                                            <textarea name="content" class="form-control @error('content') is-invalid @enderror" rows="4"
+                                                placeholder="Nhập nội dung bình luận..." required>{{ old('content') }}</textarea>
+                                            @error('content')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <button type="submit" class="cr-button">Gửi bình luận</button>
                                     </form>
+
+
+
                                 </div>
                             </div>
                         </div>
@@ -414,6 +475,56 @@
                             }
                         })
                         .catch((error) => showNotify(data.message || 'Có lỗi xảy ra!', 'error'));
+                });
+                const ratingLabels = document.querySelectorAll('.rating-label');
+
+                ratingLabels.forEach((label, index) => {
+                    label.addEventListener('click', function() {
+                        const radio = this.querySelector('input[type=radio]');
+                        if (radio) radio.checked = true;
+
+                        // Reset toàn bộ sao
+                        ratingLabels.forEach(l => {
+                            const star = l.querySelector('i');
+                            if (star) {
+                                star.classList.remove('ri-star-s-fill');
+                                star.classList.add('ri-star-s-line');
+                            }
+                        });
+
+                        // Fill từ sao đầu đến sao đang chọn
+                        for (let i = 0; i <= index; i++) {
+                            const star = ratingLabels[i].querySelector('i');
+                            if (star) {
+                                star.classList.remove('ri-star-s-line');
+                                star.classList.add('ri-star-s-fill');
+                            }
+                        }
+                    });
+                });
+                document.getElementById('imageInput').addEventListener('change', function(e) {
+                    const preview = document.getElementById('preview');
+                    preview.innerHTML = ''; // clear preview
+
+                    const files = e.target.files;
+                    if (files.length === 0) return;
+
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+
+                        if (!file.type.startsWith('image/')) continue;
+
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            const img = document.createElement('img');
+                            img.src = event.target.result;
+                            img.classList.add('img-thumbnail');
+                            img.style.maxWidth = '120px';
+                            img.style.maxHeight = '120px';
+                            preview.appendChild(img);
+                        };
+                        reader.readAsDataURL(file);
+                    }
                 });
             });
         </script>
