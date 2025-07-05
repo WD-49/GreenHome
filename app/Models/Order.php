@@ -61,4 +61,20 @@ class Order extends Model
 
         return !in_array($this->order_status, $nonCancellableStatuses);
     }
+
+    public static function generateUniqueSku()
+    {
+        do {
+            // Sinh số ngẫu nhiên từ 100 đến 100000
+            $randomNumber = mt_rand(100, 100000);
+
+            // Tạo mã SKU theo format DH + số ngẫu nhiên có 6 chữ số (bổ sung 0 nếu cần)
+            $sku = 'DH' . str_pad($randomNumber, 6, '0', STR_PAD_LEFT);
+
+            // Kiểm tra đã tồn tại SKU này chưa
+            $exists = self::where('sku', $sku)->exists();
+        } while ($exists); // Nếu tồn tại thì sinh lại
+
+        return $sku;
+    }
 }
