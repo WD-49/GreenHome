@@ -479,42 +479,7 @@
         </div>
     </section>
 
-    <!-- Deal -->
-    <section class="section-deal padding-b-100">
-        <div class="bg-banner-deal" {{-- style="background-image: url('{{ Storage::url(Str::replaceFirst('storage/', '', $dealBanner->img)) }}'); --}} background-size: cover; background-position: center; height:
-            600px;">
 
-
-
-            <div class="container">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="cr-deal-rightside">
-                            <div class="cr-deal-content text-white" data-aos="fade-up" data-aos-duration="2000">
-                                {{-- <span>
-                                <code>{{ $dealBanner->discount ?? '35' }}%</code> OFF
-                            </span> --}}
-                                <h4 class="cr-deal-title">
-                                    {{ $dealBanner->name ?? 'Great deal on organic food.' }}
-                                </h4>
-                                <p>
-                                    {{ $dealBanner->description ?? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do maecenas accumsan lacus vel facilisis.' }}
-                                </p>
-                                <div id="timer" class="cr-counter">
-                                    <div class="cr-counter-inner d-flex gap-3">
-                                        <h4><span id="days"></span> Days</h4>
-                                        <h4><span id="hours"></span> Hrs</h4>
-                                        <h4><span id="minutes"></span> Min</h4>
-                                        <h4><span id="seconds"></span> Sec</h4>
-                                    </div>
-                                </div>
-                            </div> <!-- /.cr-deal-content -->
-                        </div> <!-- /.cr-deal-rightside -->
-                    </div>
-                </div>
-            </div>
-        </div> <!-- /.bg-banner-deal -->
-    </section>
 
 
 
@@ -607,55 +572,6 @@
         </div>
     </section>
 
-    <!-- Testimonial -->
-    <section class="section-testimonial padding-b-100">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="mb-30" data-aos="fade-up" data-aos-duration="2000">
-                        <div class="cr-banner">
-                            <h2>Great Words From People</h2>
-                        </div>
-                        <div class="cr-banner-sub-title">
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-                                ut labore lacus vel facilisis. </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="cr-testimonial-slider swiper-container">
-                        <div class="swiper-wrapper cr-testimonial-pt-50">
-                            @foreach ($reviews as $review)
-                                <div class="swiper-slide" data-aos="fade-up" data-aos-duration="2000">
-                                    <div class="cr-testimonial">
-                                        <div class="cr-testimonial-image">
-                                            <img src="{{ Storage::url(\Illuminate\Support\Str::replaceFirst('storage/', '', $review->user->image)) }}"
-                                                alt="{{ $review->user->name ?? 'User' }}">
-
-                                        </div>
-                                        <div class="cr-testimonial-inner">
-                                            <span>{{ $review->user->email ?? 'User' }}</span>
-                                            <h4 class="title">{{ $review->title }}</h4>
-                                            <p>“{{ $review->content }}”</p>
-                                            <div class="cr-star">
-                                                @for ($i = 1; $i <= 5; $i++)
-                                                    <i class="ri-star{{ $i <= $review->rating ? '-fill' : '-line' }}"></i>
-                                                @endfor
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- Blog -->
     <section class="section-blog padding-b-100">
@@ -664,7 +580,7 @@
                 <div class="col-lg-12">
                     <div class="mb-30" data-aos="fade-up" data-aos-duration="2000">
                         <div class="cr-banner">
-                            <h2>Latest News</h2>
+                            <h2>Bài viết</h2>
                         </div>
                         <div class="cr-banner-sub-title">
                             <p>Tin tức mới nhất được cập nhật mỗi ngày.</p>

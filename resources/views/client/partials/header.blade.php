@@ -23,15 +23,15 @@
                     <ul class="navbar-nav">
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle cr-right-bar-item" href="javascript:void(0)">
-                            <i class="ri-user-3-line"></i>
-                            <span>
-                                @auth
-                                    {{ $authUser->name }}
-                                @else
-                                    Account
-                                @endauth
-                            </span>
-                        </a>
+                                <i class="ri-user-3-line"></i>
+                                <span>
+                                    @auth
+                                        {{ $authUser->name }}
+                                    @else
+                                        Account
+                                    @endauth
+                                </span>
+                            </a>
 
 
                             <ul class="dropdown-menu">
@@ -82,52 +82,52 @@
                         <i class="ri-menu-2-line"></i>
                     </div>
                 </div>
-              <div class="cr-cat-dropdown">
-    <div class="cr-cat-block">
-        <div class="cr-cat-tab">
-            <div class="cr-tab-list nav flex-column nav-pills" id="v-pills-tab" role="tablist"
-                aria-orientation="vertical">
-                @foreach($menuCategories as $index => $cat)
-                    <button class="nav-link {{ $loop->first ? 'active' : '' }}"
-                        id="v-pills-tab-{{ $cat->id }}" data-bs-toggle="pill"
-                        data-bs-target="#v-pills-{{ $cat->id }}" type="button"
-                        role="tab" aria-controls="v-pills-{{ $cat->id }}"
-                        aria-selected="{{ $loop->first ? 'true' : 'false' }}">
-                        {{ $cat->name }}
-                    </button>
-                @endforeach
-                <a class="nav-link" href="{{ route('shop.index') }}">
-                    View All
-                </a>
-            </div>
+                <div class="cr-cat-dropdown">
+                    <div class="cr-cat-block">
+                        <div class="cr-cat-tab">
+                            <div class="cr-tab-list nav flex-column nav-pills" id="v-pills-tab" role="tablist"
+                                aria-orientation="vertical">
+                                @foreach ($menuCategories as $index => $cat)
+                                    <button class="nav-link {{ $loop->first ? 'active' : '' }}"
+                                        id="v-pills-tab-{{ $cat->id }}" data-bs-toggle="pill"
+                                        data-bs-target="#v-pills-{{ $cat->id }}" type="button" role="tab"
+                                        aria-controls="v-pills-{{ $cat->id }}"
+                                        aria-selected="{{ $loop->first ? 'true' : 'false' }}">
+                                        {{ $cat->name }}
+                                    </button>
+                                @endforeach
+                                <a class="nav-link" href="{{ route('shop.index') }}">
+                                    View All
+                                </a>
+                            </div>
 
-            <div class="tab-content" id="v-pills-tabContent">
-                @foreach($menuCategories as $cat)
-                    <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}"
-                        id="v-pills-{{ $cat->id }}" role="tabpanel"
-                        aria-labelledby="v-pills-tab-{{ $cat->id }}">
-                        <div class="tab-list row">
-                            <div class="col">
-                                <h6 class="cr-col-title">{{ $cat->name }}</h6>
-                                <ul class="cat-list">
-                                    @forelse($cat->products as $product)
-                                        <li>
-                                            <a href="{{ route('product.show', $product->slug) }}">
-                                                {{ $product->name }}
-                                            </a>
-                                        </li>
-                                    @empty
-                                        <li><em>Chưa có sản phẩm</em></li>
-                                    @endforelse
-                                </ul>
+                            <div class="tab-content" id="v-pills-tabContent">
+                                @foreach ($menuCategories as $cat)
+                                    <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}"
+                                        id="v-pills-{{ $cat->id }}" role="tabpanel"
+                                        aria-labelledby="v-pills-tab-{{ $cat->id }}">
+                                        <div class="tab-list row">
+                                            <div class="col">
+                                                <h6 class="cr-col-title">{{ $cat->name }}</h6>
+                                                <ul class="cat-list">
+                                                    @forelse($cat->products as $product)
+                                                        <li>
+                                                            <a href="{{ route('product.show', $product->slug) }}">
+                                                                {{ $product->name }}
+                                                            </a>
+                                                        </li>
+                                                    @empty
+                                                        <li><em>Chưa có sản phẩm</em></li>
+                                                    @endforelse
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
                     </div>
-                @endforeach
-            </div>
-        </div>
-    </div>
-</div>
+                </div>
 
             </div>
             <nav class="navbar navbar-expand-lg">
@@ -167,30 +167,30 @@
                                 Home
                             </a>
                         </li>
-                      <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="javascript:void(0)">
-                            Danh Mục
-                        </a>
-                        <ul class="dropdown-menu">
-                            @isset($categories3)
-                                @foreach ($categories3 as $category)
-                                    <li>
-                                        <a class="dropdown-item" href="{{ route('category.show', $category->slug) }}">
-                                            {{ $category->name }}
-                                        </a>
-                                    </li>
-                                @endforeach
-                            @endisset
-                        </ul>
-                    </li>
-
-
                         <li class="nav-item dropdown">
-                           <a class="nav-link dropdown-toggle" href="{{ route('shop.index') }}">
+                            <a class="nav-link dropdown-toggle" href="javascript:void(0)">
+                                Danh Mục
+                            </a>
+                            <ul class="dropdown-menu">
+                                @isset($categories3)
+                                    @foreach ($categories3 as $category)
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                {{ $category->name }}
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                @endisset
+                            </ul>
+                        </li>
+
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('shop.index') }}">
                                 Cửa Hàng
                             </a>
 
-                            <ul class="dropdown-menu">
+                            {{-- <ul class="dropdown-menu">
                                 <li>
                                     <a class="dropdown-item" href="product-left-sidebar.html">product
                                         Left
@@ -207,7 +207,7 @@
                                         Width
                                     </a>
                                 </li>
-                            </ul>
+                            </ul> --}}
                         </li>
                         {{-- <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="javascript:void(0)">
@@ -281,12 +281,12 @@
                     </ul>
                 </div>
             </nav>
-           <div class="cr-calling">
-            <i class="ri-phone-line"></i>
-            <a href="tel:{{ $footerWebInfo['phone'] ?? '#' }}">
-                {{ $footerWebInfo['phone'] ?? 'Đang cập nhật...' }}
-            </a>
-        </div>
+            <div class="cr-calling">
+                <i class="ri-phone-line"></i>
+                <a href="tel:{{ $footerWebInfo['phone'] ?? '#' }}">
+                    {{ $footerWebInfo['phone'] ?? 'Đang cập nhật...' }}
+                </a>
+            </div>
 
         </div>
     </div>

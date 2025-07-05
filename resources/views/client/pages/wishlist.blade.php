@@ -33,26 +33,25 @@
                         <div class="cr-product-card">
                             <div class="cr-product-image position-relative">
                                 <div class="cr-image-inner zoom-image-hover">
-                                    <img src="{{ asset('storage/' . $product->image) }}"
-                                        alt="{{ $product->name }}" class="product-img">
+                                    <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}"
+                                        class="product-img">
                                 </div>
 
                                 <div class="cr-side-view d-flex flex-column align-items-end gap-2 position-absolute"
-                                     style="top: 10px; right: 10px;">
+                                    style="top: 10px; right: 10px;">
                                     <!-- Wishlist -->
                                     <a href="javascript:void(0);"
-                                       class="wishlist-button d-flex align-items-center justify-content-center rounded-circle bg-white shadow"
-                                       data-product-id="{{ $product->id }}"
-                                       style="width: 40px; height: 40px;">
+                                        class="wishlist-button d-flex align-items-center justify-content-center rounded-circle bg-white shadow"
+                                        data-product-id="{{ $product->id }}" style="width: 40px; height: 40px;">
                                         <i class="ri-heart-fill text-danger fs-5"></i>
                                     </a>
 
                                     <!-- Notify -->
                                     <button type="button"
-                                            class="toggle-notify d-flex align-items-center justify-content-center rounded-circle bg-white shadow border-0"
-                                            data-product-id="{{ $product->id }}"
-                                            data-current="{{ $item->notify_on_sale ? '1' : '0' }}"
-                                            style="width: 40px; height: 40px;">
+                                        class="toggle-notify d-flex align-items-center justify-content-center rounded-circle bg-white shadow border-0"
+                                        data-product-id="{{ $product->id }}"
+                                        data-current="{{ $item->notify_on_sale ? '1' : '0' }}"
+                                        style="width: 40px; height: 40px;">
                                         @if ($item->notify_on_sale)
                                             <i class="ri-notification-3-fill text-success fs-5"></i>
                                         @else
@@ -62,8 +61,7 @@
 
                                     <!-- Priority -->
                                     <select class="form-select form-select-sm select-priority mt-1"
-                                            data-product-id="{{ $product->id }}"
-                                            style="width: 80px; font-size: 13px;">
+                                        data-product-id="{{ $product->id }}" style="width: 80px; font-size: 13px;">
                                         @foreach (['Low', 'Medium', 'High'] as $level)
                                             <option value="{{ $level }}"
                                                 {{ $item->priority === $level ? 'selected' : '' }}>
@@ -137,37 +135,35 @@
 @endsection
 
 @push('scripts')
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
     <script>
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
-            xhrFields: { withCredentials: true }
+            xhrFields: {
+                withCredentials: true
+            }
         });
 
         // Toggle wishlist
-        $(document).on('click', '.wishlist-button', function (e) {
+        $(document).on('click', '.wishlist-button', function(e) {
             e.preventDefault();
             const button = $(this);
             const productId = button.data('product-id');
 
             $.post('{{ route('wishlist.toggle') }}', {
                 product_id: productId
-            }, function (res) {
+            }, function(res) {
                 if (!res.added) {
                     button.closest('.col-xxl-3').fadeOut();
                 }
-            }).fail(function (xhr) {
+            }).fail(function(xhr) {
                 alert(xhr.status === 401 ? 'Bạn cần đăng nhập.' : 'Lỗi khi cập nhật wishlist.');
             });
         });
 
         // Toggle notify_on_sale
-        $(document).on('click', '.toggle-notify', function () {
+        $(document).on('click', '.toggle-notify', function() {
             const button = $(this);
             const productId = button.data('product-id');
             const current = button.data('current') == '1';
@@ -176,7 +172,7 @@
                 product_id: productId,
                 field: 'notify_on_sale',
                 value: current ? 0 : 1
-            }, function () {
+            }, function() {
                 button.data('current', current ? 0 : 1);
                 button.find('i').toggleClass(
                     'ri-notification-off-line ri-notification-3-fill text-success'
@@ -185,7 +181,7 @@
         });
 
         // Update priority and auto-sort
-        $(document).on('change', '.select-priority', function () {
+        $(document).on('change', '.select-priority', function() {
             const select = $(this);
             const productId = select.data('product-id');
             const value = select.val();
@@ -194,7 +190,7 @@
                 product_id: productId,
                 field: 'priority',
                 value: value
-            }, function () {
+            }, function() {
                 sortWishlistByPriority();
             });
         });
@@ -209,7 +205,7 @@
 
             const items = $('.col-xxl-3').get();
 
-            items.sort(function (a, b) {
+            items.sort(function(a, b) {
                 const priorityA = $(a).find('.select-priority').val();
                 const priorityB = $(b).find('.select-priority').val();
                 return priorityOrder[priorityA] - priorityOrder[priorityB];
