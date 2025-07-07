@@ -18,8 +18,6 @@ class Order extends Model
         'shipping_phone',
         'shipping_address',
         'order_status', // Use 'order_status' directly
-        'discount_id',
-        'payment_method_id',
         'discount_code', // Đảm bảo fillable
         'discount_value', // Đảm bảo fillable
         'payment_method_name', // Đảm bảo fillable
@@ -36,20 +34,14 @@ class Order extends Model
         return $this->belongsTo(User::class)->withTrashed(); // Thêm withTrashed nếu user có thể bị soft delete
     }
 
-    public function discount()
-    {
-        return $this->belongsTo(Discount::class)->withTrashed(); // Thêm withTrashed
-    }
+
 
     public function items()
     {
         return $this->hasMany(OrderItem::class);
     }
 
-    public function paymentMethod()
-    {
-        return $this->belongsTo(PaymentMethod::class)->withTrashed(); // Thêm withTrashed
-    }
+
 
     // Phương thức kiểm tra xem đơn hàng có thể bị hủy không
     public function canBeCancelled(): bool
