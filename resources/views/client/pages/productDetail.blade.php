@@ -53,7 +53,7 @@
                 <div class="col-xxl-8 col-xl-7 col-md-6 col-12 mb-24">
                     <div class="cr-size-and-weight-contain">
                         <h2 class="heading">{{ $product->name }}</h2>
-                        <p>{{ $product->sortDes ?? '' }}</p>
+                        <p>{{ $product->sort_des ?? '' }}</p>
                     </div>
 
                     @php

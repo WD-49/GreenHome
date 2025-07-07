@@ -247,9 +247,9 @@
                                 alt="{{ $item->name }}" style="width: 100%;">
 
                             <div class="cr-ice-cubes-contain">
-                                <h4 class="title">{{ $item->name }}</h4>
-                                <h5 class="sub-title">{{ $item->sub_title ?? 'Subtitle' }}</h5>
-                                <span>{{ $item->description }}</span>
+                                {{-- <h4 class="title">{{ $item->name }}</h4> --}}
+                                {{-- <h5 class="sub-title">{{ $item->sub_title ?? 'Subtitle' }}</h5> --}}
+                                {{-- <span>{{ $item->description }}</span> --}}
                                 <a href="{{ $item->link }}" class="cr-button">Shop Now</a>
                             </div>
                         </div>
@@ -480,12 +480,6 @@
     </section>
 
 
-
-
-
-
-
-
     <!-- Popular product -->
     <section class="section-popular margin-b-100">
         <div class="container">
@@ -554,16 +548,11 @@
                             {{-- Nội dung chèn lên ảnh --}}
                             <div class="cr-products-rightbar-content position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-start text-white p-4"
                                 style="background: rgba(0, 0, 0, 0.3);">
-                                <h4>{!! $banner12->name !!}</h4>
-                                <div class="cr-off">
-                                    <span>{{ $banner12->discount ?? '25%' }} <code>OFF</code></span>
-                                </div>
+                                {{-- <h4>{!! $banner12->name !!}</h4>
                                 <div class="rightbar-buttons mt-2">
                                     <a href="{{ $banner12->link ?? '#' }}" class="cr-button">Shop Now</a>
-                                </div>
+                                </div> --}}
                             </div>
-                        @else
-                            <p class="text-danger">Banner with priority 12 not found.</p>
                         @endif
                     </div>
                 </div>
