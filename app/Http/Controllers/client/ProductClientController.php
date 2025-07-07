@@ -6,6 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Review;
 use App\Models\AttributeValue;
+
+use App\Models\Category;
+use App\Models\Discount;
+use Illuminate\Http\Client\Request as ClientRequest;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Http\Request;
 use App\Models\Comment;
 use Illuminate\Support\Facades\Auth;
@@ -111,4 +116,7 @@ class ProductClientController extends Controller
 
         return redirect()->back()->with('success', 'Bình luận của bạn đã được gửi và đang chờ duyệt.');
     }
+    // app/Http/Controllers/VoucherController.php
+
+
 }

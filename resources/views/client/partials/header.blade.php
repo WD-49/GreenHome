@@ -66,6 +66,11 @@
                     <a href="javascript:void(0)" class="cr-right-bar-item Shopping-toggle">
                         <i class="ri-shopping-cart-line"></i>
                     </a>
+                    <a href="javascript:void(0)" class="cr-right-bar-item voucher-toggle">
+                        <i class="ri-ticket-line"></i>
+                        <span>Voucher</span>
+                    </a>
+
                 </div>
             </div>
         </div>
@@ -157,6 +162,9 @@
                     <a href="javascript:void(0)" class="cr-right-bar-item Shopping-toggle">
                         <i class="ri-shopping-cart-line"></i>
                     </a>
+                    <a href="javascript:void(0)" class="cr-right-bar-item Voucher-toggle">
+                        <i class="ri-ticket-line"></i>
+                    </a>
                 </div>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav">
@@ -173,7 +181,8 @@
                                 @isset($categories3)
                                     @foreach ($categories3 as $category)
                                         <li>
-                                            <a class="dropdown-item" href="#">
+                                            <a class="dropdown-item" href="{{ route('category.show', $category->slug) }}">
+
                                                 {{ $category->name }}
                                             </a>
                                         </li>
