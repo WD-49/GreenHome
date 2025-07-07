@@ -30,7 +30,7 @@ class HomeController extends Controller
         $banner11 = Banner::where('priority', 11)->get();
         $banner12 = Banner::where('priority', 12)->first();
 
-        $products = Product::latest()->take(10)->get(); // Lấy 10 sản phẩm mới nhất
+        $products = Product::latest()->take(10)->get(); // Lấy 10 sản phẩm view cao nhất
         $categories1 = Category::all();
         $brands = Brand::all();
 

@@ -5,52 +5,39 @@
     <script>
         AOS.init();
     </script>
-    {{-- <style>
-        .banner-box {
-            border-radius: 12px;
-            overflow: hidden;
-            background: #f9f9f9;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
+    @push('styles')
+        <style>
+            /* Ảnh mặc định cho Grid View */
+            .product-img {
+                width: 100%;
+                height: 225px;
+                object-fit: cover;
+                border-radius: 6px;
+                display: block;
+            }
 
-        .banner-box:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
-        }
+            /* Cha chứa ảnh - Grid View */
+            .cr-left,
+            .cr-product-image {
+                width: 100%;
+                height: 225px;
+            }
 
-        .banner-img-wrapper {
-            width: 100%;
-            height: 220px;
-            overflow: hidden;
-        }
+            /* List View - Kích thước cố định */
+            .grid-row-active .cr-left,
+            .grid-row-active .cr-product-image {
+                width: 350px;
+                height: 280px;
+                flex-shrink: 0;
+            }
 
-        .banner-img-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.4s ease;
-        }
-
-        .banner-box:hover .banner-img-wrapper img {
-            transform: scale(1.05);
-        }
-
-        .cr-product-banner-contain {
-            padding: 20px;
-            background: white;
-            text-align: center;
-        }
-
-        .cr-product-banner-contain h5 {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-    </style> --}}
+            .grid-row-active .product-img {
+                width: 350px;
+                height: 280px;
+                object-fit: cover;
+            }
+        </style>
+    @endpush
 
     <!-- Hero slider -->
     <section class="section-hero padding-b-100 next">
