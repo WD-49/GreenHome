@@ -4,48 +4,31 @@ namespace App\Jobs;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Mail;
+use App\Mail\ResetPasswordMail; // <-- Đảm bảo đã import đúng Mailable của bạn
 
 class SendResetPasswordMailJob implements ShouldQueue
 {
-    use InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $email;
-    protected $password;
+    protected $token;
 
-    /**
-     * Tạo Job mới.
-     */
-    public function __construct(string $email, string $password)
+    public function __construct(string $email, string $token)
     {
         $this->email = $email;
-        $this->password = $password;
+        $this->token = $token;
     }
 
-    /**
-     * Thực thi gửi email.
-     */
-    public function handle(): void
+    public function handle()
     {
-        Mail::to($this->email)->send(new class($this->password) extends Mailable {
-            public $password;
+        // Xây dựng URL đặt lại mật khẩu với token
+        $resetUrl = route('password.reset', ['token' => $this->token, 'email' => $this->email]);
 
-            public function __construct($password)
-            {
-                $this->password = $password;
-            }
-
-            public function build()
-            {
-                return $this->subject('Mật khẩu mới từ GreenHome')
-                    ->view('emails.password_plain')
-                    ->with([
-                        'password' => $this->password,
-                    ]);
-            }
-        });
+        // Gửi email bằng Mailable của bạn
+        Mail::to($this->email)->send(new ResetPasswordMail($this->email, $resetUrl));
     }
 }

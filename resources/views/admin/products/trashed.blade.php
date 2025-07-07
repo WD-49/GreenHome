@@ -11,11 +11,7 @@
             <i class="mdi mdi-cube-outline fs-3 text-primary"></i>
             <h4 class="fs-20 fw-bold m-0">{{ $title }}</h4>
         </div>
-        <div>
-            <a href="{{ route('admin.products.index') }}" class="btn btn-outline-secondary">
-                <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách sản phẩm
-            </a>
-        </div>
+
     </div>
     <div class="row">
         <div class="col-12">
@@ -105,123 +101,27 @@
                                         <input type="date" class="form-control" name="max_date"
                                             value="{{ request('max_date') }}">
                                     </div>
-                                    <div class="col-md-2">
-                                        <label for="min_price" class="form-label">Giá từ</label>
-                                        <input type="number" class="form-control" name="min_price"
-                                            value="{{ request('min_price') }}">
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label for="max_price" class="form-label">Giá đến</label>
-                                        <input type="number" class="form-control" name="max_price"
-                                            value="{{ request('max_price') }}">
-                                    </div>
+
                                     <div class="col-md-12 text-end">
                                         <button type="submit" class="btn btn-outline-primary">Lọc</button>
-                                        <a href="{{ route('admin.products.trashed') }}"
-                                            class="btn btn-outline-secondary">Làm mới</a>
+                                        <button type="reset" class="btn btn-outline-primary">Reset</button>
+
                                     </div>
                                 </div>
                             </form>
                         </div>
                     </div>
-
-                    <div class="table-responsive mt-3">
-                        <table class="table table-hover align-middle text-nowrap">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Tên sản phẩm</th>
-                                    <th>Danh mục</th>
-                                    <th>Thương hiệu</th>
-                                    <th>Ảnh</th>
-                                    <th>Số lượng</th>
-                                    <th>Trạng thái</th>
-                                    <th class="text-end">Hành động</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($products as $product)
-                                    <tr>
-                                        <td>{{ $product->id }}</td>
-                                        <td>{{ $product->name }}</td>
-                                        <td>{{ $product->category->name ?? '-' }}</td>
-                                        <td>{{ $product->brand->name ?? '-' }}</td>
-                                        <td>
-                                            @if ($product->image)
-                                                <img src="{{ asset('storage/' . $product->image) }}" width="60"
-                                                    class="rounded" alt="Ảnh sản phẩm">
-                                            @else
-                                                <span class="text-muted">Không có ảnh</span>
-                                            @endif
-                                        </td>
-                                        <td>{{ $product->quantity }}</td>
-                                        <td>
-                                            <span class="badge {{ $product->status == 1 ? 'bg-success' : 'bg-danger' }}">
-                                                {{ $product->status == 1 ? 'Đang bán' : 'Dừng bán' }}
-                                            </span>
-                                        </td>
-                                        <td class="text-end">
-                                            <div class="dropdown">
-                                                <button class="btn btn-light btn-sm" type="button"
-                                                    id="dropdownMenuButton{{ $product->id }}" data-bs-toggle="dropdown"
-                                                    aria-expanded="false">
-                                                    <i class="fas fa-ellipsis-v"></i>
-                                                </button>
-                                                <ul class="dropdown-menu dropdown-menu-end"
-                                                    aria-labelledby="dropdownMenuButton{{ $product->id }}">
-                                                    <li>
-                                                        <a class="dropdown-item"
-                                                            href="{{ route('admin.products.restore', $product->id) }}">
-                                                            Khôi phục
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <form
-                                                            action="{{ route('admin.products.forceDelete', $product->id) }}"
-                                                            method="POST"
-                                                            onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này vĩnh viễn không?')">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button class="dropdown-item text-danger" type="submit">
-                                                                Xóa sản phẩm
-                                                            </button>
-                                                        </form>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                                @if ($products->count() == 0)
-                                    <tr>
-                                        <td colspan="9" class="text-center text-muted">Không có sản phẩm nào trong
-                                            thùng rác</td>
-                                    </tr>
-                                @endif
-                            </tbody>
-                        </table>
+                    <div id="product-table-wrapper">
+                        <x-table-wrapper :url="route('admin.products.index')">
+                            @include('admin.products.partials.productTrashed-table', [
+                                'products' => $products,
+                            ])
+                        </x-table-wrapper>
                     </div>
-
-                    @if ($products->lastPage() > 1)
-                        <nav class="mt-3">
-                            <ul class="pagination justify-content-end">
-                                <li class="page-item {{ $products->onFirstPage() ? 'disabled' : '' }}">
-                                    <a class="page-link" href="{{ $products->previousPageUrl() }}">Previous</a>
-                                </li>
-                                @for ($i = 1; $i <= $products->lastPage(); $i++)
-                                    <li class="page-item {{ $i == $products->currentPage() ? 'active' : '' }}">
-                                        <a class="page-link" href="{{ $products->url($i) }}">{{ $i }}</a>
-                                    </li>
-                                @endfor
-                                <li class="page-item {{ !$products->hasMorePages() ? 'disabled' : '' }}">
-                                    <a class="page-link" href="{{ $products->nextPageUrl() }}">Next</a>
-                                </li>
-                            </ul>
-                        </nav>
-                    @endif
-
                 </div>
             </div>
         </div>
     </div>
+
+    @vite('resources/js/app.js')
 @endsection
