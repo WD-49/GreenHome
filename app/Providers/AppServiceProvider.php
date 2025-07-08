@@ -7,8 +7,6 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\View;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\View;
-use Illuminate\Pagination\Paginator;
 use App\Http\View\Composers\HeaderComposer;
 use App\Http\View\Composers\FooterComposer;
 

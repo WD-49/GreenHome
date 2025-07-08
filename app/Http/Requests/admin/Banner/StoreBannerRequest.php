@@ -20,6 +20,8 @@ public function rules()
         'priority' => 'nullable|integer',
         'status' => 'required|boolean',
         'img' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+          'type' => 'required|string|in:slider,category_banner,discount_banner',
+        'category_id' => 'nullable|exists:categories,id',
     ];
 }
 

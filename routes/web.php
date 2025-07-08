@@ -2,7 +2,6 @@
 
 use Dom\Comment;
 use App\Jobs\SendTestMailJob;
-use Doctrine\DBAL\Schema\Index;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;

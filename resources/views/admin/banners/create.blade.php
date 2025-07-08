@@ -17,6 +17,7 @@
         <form action="{{ route('admin.banners.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="row mb-3 banner-row align-items-center">
+                {{-- Tên banner --}}
                 <div class="col-md-6">
                     <label class="form-label">Tên banner</label>
                     <input type="text" name="name" class="form-control form-control-lg"
@@ -26,7 +27,37 @@
                     @enderror
                 </div>
 
+                {{-- Loại banner --}}
                 <div class="col-md-6">
+                    <label class="form-label">Loại banner</label>
+                    <select name="type" class="form-select form-select-lg" id="banner-type">
+                        <option value="slider" {{ old('type') == 'slider' ? 'selected' : '' }}>Slider</option>
+                        <option value="category_banner" {{ old('type') == 'category_banner' ? 'selected' : '' }}>Banner danh mục</option>
+                     
+                    </select>
+                    @error('type')
+                        <div class="text-danger mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                {{-- Chọn danh mục (ẩn/hiện dựa vào loại) --}}
+                <div class="col-md-6 mt-3 d-none" id="category-select">
+                    <label class="form-label">Danh mục áp dụng</label>
+                    <select name="category_id" class="form-select form-select-lg">
+                        <option value="">-- Chọn danh mục --</option>
+                        @foreach ($categories as $category)
+                            <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('category_id')
+                        <div class="text-danger mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                {{-- Liên kết --}}
+                <div class="col-md-6 mt-3">
                     <label class="form-label">Liên kết</label>
                     <input type="text" name="link" class="form-control form-control-lg"
                         value="{{ old('link') }}" placeholder="http://...">
@@ -35,6 +66,7 @@
                     @enderror
                 </div>
 
+                {{-- Mức ưu tiên --}}
                 <div class="col-md-6 mt-3">
                     <label class="form-label">Mức ưu tiên</label>
                     <input type="number" name="priority" class="form-control form-control-lg"
@@ -44,6 +76,7 @@
                     @enderror
                 </div>
 
+                {{-- Trạng thái --}}
                 <div class="col-md-6 mt-3">
                     <label class="form-label">Trạng thái</label>
                     <select name="status" class="form-select form-select-lg">
@@ -55,6 +88,7 @@
                     @enderror
                 </div>
 
+                {{-- Hình ảnh --}}
                 <div class="col-md-12 mt-3">
                     <label class="form-label">Hình ảnh</label>
                     <input type="file" name="img" class="form-control form-control-lg">
@@ -63,6 +97,7 @@
                     @enderror
                 </div>
 
+                {{-- Mô tả --}}
                 <div class="col-md-12 mt-3">
                     <label class="form-label">Mô tả</label>
                     <textarea name="description" class="form-control ckeditor" placeholder="Mô tả">{{ old('description') }}</textarea>
@@ -151,6 +186,22 @@
             });
         }
 
-        window.addEventListener('DOMContentLoaded', initializeEditors);
+        window.addEventListener('DOMContentLoaded', function () {
+            initializeEditors();
+
+            const typeSelect = document.getElementById('banner-type');
+            const categoryField = document.getElementById('category-select');
+
+            function toggleCategorySelect() {
+                if (typeSelect.value === 'category_banner') {
+                    categoryField.classList.remove('d-none');
+                } else {
+                    categoryField.classList.add('d-none');
+                }
+            }
+
+            typeSelect.addEventListener('change', toggleCategorySelect);
+            toggleCategorySelect(); // chạy ngay khi load form
+        });
     </script>
 @endsection
