@@ -287,11 +287,12 @@
                                                 <a
                                                     href="#">{{ $product->brand->name ?? 'Không có thương hiệu' }}</a>
                                                 @php
-                                                    $avg = round($product->reviews_avg_rating ?? 0, 1);
+                                                    $variantReviews = $product->productVariants->flatMap->reviews;
+                                                    $avg = round($variantReviews->avg('rating'), 1);
                                                     $fullStars = floor($avg);
                                                     $halfStar = $avg - $fullStars >= 0.5;
                                                     $emptyStars = 5 - $fullStars - ($halfStar ? 1 : 0);
-                                                    $count = $product->reviews_count ?? 0;
+                                                    $count = $variantReviews->count();
                                                 @endphp
                                                 <div class="text-center" style="line-height: 1.2;">
                                                     <div class="mb-1">
@@ -309,6 +310,7 @@
                                                         ({{ $avg }} / {{ $count }} đánh giá)
                                                     </div>
                                                 </div>
+
                                             </div>
 
                                             <a href="{{ route('productDetail', $product->slug) }}" class="title">
@@ -479,7 +481,7 @@
                     beforeSend: function() {
                         $('#product-list').html(
                             '<div class="text-center w-100 py-5">Đang tải sản phẩm...</div>'
-                            );
+                        );
                     },
                     success: function(response) {
                         const $html = $('<div>').html(response);
