@@ -2,7 +2,6 @@
 
 use Dom\Comment;
 use App\Jobs\SendTestMailJob;
-use Doctrine\DBAL\Schema\Index;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
@@ -460,4 +459,3 @@ Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product
 
 Route::post('/review/submit', [ProductClientController::class, 'submitReview'])->name('client.review.submit');
 Route::post('/comment/submit', [ProductClientController::class, 'submitComment'])->name('client.comment.submit');
-
