@@ -631,7 +631,7 @@ class OrderController extends Controller
             'note' => 'nullable|string',
             'cancel_reason' => 'nullable|string|min:10',
             'discount_id' => 'nullable|exists:discounts,id',
-            'payment_method_id' => 'required|exists:payment_methods,id',
+            'payment_method_name' => 'required',
             'shipping_fee' => 'required|numeric|min:0',
         ], [
             'shipping_name.required' => 'Tên người nhận không được để trống.',
@@ -644,8 +644,7 @@ class OrderController extends Controller
             'total_amount.required' => 'Tổng tiền không được để trống.',
             'total_amount.numeric' => 'Tổng tiền phải là số.',
             'cancel_reason.min' => 'Lý do hủy phải có ít nhất 10 ký tự.',
-            'payment_method_id.required' => 'Phương thức thanh toán không được để trống.',
-            'payment_method_id.exists' => 'Phương thức thanh toán không tồn tại.',
+            'payment_method_name.required' => 'Phương thức thanh toán không được để trống.',
             'shipping_fee.required' => 'Phí vận chuyển không được để trống.',
             'shipping_fee.numeric' => 'Phí vận chuyển phải là số.',
         ]);
@@ -691,8 +690,8 @@ class OrderController extends Controller
                 $order->cancel_reason = null;
             }
 
-            $order->discount_id = $request->input('discount_id');
-            $order->payment_method_id = $request->input('payment_method_id');
+            // $order->discount_id = $request->input('discount_id');
+            $order->payment_method_name = $request->input('payment_method_name');
             $order->shipping_fee = $request->input('shipping_fee');
 
             $order->save();
