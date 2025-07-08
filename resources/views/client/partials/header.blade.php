@@ -62,6 +62,20 @@
                     <a href="{{ route('wishlist.index') }}" class="cr-right-bar-item">
                         <i class="ri-heart-3-line"></i>
                     </a>
+  @auth
+    @if (!Auth::user()->hasVerifiedEmail())
+        <a href="{{ route('profile.index') }}"
+           class="cr-right-bar-item"
+           data-bs-toggle="tooltip"
+           data-bs-placement="bottom"
+           title="Email chưa xác minh. Nhấn để xác minh!">
+            <i class="ri-alert-line" style="color: #ffc107;"></i>
+            <span> Cần Xác minh</span>
+        </a>
+    @endif
+@endauth
+
+
 
                     <a href="javascript:void(0)" class="cr-right-bar-item Shopping-toggle">
                         <i class="ri-shopping-cart-line"></i>
@@ -230,3 +244,21 @@
         </div>
     </div>
 </div>
+<script>
+    function markAsRead(id) {
+        fetch('/notifications/' + id + '/read', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        });
+    }
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (el) {
+            return new bootstrap.Tooltip(el);
+        });
+    });
+</script>
