@@ -19,7 +19,9 @@
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 6px;">
                         <button class="apply-voucher" data-code="{{ $voucher->code }}">Áp dụng</button>
-                    <a href="{{ route('voucherDetail', ['code' => $voucher->code]) }}" class="view-detail">Chi tiết</a>
+                        <a href="javascript:void(0)" class="view-detail" data-voucher='@json($voucher)'>
+                            Chi tiết
+                        </a>
 
                     </div>
                 </li>
@@ -152,90 +154,209 @@
         margin-bottom: 8px;
         color: #444;
     }
+
+   .voucher-detail-card {
+    background: #fdfdfd;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+    animation: fadeInDetail 0.3s ease-in-out;
+    font-size: 15px;
+    color: #333;
+}
+
+.voucher-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.voucher-code-big {
+    font-size: 26px;
+    font-weight: bold;
+    color: #2b9348;
+    margin-bottom: 6px;
+}
+
+.voucher-title-small {
+    font-size: 16px;
+    color: #666;
+}
+
+.voucher-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 24px;
+    line-height: 1.5;
+}
+
+@keyframes fadeInDetail {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+.voucher-detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    font-size: 15px;
+}
+
+.voucher-detail-table th,
+.voucher-detail-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+}
+
+.voucher-detail-table th {
+    background-color: #f7f7f7;
+    width: 40%;
+    color: #444;
+}
+
+.voucher-detail-table td {
+    color: #333;
+}
+
+.voucher-detail-card {
+    animation: fadeInDetail 0.3s ease-in-out;
+}
+
 </style>
 
 @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Popup chính
-            const voucherPopup = document.getElementById('voucher-popup');
-            const overlay = voucherPopup.querySelector('.voucher-overlay');
-            const openBtn = document.querySelector('.voucher-toggle');
-            const closeBtn = document.getElementById('close-voucher');
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const voucherPopup = document.getElementById('voucher-popup');
+    const voucherOverlay = voucherPopup.querySelector('.voucher-overlay');
+    const openVoucherBtn = document.querySelector('.voucher-toggle');
+    const closeVoucherBtn = document.getElementById('close-voucher');
 
-            // Popup chi tiết
-            const detailPopup = document.getElementById('voucher-detail-popup');
-            const detailContent = detailPopup.querySelector('.voucher-detail-content');
-            const applyFromDetail = document.getElementById('apply-from-detail');
-            const closeDetail = document.getElementById('close-detail');
+    const detailPopup = document.getElementById('voucher-detail-popup');
+    const detailOverlay = detailPopup.querySelector('.voucher-overlay');
+    const detailContent = detailPopup.querySelector('.voucher-detail-content');
+    const closeDetailBtn = document.getElementById('close-detail');
+    const applyFromDetailBtn = document.getElementById('apply-from-detail');
 
-            let selectedCode = null;
+    let selectedCode = null;
 
-            openBtn?.addEventListener('click', () => {
-                voucherPopup.classList.add('active');
-            });
+    // ====== Hiển thị Popup Voucher chính ======
+    openVoucherBtn?.addEventListener('click', () => {
+        voucherPopup.classList.add('active');
+    });
 
-            closeBtn?.addEventListener('click', () => {
-                voucherPopup.classList.remove('active');
-            });
+    closeVoucherBtn?.addEventListener('click', () => {
+        voucherPopup.classList.remove('active');
+    });
 
-            overlay?.addEventListener('click', () => {
-                voucherPopup.classList.remove('active');
-            });
+    voucherOverlay?.addEventListener('click', () => {
+        voucherPopup.classList.remove('active');
+    });
 
-            // Áp dụng mã
-            document.querySelectorAll('.apply-voucher').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const code = btn.dataset.code;
-                    if (code) {
-                        window.location.href = `/voucher/${code}/eligible-products`;
-                    }
-                });
-            });
-
-            // Xem chi tiết mã
-            document.querySelectorAll('.view-detail').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    console.log('Đã click nút chi tiết'); // kiểm tra debug
-                    const data = JSON.parse(btn.dataset.voucher);
-                    selectedCode = data.code;
-
-                    detailContent.innerHTML = `
-                <p><strong>Mã:</strong> ${data.code}</p>
-                <p><strong>Tiêu đề:</strong> ${data.title}</p>
-                <p><strong>Mô tả:</strong> ${data.description}</p>
-                <p><strong>Loại:</strong> ${data.discount_type}</p>
-                <p><strong>Giá trị:</strong> ${parseFloat(data.discount_value).toLocaleString()} ${data.discount_type === 'percentage' ? '%' : '₫'}</p>
-                <p><strong>Giảm tối đa:</strong> ${parseFloat(data.max_discount).toLocaleString()} ₫</p>
-                <p><strong>Đơn hàng tối thiểu:</strong> ${parseFloat(data.min_order_value).toLocaleString()} ₫</p>
-                ${data.max_order_value ? `<p><strong>Đơn hàng tối đa:</strong> ${parseFloat(data.max_order_value).toLocaleString()} ₫</p>` : ''}
-                <p><strong>Số lượng còn:</strong> ${data.quantity}</p>
-                <p><strong>Giới hạn/người:</strong> ${data.user_usage_limit}</p>
-                <p><strong>Áp dụng cho tất cả SP:</strong> ${data.applies_to_all_products ? 'Có' : 'Không'}</p>
-                <p><strong>Trạng thái:</strong> ${data.status}</p>
-                <p><strong>Bắt đầu:</strong> ${data.start_date}</p>
-                <p><strong>Kết thúc:</strong> ${data.end_date}</p>
-            `;
-
-                    detailPopup.classList.add('active');
-                });
-            });
-
-            // Áp dụng trong popup chi tiết
-            applyFromDetail?.addEventListener('click', () => {
-                if (selectedCode) {
-                    window.location.href = `/voucher/${selectedCode}/eligible-products`;
-                }
-            });
-
-            // Đóng popup chi tiết
-            closeDetail?.addEventListener('click', () => {
-                detailPopup.classList.remove('active');
-            });
-
-            detailPopup.querySelector('.voucher-overlay')?.addEventListener('click', () => {
-                detailPopup.classList.remove('active');
-            });
+    // ====== Áp dụng mã giảm giá từ danh sách ======
+    document.querySelectorAll('.apply-voucher').forEach(button => {
+        button.addEventListener('click', () => {
+            const code = button.dataset.code;
+            if (code) {
+                window.location.href = `/voucher/${code}/eligible-products`;
+            }
         });
-    </script>
+    });
+
+    // ====== Hiển thị chi tiết mã giảm giá bằng popup ======
+    document.querySelectorAll('.view-detail').forEach(button => {
+        button.addEventListener('click', () => {
+            try {
+                const data = JSON.parse(button.dataset.voucher);
+                selectedCode = data.code;
+
+             detailContent.innerHTML = `
+    <div class="voucher-detail-card">
+        <div class="voucher-header">
+            <div class="voucher-code-big">🎟 ${data.code}</div>
+            <div class="voucher-title-small">${data.title}</div>
+        </div>
+        <table class="voucher-detail-table">
+            <tbody>
+                <tr>
+                    <th>Mô tả</th>
+                    <td>${data.description || 'Không có mô tả'}</td>
+                </tr>
+                <tr>
+                    <th>Loại</th>
+                    <td>${data.discount_type === 'percentage' ? 'Phần trăm (%)' : 'Cố định (VNĐ)'}</td>
+                </tr>
+                <tr>
+                    <th>Giá trị giảm</th>
+                    <td>${parseFloat(data.discount_value).toLocaleString()} ${data.discount_type === 'percentage' ? '%' : '₫'}</td>
+                </tr>
+                <tr>
+                    <th>Giảm tối đa</th>
+                    <td>${parseFloat(data.max_discount).toLocaleString()} ₫</td>
+                </tr>
+                <tr>
+                    <th>Đơn tối thiểu</th>
+                    <td>${parseFloat(data.min_order_value).toLocaleString()} ₫</td>
+                </tr>
+                ${data.max_order_value ? `
+                <tr>
+                    <th>Đơn tối đa</th>
+                    <td>${parseFloat(data.max_order_value).toLocaleString()} ₫</td>
+                </tr>` : ''}
+                <tr>
+                    <th>Số lượng còn</th>
+                    <td>${data.quantity}</td>
+                </tr>
+                <tr>
+                    <th>Giới hạn/người</th>
+                    <td>${data.user_usage_limit}</td>
+                </tr>
+                <tr>
+                    <th>Áp dụng toàn bộ SP</th>
+                    <td>${data.applies_to_all_products ? 'Có' : 'Không'}</td>
+                </tr>
+                <tr>
+                    <th>Ngày bắt đầu</th>
+                    <td>${data.start_date}</td>
+                </tr>
+                <tr>
+                    <th>Ngày kết thúc</th>
+                    <td>${data.end_date}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+`;
+
+                detailPopup.classList.add('active');
+            } catch (error) {
+                console.error("❌ Lỗi khi phân tích JSON chi tiết mã giảm giá:", error);
+                alert('Không thể hiển thị chi tiết mã giảm giá.');
+            }
+        });
+    });
+
+    // ====== Áp dụng mã từ popup chi tiết ======
+    applyFromDetailBtn?.addEventListener('click', () => {
+        if (selectedCode) {
+            window.location.href = `/voucher/${selectedCode}/eligible-products`;
+        }
+    });
+
+    // ====== Đóng popup chi tiết ======
+    closeDetailBtn?.addEventListener('click', () => {
+        detailPopup.classList.remove('active');
+    });
+
+    detailOverlay?.addEventListener('click', () => {
+        detailPopup.classList.remove('active');
+    });
+});
+</script>
 @endpush
+
