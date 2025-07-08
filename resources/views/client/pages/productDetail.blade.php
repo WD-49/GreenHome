@@ -26,23 +26,23 @@
                     <div class="vehicle-detail-banner banner-content clearfix">
                         <div class="banner-slider">
                             <div class="slider slider-for">
-                                @foreach ($product->productVariants as $variant)
-                                    <div class="slider-banner-image">
-                                        <div class="zoom-image-hover">
-                                            <img src="{{ asset('storage/' . ($variant->image ?? 'default.jpg')) }}"
-                                                alt="{{ $variant->attribute_name }}" class="product-image">
-                                        </div>
+                                <div class="slider-banner-image">
+                                    <div class="zoom-image-hover">
+                                        <img src="{{ asset('storage/' . ($product->image ?? 'default.jpg')) }}"
+                                            alt="{{ $product->name }}" class="product-image">
                                     </div>
-                                @endforeach
+                                </div>
                             </div>
                             <div class="slider slider-nav thumb-image">
                                 @foreach ($product->productVariants as $variant)
-                                    <div class="thumbnail-image">
-                                        <div class="thumbImg">
-                                            <img src="{{ asset('storage/' . $variant->image) }}"
-                                                alt="{{ $variant->attribute_name }}">
+                                    @if ($variant->image)
+                                        <div class="thumbnail-image">
+                                            <div class="thumbImg">
+                                                <img src="{{ asset('storage/' . $variant->image) }}"
+                                                    alt="{{ $variant->attribute_name }}">
+                                            </div>
                                         </div>
-                                    </div>
+                                    @endif
                                 @endforeach
                             </div>
                         </div>
@@ -53,9 +53,7 @@
                 <div class="col-xxl-8 col-xl-7 col-md-6 col-12 mb-24">
                     <div class="cr-size-and-weight-contain">
                         <h2 class="heading">{{ $product->name }}</h2>
-                        @if ($product->sortDes)
-                            <p>{{ $product->sortDes }}</p>
-                        @endif
+                        <p>{{ $product->sort_des ?? '' }}</p>
                     </div>
 
                     @php
@@ -66,7 +64,6 @@
                         $prices = $product->productVariants->pluck('price')->filter();
                         $minPrice = $prices->min();
                         $maxPrice = $prices->max();
-                        $totalQuantity = $product->productVariants->sum('quantity') ?: $product->quantity;
                     @endphp
 
                     <div class="cr-size-and-weight">
@@ -83,7 +80,9 @@
                             <ul>
                                 <li><label>Thương Hiệu <span>:</span></label>{{ $product->brand->name ?? '' }}</li>
                                 <li><label>Danh Mục <span>:</span></label>{{ $product->category->name ?? '' }}</li>
-                                <li><label>Số lượng <span>:</span></label>{{ $totalQuantity ?? 'N/A' }}</li>
+                                <li><label>Số lượng còn <span>:</span></label><span
+                                        id="variant-quantity">{{ $product->quantity }}</span></li>
+
                                 <li><label>Lượt xem <span>:</span></label>{{ $product->view ?? 0 }}</li>
                             </ul>
                         </div>
@@ -107,9 +106,11 @@
                                 <div class="cr-kg">
                                     <ul>
                                         @foreach ($product->productVariants as $index => $variant)
-                                            <li class="variant-option{{ $index == 0 ? ' active-color' : '' }}"
-                                                data-variant-id="{{ $variant->id }}" data-price="{{ $variant->price }}"
-                                                data-image="{{ asset('storage/' . $variant->image) }}">
+                                            <li class="variant-option" data-variant-id="{{ $variant->id }}"
+                                                data-price="{{ $variant->price }}"
+                                                data-image="{{ asset('storage/' . $variant->image) }}"
+                                                data-quantity="{{ $variant->quantity }}">
+
                                                 {{ $variant->attribute_name }}
                                             </li>
                                         @endforeach
@@ -187,19 +188,28 @@
                                                     <span
                                                         class="date">{{ \Carbon\Carbon::parse($review->created_at)->locale('vi')->isoFormat('D [tháng] M, YYYY') }}</span>
                                                     <span class="name">{{ $review->user->name ?? 'Guest' }}</span>
+                                                    <span class="name">{{ $review->title ?? '' }}</span>
+
                                                 </div>
                                                 <div class="cr-t-review-rating">
                                                     @for ($i = 1; $i <= 5; $i++)
                                                         <i
                                                             class="ri-star-s-{{ $i <= $review->rating ? 'fill' : 'line' }}"></i>
                                                     @endfor
+
                                                 </div>
                                             </div>
-                                            @if ($review->title)
-                                                <h5>{{ $review->title }}</h5>
-                                            @endif
-                                            @if ($review->content)
-                                                <p>{{ $review->content }}</p>
+                                            <p>{{ $review->content }}</p>
+                                            @if ($review->images && $review->images->count())
+                                                <div class="review-images mt-2">
+                                                    @foreach ($review->images as $image)
+                                                        <img src="{{ asset('storage/' . $image->image) }}"
+                                                            alt="Review Image"
+                                                            style="width: 100px; height: auto; border-radius: 6px; margin-right: 8px;"
+                                                            loading="lazy"
+                                                            onerror="this.src='{{ asset('images/default-image.jpg') }}'">
+                                                    @endforeach
+                                                </div>
                                             @endif
                                         @empty
                                             <div class="no-reviews">
@@ -212,27 +222,64 @@
                                     <!-- Debug info (xóa sau khi test) -->
 
 
-                                    <h4 class="heading">Add a Review</h4>
-                                    <form action="javascript:void(0)">
-                                        <div class="cr-ratting-star">
-                                            <span>Your rating :</span>
-                                            <div class="cr-t-review-rating">
+                                    <h4 class="heading">Thêm đánh giá </h4>
+                                    @if (session('success'))
+                                        <div class="alert alert-success">{{ session('success') }}</div>
+                                    @endif
+
+                                    @php
+                                        $variant = $product->productVariants->first();
+                                    @endphp
+
+                                    <form action="{{ route('client.review.submit') }}" method="POST"
+                                        enctype="multipart/form-data">
+                                        @csrf
+                                        <input type="hidden" name="product_variant_id" value="{{ $variant->id }}">
+
+                                        <div class="cr-ratting-star mb-2">
+                                            <span>Đánh giá:</span>
+                                            <div class="cr-t-review-rating d-flex">
                                                 @for ($i = 1; $i <= 5; $i++)
-                                                    <i class="ri-star-s-line"></i>
+                                                    <label class="rating-label"
+                                                        style="cursor: pointer; margin-right: 4px;">
+                                                        <input type="radio" name="rating" value="{{ $i }}"
+                                                            style="display: none;" required>
+                                                        <i class="ri-star-s-line fs-5 text-warning"></i>
+                                                    </label>
                                                 @endfor
                                             </div>
                                         </div>
+
                                         <div class="cr-ratting-input">
-                                            <input name="your-name" placeholder="Name" type="text">
+                                            <input type="text" value="{{ Auth::user()->name ?? '' }}" disabled
+                                                placeholder="Tên của bạn">
                                         </div>
+
                                         <div class="cr-ratting-input">
-                                            <input name="your-email" placeholder="Email*" type="email" required="">
+                                            <input type="email" value="{{ Auth::user()->email ?? '' }}" disabled
+                                                placeholder="Email của bạn">
                                         </div>
+
+                                        <div class="cr-ratting-input">
+                                            <input name="title" placeholder="Tiêu đề (ví dụ: Rất hài lòng)"
+                                                type="text" maxlength="150" required>
+                                        </div>
+                                        <div class="cr-ratting-input mb-3">
+                                            <label for="images">Ảnh đính kèm :</label>
+                                            <input type="file" name="images[]" id="imageInput" multiple
+                                                accept="image/*" class="form-control">
+                                            <div id="preview" class="mt-2 d-flex flex-wrap gap-2"></div>
+                                        </div>
+
                                         <div class="cr-ratting-input form-submit">
-                                            <textarea name="your-comment" placeholder="Enter Your Comment"></textarea>
-                                            <button class="cr-button" type="submit">Submit</button>
+                                            <textarea name="content" placeholder="Nhận xét chi tiết của bạn về sản phẩm" required></textarea>
+                                            <button class="cr-button" type="submit">Gửi đánh giá</button>
                                         </div>
                                     </form>
+
+
+
+
                                 </div>
                             </div>
 
@@ -257,19 +304,43 @@
                                         @endforelse
 
                                     </div>
-                                    <h4 class="heading">Add a Comment</h4>
-                                    <form action="javascript:void(0)">
-                                        <div class="cr-ratting-input">
-                                            <input name="your-name" placeholder="Name" type="text">
+                                    <h4 class="heading">Thêm bình luận</h4>
+                                    @if (session('success'))
+                                        <div class="alert alert-success">
+                                            {{ session('success') }}
                                         </div>
-                                        <div class="cr-ratting-input">
-                                            <input name="your-email" placeholder="Email*" type="email" required="">
+                                    @endif
+
+                                    <form action="{{ route('client.comment.submit') }}" method="POST" class="mt-4">
+                                        @csrf
+                                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Tên của bạn</label>
+                                            <input type="text" class="form-control"
+                                                value="{{ Auth::user()->name ?? 'Khách' }}" disabled>
                                         </div>
-                                        <div class="cr-ratting-input form-submit">
-                                            <textarea name="your-comment" placeholder="Enter Your Comment"></textarea>
-                                            <button class="cr-button" type="submit">Submit</button>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Email</label>
+                                            <input type="email" class="form-control"
+                                                value="{{ Auth::user()->email ?? '' }}" disabled>
                                         </div>
+
+                                        <div class="mb-3">
+                                            <label for="content" class="form-label">Nội dung bình luận</label>
+                                            <textarea name="content" class="form-control @error('content') is-invalid @enderror" rows="4"
+                                                placeholder="Nhập nội dung bình luận..." required>{{ old('content') }}</textarea>
+                                            @error('content')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <button type="submit" class="cr-button">Gửi bình luận</button>
                                     </form>
+
+
+
                                 </div>
                             </div>
                         </div>
@@ -294,8 +365,7 @@
                         <div class="cr-product-card">
                             <div class="cr-product-image">
                                 <div class="cr-image-inner zoom-image-hover">
-                                    <img src="{{ asset('storage/' . ($item->productVariants->first()->image ?? 'default.jpg')) }}"
-                                        alt="{{ $item->name }}">
+                                    <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}">
                                 </div>
                             </div>
                             <div class="cr-product-details">
@@ -310,14 +380,16 @@
                                     $maxPrice = $prices->max();
                                 @endphp
                                 <p class="cr-price">
-                                    @if ($prices->count())
-                                        {{ number_format($minPrice, 0, ',', '.') }}₫
-                                        @if ($minPrice != $maxPrice)
-                                            - {{ number_format($maxPrice, 0, ',', '.') }}₫
+                                    <span class="new-price">
+                                        @if ($prices->count())
+                                            {{ number_format($minPrice, 0, ',', '.') }}₫
+                                            @if ($minPrice != $maxPrice)
+                                                - {{ number_format($maxPrice, 0, ',', '.') }}₫
+                                            @endif
+                                        @else
+                                            Liên hệ
                                         @endif
-                                    @else
-                                        Liên hệ
-                                    @endif
+                                    </span>
                                 </p>
                             </div>
                         </div>
@@ -338,6 +410,9 @@
                         let gia = Number(this.dataset.price);
                         document.getElementById('variant-price').textContent = gia.toLocaleString(
                             'vi-VN') + '₫';
+
+                        let soLuong = this.dataset.quantity || 0;
+                        document.getElementById('variant-quantity').textContent = soLuong;
                     });
                 });
 
@@ -400,6 +475,56 @@
                             }
                         })
                         .catch((error) => showNotify(data.message || 'Có lỗi xảy ra!', 'error'));
+                });
+                const ratingLabels = document.querySelectorAll('.rating-label');
+
+                ratingLabels.forEach((label, index) => {
+                    label.addEventListener('click', function() {
+                        const radio = this.querySelector('input[type=radio]');
+                        if (radio) radio.checked = true;
+
+                        // Reset toàn bộ sao
+                        ratingLabels.forEach(l => {
+                            const star = l.querySelector('i');
+                            if (star) {
+                                star.classList.remove('ri-star-s-fill');
+                                star.classList.add('ri-star-s-line');
+                            }
+                        });
+
+                        // Fill từ sao đầu đến sao đang chọn
+                        for (let i = 0; i <= index; i++) {
+                            const star = ratingLabels[i].querySelector('i');
+                            if (star) {
+                                star.classList.remove('ri-star-s-line');
+                                star.classList.add('ri-star-s-fill');
+                            }
+                        }
+                    });
+                });
+                document.getElementById('imageInput').addEventListener('change', function(e) {
+                    const preview = document.getElementById('preview');
+                    preview.innerHTML = ''; // clear preview
+
+                    const files = e.target.files;
+                    if (files.length === 0) return;
+
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+
+                        if (!file.type.startsWith('image/')) continue;
+
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            const img = document.createElement('img');
+                            img.src = event.target.result;
+                            img.classList.add('img-thumbnail');
+                            img.style.maxWidth = '120px';
+                            img.style.maxHeight = '120px';
+                            preview.appendChild(img);
+                        };
+                        reader.readAsDataURL(file);
+                    }
                 });
             });
         </script>

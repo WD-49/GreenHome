@@ -191,7 +191,7 @@
                         <div class="border border-dark rounded-2 me-2 widget-icons-sections">
                             <i data-feather="cpu" class="widgets-icons"></i>
                         </div>
-                        <h5 class="card-title mb-0">Top Selling Products</h5>
+                        <h5 class="card-title mb-0">Sản phẩm bán chạy</h5>
                     </div>
                 </div>
                 <div class="card-body">
@@ -729,7 +729,7 @@
         <li class="list-group-item align-items-center d-flex justify-content-between">
             <div class="product-list">
                 <img class="avatar-md p-1 rounded-circle bg-primary-subtle img-fluid me-3"
-                    src="${product.image ? window.location.origin + '/storage/' + product.image : 'https://via.placeholder.com/56x56?text=No+Image'}"
+                    src="${product.image ? window.location.origin + '/storage/' + product.image : 'app/public/default.png'}"
                     >
                 <div class="product-body align-self-center">
                     <h6 class="m-0 fw-semibold">${product.product_name}</h6>

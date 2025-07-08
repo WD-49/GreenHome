@@ -2,6 +2,7 @@
 
 use Dom\Comment;
 use App\Jobs\SendTestMailJob;
+use Doctrine\DBAL\Schema\Index;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
@@ -9,27 +10,31 @@ use App\Http\Controllers\admin\BlogController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\admin\BrandController;
 use App\Http\Controllers\admin\OrderController;
+
 use App\Http\Controllers\client\CartController;
 
 use App\Http\Controllers\client\HomeController;
-
 use App\Http\Controllers\Client\ShopController;
 use App\Http\Controllers\admin\BannerController;
 use App\Http\Controllers\admin\ReviewController;
 use App\Http\Controllers\admin\CommentController;
+use App\Http\Controllers\Admin\WebInfoController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\admin\CategoryController;
 use App\Http\Controllers\admin\DiscountController;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\Client\ProfileController;
+
 use App\Http\Controllers\admin\AttributeController;
 use App\Http\Controllers\admin\DashboardController;
 
+use App\Http\Controllers\client\CheckoutController;
+
+use App\Http\Controllers\client\WishlistController;
+use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\admin\OrderStatusController;
 use App\Http\Controllers\client\BlogDetailController;
-
 use App\Http\Controllers\Admin\BlogCategoryController;
-
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\admin\PaymentMethodController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -39,11 +44,15 @@ use App\Http\Controllers\admin\Product\ProductController;
 use App\Http\Controllers\admin\Account\AccountAdminController;
 use App\Http\Controllers\admin\Account\AccountUsersController;
 use App\Http\Controllers\admin\Product\ProductVariantController;
-use App\Http\Controllers\Admin\WebInfoController;
-use App\Http\Controllers\client\WishlistController;
+use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\client\BlogController as ClientBlogController;
-use Doctrine\DBAL\Schema\Index;
+use App\Http\Controllers\Client\DiscountController as ClientDiscountController;
+use Doctrine\DBAL\Schema\Index as DBALIndex;
 
+
+Route::get('/test-reset/{token}', function ($token) {
+    return "Test token: " . $token;
+})->name('test.reset');
 
 // route của trang client
 
@@ -53,8 +62,6 @@ Route::get('/products', [ProductController::class, 'index'])->name('products.ind
 Route::get('/products/category-id/{id}', [ProductController::class, 'getProductsByCategoryId']);
 
 //wishlist 
-
-
 Route::middleware('auth')->prefix('wishlist')->group(function () {
     Route::get('/', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/add', [WishlistController::class, 'add'])->name('wishlist.add');
@@ -64,11 +71,6 @@ Route::middleware('auth')->prefix('wishlist')->group(function () {
 Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
 Route::post('/wishlist/update-options', [WishlistController::class, 'updateOptions'])->name('wishlist.updateOptions');
 
-
-
-
-
-// viết tiếp route của các trang tại đây
 // // Route::get('/blog', [HomeController::class, 'blog'])->name('blog'); ví dụ.
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -77,17 +79,52 @@ Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->na
 Route::post('/register', [RegisterController::class, 'register']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-Route::get('/password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+// Route::get('/password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+// Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 
+// Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('forgot-password.form');
+// Route::post('/forgot-password', [ForgotPasswordController::class, 'handle'])->name('forgot-password.handle');
+
+// Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('forgot-password.form');
+// // Sử dụng route chuẩn password.email của Laravel để xử lý việc gửi form
+// Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+
+// // Bạn cũng sẽ cần các route đặt lại cho việc đặt lại dựa trên token
+// Route::get('/password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+// Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
+
+
+
+
+// Route form gửi yêu cầu và xử lý của bạn
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('forgot-password.form');
-Route::post('/forgot-password', [ForgotPasswordController::class, 'handle'])->name('forgot-password.handle');
+Route::post('/forgot-password', [ForgotPasswordController::class, 'handle'])->name('forgot-password.handle'); // Sử dụng lại route này
+// Các route đặt lại mật khẩu của Laravel
+Route::get('/password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
+
+
+
+
+
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile/{tab?}', [ProfileController::class, 'index'])->name('profile.index');
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::get('/{comment}/details-with-product', [CommentController::class, 'getCommentDetailsWithProduct'])
         ->name('detailWithProduct');
+    // Các route xác minh email CHUẨN
+    Route::get('/email/verify', [EmailVerificationPromptController::class, '__invoke'])
+        ->name('verification.notice');
+
+    Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, '__invoke'])
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('verification.verify');
+
+    // *** THAY ĐỔI LỚN TẠI ĐÂY: DÙNG CONTROLLER THAY VÌ CLOSURE ***
+    Route::post('/email/verification-notification', [EmailVerificationPromptController::class, 'sendVerificationEmail'])
+        ->middleware(['throttle:6,1']) // Middleware throttle vẫn được giữ nguyên
+        ->name('verification.send'); //throttle:6,1 giới hạn người dùng gửi yêu cầu xác thực email 6 lần trong 1 phút
 });
 
 
@@ -391,6 +428,11 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
 
 // trang trủ
 Route::get('/', [HomeController::class, 'index'])->name('home');
+// routes/web.php
+Route::get('/voucher/{code}/eligible-products', [ClientDiscountController::class, 'showEligibleProducts'])->name('voucher.products');
+Route::get('/voucher/{code}/detail', [ClientDiscountController::class, 'showDetail'])->name('voucherDetail');
+
+
 // viết tiếp route của các trang tại đây
 Route::get('/blog/{slugCategory?}', [ClientBlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/detail/{slug}', [ClientBlogController::class, 'show'])->name('blog.show');
@@ -406,7 +448,17 @@ route::prefix('cart')->middleware('auth')->name('cart.')->group(function () {
     Route::post('/update-quantity/{id}', [CartController::class, 'updateQuantity'])->name('updateQuantity');
     Route::post('/delete-multiple', [CartController::class, 'deleteMultiple'])->name('deleteMultiple');
 });
+route::get('/checkout', [CheckoutController::class, 'index'])->middleware('auth')->name('checkout.index');
+Route::get('/checkout/data', [CheckoutController::class, 'getCheckoutData'])->middleware('auth')->name('checkout.data');
+Route::post('/checkout/submit', [CheckoutController::class, 'submit'])->name('checkout.submit');
+
 
 Route::get('/blog/{slug}', [App\Http\Controllers\client\BlogDetailController::class, 'show'])->name('blog.detail');
 
 Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');
+
+Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show');
+
+Route::post('/review/submit', [ProductClientController::class, 'submitReview'])->name('client.review.submit');
+Route::post('/comment/submit', [ProductClientController::class, 'submitComment'])->name('client.comment.submit');
+

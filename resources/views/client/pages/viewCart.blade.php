@@ -49,7 +49,8 @@
                                     <div class="col-lg-12">
                                         <div class="cr-cart-update-bottom">
                                             <a href="{{ route('shop.index') }}" class="cr-links">Tiếp tục mua sắm</a>
-                                            <a href="" id="checkout-selected" class="cr-button">Thanh toán</a>
+                                            <a href="javascript:void(0)" id="checkout-selected" class="cr-button">Thanh
+                                                toán</a>
                                             <div class="cr-btn-ds" data-aos="fade-up" data-aos-duration="2000"
                                                 data-aos-delay="400">
                                                 <button type="button" id="delete-selected" class="btn btn-danger">Xoá mục
@@ -188,6 +189,25 @@
                                 console.error('Delete selected error:', error);
                                 alert(error.message || 'Không thể xoá sản phẩm!');
                             });
+                    });
+
+                    document.getElementById('checkout-selected').addEventListener('click', function() {
+                        const selectedIds = Array.from(document.querySelectorAll(
+                                '.cart-checkbox:checked'))
+                            .map(cb => cb.value);
+
+                        let url = '';
+
+                        if (selectedIds.length > 0) {
+                            // Chuyển sang chế độ selected
+                            const query = selectedIds.map(id => `ids[]=${id}`).join('&');
+                            url = `/checkout?type=selected&${query}`;
+                        } else {
+                            // Chuyển sang chế độ full cart
+                            url = `/checkout?type=full`;
+                        }
+
+                        window.location.href = url;
                     });
 
                     // Bind + and - buttons

@@ -147,6 +147,8 @@
 
     <!-- Side-tool -->
     @include('client.partials.sideTool')
+    <!-- Voucher Modal -->
+    @include('client.partials.voucherModal')
 
     <!-- Global Notify -->
     <div id="global-notify" style="display:none;position:fixed;z-index:9999;bottom:40px;right:40px;min-width:220px;">
@@ -162,7 +164,7 @@
     <!-- Vendor Custom -->
     <script src="{{ asset('assets_client/assets/js/vendor/jquery-3.6.4.min.js') }}"></script>
     <script src="{{ asset('assets_client/assets/js/vendor/jquery.zoom.min.js') }}"></script>
-    {{-- <script src="{{ asset('assets_client/assets/js/vendor/bootstrap.bundle.min.js') }}"></script> --}}
+    <script src="{{ asset('assets_client/assets/js/vendor/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('assets_client/assets/js/vendor/mixitup.min.js') }}"></script>
     <script src="{{ asset('assets_client/assets/js/vendor/range-slider.js') }}"></script>
     <script src="{{ asset('assets_client/assets/js/vendor/aos.min.js') }}"></script>

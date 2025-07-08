@@ -70,7 +70,7 @@ class LoginController extends Controller
             $now = Carbon::now()->format('H:i d/m/Y');
 
             // Gửi email thông báo đăng nhập bằng queue
-            dispatch(new SendLoginNotificationMailJob($user->email, $user->name, $now));
+            // dispatch(new SendLoginNotificationMailJob($user->email, $user->name, $now));
 
             return redirect()->intended($this->redirectTo());
         }

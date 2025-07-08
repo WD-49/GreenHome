@@ -113,4 +113,21 @@ class ProductVariant extends Model
             $product->update(['quantity' => $total]);
         }
     }
+
+    public function scopeFilter($query, $request)
+    {
+        if ($request->filled('sku')) {
+            $query->where('sku', 'LIKE', '%' . $request->sku . '%');
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->status == 1 ? 1 : 0);
+        }
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        }
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+        return $query;
+    }
 }

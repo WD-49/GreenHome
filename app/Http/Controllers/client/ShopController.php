@@ -37,19 +37,19 @@ class ShopController extends Controller
 
         // Lọc theo số sao đánh giá
         if ($request->filled('rating')) {
-            $star = intval($request->input('rating'));
+    $star = intval($request->input('rating'));
 
-            $productsQuery->whereIn('id', function ($sub) use ($star) {
-                $sub->select('products.id')
-                    ->from('products')
-                    ->join('product_variants', 'products.id', '=', 'product_variants.product_id')
-                    ->join('reviews', 'product_variants.id', '=', 'reviews.product_variant_id')
-                    ->whereNull('reviews.deleted_at')
-                    ->groupBy('products.id')
-                    ->havingRaw('AVG(reviews.rating) >= ?', [$star])
-                    ->havingRaw('AVG(reviews.rating) < ?', [$star + 1]);
-            });
-        }
+    $productsQuery->whereIn('id', function ($sub) use ($star) {
+        $sub->select('products.id')
+            ->from('products')
+            ->join('product_variants', 'products.id', '=', 'product_variants.product_id')
+            ->join('reviews', 'product_variants.id', '=', 'reviews.product_variant_id')
+            ->whereNull('reviews.deleted_at')
+            ->groupBy('products.id')
+            ->havingRaw('AVG(reviews.rating) >= ?', [$star])
+            ->havingRaw('AVG(reviews.rating) < ?', [$star + 1]);
+    }); 
+}
 
 
 
