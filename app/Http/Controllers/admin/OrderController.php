@@ -60,10 +60,8 @@ class OrderController extends Controller
     {
         $query = Order::with([
             'user',
-            'discount',
-            'paymentMethod',
-            'items.productVariant.product',
-            'items.productVariant.productVariantValues.attributeValue', // Đã sửa tên quan hệ ở model ProductVariant
+            'items',
+            'items', // Đã sửa tên quan hệ ở model ProductVariant
         ])->latest();
 
         // Lọc theo mã đơn hàng (sku hoặc id)
@@ -475,18 +473,11 @@ class OrderController extends Controller
     {
         $order = Order::with([
             'user.profile',
-            'discount.products',
-            'paymentMethod',
             'items' => function ($query) {
                 $query->withTrashed();
             },
-            'items.productVariant' => function ($query) {
-                $query->withTrashed();
-            },
-            'items.productVariant.product' => function ($query) {
-                $query->withTrashed();
-            },
-            'items.productVariant.productVariantValues.attributeValue',
+            
+            
         ])
             ->withTrashed()
             ->findOrFail($id);
@@ -608,9 +599,6 @@ class OrderController extends Controller
     {
         $order = Order::with([
             'user.profile',
-            'discount.products',
-            'items.productVariant.product',
-            'paymentMethod'
         ])->findOrFail($id);
 
         $allOrderStatuses = $this->getOrderEnumStatuses();
