@@ -103,7 +103,8 @@ class DiscountController extends Controller
         //     'title' => 'Create Discount',
         // ]);
         // $products = Product::whereNull('deleted_at')->get();
-        $products = Product::all();
+$products = Product::with(['productVariants'])->get();
+
 
         return view('admin.discount.create', compact('products'));
     }

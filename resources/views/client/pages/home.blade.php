@@ -72,7 +72,7 @@
                                             <h1>{{ $item->name }}</h1>
                                             <p>{!! $item->description !!}</p>
                                             <div class="cr-last-buttons">
-                                                <a href="{{ $item->link }}" class="cr-button">shop now</a>
+                                                <a href="{{ $item->link }}" class="cr-button">Xem Cửa Hàng</a>
                                             </div>
                                         </div>
                                     </div>
@@ -97,7 +97,7 @@
                                             <h1>{{ $item->name }}</h1>
                                             <p>{!! $item->description !!}</p>
                                             <div class="cr-last-buttons">
-                                                <a href="{{ $item->link }}" class="cr-button">shop now</a>
+                                                <a href="{{ $item->link }}" class="cr-button">Xem Cửa Hàng</a>
                                             </div>
                                         </div>
                                     </div>
@@ -122,7 +122,7 @@
                 <div class="col-lg-4 col-12 mb-24">
                     <div class="cr-categories">
                         <ul class="nav nav-tabs" id="myTab" role="tablist">
-                            @foreach ($categories1 as $index => $category)
+                            @foreach ($topCategories as $index => $category)
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link center-categories-inner {{ $loop->first ? 'active' : '' }}"
                                         id="tab-{{ $category->id }}" data-bs-toggle="tab"
@@ -135,7 +135,7 @@
                             @endforeach
                             <li class="nav-item" role="presentation">
                                 <a class="center-categories-inner cr-view-more" href="shop-left-sidebar.html">
-                                    View More
+                                    Xem thêm
                                 </a>
                             </li>
                         </ul>
@@ -183,7 +183,7 @@
                                                         </div>
                                                         <div class="categories-button">
                                                             <a href="{{ route('shop.category', $category->slug ?? $category->id) }}"
-                                                                class="cr-button">Shop Now</a>
+                                                                class="cr-button">Xem Cửa Hàng</a>
                                                         </div>
                                                     </div>
                                                     <div
@@ -216,11 +216,10 @@
                 <div class="col-lg-12">
                     <div class="mb-30">
                         <div class="cr-banner">
-                            <h2>Popular Products</h2>
+                            <h2>Sản phẩm nổi bật</h2>
                         </div>
                         <div class="cr-banner-sub-title">
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-                                ut labore lacus vel facilisis.</p>
+                            <p>Tổng hợp những sản phẩm được yêu thích và đánh giá cao nhất – chất lượng vượt trội, thiết kế ấn tượng và luôn dẫn đầu xu hướng</p>
                         </div>
                     </div>
                 </div>
@@ -233,7 +232,7 @@
                     <div class="cr-product-tabs">
                         <ul>
                             <li class="active" data-filter="all" onclick="showTab('all')">All</li>
-                            @foreach ($categories as $category)
+                            @foreach ($categoriesWithTopProducts as $category)
                                 <li data-filter=".{{ $category->slug }}" onclick="showTab('cat-{{ $category->id }}')">
                                     {{ $category->name }}
                                 </li>
@@ -250,7 +249,7 @@
                                 <h4 class="title">{{ $item->name }}</h4>
                                 <h5 class="sub-title">{{ $item->sub_title ?? 'Subtitle' }}</h5>
                                 <span>{{ $item->description }}</span>
-                                <a href="{{ $item->link }}" class="cr-button">Shop Now</a>
+                                <a href="{{ $item->link }}" class="cr-button">Xem Cửa Hàng</a>
                             </div>
                         </div>
                     @endforeach
@@ -407,7 +406,7 @@
                                             style="background: rgba(0, 0, 0, 0.3);">
                                             <h5 class="fw-bold" style="font-size: 24px;">{!! $banner->name !!}</h5>
                                             <p>{{ $banner->sub_title ?? '' }}</p>
-                                            <a href="{{ $banner->link ?? '#' }}" class="cr-button mt-2">Shop now</a>
+                                            <a href="{{ $banner->link ?? '#' }}" class="cr-button mt-2">Xem Cửa Hàng</a>
                                         </div>
 
                                     </div>
@@ -433,8 +432,9 @@
                                             <i class="ri-red-packet-line"></i>
                                         </div>
                                         <div class="cr-services-contain">
-                                            <h4>Product Packing</h4>
-                                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing.</p>
+                                            <h4> Đóng gói sản phẩm</h4>
+                                            <p>Chúng tôi đóng gói sản phẩm cẩn thận, đảm bảo an toàn tuyệt đối trong quá
+                                                trình vận chuyển đến tay bạn..</p>
                                         </div>
                                     </div>
                                 </div>
@@ -444,8 +444,9 @@
                                             <i class="ri-customer-service-2-line"></i>
                                         </div>
                                         <div class="cr-services-contain">
-                                            <h4>24X7 Support</h4>
-                                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing.</p>
+                                            <h4>Hỗ trợ 24/7</h4>
+                                            <p>Đội ngũ chăm sóc khách hàng luôn sẵn sàng hỗ trợ bạn mọi lúc, mọi nơi – kể cả
+                                                cuối tuần và ngày lễ.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -455,8 +456,9 @@
                                             <i class="ri-truck-line"></i>
                                         </div>
                                         <div class="cr-services-contain">
-                                            <h4>Delivery in 5 Days</h4>
-                                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing.</p>
+                                            <h4> Giao hàng trong 5 ngày</h4>
+                                            <p>Cam kết giao hàng nhanh chóng trong vòng 5 ngày làm việc, đúng hẹn và đúng
+                                                chất lượng.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -466,8 +468,9 @@
                                             <i class="ri-money-dollar-box-line"></i>
                                         </div>
                                         <div class="cr-services-contain">
-                                            <h4>Payment Secure</h4>
-                                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing.</p>
+                                            <h4> Thanh toán an toàn</h4>
+                                            <p>Mọi giao dịch được mã hóa và bảo mật tuyệt đối, giúp bạn yên tâm khi thanh
+                                                toán trực tuyến.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -594,7 +597,7 @@
                                     <span>{{ $banner12->discount ?? '25%' }} <code>OFF</code></span>
                                 </div>
                                 <div class="rightbar-buttons mt-2">
-                                    <a href="{{ $banner12->link ?? '#' }}" class="cr-button">Shop Now</a>
+                                    <a href="{{ $banner12->link ?? '#' }}" class="cr-button">Xem Cửa Hàng</a>
                                 </div>
                             </div>
                         @else
@@ -607,56 +610,7 @@
         </div>
     </section>
 
-    <!-- Testimonial -->
-    <section class="section-testimonial padding-b-100">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="mb-30" data-aos="fade-up" data-aos-duration="2000">
-                        <div class="cr-banner">
-                            <h2>Great Words From People</h2>
-                        </div>
-                        <div class="cr-banner-sub-title">
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-                                ut labore lacus vel facilisis. </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="cr-testimonial-slider swiper-container">
-                        <div class="swiper-wrapper cr-testimonial-pt-50">
-                            @foreach ($reviews as $review)
-                                <div class="swiper-slide" data-aos="fade-up" data-aos-duration="2000">
-                                    <div class="cr-testimonial">
-                                        <div class="cr-testimonial-image">
-                                            <img src="{{ Storage::url(\Illuminate\Support\Str::replaceFirst('storage/', '', $review->user->image)) }}"
-                                                alt="{{ $review->user->name ?? 'User' }}">
-
-                                        </div>
-                                        <div class="cr-testimonial-inner">
-                                            <span>{{ $review->user->email ?? 'User' }}</span>
-                                            <h4 class="title">{{ $review->title }}</h4>
-                                            <p>“{{ $review->content }}”</p>
-                                            <div class="cr-star">
-                                                @for ($i = 1; $i <= 5; $i++)
-                                                    <i class="ri-star{{ $i <= $review->rating ? '-fill' : '-line' }}"></i>
-                                                @endfor
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
+    
     <!-- Blog -->
     <section class="section-blog padding-b-100">
         <div class="container">
@@ -664,7 +618,7 @@
                 <div class="col-lg-12">
                     <div class="mb-30" data-aos="fade-up" data-aos-duration="2000">
                         <div class="cr-banner">
-                            <h2>Latest News</h2>
+                            <h2>Tin tức mới nhất</h2>
                         </div>
                         <div class="cr-banner-sub-title">
                             <p>Tin tức mới nhất được cập nhật mỗi ngày.</p>
@@ -686,7 +640,7 @@
                                                 <a href="#">{{ $blog->category->name ?? 'Uncategorized' }}</a>
                                             </span>
                                             <h5>{{ $blog->title }}</h5>
-                                            <a class="read" href="">Read More</a>
+                                            <a class="read" href="">Đọc thêm</a>
                                         </div>
 
                                         <div class="cr-blog-image">

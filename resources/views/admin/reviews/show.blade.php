@@ -1,4 +1,5 @@
 @extends('layouts.admin')
+
 @section('title', 'Chi tiết đánh giá sản phẩm')
 @section('content')
     <style>
@@ -134,7 +135,22 @@
                     @endif
                 </div>
             </div>
+             <div class="review-row">
+    <div class="label-text">Ảnh đánh giá:</div>
+    <div class="value-text">
+        @if ($review->images->count() > 0)
+            @foreach ($review->images as $image)
+                <img src="{{ Storage::url(str_replace(["\r", "\n"], '', $image->image)) }}"
+                     alt="Ảnh đánh giá"
+                     style="width: 80px; margin: 4px; border-radius: 6px;">
+            @endforeach
+        @else
+            <span>Không có ảnh</span>
+        @endif
+    </div>
+</div>
         </div>
+      
 
         <div class="btn-group-custom">
             <a href="{{ route('admin.reviews.index') }}" class="btn btn-custom btn-custom-outline">← Quay lại</a>
