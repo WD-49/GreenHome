@@ -324,9 +324,9 @@
                                                                 <tbody>
                                                                     @foreach ($order->items as $item)
                                                                         <tr>
-                                                                            @if ($item->product && $item->product->image)
+                                                                            @if ($item->product_image)
                                                                                 <td>
-                                                                                    <img src="{{ asset('storage/' . $item->product->image) }}"
+                                                                                    <img src="{{ asset('storage/' . $item->product_image) }}"
                                                                                         alt="Product Image"
                                                                                         class="img-fluid rounded me-2"
                                                                                         style="width:50px; height:50px; object-fit:cover;">
