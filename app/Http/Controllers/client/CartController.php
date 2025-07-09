@@ -13,6 +13,15 @@ use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
+    protected function validateStockQuantity(ProductVariant $variant, int $quantityInCart, int $addedQuantity = 0): void
+    {
+        $available = $variant->quantity ?? 0;
+
+        if ($available < $quantityInCart + $addedQuantity) {
+            throw new \Exception("Số lượng bạn thêm vào giỏ vượt quá số lượng sản phẩm trong kho, chỉ còn lại {$available} sản phẩm trong kho.");
+        }
+    }
+
     public function getCartData()
     {
         $cart = null;
@@ -39,11 +48,19 @@ class CartController extends Controller
             $user = Auth::user();
             $variant = ProductVariant::findOrFail($request->product_variant_id);
 
+
             // Tìm hoặc tạo cart cho user
             $cart = Cart::firstOrCreate(
                 ['user_id' => $user->id, 'deleted_at' => null],
                 ['total_amount' => 0]
             );
+            // Tính tổng số lượng hiện có trong giỏ
+            $quantityInCart = CartItem::where('cart_id', $cart->id)
+                ->where('product_variant_id', $variant->id)
+                ->value('quantity') ?? 0;
+
+            // Gọi hàm kiểm tra tồn kho
+            $this->validateStockQuantity($variant, $quantityInCart, $request->quantity);
 
             // Kiểm tra nếu đã có item này trong cart thì tăng số lượng
             $cartItem = CartItem::where('cart_id', $cart->id)
@@ -88,15 +105,27 @@ class CartController extends Controller
 
     public function updateQuantity(Request $request, $id)
     {
-        $quantity = $request->input('quantity');
-        $cartItem = CartItem::findOrFail($id);
-        $total_price = $cartItem->unit_price * $quantity;
-        $cartItem->quantity = $quantity;
-        $cartItem->total_price = $total_price;
-        $cartItem->save();
+        try {
+            $quantity = $request->input('quantity');
+            $cartItem = CartItem::findOrFail($id);
 
-        return response()->json(['success' => true]);
+            // Kiểm tra tồn kho
+            $this->validateStockQuantity($cartItem->productVariant, 0, $quantity);
+
+            $total_price = $cartItem->unit_price * $quantity;
+            $cartItem->quantity = $quantity;
+            $cartItem->total_price = $total_price;
+            $cartItem->save();
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
     }
+
 
     public function deleteMultiple(Request $request)
     {
