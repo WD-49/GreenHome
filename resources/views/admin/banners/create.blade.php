@@ -33,7 +33,7 @@
                     <select name="type" class="form-select form-select-lg" id="banner-type">
                         <option value="slider" {{ old('type') == 'slider' ? 'selected' : '' }}>Slider</option>
                         <option value="category_banner" {{ old('type') == 'category_banner' ? 'selected' : '' }}>Banner danh mục</option>
-                     
+                         <option value="discount_banner" {{ old('type') == 'discount_banner' ? 'selected' : '' }}>Banner khuyến mãi</option> 
                     </select>
                     @error('type')
                         <div class="text-danger mt-1">{{ $message }}</div>

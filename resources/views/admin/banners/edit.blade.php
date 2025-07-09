@@ -53,7 +53,7 @@
                     <select name="type" class="form-select">
                         <option value="slider" {{ old('type', $banner->type) == 'slider' ? 'selected' : '' }}>Slide trang chủ</option>
                         <option value="category_banner" {{ old('type', $banner->type) == 'category_banner' ? 'selected' : '' }}>Banner danh mục</option>
-                       
+                         <option value="discount_banner" {{ old('type', $banner->type) == 'discount_banner' ? 'selected' : '' }}>Banner khuyến mãi</option> 
                     </select>
                     @error('type')
                         <div class="text-danger mt-1">{{ $message }}</div>
