@@ -24,8 +24,15 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle cr-right-bar-item" href="javascript:void(0)">
                                 <i class="ri-user-3-line"></i>
-                                <span>Account</span>
+                                <span>
+                                    @auth
+                                        {{ $authUser->name }}
+                                    @else
+                                        Account
+                                    @endauth
+                                </span>
                             </a>
+
 
                             <ul class="dropdown-menu">
                                 @guest
@@ -54,12 +61,10 @@
                     </ul>
                     <a href="{{ route('wishlist.index') }}" class="cr-right-bar-item">
                         <i class="ri-heart-3-line"></i>
-                        <span>Wishlist</span>
                     </a>
 
                     <a href="javascript:void(0)" class="cr-right-bar-item Shopping-toggle">
                         <i class="ri-shopping-cart-line"></i>
-                        <span>Cart</span>
                     </a>
                     <a href="javascript:void(0)" class="cr-right-bar-item voucher-toggle">
                         <i class="ri-ticket-line"></i>
@@ -85,175 +90,48 @@
                         <div class="cr-cat-tab">
                             <div class="cr-tab-list nav flex-column nav-pills" id="v-pills-tab" role="tablist"
                                 aria-orientation="vertical">
-                                <button class="nav-link active" id="v-pills-home-tab" data-bs-toggle="pill"
-                                    data-bs-target="#v-pills-home" type="button" role="tab"
-                                    aria-controls="v-pills-home" aria-selected="true">
-                                    Dairy &amp; Bakery</button>
-                                <button class="nav-link" id="v-pills-profile-tab" data-bs-toggle="pill"
-                                    data-bs-target="#v-pills-profile" type="button" role="tab"
-                                    aria-controls="v-pills-profile" aria-selected="false" tabindex="-1">
-                                    Fruits &amp; Vegetable</button>
-                                <button class="nav-link" id="v-pills-messages-tab" data-bs-toggle="pill"
-                                    data-bs-target="#v-pills-messages" type="button" role="tab"
-                                    aria-controls="v-pills-messages" aria-selected="false" tabindex="-1">
-                                    Snack &amp; Spice</button>
-                                <button class="nav-link" id="v-pills-settings-tab" data-bs-toggle="pill"
-                                    data-bs-target="#v-pills-settings" type="button" role="tab"
-                                    aria-controls="v-pills-settings" aria-selected="false" tabindex="-1">
-                                    Juice &amp; Drinks </button>
-                                <a class="nav-link" href="shop-left-sidebar.html">
-                                    View All </a>
+                                @foreach ($menuCategories as $index => $cat)
+                                    <button class="nav-link {{ $loop->first ? 'active' : '' }}"
+                                        id="v-pills-tab-{{ $cat->id }}" data-bs-toggle="pill"
+                                        data-bs-target="#v-pills-{{ $cat->id }}" type="button" role="tab"
+                                        aria-controls="v-pills-{{ $cat->id }}"
+                                        aria-selected="{{ $loop->first ? 'true' : 'false' }}">
+                                        {{ $cat->name }}
+                                    </button>
+                                @endforeach
+                                <a class="nav-link" href="{{ route('shop.index') }}">
+                                    View All
+                                </a>
                             </div>
+
                             <div class="tab-content" id="v-pills-tabContent">
-                                <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel"
-                                    aria-labelledby="v-pills-home-tab">
-                                    <div class="tab-list row">
-                                        <div class="col">
-                                            <h6 class="cr-col-title">Dairy</h6>
-                                            <ul class="cat-list">
-                                                <li><a href="shop-left-sidebar.html">Milk</a></li>
-                                                <li><a href="shop-left-sidebar.html">Ice cream</a>
-                                                </li>
-                                                <li><a href="shop-left-sidebar.html">Cheese</a></li>
-                                                <li><a href="shop-left-sidebar.html">Frozen
-                                                        custard</a>
-                                                </li>
-                                                <li><a href="shop-left-sidebar.html">Frozen
-                                                        yogurt</a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        <div class="col">
-                                            <h6 class="cr-col-title">Bakery</h6>
-                                            <ul class="cat-list">
-                                                <li><a href="shop-left-sidebar.html">Cake and
-                                                        Pastry</a>
-                                                </li>
-                                                <li><a href="shop-left-sidebar.html">Rusk Toast</a>
-                                                </li>
-                                                <li><a href="shop-left-sidebar.html">Bread &amp;
-                                                        Buns</a>
-                                                </li>
-                                                <li><a href="shop-left-sidebar.html">Chocolate
-                                                        Brownie</a>
-                                                </li>
-                                                <li><a href="shop-left-sidebar.html">Cream Roll</a>
-                                                </li>
-                                            </ul>
+                                @foreach ($menuCategories as $cat)
+                                    <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}"
+                                        id="v-pills-{{ $cat->id }}" role="tabpanel"
+                                        aria-labelledby="v-pills-tab-{{ $cat->id }}">
+                                        <div class="tab-list row">
+                                            <div class="col">
+                                                <h6 class="cr-col-title">{{ $cat->name }}</h6>
+                                                <ul class="cat-list">
+                                                    @forelse($cat->products as $product)
+                                                        <li>
+                                                            <a href="{{ route('product.show', $product->slug) }}">
+                                                                {{ $product->name }}
+                                                            </a>
+                                                        </li>
+                                                    @empty
+                                                        <li><em>Chưa có sản phẩm</em></li>
+                                                    @endforelse
+                                                </ul>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="tab-pane fade" id="v-pills-profile" role="tabpanel"
-                                    aria-labelledby="v-pills-profile-tab">
-                                    <div class="tab-list row">
-                                        <div class="col">
-                                            <h6 class="cr-col-title">Fruits</h6>
-                                            <ul class="cat-list">
-                                                <li><a href="shop-left-sidebar.html">Cauliflower</a>
-                                                </li>
-                                                <li><a href="shop-left-sidebar.html">Bell
-                                                        Peppers</a></li>
-                                                <li><a href="shop-left-sidebar.html">Broccoli</a>
-                                                </li>
-                                                <li><a href="shop-left-sidebar.html">Cabbage</a>
-                                                </li>
-                                                <li><a href="shop-left-sidebar.html">Tomato</a></li>
-                                            </ul>
-                                        </div>
-                                        <div class="col">
-                                            <h6 class="cr-col-title">Vegetable</h6>
-                                            <ul class="cat-list">
-                                                <li><a href="shop-left-sidebar.html">Cauliflower</a>
-                                                </li>
-                                                <li><a href="shop-left-sidebar.html">Bell
-                                                        Peppers</a></li>
-                                                <li><a href="shop-left-sidebar.html">Broccoli</a>
-                                                </li>
-                                                <li><a href="shop-left-sidebar.html">Cabbage</a>
-                                                </li>
-                                                <li><a href="shop-left-sidebar.html">Tomato</a></li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="tab-pane fade" id="v-pills-messages" role="tabpanel"
-                                    aria-labelledby="v-pills-messages-tab">
-                                    <div class="tab-list row">
-                                        <div class="col">
-                                            <h6 class="cr-col-title">Snacks</h6>
-                                            <ul class="cat-list">
-                                                <li><a href="shop-left-sidebar.html">French
-                                                        fries</a></li>
-                                                <li><a href="shop-left-sidebar.html">potato
-                                                        chips</a></li>
-                                                <li><a href="shop-left-sidebar.html">Biscuits &amp;
-                                                        Cookies</a></li>
-                                                <li><a href="shop-left-sidebar.html">Popcorn</a>
-                                                </li>
-                                                <li><a href="shop-left-sidebar.html">Rice Cakes</a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        <div class="col">
-                                            <h6 class="cr-col-title">Spice</h6>
-                                            <ul class="cat-list">
-                                                <li><a href="shop-left-sidebar.html">Cinnamon
-                                                        Powder</a>
-                                                </li>
-                                                <li><a href="shop-left-sidebar.html">Cumin
-                                                        Powder</a></li>
-                                                <li><a href="shop-left-sidebar.html">Fenugreek
-                                                        Powder</a>
-                                                </li>
-                                                <li><a href="shop-left-sidebar.html">Pepper
-                                                        Powder</a>
-                                                </li>
-                                                <li><a href="shop-left-sidebar.html">Long Pepper</a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="tab-pane fade" id="v-pills-settings" role="tabpanel"
-                                    aria-labelledby="v-pills-settings-tab">
-                                    <div class="tab-list row">
-                                        <div class="col">
-                                            <h6 class="cr-col-title">Juice</h6>
-                                            <ul class="cat-list">
-                                                <li><a href="shop-left-sidebar.html">Mango Juice</a>
-                                                </li>
-                                                <li><a href="shop-left-sidebar.html">Coconut
-                                                        Water</a>
-                                                </li>
-                                                <li><a href="shop-left-sidebar.html">Tetra Pack</a>
-                                                </li>
-                                                <li><a href="shop-left-sidebar.html">Apple
-                                                        Juices</a></li>
-                                                <li><a href="shop-left-sidebar.html">Lychee
-                                                        Juice</a></li>
-                                            </ul>
-                                        </div>
-                                        <div class="col">
-                                            <h6 class="cr-col-title">soft drink</h6>
-                                            <ul class="cat-list">
-                                                <li><a href="shop-left-sidebar.html">Breizh Cola</a>
-                                                </li>
-                                                <li><a href="shop-left-sidebar.html">Green Cola</a>
-                                                </li>
-                                                <li><a href="shop-left-sidebar.html">Jolt Cola</a>
-                                                </li>
-                                                <li><a href="shop-left-sidebar.html">Mecca Cola</a>
-                                                </li>
-                                                <li><a href="shop-left-sidebar.html">Topsia Cola</a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
+                                @endforeach
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
             <nav class="navbar navbar-expand-lg">
                 <a href="javascript:void(0)" class="navbar-toggler shadow-none">
@@ -304,6 +182,7 @@
                                     @foreach ($categories3 as $category)
                                         <li>
                                             <a class="dropdown-item" href="{{ route('category.show', $category->slug) }}">
+
                                                 {{ $category->name }}
                                             </a>
                                         </li>
@@ -312,66 +191,15 @@
                             </ul>
                         </li>
 
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="javascript:void(0)">
-                                Sản Phẩm
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('shop.index') }}">
+                                Cửa Hàng
                             </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="product-left-sidebar.html">product
-                                        Left
-                                        sidebar </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="product-right-sidebar.html">product
-                                        Right
-                                        sidebar </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="product-full-width.html">Product
-                                        Full
-                                        Width
-                                    </a>
-                                </li>
-                            </ul>
+
+
                         </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="javascript:void(0)">
-                                Pages
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="about.html">About Us</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="contact-us.html">Contact Us</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="cart.html">Cart</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="checkout.html">Checkout</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="track-order.html">Track Order</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="wishlist.html">Wishlist</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="faq.html">Faq</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="login.html">Login</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="register.html">Register</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="policy.html">Policy</a>
-                                </li>
-                            </ul>
-                        </li>
+
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="{{ route('blog.index') }}">
                                 Bài viết
@@ -394,8 +222,11 @@
             </nav>
             <div class="cr-calling">
                 <i class="ri-phone-line"></i>
-                <a href="javascript:void(0)">+123 ( 456 ) ( 7890 )</a>
+                <a href="tel:{{ $footerWebInfo['phone'] ?? '#' }}">
+                    {{ $footerWebInfo['phone'] ?? 'Đang cập nhật...' }}
+                </a>
             </div>
+
         </div>
     </div>
 </div>

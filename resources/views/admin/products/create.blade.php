@@ -137,7 +137,14 @@
                     {{-- ...existing code... --}}
                 </div>
             </div>
-
+            <div class="mb-3">
+                <label for="sort_des" class="form-label">Mô tả ngắn</label>
+                <input type="text" class="form-control @error('sort_des') is-invalid @enderror" name="sort_des"
+                    id="sort_des" value="{{ old('sort_des') }}">
+                @error('sort_des')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
             <div class="mb-3">
                 <label for="description" class="form-label">Mô tả</label>
                 <textarea class="form-control @error('description') is-invalid @enderror" name="description" id="description"

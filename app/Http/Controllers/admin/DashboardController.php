@@ -152,9 +152,6 @@ class DashboardController extends Controller
             'total_products_sold_last_7_days' => $totalProductsSoldLast7Days,
             'total_products_sold_last_7_days_labels' => $totalProductsSoldLast7DaysLabels,
 
-
-
-
         ]);
     }
 

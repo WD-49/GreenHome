@@ -18,8 +18,6 @@ class Order extends Model
         'shipping_phone',
         'shipping_address',
         'order_status', // Use 'order_status' directly
-        'discount_id',
-        'payment_method_id',
         'discount_code', // Đảm bảo fillable
         'discount_value', // Đảm bảo fillable
         'payment_method_name', // Đảm bảo fillable
@@ -36,20 +34,14 @@ class Order extends Model
         return $this->belongsTo(User::class)->withTrashed(); // Thêm withTrashed nếu user có thể bị soft delete
     }
 
-    public function discount()
-    {
-        return $this->belongsTo(Discount::class)->withTrashed(); // Thêm withTrashed
-    }
+
 
     public function items()
     {
         return $this->hasMany(OrderItem::class);
     }
 
-    public function paymentMethod()
-    {
-        return $this->belongsTo(PaymentMethod::class)->withTrashed(); // Thêm withTrashed
-    }
+
 
     // Phương thức kiểm tra xem đơn hàng có thể bị hủy không
     public function canBeCancelled(): bool
@@ -60,5 +52,21 @@ class Order extends Model
         $nonCancellableStatuses = ['Đang vận chuyển', 'Giao hàng thành công', 'Hủy đơn'];
 
         return !in_array($this->order_status, $nonCancellableStatuses);
+    }
+
+    public static function generateUniqueSku()
+    {
+        do {
+            // Sinh số ngẫu nhiên từ 100 đến 100000
+            $randomNumber = mt_rand(100, 100000);
+
+            // Tạo mã SKU theo format DH + số ngẫu nhiên có 6 chữ số (bổ sung 0 nếu cần)
+            $sku = 'DH' . str_pad($randomNumber, 6, '0', STR_PAD_LEFT);
+
+            // Kiểm tra đã tồn tại SKU này chưa
+            $exists = self::where('sku', $sku)->exists();
+        } while ($exists); // Nếu tồn tại thì sinh lại
+
+        return $sku;
     }
 }

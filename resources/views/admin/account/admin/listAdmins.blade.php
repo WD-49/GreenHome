@@ -107,14 +107,14 @@
                                                 {{-- Điều kiện để nút phân quyền hiển thị (ví dụ: không cho phép phân quyền chính mình nếu bạn là admin) --}}
 
                                                 <button type="button"
-                                                        class="btn btn-{{ $user->role == 'client' ? 'warning' : 'primary' }} btn-sm toggle-role-btn"
-                                                        data-user-id="{{ $user->id }}"
-                                                        data-current-role="{{ $user->role }}"
-                                                        title="{{ $user->role == 'client' ? 'Chuyển thành Admin' : 'Chuyển thành Client' }}">
-                                                        <i class="fas fa-user-shield"></i> {{-- Icon cho phân quyền --}}
-                                                    </button>
+                                                    class="btn btn-{{ $user->role == 'client' ? 'warning' : 'primary' }} btn-sm toggle-role-btn"
+                                                    data-user-id="{{ $user->id }}"
+                                                    data-current-role="{{ $user->role }}"
+                                                    title="{{ $user->role == 'client' ? 'Chuyển thành Admin' : 'Chuyển thành Client' }}">
+                                                    <i class="fas fa-user-shield"></i> {{-- Icon cho phân quyền --}}
+                                                </button>
 
-                                                <form action="{{ route('admin.account.softDeleteUser', $user->id) }}"
+                                                {{-- <form action="{{ route('admin.account.softDeleteUser', $user->id) }}"
                                                     method="POST" class="d-inline"
                                                     onsubmit="return confirm('Bạn có chắc chắn muốn xóa tạm thời người dùng này không?')">
                                                     @csrf
@@ -122,7 +122,7 @@
                                                         title="Xóa tạm thời">
                                                         <i class="fas fa-trash-alt"></i>
                                                     </button>
-                                                </form>
+                                                </form> --}}
                                                 <form action="{{ route('admin.account.resetPassUser', $user->id) }}"
                                                     method="POST" class="d-inline"
                                                     onsubmit="return confirm('Bạn có chắc muốn đặt lại mật khẩu cho người dùng này không?')">
@@ -258,12 +258,15 @@
                 const originalHtml = button.html();
                 button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
 
-                const updateRoleUrl = `{{ route('admin.account.toggleUserRole', ['user' => ':userId']) }}`.replace(':userId', userId);
+                const updateRoleUrl = `{{ route('admin.account.toggleUserRole', ['user' => ':userId']) }}`
+                    .replace(':userId', userId);
 
                 $.ajax({
                     url: updateRoleUrl,
                     type: 'POST',
-                    data: { new_role: newRole },
+                    data: {
+                        new_role: newRole
+                    },
                     dataType: 'json',
                     success: function(response) {
                         if (response.success) {
@@ -274,8 +277,10 @@
                             roleCell.html(newRoleBadge);
 
                             button.data('currentRole', newRole);
-                            button.attr('title', newRole === 'client' ? 'Chuyển thành Admin' : 'Chuyển thành Client');
-                            button.removeClass('btn-warning btn-primary').addClass(newRole === 'client' ? 'btn-warning' : 'btn-primary');
+                            button.attr('title', newRole === 'client' ? 'Chuyển thành Admin' :
+                                'Chuyển thành Client');
+                            button.removeClass('btn-warning btn-primary').addClass(newRole ===
+                                'client' ? 'btn-warning' : 'btn-primary');
                             button.tooltip('dispose').tooltip(); // Cập nhật tooltip
 
                             showTemporaryMessage(response.message, 'success');
@@ -285,12 +290,14 @@
                                 location.reload();
                             }, 500);
                         } else {
-                            showTemporaryMessage(response.message || 'Thay đổi vai trò thất bại.', 'error');
+                            showTemporaryMessage(response.message ||
+                                'Thay đổi vai trò thất bại.', 'error');
                         }
                     },
                     error: function(xhr) {
                         console.error('Error toggling role:', xhr.responseText);
-                        const errorMessage = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Lỗi hệ thống khi thay đổi vai trò.';
+                        const errorMessage = xhr.responseJSON && xhr.responseJSON.message ? xhr
+                            .responseJSON.message : 'Lỗi hệ thống khi thay đổi vai trò.';
                         showTemporaryMessage(errorMessage, 'error');
                     },
                     complete: function() {
@@ -323,7 +330,8 @@
                             form.closest('tr').fadeOut(500, function() {
                                 $(this).remove();
                                 if ($.fn.DataTable.isDataTable('#datatable')) {
-                                    $('#datatable').DataTable().row(this).remove().draw(); // 'this' trỏ đến row đã fadeOut
+                                    $('#datatable').DataTable().row(this).remove()
+                                    .draw(); // 'this' trỏ đến row đã fadeOut
                                 }
                             });
                         } else {
@@ -332,7 +340,8 @@
                     },
                     error: function(xhr) {
                         console.error('Error soft deleting user:', xhr.responseText);
-                        const errorMessage = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Lỗi hệ thống khi xóa tạm thời.';
+                        const errorMessage = xhr.responseJSON && xhr.responseJSON.message ? xhr
+                            .responseJSON.message : 'Lỗi hệ thống khi xóa tạm thời.';
                         showTemporaryMessage(errorMessage, 'error');
                     },
                     complete: function() {
@@ -363,12 +372,14 @@
                         if (response.success) {
                             showTemporaryMessage(response.message, 'success');
                         } else {
-                            showTemporaryMessage(response.message || 'Đặt lại mật khẩu thất bại.', 'error');
+                            showTemporaryMessage(response.message ||
+                                'Đặt lại mật khẩu thất bại.', 'error');
                         }
                     },
                     error: function(xhr) {
                         console.error('Error resetting password:', xhr.responseText);
-                        const errorMessage = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Lỗi hệ thống khi đặt lại mật khẩu.';
+                        const errorMessage = xhr.responseJSON && xhr.responseJSON.message ? xhr
+                            .responseJSON.message : 'Lỗi hệ thống khi đặt lại mật khẩu.';
                         showTemporaryMessage(errorMessage, 'error');
                     },
                     complete: function() {
