@@ -388,22 +388,7 @@
                                 </li>
                             </ul>
                         </li>
-                        {{-- <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="javascript:void(0)">
-                                Elements
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="elements-products.html">Products</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="elements-typography.html">Typography</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="elements-buttons.html">Buttons</a>
-                                </li>
-                            </ul>
-                        </li> --}}
+                   
                     </ul>
                 </div>
             </nav>
