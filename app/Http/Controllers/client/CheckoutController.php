@@ -8,12 +8,16 @@ use App\Models\WebInfo;
 use App\Models\CartItem;
 use App\Models\Discount;
 use App\Models\OrderItem;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Models\DiscountUsage;
 use App\Models\PaymentMethod;
 use App\Models\ProductVariant;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 
 class CheckoutController extends Controller
 {
@@ -133,56 +137,107 @@ class CheckoutController extends Controller
             $data = $request->validate([
                 'fullname' => 'required|string',
                 'phone' => 'required|string',
-                'province' => 'required|string',
-                'district' => 'required|string',
-                'ward' => 'required|string',
+                'ward_name' => 'required|string',
+                'district_name' => 'required|string',
+                'province_name' => 'required|string',
                 'address_detail' => 'required|string',
                 'note' => 'nullable|string',
                 'payment_method_id' => 'required|exists:payment_methods,id',
                 'final_total' => 'required|numeric',
                 'discount_id' => 'nullable|exists:discounts,id',
+                'discount_code' => 'nullable|string',
                 'discount_amount' => 'nullable|numeric',
+                'shipping_fee' => 'required|numeric',
                 'items' => 'required|array|min:1',
             ]);
 
             DB::beginTransaction();
 
+            $user = auth()->user();
+
             $paymentMethod = PaymentMethod::findOrFail($data['payment_method_id']);
-            dd($data['discount_code']);
+            $discountApplied = !empty($data['discount_id'])
+                ? Discount::findOrFail($data['discount_id'])
+                : null;
+            Log::info($discountApplied);
 
             $order = Order::create([
                 'sku' => Order::generateUniqueSku(),
-                'user_id' => auth()->id(),
-                'user_name' => auth()->user()->name,
+                'user_id' => $user->id,
+                'user_name' => $user->name,
                 'shipping_name' => $data['fullname'],
                 'shipping_phone' => $data['phone'],
-                'shipping_address' => "{$data['address_detail']}, {$data['ward']}, {$data['district']}, {$data['province']}",
+                'shipping_address' => "{$data['address_detail']}, {$data['ward_name']}, {$data['district_name']}, {$data['province_name']}",
                 'order_status' => 'Chưa xác nhận',
                 'note' => $data['note'] ?? null,
-                'payment_method_id' => $data['payment_method_id'],
                 'payment_method_name' => $paymentMethod->name,
                 'payment_status' => 'pending',
-                'discount_id' => $data['discount_id'],
-                'discount_value' => $data['discount_value'] ?? 0,
-                'discount_code' => $data['discount_code'] ?? null,
+                'discount_value' => $discountApplied->discount_value ?? 0,
+                'discount_type' => $discountApplied->discount_type ?? null,
+                'discount_code' => $discountApplied->code ?? null,
                 'discount_amount' => $data['discount_amount'] ?? 0,
                 'shipping_fee' => $data['shipping_fee'] ?? 0,
                 'total_amount' => $data['final_total'],
             ]);
 
             foreach ($data['items'] as $item) {
+                $productName = $item['product_variant']['product']['name'];
+                $attribute = $item['product_variant']['attribute_name'] ?? '';
+                $filename = Str::slug($productName . ' ' . $attribute) . '.jpg';
+
+                $sourcePath = storage_path('app/public/' . $item['product_variant']['image']);
+                $destinationPath = storage_path('app/public/images/orderItem/' . $filename);
+                // Kiểm tra và sao chép hình ảnh sản phẩm
+                if (File::exists($sourcePath) && !File::exists($destinationPath)) {
+                    File::ensureDirectoryExists(dirname($destinationPath));
+                    File::copy($sourcePath, $destinationPath);
+                }
+                $productImagePath = 'images/orderItem/' . $filename;
                 $totalPrice = $item['product_variant']['price'] * $item['quantity'] - ($item['_discount_amount'] ?? 0);
+
+                // Kiểm tra tồn kho
+                $variant = ProductVariant::with('product')->lockForUpdate()->findOrFail($item['product_variant']['id']);
+
+                if ($variant->quantity < $item['quantity']) {
+                    $productName = "{$variant->product->name} {$variant->attribute_name}";
+
+                    $message = $variant->quantity <= 0
+                        ? "Sản phẩm: '{$productName}' hiện đã hết hàng."
+                        : "Sản phẩm: '{$productName}' chỉ còn {$variant->quantity} sản phẩm trong kho, không đủ cho yêu cầu mua {$item['quantity']} sản phẩm của bạn.";
+
+                    // Log::info($message);
+
+                    DB::rollBack();
+
+                    return response()->json([
+                        'success' => false,
+                        'message' => $message,
+                    ]);
+                }
+
 
                 OrderItem::create([
                     'order_id' => $order->id,
-                    'product_variant_id' => $item['product_variant']['id'],
-                    'product_name' => $item['product_variant']['product']['name'],
+                    'product_name' => $productName,
                     'product_variant_sku' => $item['product_variant']['sku'],
-                    'product_attribute' => $item['product_variant']['attribute_name'] ?? '',
+                    'product_image' => $productImagePath,
+                    'product_attribute' => $attribute,
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['product_variant']['price'],
                     'discount_amount' => $item['_discount_amount'] ?? 0,
                     'total_price' => $totalPrice,
+                ]);
+                // Trừ kho
+                $variant->decrement('quantity', $item['quantity']);
+            }
+            if (!empty($data['discount_id'])) {
+                DiscountUsage::create([
+                    'discount_id' => $data['discount_id'],
+                    'user_id' => $user->id,
+                    'order_id' => $order->id,
+                    'user_name' => $user->name,
+                    'discount_code' => $discountApplied->code,
+                    'used_at' => now(),
                 ]);
             }
 

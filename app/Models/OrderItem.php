@@ -13,6 +13,7 @@ class OrderItem extends Model
     protected $fillable = [
         'order_id',
         'product_name', // Đã sửa chính tả và đảm bảo fillable
+        'product_image',
         'product_variant_sku', // Đảm bảo fillable
         'product_attribute', // Đảm bảo fillable
         'quantity',
