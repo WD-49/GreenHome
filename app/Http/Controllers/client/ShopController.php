@@ -21,6 +21,14 @@ class ShopController extends Controller
         $productsQuery = Product::query()
             ->with(['brand', 'productVariants.productVariantValues', 'productVariants.reviews'])
             ->where('status', 1);
+            // Tìm kiếm theo tên sản phẩm hoặc mô tả
+if ($request->filled('search')) {
+    $searchTerm = $request->input('search');
+    $productsQuery->where(function ($query) use ($searchTerm) {
+        $query->where('name', 'like', '%' . $searchTerm . '%')
+              ->orWhere('description', 'like', '%' . $searchTerm . '%');
+    });
+}
 
         // Lọc danh mục
         $selectedCategories = array_filter($request->input('categories', []));
@@ -49,7 +57,12 @@ class ShopController extends Controller
             ->havingRaw('AVG(reviews.rating) >= ?', [$star])
             ->havingRaw('AVG(reviews.rating) < ?', [$star + 1]);
     }); 
+
+    
 }
+
+
+
 
 
 

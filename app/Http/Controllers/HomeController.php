@@ -24,16 +24,16 @@ class HomeController extends Controller
         $user = Auth::user();
 
         // Gửi thông báo nếu chưa xác thực và chưa từng nhận thông báo này
-        if ($user && !$user->hasVerifiedEmail()) {
-            $alreadyNotified = $user->notifications()
-                ->where('type', VerifyEmailReminder::class)
-                ->whereNull('read_at')
-                ->exists();
+       if ($user && !$user->hasVerifiedEmail()) {
+    $alreadyNotified = $user->unreadNotifications()
+        ->where('type', VerifyEmailReminder::class)
+        ->exists();
 
-            if (!$alreadyNotified) {
-                $user->notify(new VerifyEmailReminder());
-            }
-        }
+    if (!$alreadyNotified) {
+        $user->notify(new VerifyEmailReminder());
+    }
+}
+
 
         // Lấy thông báo để truyền vào view
         $notifications = $user->unreadNotifications;

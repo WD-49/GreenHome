@@ -186,7 +186,8 @@
     <script src="{{ asset('assets_client/assets/js/main.js') }}"></script>
 
     {{-- js cho thông báo --}}
-    @Vite(['resources/js/app.js']);
+    {{-- do dòng này --}}
+    @Vite(['resources/js/app.js']); 
     @stack('scripts')
 </body>
 

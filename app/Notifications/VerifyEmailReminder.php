@@ -35,7 +35,7 @@ class VerifyEmailReminder extends Notification
         return [
             'title' => 'Vui lòng xác minh địa chỉ email của bạn',
             'message' => 'Hãy xác minh email để sử dụng đầy đủ tính năng.',
-            'url' => route('user.profile'),
+            'url' => route('profile.index'),
             'icon' => 'fa fa-envelope', // nếu bạn hiển thị bằng FontAwesome
             'type' => 'verify_email',
         ];

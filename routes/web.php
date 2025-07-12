@@ -133,6 +133,11 @@ Route::middleware(['auth'])->group(function () {
     })->name('notifications.read');
 });
 
+Route::get('/test-notify', function () {
+    $user = \App\Models\User::find(9);
+    $user->notify(new \App\Notifications\VerifyEmailReminder());
+    return 'Notification sent';
+});
 
 
 // route của trang admin
