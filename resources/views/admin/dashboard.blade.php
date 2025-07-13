@@ -170,8 +170,8 @@
                 </div>
             </div>
 
-            <div class="card-body">
-                <div id="sales-report-chart" class="apex-charts"></div>
+            <div style="overflow-x:auto; white-space: nowrap;">
+                <div id="sales-report-chart" class="apex-charts" style="min-width: 900px;"></div>
             </div>
         </div>
 
@@ -214,8 +214,8 @@
 
                 </div>
 
-                <div class="card-body">
-                    <div id="repeat-customer-per-week" class="apex-charts"></div>
+                <div style="overflow-x:auto; white-space: nowrap;">
+                    <div id="repeat-customer-per-week" class="apex-charts" style="min-width: 900px;"></div>
                 </div>
 
             </div>
@@ -307,6 +307,7 @@
                         chart: {
                             type: 'line',
                             height: 300,
+                            width: Math.max(900, data.repeat_customer_labels.length * 100),
                             toolbar: {
                                 show: false
                             }
@@ -336,45 +337,94 @@
                             }
                         }
                     }).render();
+
                 });
         }
 
-        function renderSalesReport(year, from = '', to = '') {
+        function renderSalesReport(year, from = '', to = '', filterIncome = false) {
             let url = `${endpoint}/sales-report-income?year=${year}`;
             if (from && to) {
                 url += `&from=${from}&to=${to}`;
             }
+            if (filterIncome) {
+                url += '&filter_income=1';
+            }
+
             fetch(url)
                 .then(res => res.json())
                 .then(data => {
-
-
                     if (salesChart) salesChart.destroy();
+
                     salesChart = new ApexCharts(document.querySelector("#sales-report-chart"), {
                         chart: {
                             type: 'bar',
                             height: 350,
+                            width: Math.max(900, data.labels.length *
+                                150), // chiều rộng tùy theo số ngày, mỗi ngày 50px
                             toolbar: {
                                 show: false
-                            }
+                            },
+                            zoom: {
+                                enabled: true,
+                                type: 'x',
+                                autoScaleYaxis: true,
+                            },
+                            animations: {
+                                enabled: true
+                            },
                         },
                         series: [{
                             name: 'Doanh thu',
                             data: data.income
                         }],
                         xaxis: {
-                            categories: data.labels
+                            categories: data.labels,
+                            title: {
+                                text: 'Ngày',
+                                style: {
+                                    fontWeight: 600
+                                }
+                            },
+                            labels: {
+                                rotate: -45
+                            }
                         },
-                        colors: ['#556ee6'],
+                        yaxis: {
+                            title: {
+                                text: 'VNĐ',
+                                style: {
+                                    fontWeight: 600
+                                }
+                            },
+                            labels: {
+                                formatter: val => `${val.toLocaleString()} đ`
+                            }
+                        },
+                        colors: ['#3b82f6'],
                         tooltip: {
                             y: {
                                 formatter: val => `${val.toLocaleString()} đ`
                             }
+                        },
+                        plotOptions: {
+                            bar: {
+                                columnWidth: '40%',
+                                distributed: false,
+                                borderRadius: 4
+                            }
+                        },
+                        dataLabels: {
+                            enabled: false
                         }
                     });
+
+
                     salesChart.render();
                 });
         }
+
+
+
 
         function updateStatCard(idPrefix, today, yesterday, percent, series, labels, color, suffix) {
             const todayEl = document.getElementById(`${idPrefix}-today`);

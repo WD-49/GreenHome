@@ -260,53 +260,41 @@ class DashboardController extends Controller
 
     public function salesReportIncome(Request $request)
     {
-        $year = $request->query('year', Carbon::now()->year);
+        // Lấy from và to từ query string
+        $to = $request->query('to') ?? Carbon::today()->format('Y-m-d');
         $from = $request->query('from');
-        $to = $request->query('to');
 
-        $years = Order::selectRaw('YEAR(created_at) as year')
-            ->distinct()
-            ->orderBy('year', 'desc')
-            ->pluck('year');
+        $toDate = Carbon::parse($to)->endOfDay();
 
-        // Nếu có từ ngày đến ngày -> tính theo ngày
-        if ($from && $to) {
-            $labels = collect();
-            $incomeData = collect();
-
-            // Lấy doanh thu từng ngày trong khoảng from - to
-            $salesPerDay = Order::where('payment_status', 'paid')
-                ->whereBetween('created_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
-                ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total')
-                ->groupBy('date')
-                ->orderBy('date')
-                ->pluck('total', 'date');
-
-            // Tạo mảng ngày liên tục từ $from đến $to làm labels
-            $period = \Carbon\CarbonPeriod::create($from, $to);
-            foreach ($period as $date) {
-                $dateStr = $date->format('Y-m-d');
-                $labels->push($date->format('d-m'));
-                $incomeData->push((float) ($salesPerDay[$dateStr] ?? 0));
-            }
+        if ($from) {
+            $fromDate = Carbon::parse($from)->startOfDay();
         } else {
-            // Nếu không có from/to thì lấy theo năm, theo tháng
-            $labels = collect(range(1, 12))->map(fn($m) => 'Tháng ' . $m);
+            // Nếu không có from thì lấy 10 ngày trước toDate
+            $fromDate = $toDate->copy()->subDays(9)->startOfDay();
+        }
 
-            $salesPerMonth = Order::where('payment_status', 'paid')
-                ->whereYear('created_at', $year)
-                ->selectRaw('MONTH(created_at) as month, SUM(total_amount) as total')
-                ->groupBy('month')
-                ->pluck('total', 'month');
+        // Lấy doanh thu theo ngày trong khoảng fromDate -> toDate
+        $salesPerDay = Order::where('payment_status', 'paid')
+            ->whereBetween('created_at', [$fromDate, $toDate])
+            ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->pluck('total', 'date');
 
-            $incomeData = collect(range(1, 12))->map(fn($m) => (float)($salesPerMonth[$m] ?? 0));
+        // Chuẩn bị labels và dữ liệu
+        $labels = collect();
+        $incomeData = collect();
+
+        $period = \Carbon\CarbonPeriod::create($fromDate, $toDate);
+        foreach ($period as $date) {
+            $dateStr = $date->format('Y-m-d');
+            $labels->push($date->format('d-m'));
+            $incomeData->push((float) ($salesPerDay[$dateStr] ?? 0));
         }
 
         return response()->json([
             'labels' => $labels,
             'income' => $incomeData,
-            'years' => $years,
-            'selected_year' => (int)$year,
         ]);
     }
 }
