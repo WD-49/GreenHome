@@ -19,6 +19,7 @@
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 6px;">
                         <button class="apply-voucher" data-code="{{ $voucher->code }}">Áp dụng</button>
+
                         <a href="javascript:void(0)" class="view-detail" data-voucher='@json($voucher)'>
                             Chi tiết
                         </a>

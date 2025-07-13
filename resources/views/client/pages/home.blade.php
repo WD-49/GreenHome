@@ -233,6 +233,7 @@
                                 alt="{{ $item->name }}" style="width: 100%;">
 
                             <div class="cr-ice-cubes-contain">
+
                                 <h4 class="title">{{ $item->name }}</h4>
                                 <h5 class="sub-title">{{ $item->sub_title ?? 'Subtitle' }}</h5>
                                 <span>{{ $item->description }}</span>
@@ -541,6 +542,7 @@
                                 style="background: rgba(0, 0, 0, 0.3);">
                                 {{-- <h4>{!! $banner12->name !!}</h4>
                                 <div class="rightbar-buttons mt-2">
+
                                     <a href="{{ $banner12->link ?? '#' }}" class="cr-button">Xem Cửa Hàng</a>
                                 </div>
 
@@ -561,6 +563,7 @@
                 <div class="col-lg-12">
                     <div class="mb-30" data-aos="fade-up" data-aos-duration="2000">
                         <div class="cr-banner">
+
                             <h2>Tin tức mới nhất</h2>
 
                         </div>

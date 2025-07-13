@@ -10,7 +10,7 @@ use App\Models\AttributeValue;
 use App\Models\Category;
 use App\Models\Discount;
 use Illuminate\Http\Client\Request as ClientRequest;
-// use Illuminate\Support\Facades\Request;
+
 use Illuminate\Http\Request;
 use App\Models\Comment;
 use Illuminate\Support\Facades\Auth;

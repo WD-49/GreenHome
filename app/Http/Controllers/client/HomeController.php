@@ -30,6 +30,7 @@ class HomeController extends Controller
         $banner11 = Banner::where('priority', 11)->get();
         $banner12 = Banner::where('priority', 12)->first();
 
+
         $products = Product::latest()->take(10)->get(); // Lấy 10 sản phẩm mới nhất
         // Lấy 4 danh mục có số lượng sản phẩm lớn nhất
       $topCategories = Category::withCount('products')
@@ -66,6 +67,7 @@ class HomeController extends Controller
             }
         ])->get();
         $dealBanner = Banner::where('priority', 13)->where('status', 1)->first();
+
         $webInfos = DB::table('web_infos')->get()->pluck('value', 'key');
         $categories3 = DB::table('categories')
             ->where('status', 1)
@@ -76,6 +78,7 @@ class HomeController extends Controller
 $categories = Category::all();
 
         return view('client.pages.home', compact('categories', 'dealBanner', 'categories2', 'products1', 'blogs', 'products', 'banner12', 'banner1', 'banner2', 'banner3', 'banner4', 'banner5', 'banner6', 'banner7', 'banner8', 'banner9', 'banner10', 'topCategories', 'categoriesWithTopProducts', 'categories2', 'randomProducts', 'brands', 'banners', 'banner11', 'banners_mix', 'webInfos', 'categories3'));
+
 
     }
 }

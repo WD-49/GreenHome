@@ -60,7 +60,7 @@
     <!-- Breadcrumb -->
     <section class="section-breadcrumb">
         <div class="cr-breadcrumb-image">
-            <div class="container-fluid">
+            <div class="container">
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="cr-breadcrumb-title">
@@ -82,6 +82,20 @@
                 <div class="col-lg-3">
                     <div class="cr-shop-sideview">
                         <form action="{{ route('shop.index') }}" method="GET" id="filter-form" class="mb-4">
+
+                            {{-- Tìm kiếm tên sản phẩm --}}
+                            <div class="mb-3">
+                                <label class="fw-bold">Tìm kiếm sản phẩm:</label>
+                                <div class="input-group">
+                                    <input type="text" name="search" class="form-control" placeholder="Nhập từ khóa..."
+                                        value="{{ request('search') }}">
+                                    <button class="btn btn-outline-secondary" type="submit">
+                                        <i class="ri-search-line"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+
                             <div class="mb-3">
                                 {{-- Lọc Theo Danh Mục----------------------------------------------------------- --}}
                                 <label class="fw-bold">Danh mục:</label>
@@ -284,14 +298,14 @@
                                         {{-- Bọc toàn bộ bên phải (chi tiết) --}}
                                         <div class="cr-product-details flex-grow-1">
                                             <div class="cr-brand">
-                                                <a
-                                                    href="#">{{ $product->brand->name ?? 'Không có thương hiệu' }}</a>
+                                                <a href="#">{{ $product->brand->name ?? '' }}</a>
                                                 @php
-                                                    $avg = round($product->reviews_avg_rating ?? 0, 1);
+                                                    $variantReviews = $product->productVariants->flatMap->reviews;
+                                                    $avg = round($variantReviews->avg('rating'), 1);
                                                     $fullStars = floor($avg);
                                                     $halfStar = $avg - $fullStars >= 0.5;
                                                     $emptyStars = 5 - $fullStars - ($halfStar ? 1 : 0);
-                                                    $count = $product->reviews_count ?? 0;
+                                                    $count = $variantReviews->count();
                                                 @endphp
                                                 <div class="text-center" style="line-height: 1.2;">
                                                     <div class="mb-1">
@@ -309,6 +323,7 @@
                                                         ({{ $avg }} / {{ $count }} đánh giá)
                                                     </div>
                                                 </div>
+
                                             </div>
 
                                             <a href="{{ route('productDetail', $product->slug) }}" class="title">
@@ -322,7 +337,7 @@
 
 
                                             <ul class="list">
-                                                <li><label>Brand :</label> {{ $product->brand->name ?? 'Không rõ' }}</li>
+                                                <li><label>Brand :</label> {{ $product->brand->name ?? '' }}</li>
                                             </ul>
 
                                             {{-- Giá --}}
@@ -342,7 +357,7 @@
                                                     </span>
                                                 </p>
                                             @else
-                                                <p class="cr-price"><span class="new-price">Chưa có giá</span></p>
+                                                <p class="cr-price"><span class="new-price"></span></p>
                                             @endif
                                         </div>
                                     </div>
@@ -417,11 +432,15 @@
             }
 
             // ✅ Áp dụng kiểu hiển thị Grid/List
+            function isListView() {
+                return $('.gridRow').hasClass('active-grid');
+            }
+
             function applyViewMode() {
-                const isListView = $('.gridRow').hasClass('active-grid');
+                const listMode = isListView();
                 const $productList = $('#product-list');
 
-                if (isListView) {
+                if (listMode) {
                     $productList.find('.product-description').removeClass('d-none');
                     $productList.addClass('grid-row-active');
                     $productList.find('.cr-product-box').removeClass('col-xxl-3 col-xl-4 col-6').addClass('col-12');
@@ -433,6 +452,7 @@
                     $productList.find('.cr-product-card').removeClass('d-flex flex-row gap-3');
                 }
             }
+
 
             // ✅ Cập nhật lại nội dung khi AJAX thành công
             function updateContent($html) {
