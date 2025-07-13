@@ -34,12 +34,12 @@ class ProfileController extends Controller
         $data['profile'] = $user->profile;
 
         $data['orders'] = Order::where('user_id', $user->id)
-            ->with('items.productVariant') // Tải trước các mục đơn hàng và biến thể sản phẩm
+            ->with('items') // Tải trước các mục đơn hàng và biến thể sản phẩm
             ->orderBy('created_at', 'desc')
             ->get();
 
         $data['reviews'] = Review::where('user_id', $user->id)
-            ->with('productVariant.product') // Tải trước biến thể sản phẩm và sản phẩm của nó
+             // Tải trước biến thể sản phẩm và sản phẩm của nó
             ->orderBy('created_at', 'desc')
             ->get();
 

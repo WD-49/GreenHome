@@ -48,12 +48,7 @@ use App\Http\Controllers\client\BlogController as ClientBlogController;
 use App\Http\Controllers\Client\DiscountController as ClientDiscountController;
 use Doctrine\DBAL\Schema\Index;
 
-Route::get('/test-reset/{token}', function ($token) {
-    return "Test token: " . $token;
-})->name('test.reset');
-
 // route của trang client
-
 // trang trủ
 Route::get('/category/{id}', [HomeController::class, 'category'])->name('shop.category');
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
@@ -77,34 +72,12 @@ Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->na
 Route::post('/register', [RegisterController::class, 'register']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-// Route::get('/password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-// Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
-
-// Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('forgot-password.form');
-// Route::post('/forgot-password', [ForgotPasswordController::class, 'handle'])->name('forgot-password.handle');
-
-// Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('forgot-password.form');
-// // Sử dụng route chuẩn password.email của Laravel để xử lý việc gửi form
-// Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
-
-// // Bạn cũng sẽ cần các route đặt lại cho việc đặt lại dựa trên token
-// Route::get('/password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
-// Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
-
-
-
-
 // Route form gửi yêu cầu và xử lý của bạn
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('forgot-password.form');
 Route::post('/forgot-password', [ForgotPasswordController::class, 'handle'])->name('forgot-password.handle'); // Sử dụng lại route này
 // Các route đặt lại mật khẩu của Laravel
 Route::get('/password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
-
-
-
-
-
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile/{tab?}', [ProfileController::class, 'index'])->name('profile.index');
@@ -416,11 +389,6 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::post('/webinfor/update', [WebInfoController::class, 'update'])->name('web_info.update');
 });
 // webinfor 
-
-
-
-
-
 
 // route của trang client
 
