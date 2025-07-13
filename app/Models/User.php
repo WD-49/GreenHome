@@ -11,6 +11,7 @@ use App\Models\CartItem;
 use App\Notifications\VerifyEmail as VerifyEmailNotification;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
+use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -24,7 +25,9 @@ use Illuminate\Notifications\Notifiable;
  */
 class User extends Authenticatable implements MustVerifyEmailContract
 {
-    use SoftDeletes, HasFactory, Notifiable;
+
+    /** @use HasFactory<\Database\Factories\UserFactory> */
+    use SoftDeletes, HasFactory, Notifiable, MustVerifyEmail;
 
     protected $dates = ['deleted_at'];
 
@@ -99,6 +102,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
      */
     public function sendEmailVerificationNotification()
     {
+
         $this->notify(new VerifyEmailNotification);
     }
 }

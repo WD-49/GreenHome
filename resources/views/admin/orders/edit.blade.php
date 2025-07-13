@@ -53,7 +53,8 @@
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">Thông tin đơn hàng</h5>
-                    </div><div class="card-body">
+                    </div>
+                    <div class="card-body">
                         <form action="{{ route('admin.orders.update', $order->id) }}" method="POST">
                             @csrf
                             @method('PUT')
@@ -80,7 +81,8 @@
                                     </div>
                                     <div class="mb-3">
                                         <label for="shipping_address" class="form-label">Địa chỉ:</label>
-                                        <input type="text" class="form-control" id="shipping_address" name="shipping_address"
+                                        <input type="text" class="form-control" id="shipping_address"
+                                            name="shipping_address"
                                             value="{{ old('shipping_address', $order->shipping_address) }}" required>
                                         @error('shipping_address')
                                             <div class="text-danger small">{{ $message }}</div>
@@ -98,7 +100,7 @@
                                 {{-- Cột thông tin đơn hàng & trạng thái --}}
                                 <div class="col-lg-6">
                                     <h6 class="mb-3 text-muted">Chi tiết Đơn hàng</h6>
-                                    
+
                                     {{-- Trạng thái đơn hàng --}}
                                     <div class="mb-3">
                                         <label for="order_status" class="form-label">Trạng thái đơn hàng:</label>
@@ -106,8 +108,7 @@
                                             data-current-status="{{ $order->order_status }}"> {{-- Thêm data attribute --}}
                                             @foreach ($allOrderStatuses as $status)
                                                 <option value="{{ $status }}"
-                                                    {{ old('order_status', $order->order_status) == $status ? 'selected' : '' }}
-                                                    >
+                                                    {{ old('order_status', $order->order_status) == $status ? 'selected' : '' }}>
                                                     {{ $status }}
                                                 </option>
                                             @endforeach
@@ -116,12 +117,14 @@
                                             <div class="text-danger small">{{ $message }}</div>
                                         @enderror
                                     </div>
-                                    
+
                                     {{-- Lý do hủy (sẽ hiển thị/ẩn bằng JS) --}}
-                                    <div class="mb-3" id="cancel_reason_field" 
-                                         style="display: {{ (old('order_status', $order->order_status) === 'Hủy đơn' || $errors->has('cancel_reason')) ? 'block' : 'none' }}">
-                                        <label for="cancel_reason" class="form-label">Lý do hủy (<span class="text-danger">*</span>):</label> {{-- Thêm dấu sao cho bắt buộc --}}
-                                        <textarea class="form-control" id="cancel_reason" name="cancel_reason" rows="3" minlength="10" {{ (old('order_status', $order->order_status) === 'Hủy đơn') ?  : '' }}>{{ old('cancel_reason', $order->cancel_reason) }}</textarea> {{-- Thêm minlength và required --}}
+                                    <div class="mb-3" id="cancel_reason_field"
+                                        style="display: {{ old('order_status', $order->order_status) === 'Hủy đơn' || $errors->has('cancel_reason') ? 'block' : 'none' }}">
+                                        <label for="cancel_reason" class="form-label">Lý do hủy (<span
+                                                class="text-danger">*</span>):</label> {{-- Thêm dấu sao cho bắt buộc --}}
+                                        <textarea class="form-control" id="cancel_reason" name="cancel_reason" rows="3" minlength="10"
+                                            {{ old('order_status', $order->order_status) === 'Hủy đơn' ?: '' }}>{{ old('cancel_reason', $order->cancel_reason) }}</textarea> {{-- Thêm minlength và required --}}
                                         @error('cancel_reason')
                                             <div class="text-danger small">{{ $message }}</div>
                                         @enderror
@@ -151,24 +154,35 @@
                                     </div>
 
                                     <div class="mb-3">
-                                        <label for="payment_method_id" class="form-label">Phương thức thanh toán:</label>
-                                        <select class="form-select" id="payment_method_id" name="payment_method_id" required>
-                                            @foreach ($paymentMethods as $method)
-                                                <option value="{{ $method->id }}"
-                                                    {{ old('payment_method_id', $order->payment_method_id) == $method->id ? 'selected' : '' }}>
-                                                    {{ $method->name }}
+                                        <label for="payment_method_name" class="form-label">Phương thức thanh
+                                            toán:</label>
+                                        <select class="form-select" id="payment_method_name" name="payment_method_name"
+                                            required>
+                                            @php
+                                                $methods = [
+                                                    'Thanh toán khi nhận hàng (COD)',
+                                                    'Chuyển khoản ngân hàng',
+                                                    'Thanh toán qua Momo',
+                                                ];
+                                            @endphp
+
+                                            @foreach ($methods as $method)
+                                                <option value="{{ $method }}"
+                                                    {{ old('payment_method_name', $order->payment_method_name ?? '') == $method ? 'selected' : '' }}>
+                                                    {{ $method }}
                                                 </option>
                                             @endforeach
                                         </select>
-                                        @error('payment_method_id')
+                                        @error('payment_method_name')
                                             <div class="text-danger small">{{ $message }}</div>
                                         @enderror
                                     </div>
 
                                     <div class="mb-3">
                                         <label for="shipping_fee" class="form-label">Phí vận chuyển:</label>
-                                        <input type="number" step="0.01" class="form-control" id="shipping_fee" name="shipping_fee"
-                                            value="{{ old('shipping_fee', $order->shipping_fee) }}" required min="0">
+                                        <input type="number" step="0.01" class="form-control" id="shipping_fee"
+                                            name="shipping_fee" value="{{ old('shipping_fee', $order->shipping_fee) }}"
+                                            required min="0">
                                         @error('shipping_fee')
                                             <div class="text-danger small">{{ $message }}</div>
                                         @enderror
@@ -176,8 +190,9 @@
 
                                     <div class="mb-3">
                                         <label for="total_amount" class="form-label">Tổng tiền:</label>
-                                        <input type="number" step="0.01" class="form-control" id="total_amount" name="total_amount"
-                                            value="{{ old('total_amount', $order->total_amount) }}" required>
+                                        <input type="number" step="0.01" class="form-control" id="total_amount"
+                                            name="total_amount" value="{{ old('total_amount', $order->total_amount) }}"
+                                            required>
                                         @error('total_amount')
                                             <div class="text-danger small">{{ $message }}</div>
                                         @enderror
@@ -190,7 +205,11 @@
                                 <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary">Hủy</a>
                             </div>
                         </form>
-                    </div></div></div></div></div> @endsection
+                    </div>
+                </div>
+            </div>
+        </div>
+</div> @endsection
 
 @push('scripts')
     {{-- Các script bạn đã có từ template --}}
@@ -203,7 +222,9 @@
             const cancelReasonField = $('#cancel_reason_field');
             const cancelReasonTextarea = $('#cancel_reason'); // Lấy textarea lý do hủy
             const currentOrderStatus = orderStatusSelect.data('currentStatus');
-            const orderStatusesOrder = ['Chưa xác nhận', 'Xác nhận', 'Đang vận chuyển', 'Giao hàng thành công', 'Hủy đơn'];
+            const orderStatusesOrder = ['Chưa xác nhận', 'Xác nhận', 'Đang vận chuyển', 'Giao hàng thành công',
+                'Hủy đơn'
+            ];
 
             // Logic cho trạng thái thanh toán
             const paymentStatusSelect = $('#payment_status');
@@ -240,9 +261,8 @@
                     // Logic này sẽ được kiểm tra ở backend, nhưng có thể disable ở frontend để UX tốt hơn
                     else if (optionValue === 'Hủy đơn') {
                         // Tạm thời không disable ở frontend, backend sẽ kiểm tra canBeCancelled
-                        $(this).prop('disabled', false); 
-                    }
-                    else {
+                        $(this).prop('disabled', false);
+                    } else {
                         // Cho phép chọn các trạng thái tiến triển
                         $(this).prop('disabled', false);
                     }

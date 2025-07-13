@@ -96,6 +96,8 @@
                                         <th>Liên kết</th>
                                         <th>Ưu tiên</th>
                                         <th>Trạng thái</th>
+                                        <th>Loại</th>
+                                        <th>Danh mục</th>
                                         <th>Hành động</th>
                                     </tr>
                                 </thead>
@@ -132,6 +134,22 @@
                                                     <span class="badge bg-secondary">Ẩn</span>
                                                 @endif
                                             </td>
+                                            <td class="text-center">
+                                            @switch($banner->type)
+                                                @case('slider') <span class="badge bg-primary">Slider</span> @break
+                                                @case('category_banner') <span class="badge bg-info text-dark">Danh mục</span> @break
+                                                @case('discount_banner') <span class="badge bg-warning text-dark">Khuyến mãi</span> @break
+                                                @default <span class="badge bg-secondary">Khác</span>
+                                            @endswitch
+                                        </td>
+
+                                        <td class="text-center">
+                                            @if($banner->category_id && $banner->category)
+                                                {{ $banner->category->name }}
+                                            @else
+                                                <span class="text-muted">Không áp dụng</span>
+                                            @endif
+                                        </td>
                                             <td class="text-center">
                                                 <a href="{{ route('admin.banners.edit', $banner->id) }}" class="btn btn-sm btn-warning">
                                                     <i class="bi bi-pencil-square"></i> Sửa

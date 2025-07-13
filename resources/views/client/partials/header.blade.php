@@ -19,6 +19,7 @@
                                 {{ $cat->name }}
                             </option>
                         @endforeach
+
                     </select>
 
                     <button type="submit" class="search-btn">
@@ -31,6 +32,7 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle cr-right-bar-item" href="javascript:void(0)">
                                 <i class="ri-user-3-line"></i>
+
                                 <span>
                                     @auth
                                         {{ $authUser->name }}
@@ -68,6 +70,7 @@
                     </ul>
                     <a href="{{ route('wishlist.index') }}" class="cr-right-bar-item">
                         <i class="ri-heart-3-line"></i>
+
                     </a>
 
 
@@ -151,6 +154,7 @@
                         <i class="ri-ticket-line"></i>
                         <span>Voucher</span>
                     </a>
+
 
                 </div>
             </div>
@@ -264,6 +268,7 @@
                                         <li>
                                             <a class="dropdown-item"
                                                 href="{{ route('category.show', $category->slug) }}">
+
 
                                                 {{ $category->name }}
                                             </a>

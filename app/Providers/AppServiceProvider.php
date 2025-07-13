@@ -7,6 +7,7 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Discount;
+
 use App\Http\View\Composers\HeaderComposer;
 use App\Http\View\Composers\FooterComposer;
 
@@ -40,6 +41,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Đăng ký Composer cho header & footer (nếu có logic riêng)
         View::composer('client.partials.header', HeaderComposer::class);
+
         View::composer('*', FooterComposer::class);
     }
 }
