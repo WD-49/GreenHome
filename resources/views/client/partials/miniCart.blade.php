@@ -32,13 +32,13 @@
 
     async function loadMiniCart() {
         try {
-            const response = await fetch("{{ route('cart.data') }}");
-            const data = await response.json();
+            const res = await fetch("{{ route('cart.data') }}");
+            const data = await res.json();
 
             const miniCart = document.getElementById('mini-cart-items');
             const cartTable = document.querySelector('.cart-table');
 
-            if (!data.success || !data.cart || !data.cart.items.length) {
+            if (!data.success || !data.cart?.items?.length) {
                 miniCart.innerHTML = `<li>Bạn chưa thêm sản phẩm nào vào giỏ hàng</li>`;
                 cartTable.innerHTML = `
                     <tr><td class="text-left">Tạm tính :</td><td class="text-right">0 ₫</td></tr>
@@ -62,26 +62,30 @@
                 const total = price * quantity;
                 subtotal += total;
 
+                // ✅ Gán disablePlus trước
+                const disablePlus = quantity >= variant.quantity ? 'disabled' : '';
+
                 html += `
-                    <li data-id="${item.id}">
-                        <a href="/product/${product.slug}" class="crside_pro_img">
-                            <img src="/storage/${image}" alt="${product.name}">
-                        </a>
-                        <div class="cr-pro-content">
-                            <a href="/product/${product.slug}" class="cart_pro_title">${product.name}</a>
-                            <span class="cart-price"><span>${formatVND(price)}</span> x ${quantity}</span>
-                            <div class="cr-cart-qty">
-                                <div class="cart-qty-plus-minus">
-                                    <button type="button" class="plus">+</button>
-                                    <input type="text" value="${quantity}" class="quantity" readonly>
-                                    <button type="button" class="minus">-</button>
+                        <li data-id="${item.id}" data-max="${variant.quantity}">
+                            <a href="/product/${product.slug}" class="crside_pro_img">
+                                <img src="/storage/${image}" alt="${product.name}">
+                            </a>
+                            <div class="cr-pro-content">
+                                <a href="/product/${product.slug}" class="cart_pro_title">${product.name}</a>
+                                <span class="cart-price"><span>${formatVND(price)}</span> x ${quantity}</span>
+                                <div class="cr-cart-qty">
+                                    <div class="cart-qty-plus-minus">
+                                        <button type="button" class="minus">-</button>
+                                        <input type="text" value="${quantity}" class="quantity" readonly>
+                                        <button type="button" class="plus" ${disablePlus}>+</button>
+                                    </div>
                                 </div>
+                                <a href="javascript:void(0)" class="remove">×</a>
                             </div>
-                            <a href="javascript:void(0)" class="remove">×</a>
-                        </div>
-                    </li>
-                `;
+                        </li>
+                    `;
             });
+
 
             miniCart.innerHTML = html;
 
@@ -90,50 +94,55 @@
                 <tr><td class="text-left">Tổng cộng :</td><td class="text-right primary-color">${formatVND(subtotal)}</td></tr>
             `;
 
-            // Gắn sự kiện sau khi render HTML
-            document.querySelectorAll('#mini-cart-items .plus').forEach(btn => {
-                btn.addEventListener('click', async function() {
-                    const li = this.closest('li');
-                    const input = li.querySelector('.quantity');
-                    const id = li.dataset.id;
-                    let quantity = parseInt(input.value) + 1;
-                    input.value = quantity;
-
-                    await updateMiniCartQuantity(id, quantity);
-                });
-            });
-
-            document.querySelectorAll('#mini-cart-items .minus').forEach(btn => {
-                btn.addEventListener('click', async function() {
-                    const li = this.closest('li');
-                    const input = li.querySelector('.quantity');
-                    const id = li.dataset.id;
-                    let quantity = Math.max(1, parseInt(input.value) - 1);
-                    input.value = quantity;
-
-                    await updateMiniCartQuantity(id, quantity);
-                });
-            });
-
-            document.querySelectorAll('#mini-cart-items .remove').forEach(btn => {
-                btn.addEventListener('click', async function() {
-                    const li = this.closest('li');
-                    const id = li.dataset.id;
-
-                    if (!confirm('Bạn có chắc muốn xoá sản phẩm này?')) return;
-
-                    await deleteMiniCartItem(id);
-                });
-            });
-
+            bindMiniCartEvents();
         } catch (error) {
-            console.error('Error loading cart:', error);
+            console.error('Lỗi khi tải giỏ hàng:', error);
         }
+    }
+
+    function bindMiniCartEvents() {
+        const miniCart = document.getElementById('mini-cart-items');
+
+        miniCart.querySelectorAll('.plus, .minus').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const li = this.closest('li');
+                const input = li.querySelector('.quantity');
+                const id = li.dataset.id;
+                const max = parseInt(li.dataset.max); // 🟢 số lượng tồn kho
+                const oldQuantity = parseInt(input.value);
+                let quantity = oldQuantity;
+
+                // Cộng / trừ số lượng
+                if (this.classList.contains('plus')) {
+                    if (oldQuantity >= max) {
+                        alert('Bạn đã đạt tới số lượng tối đa của sản phẩm.');
+                        return;
+                    }
+                    quantity++;
+                } else {
+                    quantity = Math.max(1, quantity - 1);
+                }
+
+                input.value = quantity;
+                await updateMiniCartQuantity(id, quantity);
+            });
+        });
+
+
+        miniCart.querySelectorAll('.remove').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const li = this.closest('li');
+                const id = li.dataset.id;
+                if (confirm('Bạn có chắc muốn xoá sản phẩm này?')) {
+                    await deleteMiniCartItem(id);
+                }
+            });
+        });
     }
 
     async function updateMiniCartQuantity(id, quantity) {
         try {
-            const response = await fetch(`{{ route('cart.updateQuantity', ':id') }}`.replace(':id', id), {
+            const res = await fetch(`{{ route('cart.updateQuantity', ':id') }}`.replace(':id', id), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -144,20 +153,20 @@
                 })
             });
 
-            const data = await response.json();
+            const data = await res.json();
             if (data.success) {
-                loadMiniCart(); // cập nhật lại
+                await loadMiniCart(); // Tải lại cart sau cập nhật
             } else {
                 alert(data.message || 'Không thể cập nhật số lượng.');
             }
         } catch (error) {
-            console.error('Update quantity error:', error);
+            console.error('Lỗi cập nhật số lượng:', error);
         }
     }
 
     async function deleteMiniCartItem(id) {
         try {
-            const response = await fetch(`{{ route('cart.deleteMultiple') }}`, {
+            const res = await fetch(`{{ route('cart.deleteMultiple') }}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -168,21 +177,18 @@
                 })
             });
 
-            const data = await response.json();
+            const data = await res.json();
             if (data.success) {
-                loadMiniCart();
+                await loadMiniCart();
             } else {
                 alert(data.message || 'Xoá không thành công.');
             }
         } catch (error) {
-            console.error('Delete mini cart error:', error);
+            console.error('Lỗi xoá sản phẩm:', error);
         }
     }
+
+    @auth
+    document.addEventListener('DOMContentLoaded', loadMiniCart);
+    @endauth
 </script>
-
-
-@auth
-    <script>
-        document.addEventListener('DOMContentLoaded', loadMiniCart);
-    </script>
-@endauth

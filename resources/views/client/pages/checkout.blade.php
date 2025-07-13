@@ -1,4 +1,3 @@
-
 @extends('layouts.app')
 
 @section('content')
@@ -212,7 +211,7 @@
                 items.forEach(item => {
                     const variant = item.product_variant;
                     const product = variant.product;
-                    const image = product.image || 'default.jpg';
+                    const image = variant.image || product.image || 'default.jpg';
                     const name = product.name;
                     const price = parseFloat(variant.price);
                     const quantity = item.quantity;
@@ -460,12 +459,22 @@
         document.getElementById('place-order-btn').addEventListener('click', function() {
             const fullname = document.querySelector('[name="fullname"]').value.trim();
             const phone = document.querySelector('[name="phone"]').value.trim();
-            const province = document.getElementById('province').value;
-            const district = document.getElementById('district').value;
-            const ward = document.getElementById('ward').value;
             const address_detail = document.querySelector('[name="address_detail"]').value.trim();
             const note = document.querySelector('[name="note"]').value.trim();
             const payment_method_id = document.querySelector('input[name="payment_method"]:checked')?.value;
+
+            const provinceSelect = document.getElementById('province');
+            const districtSelect = document.getElementById('district');
+            const wardSelect = document.getElementById('ward');
+
+            const province = provinceSelect.value;
+            const province_name = provinceSelect.options[provinceSelect.selectedIndex].text;
+
+            const district = districtSelect.value;
+            const district_name = districtSelect.options[districtSelect.selectedIndex].text;
+
+            const ward = wardSelect.value;
+            const ward_name = wardSelect.options[wardSelect.selectedIndex].text;
 
             if (!fullname || !phone || !province || !district || !ward || !address_detail || !payment_method_id) {
                 alert('Vui lòng điền đầy đủ thông tin trước khi đặt hàng.');
@@ -475,9 +484,9 @@
             const payload = {
                 fullname,
                 phone,
-                province,
-                district,
-                ward,
+                province_name,
+                district_name,
+                ward_name,
                 address_detail,
                 note,
                 payment_method_id,
@@ -517,4 +526,3 @@
         });
     </script>
 @endpush
-

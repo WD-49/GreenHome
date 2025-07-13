@@ -19,6 +19,7 @@ class Order extends Model
         'shipping_address',
         'order_status', // Use 'order_status' directly
         'discount_code', // Đảm bảo fillable
+        'discount_type',
         'discount_value', // Đảm bảo fillable
         'payment_method_name', // Đảm bảo fillable
         'payment_status',

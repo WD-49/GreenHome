@@ -402,6 +402,7 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
+
                 document.querySelectorAll('.variant-option').forEach(function(li) {
                     li.addEventListener('click', function() {
                         document.querySelectorAll('.variant-option').forEach(e => e.classList.remove(
