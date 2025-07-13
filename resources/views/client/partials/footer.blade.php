@@ -2,50 +2,36 @@
 <footer class="footer padding-t-100 bg-off-white">
     <div class="container">
         <div class="row footer-top padding-b-100">
-          
             <div class="col-xl-4 col-lg-6 col-sm-12 col-12 cr-footer-border">
                 <div class="cr-footer-logo">
                     <div class="image">
-                        {{-- <img src="{{ asset('assets_client/assets/img/logo/logo.png') }}" alt="logo" class="logo">
-                        <img src="{{ asset('assets_client/assets/img/logo/dark-logo.png') }}" alt="logo"
-                            class="dark-logo"> --}}
-                            {{-- Hiển thị tên website --}}
                         <h2 style="font-weight: bold; font-size: 24px;">
-                            {{ $webInfos['web_name'] ?? 'Tên website' }}
+                            {{ $footerWebInfo['web_name'] ?? 'Tên website' }}
                         </h2>
                     </div>
-                     {!! $webInfos['sortDes'] ?? '<em>Chưa có mô tả</em>' !!}
+                    {!! $footerWebInfo['sortDes'] ?? '<em>Chưa có mô tả</em>' !!}
                 </div>
                 <div class="cr-footer">
-                    <h4 class="cr-sub-title cr-title-hidden">
-                        Contact us
-                        <span class="cr-heading-res"></span>
-                    </h4>
+                    <h4 class="cr-sub-title cr-title-hidden">Contact us <span class="cr-heading-res"></span></h4>
                     <ul class="cr-footer-links cr-footer-dropdown">
-                        <li class="location-icon">
-                            {{ $webInfos['address'] ?? 'Địa chỉ đang cập nhật' }}
-                        </li>
+                        <li class="location-icon">{{ $footerWebInfo['address'] ?? 'Địa chỉ đang cập nhật' }}</li>
                         <li class="mail-icon">
-                            <a href="mailto:{{ $webInfos['email'] ?? '#' }}">
-                                {{ $webInfos['email'] ?? 'Email đang cập nhật' }}
+                            <a href="mailto:{{ $footerWebInfo['email'] ?? '#' }}">
+                                {{ $footerWebInfo['email'] ?? 'Email đang cập nhật' }}
                             </a>
                         </li>
                         <li class="phone-icon">
-                            <a href="tel:{{ $webInfos['phone'] ?? '#' }}">
-                                {{ $webInfos['phone'] ?? 'SĐT đang cập nhật' }}
+                            <a href="tel:{{ $footerWebInfo['phone'] ?? '#' }}">
+                                {{ $footerWebInfo['phone'] ?? 'SĐT đang cập nhật' }}
                             </a>
                         </li>
                     </ul>
                 </div>
             </div>
 
-           
             <div class="col-xl-2 col-lg-3 col-sm-12 col-12 cr-footer-border">
                 <div class="cr-footer">
-                    <h4 class="cr-sub-title">
-                        Company
-                        <span class="cr-heading-res"></span>
-                    </h4>
+                    <h4 class="cr-sub-title">Company <span class="cr-heading-res"></span></h4>
                     <ul class="cr-footer-links cr-footer-dropdown">
                         <li><a href="about.html">About Us</a></li>
                         <li><a href="track-order.html">Delivery Information</a></li>
@@ -57,33 +43,20 @@
                 </div>
             </div>
 
-          <div class="col-xl-2 col-lg-3 col-sm-12 col-12 cr-footer-border">
-    <div class="cr-footer">
-        <h4 class="cr-sub-title">
-            Category
-            <span class="cr-heading-res"></span>
-        </h4>
-        <ul class="cr-footer-links cr-footer-dropdown">
-            @isset($categories3)
-            @foreach($categories3 as $category)
-                <li>
-                    <a href="{{ route('category.show', $category->slug) }}">
-                        {{ $category->name }}
-                    </a>
-                </li>
-            @endforeach
-             @endisset
-        </ul>
-    </div>
-</div>
-
+            <div class="col-xl-2 col-lg-3 col-sm-12 col-12 cr-footer-border">
+                <div class="cr-footer">
+                    <h4 class="cr-sub-title">Category <span class="cr-heading-res"></span></h4>
+                    <ul class="cr-footer-links cr-footer-dropdown">
+                        @foreach($footerCategories as $category)
+                            <li><a href="{{ route('category.show', $category->slug) }}">{{ $category->name }}</a></li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
 
             <div class="col-xl-4 col-lg-12 col-sm-12 col-12 cr-footer-border">
                 <div class="cr-footer cr-newsletter">
-                    <h4 class="cr-sub-title">
-                        Subscribe Our Newsletter
-                        <span class="cr-heading-res"></span>
-                    </h4>
+                    <h4 class="cr-sub-title">Subscribe Our Newsletter <span class="cr-heading-res"></span></h4>
                     <div class="cr-footer-links cr-footer-dropdown">
                         <form class="cr-search-footer">
                             <input class="search-input" type="text" placeholder="Search here...">
@@ -93,10 +66,10 @@
                         </form>
                     </div>
                     <div class="cr-social-media">
-                        <span><a href="javascript:void(0)"><i class="ri-facebook-line"></i></a></span>
-                        <span><a href="javascript:void(0)"><i class="ri-twitter-x-line"></i></a></span>
-                        <span><a href="javascript:void(0)"><i class="ri-dribbble-line"></i></a></span>
-                        <span><a href="javascript:void(0)"><i class="ri-instagram-line"></i></a></span>
+                        <span><a href="#"><i class="ri-facebook-line"></i></a></span>
+                        <span><a href="#"><i class="ri-twitter-x-line"></i></a></span>
+                        <span><a href="#"><i class="ri-dribbble-line"></i></a></span>
+                        <span><a href="#"><i class="ri-instagram-line"></i></a></span>
                     </div>
                     <div class="cr-payment">
                         <div class="cr-insta-slider swiper-container">
@@ -104,8 +77,7 @@
                                 @for ($i = 1; $i <= 8; $i++)
                                     <div class="swiper-slide">
                                         <a href="#" class="cr-payment-image">
-                                            <img src="{{ asset('assets_client/assets/img/insta/' . $i . '.jpg') }}"
-                                                alt="insta">
+                                            <img src="{{ asset('assets_client/assets/img/insta/' . $i . '.jpg') }}" alt="insta">
                                             <div class="payment-overlay"></div>
                                         </a>
                                     </div>
@@ -118,7 +90,8 @@
         </div>
 
         <div class="cr-last-footer">
-            <p>&copy; <span id="copyright_year"></span> <a href="index.html">Carrot</a>, All rights reserved.</p>
+            <p>&copy; <span id="copyright_year"></span>
+                <a href="index.html">Carrot</a>, All rights reserved.</p>
         </div>
     </div>
 </footer>

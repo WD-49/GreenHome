@@ -39,6 +39,7 @@ class HomeController extends Controller
 
 
 
+
         $brands = Brand::all();
         $banners = Banner::where('priority', '>=', 3)->orderBy('priority')->get();
         //Lấy tất cả danh mục, và mỗi danh mục chỉ lấy 8 sản phẩm có view cao nhất
@@ -75,5 +76,6 @@ class HomeController extends Controller
 $categories = Category::all();
 
         return view('client.pages.home', compact('categories', 'dealBanner', 'categories2', 'products1', 'blogs', 'products', 'banner12', 'banner1', 'banner2', 'banner3', 'banner4', 'banner5', 'banner6', 'banner7', 'banner8', 'banner9', 'banner10', 'topCategories', 'categoriesWithTopProducts', 'categories2', 'randomProducts', 'brands', 'banners', 'banner11', 'banners_mix', 'webInfos', 'categories3'));
+
     }
 }

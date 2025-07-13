@@ -12,7 +12,14 @@ class Review extends Model
     /** @use HasFactory<\Database\Factories\ReviewFactory> */
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['user_id', 'product_id', 'rating', 'title', 'content'];
+    protected $fillable = [
+        'user_id',
+        'product_variant_id', 
+        'rating',
+        'title',
+        'content',
+        'status',
+    ];
 
     public function user()
     {

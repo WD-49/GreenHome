@@ -5,52 +5,39 @@
     <script>
         AOS.init();
     </script>
-    {{-- <style>
-        .banner-box {
-            border-radius: 12px;
-            overflow: hidden;
-            background: #f9f9f9;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
+    @push('styles')
+        <style>
+            /* Ảnh mặc định cho Grid View */
+            .product-img {
+                width: 100%;
+                height: 225px;
+                object-fit: cover;
+                border-radius: 6px;
+                display: block;
+            }
 
-        .banner-box:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
-        }
+            /* Cha chứa ảnh - Grid View */
+            .cr-left,
+            .cr-product-image {
+                width: 100%;
+                height: 225px;
+            }
 
-        .banner-img-wrapper {
-            width: 100%;
-            height: 220px;
-            overflow: hidden;
-        }
+            /* List View - Kích thước cố định */
+            .grid-row-active .cr-left,
+            .grid-row-active .cr-product-image {
+                width: 350px;
+                height: 280px;
+                flex-shrink: 0;
+            }
 
-        .banner-img-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.4s ease;
-        }
-
-        .banner-box:hover .banner-img-wrapper img {
-            transform: scale(1.05);
-        }
-
-        .cr-product-banner-contain {
-            padding: 20px;
-            background: white;
-            text-align: center;
-        }
-
-        .cr-product-banner-contain h5 {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-    </style> --}}
+            .grid-row-active .product-img {
+                width: 350px;
+                height: 280px;
+                object-fit: cover;
+            }
+        </style>
+    @endpush
 
     <!-- Hero slider -->
     <section class="section-hero padding-b-100 next">
@@ -250,6 +237,7 @@
                                 <h5 class="sub-title">{{ $item->sub_title ?? 'Subtitle' }}</h5>
                                 <span>{{ $item->description }}</span>
                                 <a href="{{ $item->link }}" class="cr-button">Xem Cửa Hàng</a>
+
                             </div>
                         </div>
                     @endforeach
@@ -482,47 +470,6 @@
         </div>
     </section>
 
-    <!-- Deal -->
-    <section class="section-deal padding-b-100">
-        <div class="bg-banner-deal" {{-- style="background-image: url('{{ Storage::url(Str::replaceFirst('storage/', '', $dealBanner->img)) }}'); --}} background-size: cover; background-position: center; height:
-            600px;">
-
-
-
-            <div class="container">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="cr-deal-rightside">
-                            <div class="cr-deal-content text-white" data-aos="fade-up" data-aos-duration="2000">
-                                {{-- <span>
-                                <code>{{ $dealBanner->discount ?? '35' }}%</code> OFF
-                            </span> --}}
-                                <h4 class="cr-deal-title">
-                                    {{ $dealBanner->name ?? 'Great deal on organic food.' }}
-                                </h4>
-                                <p>
-                                    {{ $dealBanner->description ?? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do maecenas accumsan lacus vel facilisis.' }}
-                                </p>
-                                <div id="timer" class="cr-counter">
-                                    <div class="cr-counter-inner d-flex gap-3">
-                                        <h4><span id="days"></span> Days</h4>
-                                        <h4><span id="hours"></span> Hrs</h4>
-                                        <h4><span id="minutes"></span> Min</h4>
-                                        <h4><span id="seconds"></span> Sec</h4>
-                                    </div>
-                                </div>
-                            </div> <!-- /.cr-deal-content -->
-                        </div> <!-- /.cr-deal-rightside -->
-                    </div>
-                </div>
-            </div>
-        </div> <!-- /.bg-banner-deal -->
-    </section>
-
-
-
-
-
 
     <!-- Popular product -->
     <section class="section-popular margin-b-100">
@@ -592,16 +539,12 @@
                             {{-- Nội dung chèn lên ảnh --}}
                             <div class="cr-products-rightbar-content position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-start text-white p-4"
                                 style="background: rgba(0, 0, 0, 0.3);">
-                                <h4>{!! $banner12->name !!}</h4>
-                                <div class="cr-off">
-                                    <span>{{ $banner12->discount ?? '25%' }} <code>OFF</code></span>
-                                </div>
+                                {{-- <h4>{!! $banner12->name !!}</h4>
                                 <div class="rightbar-buttons mt-2">
                                     <a href="{{ $banner12->link ?? '#' }}" class="cr-button">Xem Cửa Hàng</a>
                                 </div>
+
                             </div>
-                        @else
-                            <p class="text-danger">Banner with priority 12 not found.</p>
                         @endif
                     </div>
                 </div>
@@ -610,7 +553,7 @@
         </div>
     </section>
 
-    
+
     <!-- Blog -->
     <section class="section-blog padding-b-100">
         <div class="container">
@@ -619,6 +562,7 @@
                     <div class="mb-30" data-aos="fade-up" data-aos-duration="2000">
                         <div class="cr-banner">
                             <h2>Tin tức mới nhất</h2>
+
                         </div>
                         <div class="cr-banner-sub-title">
                             <p>Tin tức mới nhất được cập nhật mỗi ngày.</p>

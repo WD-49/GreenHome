@@ -2,7 +2,6 @@
 
 use Dom\Comment;
 use App\Jobs\SendTestMailJob;
-use Doctrine\DBAL\Schema\Index;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
@@ -28,8 +27,9 @@ use App\Http\Controllers\Client\ProfileController;
 use App\Http\Controllers\admin\AttributeController;
 use App\Http\Controllers\admin\DashboardController;
 
-use App\Http\Controllers\client\WishlistController;
+use App\Http\Controllers\client\CheckoutController;
 
+use App\Http\Controllers\client\WishlistController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\admin\OrderStatusController;
 use App\Http\Controllers\client\BlogDetailController;
@@ -45,6 +45,8 @@ use App\Http\Controllers\admin\Account\AccountUsersController;
 use App\Http\Controllers\admin\Product\ProductVariantController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\client\BlogController as ClientBlogController;
+use App\Http\Controllers\Client\DiscountController as ClientDiscountController;
+use Doctrine\DBAL\Schema\Index;
 
 Route::get('/test-reset/{token}', function ($token) {
     return "Test token: " . $token;
@@ -120,7 +122,7 @@ Route::middleware(['auth'])->group(function () {
     // *** THAY ĐỔI LỚN TẠI ĐÂY: DÙNG CONTROLLER THAY VÌ CLOSURE ***
     Route::post('/email/verification-notification', [EmailVerificationPromptController::class, 'sendVerificationEmail'])
         ->middleware(['throttle:6,1']) // Middleware throttle vẫn được giữ nguyên
-        ->name('verification.send');//throttle:6,1 giới hạn người dùng gửi yêu cầu xác thực email 6 lần trong 1 phút
+        ->name('verification.send'); //throttle:6,1 giới hạn người dùng gửi yêu cầu xác thực email 6 lần trong 1 phút
 });
 
 
@@ -424,6 +426,11 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
 
 // trang trủ
 Route::get('/', [HomeController::class, 'index'])->name('home');
+// routes/web.php
+Route::get('/voucher/{code}/eligible-products', [ClientDiscountController::class, 'showEligibleProducts'])->name('voucher.products');
+Route::get('/voucher/{code}/detail', [ClientDiscountController::class, 'showDetail'])->name('voucherDetail');
+
+
 // viết tiếp route của các trang tại đây
 Route::get('/blog/{slugCategory?}', [ClientBlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/detail/{slug}', [ClientBlogController::class, 'show'])->name('blog.show');
@@ -439,9 +446,16 @@ route::prefix('cart')->middleware('auth')->name('cart.')->group(function () {
     Route::post('/update-quantity/{id}', [CartController::class, 'updateQuantity'])->name('updateQuantity');
     Route::post('/delete-multiple', [CartController::class, 'deleteMultiple'])->name('deleteMultiple');
 });
+route::get('/checkout', [CheckoutController::class, 'index'])->middleware('auth')->name('checkout.index');
+Route::get('/checkout/data', [CheckoutController::class, 'getCheckoutData'])->middleware('auth')->name('checkout.data');
+Route::post('/checkout/submit', [CheckoutController::class, 'submit'])->name('checkout.submit');
+
 
 Route::get('/blog/{slug}', [App\Http\Controllers\client\BlogDetailController::class, 'show'])->name('blog.detail');
 
 Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');
 
+Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show');
 
+Route::post('/review/submit', [ProductClientController::class, 'submitReview'])->name('client.review.submit');
+Route::post('/comment/submit', [ProductClientController::class, 'submitComment'])->name('client.comment.submit');

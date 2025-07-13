@@ -228,7 +228,8 @@
                                         <td>{{ number_format($totalOrderAmount, 0, ',', '.') }} VND</td>
                                     </tr>
                                     <tr>
-                                        <th>Mã giảm giá ({{ optional($order->discount)->code ?? 'Không áp dụng' }}). <br>
+                                        <th>Mã giảm giá
+                                            ({{ optional($order)->discount_code ?? 'Không áp dụng' }}). <br>
                                             {{ optional($order->discount)->description }}</th>
                                         @if ($discountAmount > 0)
                                             <td>
