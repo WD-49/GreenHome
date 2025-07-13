@@ -147,6 +147,8 @@
 
     <!-- Side-tool -->
     @include('client.partials.sideTool')
+    <!-- Voucher Modal -->
+    @include('client.partials.voucherModal')
 
     <!-- Global Notify -->
     <div id="global-notify" style="display:none;position:fixed;z-index:9999;bottom:40px;right:40px;min-width:220px;">

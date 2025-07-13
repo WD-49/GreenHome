@@ -2,7 +2,6 @@
 
 use Dom\Comment;
 use App\Jobs\SendTestMailJob;
-use Doctrine\DBAL\Schema\Index;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
@@ -46,6 +45,8 @@ use App\Http\Controllers\admin\Account\AccountUsersController;
 use App\Http\Controllers\admin\Product\ProductVariantController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\client\BlogController as ClientBlogController;
+use App\Http\Controllers\Client\DiscountController as ClientDiscountController;
+use Doctrine\DBAL\Schema\Index;
 
 Route::get('/test-reset/{token}', function ($token) {
     return "Test token: " . $token;
@@ -425,6 +426,11 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
 
 // trang trủ
 Route::get('/', [HomeController::class, 'index'])->name('home');
+// routes/web.php
+Route::get('/voucher/{code}/eligible-products', [ClientDiscountController::class, 'showEligibleProducts'])->name('voucher.products');
+Route::get('/voucher/{code}/detail', [ClientDiscountController::class, 'showDetail'])->name('voucherDetail');
+
+
 // viết tiếp route của các trang tại đây
 Route::get('/blog/{slugCategory?}', [ClientBlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/detail/{slug}', [ClientBlogController::class, 'show'])->name('blog.show');
@@ -453,4 +459,3 @@ Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product
 
 Route::post('/review/submit', [ProductClientController::class, 'submitReview'])->name('client.review.submit');
 Route::post('/comment/submit', [ProductClientController::class, 'submitComment'])->name('client.comment.submit');
-

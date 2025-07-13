@@ -61,13 +61,16 @@
                     </ul>
                     <a href="{{ route('wishlist.index') }}" class="cr-right-bar-item">
                         <i class="ri-heart-3-line"></i>
-                        <span>Wishlist</span>
                     </a>
 
                     <a href="javascript:void(0)" class="cr-right-bar-item Shopping-toggle">
                         <i class="ri-shopping-cart-line"></i>
-                        <span>Cart</span>
                     </a>
+                    <a href="javascript:void(0)" class="cr-right-bar-item voucher-toggle">
+                        <i class="ri-ticket-line"></i>
+                        <span>Voucher</span>
+                    </a>
+
                 </div>
             </div>
         </div>
@@ -159,6 +162,9 @@
                     <a href="javascript:void(0)" class="cr-right-bar-item Shopping-toggle">
                         <i class="ri-shopping-cart-line"></i>
                     </a>
+                    <a href="javascript:void(0)" class="cr-right-bar-item Voucher-toggle">
+                        <i class="ri-ticket-line"></i>
+                    </a>
                 </div>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav">
@@ -175,7 +181,8 @@
                                 @isset($categories3)
                                     @foreach ($categories3 as $category)
                                         <li>
-                                            <a class="dropdown-item" href="#">
+                                            <a class="dropdown-item" href="{{ route('category.show', $category->slug) }}">
+
                                                 {{ $category->name }}
                                             </a>
                                         </li>
@@ -190,62 +197,9 @@
                                 Cửa Hàng
                             </a>
 
-                            {{-- <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="product-left-sidebar.html">product
-                                        Left
-                                        sidebar </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="product-right-sidebar.html">product
-                                        Right
-                                        sidebar </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="product-full-width.html">Product
-                                        Full
-                                        Width
-                                    </a>
-                                </li>
-                            </ul> --}}
+
                         </li>
-                        {{-- <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="javascript:void(0)">
-                                Pages
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="about.html">About Us</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="contact-us.html">Contact Us</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="cart.html">Cart</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="checkout.html">Checkout</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="track-order.html">Track Order</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="wishlist.html">Wishlist</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="faq.html">Faq</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="login.html">Login</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="register.html">Register</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="policy.html">Policy</a>
-                                </li>
-                            </ul>
-                        </li> --}}
+
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="{{ route('blog.index') }}">
                                 Bài viết
@@ -262,22 +216,7 @@
                                 </li>
                             </ul>
                         </li>
-                        {{-- <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="javascript:void(0)">
-                                Elements
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="elements-products.html">Products</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="elements-typography.html">Typography</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="elements-buttons.html">Buttons</a>
-                                </li>
-                            </ul>
-                        </li> --}}
+
                     </ul>
                 </div>
             </nav>

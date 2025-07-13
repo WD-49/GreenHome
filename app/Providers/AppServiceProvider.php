@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\Discount;
+
+
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Pagination\Paginator;
@@ -25,6 +28,14 @@ class AppServiceProvider extends ServiceProvider
     {
         // Dùng Bootstrap cho phân trang
         Paginator::useBootstrap();
+        View::composer('*', function ($view) {
+            $vouchers = Discount::where('end_date', '>=', now())
+                ->where('status', 'active')
+                ->get();
+
+            $view->with('vouchers', $vouchers);
+        });
+
 
         // Đăng ký View Composer
         View::composer('*', HeaderComposer::class);
