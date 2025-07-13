@@ -477,15 +477,17 @@
                                                                     <tbody>
                                                                         @php $subtotalBeforeDiscount = 0; @endphp {{-- Biến mới để tính tổng giá trị sản phẩm trước giảm giá --}}
                                                                         @foreach ($order->items as $item)
+                                                                        {{-- @dd($item) --}}
                                                                             @php
+                                                                                
                                                                                 $itemOriginalPrice =
                                                                                     $item->quantity * $item->unit_price;
                                                                                 $subtotalBeforeDiscount += $itemOriginalPrice;
                                                                             @endphp
                                                                             <tr>
                                                                                 <td>
-                                                                                    @if ($item->product && $item->product->image)
-                                                                                        <img src="{{ asset('storage/' . $item->product->image) }}"
+                                                                                    @if ($item->product_image)
+                                                                                        <img src="{{ asset('storage/' . $item->product_image) }}"
                                                                                             alt="Product Image"
                                                                                             class="img-fluid rounded me-2"
                                                                                             style="width:50px; height:50px; object-fit:cover;">

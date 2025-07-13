@@ -138,10 +138,10 @@ class PaymentMethodController extends Controller
         return redirect()->route('admin.paymentMethods.trash')->with('success', 'Xóa vĩnh viễn thành công!');
     }
 
-    public function show($id)
-    {
-        // 👇 ĐÃ SỬA: Thêm `with('orders')` để nạp đơn hàng
-        $paymentMethod = PaymentMethod::withTrashed()->with('orders')->findOrFail($id);
-        return view('admin.payment_methods.show', compact('paymentMethod'));
-    }
+public function show($id)
+{
+    $paymentMethod = PaymentMethod::withTrashed()->findOrFail($id);
+    return view('admin.payment_methods.show', compact('paymentMethod'));
+}
+
 }

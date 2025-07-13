@@ -113,12 +113,12 @@
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">Danh sách đơn hàng</h5>
                         <div>
-                            <a href="{{ route('admin.orders.create') }}" class="btn btn-success shadow-sm">
+                            {{-- <a href="{{ route('admin.orders.create') }}" class="btn btn-success shadow-sm">
                                 + Tạo đơn hàng
-                            </a>
-                            <a href="{{ route('admin.orders.trash') }}" class="btn btn-danger shadow-sm">
+                            </a> --}}
+                            {{-- <a href="{{ route('admin.orders.trash') }}" class="btn btn-danger shadow-sm">
                                 <i class="fas fa-trash-restore fa-sm text-white-50"></i> Thùng rác
-                            </a>
+                            </a> --}}
                         </div>
                     </div>
 
@@ -155,7 +155,7 @@
                                             {{ number_format($order->total_amount, 0, ',', '.') }} VNĐ
                                         </td>
                                         <td>
-                                            {{ $order->paymentMethod->name ?? 'N/A' }}
+                                            {{ $order->payment_method_name ?? 'N/A' }}
                                         </td>
                                         <td>
                                             {{-- Hiển thị trạng thái thanh toán bằng tiếng Việt với màu sắc --}}
@@ -243,7 +243,7 @@
                                                 @endif --}}
 
                                                 {{-- Form Xóa (Thùng rác) --}}
-                                                <form action="{{ route('admin.orders.destroy', $order->id) }}"
+                                                {{-- <form action="{{ route('admin.orders.destroy', $order->id) }}"
                                                     method="POST"
                                                     onsubmit="return confirm('Bạn có chắc muốn xóa đơn hàng này (đưa vào thùng rác)?')"
                                                     class="d-inline soft-delete-order-form">
@@ -253,7 +253,7 @@
                                                         title="Xóa (Thùng rác)">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
-                                                </form>
+                                                </form> --}}
                                             </div>
                                         </td>
                                     </tr>

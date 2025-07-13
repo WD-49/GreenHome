@@ -21,6 +21,14 @@ class ShopController extends Controller
         $productsQuery = Product::query()
             ->with(['brand', 'productVariants.productVariantValues', 'productVariants.reviews'])
             ->where('status', 1);
+            // Tìm kiếm theo tên sản phẩm hoặc mô tả
+if ($request->filled('search')) {
+    $searchTerm = $request->input('search');
+    $productsQuery->where(function ($query) use ($searchTerm) {
+        $query->where('name', 'like', '%' . $searchTerm . '%')
+              ->orWhere('description', 'like', '%' . $searchTerm . '%');
+    });
+}
 
         // Lọc danh mục
         $selectedCategories = array_filter($request->input('categories', []));
@@ -37,34 +45,48 @@ class ShopController extends Controller
 
         // Lọc theo số sao đánh giá
         if ($request->filled('rating')) {
-            $star = intval($request->input('rating'));
-            $productsQuery->whereHas('productVariants', function ($q) use ($star) {
-                $q->whereHas('reviews', function ($q2) use ($star) {
-                    $q2->select('product_variant_id')
-                        ->groupBy('product_variant_id')
-                        ->havingRaw('AVG(rating) >= ?', [$star])
-                        ->havingRaw('AVG(rating) < ?', [$star + 1]);
-                });
-            });
-        }
+    $star = intval($request->input('rating'));
+
+    $productsQuery->whereIn('id', function ($sub) use ($star) {
+        $sub->select('products.id')
+            ->from('products')
+            ->join('product_variants', 'products.id', '=', 'product_variants.product_id')
+            ->join('reviews', 'product_variants.id', '=', 'reviews.product_variant_id')
+            ->whereNull('reviews.deleted_at')
+            ->groupBy('products.id')
+            ->havingRaw('AVG(reviews.rating) >= ?', [$star])
+            ->havingRaw('AVG(reviews.rating) < ?', [$star + 1]);
+    }); 
+
+    
+}
+
+
+
+
+
+
+
+
+
 
         // Lọc theo biến thể
-      if ($request->filled('attribute_values')) {
-    $attributeValueIds = collect($request->input('attribute_values', []))->map(fn($id) => (int) $id);
+        if ($request->filled('attribute_values')) {
+            $attributeValueIds = collect($request->input('attribute_values', []))->map(fn($id) => (int) $id);
 
-    // Lấy danh sách Attribute ID và group lại theo thuộc tính
-    $attributeValues = \App\Models\AttributeValue::with('attribute')->whereIn('id', $attributeValueIds)->get();
+            // Lấy danh sách Attribute ID và group lại theo thuộc tính
+            $attributeValues = \App\Models\AttributeValue::with('attribute')->whereIn('id', $attributeValueIds)->get();
 
-    $groupedByAttr = $attributeValues->groupBy(fn($val) => $val->attribute->id);
+            $groupedByAttr = $attributeValues->groupBy(fn($val) => $val->attribute->id);
 
-    foreach ($groupedByAttr as $attributeId => $values) {
-        $valueIds = $values->pluck('id')->toArray();
+            foreach ($groupedByAttr as $attributeId => $values) {
+                $valueIds = $values->pluck('id')->toArray();
 
-        $productsQuery->whereHas('productVariants.productVariantValues', function ($q) use ($valueIds) {
-            $q->whereIn('attribute_value_id', $valueIds);
-        });
-    }
-}
+                $productsQuery->whereHas('productVariants.productVariantValues', function ($q) use ($valueIds) {
+                    $q->whereIn('attribute_value_id', $valueIds);
+                });
+            }
+        }
 
 
         // Lọc theo khoảng giá
@@ -102,7 +124,6 @@ class ShopController extends Controller
         $wishlistProductIds = [];
         if (Auth::check()) {
             $wishlistProductIds = \App\Models\WishList::where('user_id', Auth::id())->pluck('product_id')->toArray();
-
         }
 
 
@@ -118,6 +139,5 @@ class ShopController extends Controller
             'attributeValues',
             'wishlistProductIds'
         ));
-
     }
 }

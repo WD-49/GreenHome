@@ -7,23 +7,32 @@
                     <img src="{{ asset('assets_client/assets/img/logo/dark-logo.png') }}" alt="logo"
                         class="dark-logo">
                 </a>
-                <form class="cr-search">
-                    <input class="search-input" type="text" placeholder="Search For items...">
-                    <select class="form-select" aria-label="Default select example">
-                        <option selected>All Categories</option>
-                        <option value="1">Mens</option>
-                        <option value="2">Womens</option>
-                        <option value="3">Electronics</option>
+                <form class="cr-search" action="{{ route('shop.index') }}" method="GET">
+                    <input class="search-input" type="text" name="search" value="{{ request('search') }}"
+                        placeholder="Tìm Kiếm...">
+
+                    <select class="form-select" name="category_id">
+                        <option value="">Danh Mục</option>
+                        @foreach ($categories as $cat)
+                            <option value="{{ $cat->id }}"
+                                {{ request('category_id') == $cat->id ? 'selected' : '' }}>
+                                {{ $cat->name }}
+                            </option>
+                        @endforeach
+
                     </select>
-                    <a href="javascript:void(0)" class="search-btn">
+
+                    <button type="submit" class="search-btn">
                         <i class="ri-search-line"></i>
-                    </a>
+                    </button>
                 </form>
+
                 <div class="cr-right-bar">
                     <ul class="navbar-nav">
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle cr-right-bar-item" href="javascript:void(0)">
                                 <i class="ri-user-3-line"></i>
+
                                 <span>
                                     @auth
                                         {{ $authUser->name }}
@@ -61,7 +70,82 @@
                     </ul>
                     <a href="{{ route('wishlist.index') }}" class="cr-right-bar-item">
                         <i class="ri-heart-3-line"></i>
+
                     </a>
+
+
+                    @auth
+                        @php
+                            $unreadCount = Auth::user()->unreadNotifications->count();
+                        @endphp
+
+                        <!-- Nút chuông: kích hoạt offcanvas -->
+                        <a href="javascript:void(0)" class="cr-right-bar-item" data-bs-toggle="offcanvas"
+                            data-bs-target="#notificationPanel" aria-controls="notificationPanel"
+                            style="position: relative;">
+                            <i class="ri-notification-3-line" style="font-size: 22px; position: relative;">
+                                @if ($unreadCount > 0)
+                                    <span class="notification-count">{{ $unreadCount }}</span>
+                                @endif
+                            </i>
+                        </a>
+
+                        <!-- Offcanvas Panel: thông báo -->
+                        <div class="offcanvas offcanvas-end" tabindex="-1" id="notificationPanel"
+                            aria-labelledby="notificationPanelLabel">
+                            <div class="offcanvas-header">
+                                <h5 class="offcanvas-title" id="notificationPanelLabel">Thông báo</h5>
+                                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="offcanvas-body">
+                                @if (!Auth::user()->hasVerifiedEmail())
+                                    <div class="alert alert-warning d-flex align-items-start gap-2 mb-3">
+                                        <i class="ri-alert-line fs-5 text-warning"></i>
+                                        <div>
+                                            <strong>Email của bạn chưa được xác minh</strong>
+                                            <p class="mb-1 small text-muted">Nhấn vào để xác minh và sử dụng đầy đủ tính
+                                                năng.</p>
+                                            <a href="{{ route('profile.index') }}"
+                                                class="btn btn-sm btn-outline-primary">Xác minh ngay</a>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @forelse (Auth::user()->notifications as $notification)
+                                    <div class="border-bottom pb-2 mb-3">
+                                        <strong>{{ $notification->data['title'] ?? 'Thông báo mới' }}</strong>
+                                        <p class="mb-1 small text-muted">{{ $notification->data['message'] ?? '...' }}</p>
+                                        <span
+                                            class="badge bg-light text-dark">{{ $notification->created_at->diffForHumans() }}</span>
+                                    </div>
+                                @empty
+                                    <p class="text-muted">Không có thông báo nào.</p>
+                                @endforelse
+                            </div>
+                        </div>
+                    @endauth
+
+                    <style>
+                        .notification-count {
+                            position: absolute;
+                            top: 0px;
+                            right: -4px;
+                            background-color: red;
+                            color: white;
+                            font-size: 10px;
+                            padding: 2px 5px;
+                            border-radius: 999px;
+                            line-height: 1;
+                            font-weight: bold;
+                            min-width: 16px;
+                            height: 16px;
+                            text-align: center;
+                            display: inline-block;
+                        }
+                    </style>
+
+
 
                     <a href="javascript:void(0)" class="cr-right-bar-item Shopping-toggle">
                         <i class="ri-shopping-cart-line"></i>
@@ -70,6 +154,7 @@
                         <i class="ri-ticket-line"></i>
                         <span>Voucher</span>
                     </a>
+
 
                 </div>
             </div>
@@ -181,7 +266,9 @@
                                 @isset($categories3)
                                     @foreach ($categories3 as $category)
                                         <li>
-                                            <a class="dropdown-item" href="{{ route('category.show', $category->slug) }}">
+                                            <a class="dropdown-item"
+                                                href="{{ route('category.show', $category->slug) }}">
+
 
                                                 {{ $category->name }}
                                             </a>
@@ -230,3 +317,21 @@
         </div>
     </div>
 </div>
+<script>
+    function markAsRead(id) {
+        fetch('/notifications/' + id + '/read', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        });
+    }
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function(el) {
+            return new bootstrap.Tooltip(el);
+        });
+    });
+</script>

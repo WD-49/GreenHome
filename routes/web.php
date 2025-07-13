@@ -2,6 +2,7 @@
 
 use Dom\Comment;
 use App\Jobs\SendTestMailJob;
+use Doctrine\DBAL\Schema\Index;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
@@ -46,14 +47,15 @@ use App\Http\Controllers\admin\Product\ProductVariantController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\client\BlogController as ClientBlogController;
 use App\Http\Controllers\Client\DiscountController as ClientDiscountController;
-use Doctrine\DBAL\Schema\Index;
+use Doctrine\DBAL\Schema\Index as DBALIndex;
+
 
 Route::get('/test-reset/{token}', function ($token) {
     return "Test token: " . $token;
 })->name('test.reset');
 
-// route của trang client
 
+// route của trang client
 // trang trủ
 Route::get('/category/{id}', [HomeController::class, 'category'])->name('shop.category');
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
@@ -77,22 +79,6 @@ Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->na
 Route::post('/register', [RegisterController::class, 'register']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-// Route::get('/password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-// Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
-
-// Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('forgot-password.form');
-// Route::post('/forgot-password', [ForgotPasswordController::class, 'handle'])->name('forgot-password.handle');
-
-// Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('forgot-password.form');
-// // Sử dụng route chuẩn password.email của Laravel để xử lý việc gửi form
-// Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
-
-// // Bạn cũng sẽ cần các route đặt lại cho việc đặt lại dựa trên token
-// Route::get('/password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
-// Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
-
-
-
 
 // Route form gửi yêu cầu và xử lý của bạn
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('forgot-password.form');
@@ -100,10 +86,6 @@ Route::post('/forgot-password', [ForgotPasswordController::class, 'handle'])->na
 // Các route đặt lại mật khẩu của Laravel
 Route::get('/password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
-
-
-
-
 
 
 Route::middleware(['auth'])->group(function () {
@@ -123,8 +105,20 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/email/verification-notification', [EmailVerificationPromptController::class, 'sendVerificationEmail'])
         ->middleware(['throttle:6,1']) // Middleware throttle vẫn được giữ nguyên
         ->name('verification.send'); //throttle:6,1 giới hạn người dùng gửi yêu cầu xác thực email 6 lần trong 1 phút
+
+         Route::post('/notifications/{id}/read', function ($id) {
+        $notification = auth()->user()->notifications()->findOrFail($id);
+        $notification->markAsRead();
+        return response()->noContent();
+    })->name('notifications.read');
+
 });
 
+Route::get('/test-notify', function () {
+    $user = \App\Models\User::find(9);
+    $user->notify(new \App\Notifications\VerifyEmailReminder());
+    return 'Notification sent';
+});
 
 
 // route của trang admin
@@ -255,7 +249,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::delete('/forceDeleteUser/{id}', [AccountUsersController::class, 'forceDeleteUser'])->name('forceDeleteUser');
         Route::post('/resetPassUser/{id}', [AccountUsersController::class, 'resetPassUser'])->name('resetPassUser');
         Route::get('/orders/{order}/ajax-details', [AccountUsersController::class, 'getAjaxOrderDetails'])
-            ->name('order.ajaxDetails');
+            ->name('order.ajaxDetails');   
         // ROUTE MỚI CHO PHÂN QUYỀN
         Route::post('toggleUserRole/{user}', [AccountUsersController::class, 'toggleUserRole'])->name('toggleUserRole');
         // Admins
@@ -417,11 +411,6 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
 });
 // webinfor 
 
-
-
-
-
-
 // route của trang client
 
 // trang trủ
@@ -459,3 +448,4 @@ Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product
 
 Route::post('/review/submit', [ProductClientController::class, 'submitReview'])->name('client.review.submit');
 Route::post('/comment/submit', [ProductClientController::class, 'submitComment'])->name('client.comment.submit');
+

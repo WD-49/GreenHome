@@ -2,17 +2,42 @@
 @section('title', 'Quản lý đánh giá sản phẩm')
 
 @section('content')
+    <style>
+        <style>.image-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            max-width: 220px;
+            /* Giới hạn chiều rộng để ảnh không tràn */
+        }
+
+        .image-grid img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+            transition: transform 0.2s ease;
+        }
+
+        .image-grid img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+
+    </style>
     <h1 class="mb-4">Quản lý đánh giá sản phẩm</h1>
-<!-- HÀNG CHỨA 2 NÚT -->
-<div class="d-flex justify-content-between align-items-center mb-4 gap-2 flex-wrap">
-    {{-- <a href="{{ route('admin.reviews.trash') }}" class="btn btn-outline-danger">
+    <!-- HÀNG CHỨA 2 NÚT -->
+    <div class="d-flex justify-content-between align-items-center mb-4 gap-2 flex-wrap">
+        {{-- <a href="{{ route('admin.reviews.trash') }}" class="btn btn-outline-danger">
         <i class="bi bi-trash3"></i> Xem thùng rác
     </a> --}}
 
-    <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#filterForm" aria-expanded="false">
-        <i class="bi bi-funnel"></i> Bộ lọc nâng cao
-    </button>
-</div>
+        <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#filterForm"
+            aria-expanded="false">
+            <i class="bi bi-funnel"></i> Bộ lọc nâng cao
+        </button>
+    </div>
 
 
     <div class="collapse mt-3" id="filterForm">
@@ -23,7 +48,8 @@
                 <select name="rating" id="rating" class="form-select">
                     <option value="">-- Tất cả --</option>
                     @for ($i = 1; $i <= 5; $i++)
-                        <option value="{{ $i }}" {{ request('rating') == $i ? 'selected' : '' }}>{{ $i }} sao</option>
+                        <option value="{{ $i }}" {{ request('rating') == $i ? 'selected' : '' }}>
+                            {{ $i }} sao</option>
                     @endfor
                 </select>
             </div>
@@ -45,8 +71,8 @@
             </div>
         </form>
     </div>
-</div>
-<br>  <br>
+    </div>
+    <br> <br>
 
     <div class="table-responsive-md">
         <table class="table table-bordered align-middle text-center">
@@ -56,6 +82,7 @@
                     <th>Biến thể</th>
                     <th>Người dùng</th>
                     <th>Đánh giá</th>
+                    <th>Ảnh</th>
                     <th>Tiêu đề</th>
                     <th>Ngày tạo</th>
                     <th>Trạng thái</th>
@@ -72,6 +99,24 @@
                         <td class="text-warning">
                             {!! str_repeat('★', $review->rating) !!}
                         </td>
+                        <td>
+                            @if ($review->images->count() > 0)
+                                <div class="image-grid">
+                                    @foreach ($review->images as $image)
+                                        @php
+                                            $imageUrl = Storage::url(str_replace(["\r", "\n"], '', $image->image));
+                                        @endphp
+                                        <a href="{{ $imageUrl }}" data-lightbox="review-{{ $review->id }}">
+                                            <img src="{{ $imageUrl }}" alt="Ảnh đánh giá">
+                                        </a>
+                                    @endforeach
+                                </div>
+                            @else
+                                Không có ảnh
+                            @endif
+                        </td>
+
+
                         <td>{{ $review->title ?? 'Không có tiêu đề' }}</td>
                         <td>
                             {{ $review->created_at ? $review->created_at->format('d/m/Y') : 'Không có' }}
@@ -89,7 +134,8 @@
                         </td>
                         <td>
                             <div class="d-flex justify-content-center gap-2">
-                                <a href="{{ route('admin.reviews.show', $review->id) }}" class="btn btn-sm btn-outline-info">
+                                <a href="{{ route('admin.reviews.show', $review->id) }}"
+                                    class="btn btn-sm btn-outline-info">
                                     <i class="bi bi-eye"></i>
                                 </a>
 
@@ -135,4 +181,5 @@
     <div class="mt-3">
         {{ $reviews->links() }}
     </div>
+
 @endsection

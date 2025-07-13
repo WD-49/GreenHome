@@ -3,16 +3,29 @@
 namespace App\Models;
 
 use App\Models\WishList;
-use Illuminate\Auth\MustVerifyEmail;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Models\UserProfile;
+use App\Models\Comment;
+use App\Models\Order;
+use App\Models\Cart;
+use App\Models\CartItem;
 use App\Notifications\VerifyEmail as VerifyEmailNotification;
 
-class User extends Authenticatable
+use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
+use Illuminate\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+
+/**
+ * @method bool hasVerifiedEmail()
+ * @method void notify(\Illuminate\Notifications\Notification $notification)
+ * @method \Illuminate\Notifications\DatabaseNotificationCollection notifications()
+ */
+class User extends Authenticatable implements MustVerifyEmailContract
 {
+
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use SoftDeletes, HasFactory, Notifiable, MustVerifyEmail;
 
@@ -45,12 +58,12 @@ class User extends Authenticatable
         return $this->hasOne(UserProfile::class);
     }
 
-    public function comments()
+    public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
     }
 
-    public function orders()
+    public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
     }
@@ -69,8 +82,6 @@ class User extends Authenticatable
 
     /**
      * Get the wishlists of the user.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function wishlists(): HasMany
     {
@@ -86,14 +97,12 @@ class User extends Authenticatable
         });
     }
 
-    // public function sendPasswordResetNotification($token)
-    // {
-    //     // Ghi đè để không gửi email mặc định của Laravel
-    // }
-
+    /**
+     * Gửi thông báo xác minh email tuỳ chỉnh.
+     */
     public function sendEmailVerificationNotification()
     {
-        // Sử dụng Notification tùy chỉnh của bạn
+
         $this->notify(new VerifyEmailNotification);
     }
 }
