@@ -8,9 +8,9 @@
                         class="dark-logo">
                 </a>
                 <form class="cr-search">
-                    <input class="search-input" type="text" placeholder="Search For items...">
+                    <input class="search-input" type="text" placeholder="Tìm kiếm sản phẩm...">
                     <select class="form-select" aria-label="Default select example">
-                        <option selected>All Categories</option>
+                        <option selected>Danh mục</option>
                         <option value="1">Mens</option>
                         <option value="2">Womens</option>
                         <option value="3">Electronics</option>
@@ -24,6 +24,7 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle cr-right-bar-item" href="javascript:void(0)">
                                 <i class="ri-user-3-line"></i>
+
                                 <span>
                                     @auth
                                         {{ $authUser->name }}
@@ -61,10 +62,12 @@
                     </ul>
                     <a href="{{ route('wishlist.index') }}" class="cr-right-bar-item">
                         <i class="ri-heart-3-line"></i>
+
                     </a>
 
                     <a href="javascript:void(0)" class="cr-right-bar-item Shopping-toggle">
                         <i class="ri-shopping-cart-line"></i>
+
                     </a>
                     <a href="javascript:void(0)" class="cr-right-bar-item voucher-toggle">
                         <i class="ri-ticket-line"></i>
