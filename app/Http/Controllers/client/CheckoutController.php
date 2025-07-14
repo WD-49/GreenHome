@@ -276,4 +276,44 @@ class CheckoutController extends Controller
 
         return view('client.pages.invoice', compact('order', 'user'));
     }
+
+    public function cancel($sku)
+    {
+        $order = Order::where('sku', $sku)->with('items')->firstOrFail();
+
+        if ($order->user_id !== auth()->id()) {
+            return redirect()->route('orders.list')->with('error', 'Bạn không có quyền hủy đơn hàng này.');
+        }
+
+        if (!$order->canBeCancel()) {
+            return redirect()->route('orders.list')->with('error', 'Đơn hàng không thể hủy.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Cập nhật kho
+            foreach ($order->items as $item) {
+                if ($item->product_variant_sku) {
+                    $variant = \App\Models\ProductVariant::where('sku', $item->product_variant_sku)->lockForUpdate()->first();
+                    if ($variant) {
+                        $variant->increment('quantity', $item->quantity);
+                    }
+                }
+            }
+
+            // Cập nhật trạng thái và lý do hủy
+            $order->order_status = 'Hủy đơn';
+            $order->cancel_reason = request('cancel_reason');
+            $order->save();
+
+            DB::commit();
+
+            return redirect()->route('orders.list')->with('success', 'Đã hủy đơn hàng và hoàn tồn kho.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Hủy đơn thất bại: ' . $e->getMessage());
+            return redirect()->route('orders.list')->with('error', 'Có lỗi xảy ra khi hủy đơn hàng. Vui lòng thử lại.');
+        }
+    }
 }

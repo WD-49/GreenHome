@@ -6,14 +6,28 @@
 @endpush
 
 @section('content')
+
+    @if (session('success'))
+        <script>
+            alert(@json(session('success')));
+        </script>
+    @endif
+
+    @if (session('error'))
+        <script>
+            alert(@json(session('error')));
+        </script>
+    @endif
     <section class="section-breadcrumb">
         <div class="cr-breadcrumb-image">
             <div class="container">
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="cr-breadcrumb-title">
-                            <h2>Đơn hàng</h2>
-                            <span> <a href="{{ route('home') }}">Trang trủ</a> / giỏ hàng</span>
+                            <h2>Đơn hàng: {{ $order->sku }}</h2>
+                            <span> <a href="{{ route('home') }}">Trang trủ</a>/<a href="{{ route('orders.list') }}">Đơn
+                                    hàng</a> /
+                                Chi tiết đơn hàng</span>
                         </div>
                     </div>
                 </div>
@@ -175,8 +189,13 @@
                                                 <p>{{ $order->note }}</p>
                                             @endif
 
+                                            @if ($order->cancel_reason)
+                                                <label>Lý do hủy đơn:</label>
+                                                <p>{{ $order->cancel_reason }}</p>
+                                            @endif
                                         </div>
                                     </div>
+
                                     <div class="col-lg-4 order-lg-2 order-md-1 order-sm-1">
                                         @php
                                             $productDiscount = $order->items->sum('discount_amount');
