@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Thông tin cá nhân của ' . $user->name) {{-- Thay đổi tiêu đề cho phù hợp với trang cá nhân --}}
+
 {{-- Đặt ở đầu phần nội dung chính của trang --}}
 @if (session('success'))
     <div class="alert alert-success">
@@ -143,8 +144,8 @@
                                         @else
                                             <span class="badge bg-danger"><i class="fas fa-times-circle me-1"></i>Chưa xác
                                                 thực</span>
-                                            <a href="{{ route('verification.notice') }}"
-                                                class="btn btn-outline-warning">Xác nhận email</a>
+                                            <a href="{{ route('verification.notice') }}" class="btn btn-outline-warning">Xác
+                                                nhận email</a>
                                         @endif
                                     </p>
                                     @if ($user->role == 'admin' || $user->role == 'superadmin')
@@ -477,9 +478,9 @@
                                                                     <tbody>
                                                                         @php $subtotalBeforeDiscount = 0; @endphp {{-- Biến mới để tính tổng giá trị sản phẩm trước giảm giá --}}
                                                                         @foreach ($order->items as $item)
-                                                                        {{-- @dd($item) --}}
+                                                                            {{-- @dd($item) --}}
                                                                             @php
-                                                                                
+
                                                                                 $itemOriginalPrice =
                                                                                     $item->quantity * $item->unit_price;
                                                                                 $subtotalBeforeDiscount += $itemOriginalPrice;
@@ -501,7 +502,7 @@
                                                                                 <td>
                                                                                     {{ $item->product_name }}
                                                                                     @if ($item->product_attribute)
-                                                                                        <br><small class="text-muted">Phân
+                                                                                        <br><small class="text-muted">
                                                                                             loại:
                                                                                             ({{ $item->product_attribute }})
                                                                                         </small>

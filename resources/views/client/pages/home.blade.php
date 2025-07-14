@@ -206,7 +206,8 @@
                             <h2>Sản phẩm nổi bật</h2>
                         </div>
                         <div class="cr-banner-sub-title">
-                            <p>Tổng hợp những sản phẩm được yêu thích và đánh giá cao nhất – chất lượng vượt trội, thiết kế ấn tượng và luôn dẫn đầu xu hướng</p>
+                            <p>Tổng hợp những sản phẩm được yêu thích và đánh giá cao nhất – chất lượng vượt trội, thiết kế
+                                ấn tượng và luôn dẫn đầu xu hướng</p>
                         </div>
                     </div>
                 </div>
@@ -540,7 +541,7 @@
                             {{-- Nội dung chèn lên ảnh --}}
                             <div class="cr-products-rightbar-content position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-start text-white p-4"
                                 style="background: rgba(0, 0, 0, 0.3);">
-                                {{-- <h4>{!! $banner12->name !!}</h4>
+                                {{-- {{-- <h4>{!! $banner12->name !!}</h4> --}}
                                 <div class="rightbar-buttons mt-2">
 
                                     <a href="{{ $banner12->link ?? '#' }}" class="cr-button">Xem Cửa Hàng</a>

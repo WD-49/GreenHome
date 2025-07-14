@@ -13,7 +13,7 @@
 
                     <select class="form-select" name="category_id">
                         <option value="">Danh Mục</option>
-                        @foreach ($categories as $cat)
+                        @foreach ($headerCategories as $cat)
                             <option value="{{ $cat->id }}"
                                 {{ request('category_id') == $cat->id ? 'selected' : '' }}>
                                 {{ $cat->name }}
