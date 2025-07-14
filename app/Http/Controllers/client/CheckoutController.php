@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\client;
 
 use App\Models\Cart;
+use App\Models\User;
 use App\Models\Order;
 use App\Models\WebInfo;
 use App\Models\CartItem;
@@ -250,5 +251,29 @@ class CheckoutController extends Controller
                 'message' => $e->getMessage(),
             ]);
         }
+    }
+
+    public function list()
+    {
+        $user = Auth::user();
+        $orders = Order::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+        return view('client.pages.viewOrder', compact('orders', 'user'));
+    }
+
+    public function show(Order $order)
+    {
+        $user = User::with('profile')
+            ->find(Auth::id());
+        // dd($user);
+
+        if ($order->user_id !== $user->id) {
+            return redirect()->route('orders.list')->with('error', 'Bạn không có quyền xem đơn hàng này.');
+        }
+
+        $order->load('items');
+
+        return view('client.pages.invoice', compact('order', 'user'));
     }
 }

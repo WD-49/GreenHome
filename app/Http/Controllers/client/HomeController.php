@@ -16,7 +16,7 @@ class HomeController extends Controller
 {
     public function index()
     {
-       
+
         $banner1 = Banner::where('priority', 1)->get();
         $banner2 = Banner::where('priority', 2)->get();
         $banner3 = Banner::where('priority', 3)->get();
@@ -33,10 +33,10 @@ class HomeController extends Controller
 
         $products = Product::latest()->take(10)->get(); // Lấy 10 sản phẩm mới nhất
         // Lấy 4 danh mục có số lượng sản phẩm lớn nhất
-      $topCategories = Category::withCount('products')
-    ->orderBy('products_count', 'desc')
-    ->take(4)
-    ->get();
+        $topCategories = Category::withCount('products')
+            ->orderBy('products_count', 'desc')
+            ->take(4)
+            ->get();
 
 
 
@@ -44,9 +44,9 @@ class HomeController extends Controller
         $brands = Brand::all();
         $banners = Banner::where('priority', '>=', 3)->orderBy('priority')->get();
         //Lấy tất cả danh mục, và mỗi danh mục chỉ lấy 8 sản phẩm có view cao nhất
-       $categoriesWithTopProducts = Category::with(['products' => function ($query) {
-    $query->orderBy('view', 'desc')->take(8);
-}])->get();
+        $categoriesWithTopProducts = Category::with(['products' => function ($query) {
+            $query->orderBy('view', 'desc')->take(8);
+        }])->get();
 
         $randomProducts = Product::inRandomOrder()->take(8)->get();
         $categories2 = Category::with(['products' => function ($query) {
@@ -75,10 +75,8 @@ class HomeController extends Controller
             ->orderBy('created_at', 'desc') // Mới nhất
             ->limit(5)                      // Giới hạn 5 bản ghi
             ->get();
-$categories = Category::all();
+        $categories = Category::all();
 
         return view('client.pages.home', compact('categories', 'dealBanner', 'categories2', 'products1', 'blogs', 'products', 'banner12', 'banner1', 'banner2', 'banner3', 'banner4', 'banner5', 'banner6', 'banner7', 'banner8', 'banner9', 'banner10', 'topCategories', 'categoriesWithTopProducts', 'categories2', 'randomProducts', 'brands', 'banners', 'banner11', 'banners_mix', 'webInfos', 'categories3'));
-
-
     }
 }

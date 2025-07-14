@@ -1,0 +1,244 @@
+@extends('layouts.app')
+@section('title', 'Invoice')
+@push('styles')
+    <link href="{{ asset('assets/css/vendor/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/css/invoice-custom.css') }}" rel="stylesheet">
+@endpush
+
+@section('content')
+    <section class="section-breadcrumb">
+        <div class="cr-breadcrumb-image">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="cr-breadcrumb-title">
+                            <h2>Đơn hàng</h2>
+                            <span> <a href="{{ route('home') }}">Trang trủ</a> / giỏ hàng</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="cr-main-content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="cr-card cr-invoice max-width-1170">
+                        {{-- <div class="cr-card-header">
+                            <h4 class="cr-card-title">Invoice</h4>
+                            <div class="header-tools">
+                                <button class="cr-btn-primary m-r-5">Save</button>
+                                <button class="cr-btn-secondary">Print</button>
+                            </div>
+                        </div> --}}
+                        <div class="cr-card-content card-default">
+
+                            <div class="invoice-wrapper">
+
+                                <div class="row">
+                                    {{-- <div class="col-md-6 col-lg-3 col-sm-6">
+                                        <img src="{{ asset('assets_client/assets/img/logo/logo.png') }}" alt="logo">
+
+                                        <address>
+                                            <br> 321, Porigo alto, new st george church, Nr. Jogas garden, USA.
+                                        </address>
+                                    </div> --}}
+                                    <div class="col-md-6 col-lg-4 col-sm-6">
+                                        <p class="text-dark mb-2">Thông tin người đặt</p>
+
+                                        <address>
+                                            <span>{{ $user->name }}</span>
+                                            <br> {{ $user->profile->address ?? ' ' }}
+                                            <br> <span>Email:</span> {{ $user->email }}
+                                            <br> <span>Sdt:</span> {{ $user->profile->phone ?? ' ' }}
+                                        </address>
+                                    </div>
+                                    <div class="col-md-6 col-lg-4 col-sm-6">
+                                        <p class="text-dark mb-2">Thông tin người nhận</p>
+
+                                        <address>
+                                            <span>{{ $order->shipping_name }}</span>
+                                            <br> {{ $order->shipping_address }}
+                                            <br> <span>Sdt:</span> {{ $order->shipping_phone }}
+                                        </address>
+                                    </div>
+                                    <div class="col-md-6 col-lg-4 col-sm-6">
+                                        <p class="text-dark mb-2">Chi tiết</p>
+
+                                        @php
+                                            $paymentStatusMap = [
+                                                'pending' => ['Chờ thanh toán', 'secondary'],
+                                                'paid' => ['Đã thanh toán', 'success'],
+                                                'failed' => ['Thanh toán thất bại', 'danger'],
+                                            ];
+                                            [$paymentLabel, $paymentClass] = $paymentStatusMap[
+                                                $order->payment_status
+                                            ] ?? ['Không rõ', 'dark'];
+                                        @endphp
+
+                                        <address>
+                                            <div><span>Mã đơn hàng: </span> <span
+                                                    class="text-dark">{{ $order->sku }}</span></div>
+                                            <div><span>Phương thức thanh toán: </span> {{ $order->payment_method_name }}
+                                            </div>
+                                            <div>
+                                                <span>Trạng thái đơn hàng: </span>
+                                                <span class="badge bg-primary">{{ $order->order_status }}</span>
+                                                {{-- Nếu cần dịch thì tạo thêm map tương tự --}}
+                                            </div>
+                                            <div>
+                                                <span>Trạng thái thanh toán: </span>
+                                                <span class="badge bg-{{ $paymentClass }}">{{ $paymentLabel }}</span>
+                                            </div>
+                                        </address>
+                                    </div>
+
+                                </div>
+                                <div class="cr-chart-header">
+                                    <div class="block">
+                                        <h6>Đơn hàng</h6>
+                                        <h5>{{ $order->sku }}</h5>
+                                    </div>
+                                    <div class="block">
+                                        <h6>Tổng tiền</h6>
+                                        <h5>{{ number_format($order->total_amount, 0, ',', '.') }} đ</h5>
+                                        </h5>
+                                    </div>
+                                    {{-- <div class="block">
+                                        <h6>Quantity</h6>
+                                        <h5>30
+                                        </h5>
+                                    </div> --}}
+                                    <div class="block">
+                                        <h6>Ngày đặt</h6>
+                                        <h5>{{ $order->created_at->format('H:i d/m/Y') }}</h5>
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="table-responsive tbl-800">
+                                    <div>
+                                        <table class="table-invoice table-striped" style="width:100%">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Sản phẩm</th>
+                                                    <th>giá đặt</th>
+                                                    <th>số lượng</th>
+                                                    <th>tổng tiền</th>
+                                                    <th>giảm giá</th>
+                                                    <th>Tổng tiền</th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+                                                @foreach ($order->items as $index => $item)
+                                                    <tr>
+                                                        <td>{{ $index + 1 }}</td>
+                                                        <td class="d-flex align-items-start">
+                                                            <img class="invoice-item-img me-2"
+                                                                src="{{ asset('storage/' . $item->product_image) }}"
+                                                                alt="product-image"
+                                                                style="width: 50px; height: 50px; object-fit: cover;">
+
+                                                            <div>
+                                                                <div class="fw-semibold">{{ $item->product_name }}</div>
+                                                                @if (!empty($item->product_attribute))
+                                                                    <div class="text-muted small">
+                                                                        (Loại: {{ $item->product_attribute }})
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                        </td>
+
+                                                        <td>{{ number_format($item->unit_price, 0, ',', '.') }}đ </td>
+                                                        <td>{{ $item->quantity }}</td>
+                                                        <td>{{ number_format($item->unit_price * $item->quantity, 0, ',', '.') }}đ
+                                                        </td>
+                                                        <td>-{{ number_format($item->discount_amount, 0, ',', '.') ?? 0 }}đ
+                                                        </td>
+                                                        <td>{{ number_format($item->total_price, 0, ',', '.') }}đ </td>
+
+                                                    </tr>
+                                                @endforeach
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="row justify-content-end inc-total">
+                                    <div class="col-lg-8 order-lg-1 order-md-2 order-sm-2">
+                                        <div class="note">
+                                            @if ($order->note)
+                                                <label>Ghi chú:</label>
+                                                <p>{{ $order->note }}</p>
+                                            @endif
+
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 order-lg-2 order-md-1 order-sm-1">
+                                        @php
+                                            $productDiscount = $order->items->sum('discount_amount');
+                                            $orderDiscount = $order->discount_amount;
+                                            $isProductDiscount = $productDiscount > 0;
+                                            $isOrderDiscount = $orderDiscount > $productDiscount;
+                                        @endphp
+
+                                        <ul class="list-unstyled">
+                                            <li class="mid pb-3 text-dark">Tổng tiền sản phẩm:
+                                                <span class="d-inline-block float-right text-default">
+                                                    {{ number_format(
+                                                        $order->items->sum(function ($item) {
+                                                            return $item->unit_price * $item->quantity;
+                                                        }),
+                                                        0,
+                                                        ',',
+                                                        '.',
+                                                    ) }}đ
+                                                </span>
+                                            </li>
+
+                                            @if ($isProductDiscount)
+                                                <li class="mid pb-3 text-dark">
+                                                    Giảm giá theo sản phẩm: <br>(mã: {{ $order->discount_code }})
+                                                    <span class="d-inline-block float-right text-default">
+                                                        -{{ number_format($productDiscount, 0, ',', '.') }}đ
+                                                    </span>
+                                                </li>
+                                            @endif
+
+                                            @if ($isOrderDiscount)
+                                                <li class="mid pb-3 text-dark">
+                                                    Giảm giá toàn đơn: <br>(mã: {{ $order->discount_code }})
+                                                    <span class="d-inline-block float-right text-default">
+                                                        -{{ number_format($orderDiscount - $productDiscount, 0, ',', '.') }}đ
+                                                    </span>
+                                                </li>
+                                            @endif
+
+
+
+                                            <li class="mid pb-3 text-dark">Phí vận chuyển:
+                                                <span class="d-inline-block float-right text-default">
+                                                    {{ number_format($order->shipping_fee, 0, ',', '.') }}đ
+                                                </span>
+                                            </li>
+
+                                            <li class="text-dark">Tổng tiền đơn hàng:
+                                                <span class="d-inline-block float-right">
+                                                    {{ number_format($order->total_amount, 0, ',', '.') }}đ
+                                                </span>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection

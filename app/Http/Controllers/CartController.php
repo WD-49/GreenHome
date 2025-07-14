@@ -15,53 +15,53 @@ class CartController extends Controller
      * Hiển thị giỏ hàng nhỏ (mini cart)
      */
 
-   public function index()
-{
-    $user = Auth::user();
-    $items = collect(); // Tạo collection rỗng mặc định
+    public function index()
+    {
+        $user = Auth::user();
+        $items = collect(); // Tạo collection rỗng mặc định
 
-    if ($user) {
-        $cartItems = CartItem::with(['productVariant.product'])
-            ->where('user_id', $user->id)
-            ->get();
+        if ($user) {
+            $cartItems = CartItem::with(['productVariant.product'])
+                ->where('user_id', $user->id)
+                ->get();
 
-        $items = $cartItems->map(function ($item) {
-            $variant = $item->productVariant;
-            $product = $variant->product ?? null;
+            $items = $cartItems->map(function ($item) {
+                $variant = $item->productVariant;
+                $product = $variant->product ?? null;
 
-            return [
-                'id' => $item->id,
-                'slug' => $product?->slug,
-                'name' => $product?->name ?? 'Sản phẩm',
-                'image' => $variant?->image ?? $product?->image ?? 'default.jpg',
-                'price' => $item->unit_price ?? $variant?->price ?? 0,
-                'quantity' => $item->quantity ?? 1,
-            ];
-        });
-    } else {
-        $sessionCart = session()->get('cart', []);
-        $items = collect($sessionCart)->map(function ($item) {
-            return [
-                'id' => $item['variant_id'],
-                'slug' => $item['slug'] ?? null,
-                'name' => $item['name'] ?? 'Sản phẩm',
-                'image' => $item['image'] ?? 'default.jpg',
-                'price' => $item['price'] ?? 0,
-                'quantity' => $item['quantity'] ?? 1,
-            ];
-        });
+                return [
+                    'id' => $item->id,
+                    'slug' => $product?->slug,
+                    'name' => $product?->name ?? 'Sản phẩm',
+                    'image' => $variant?->image ?? $product?->image ?? 'default.jpg',
+                    'price' => $item->unit_price ?? $variant?->price ?? 0,
+                    'quantity' => $item->quantity ?? 1,
+                ];
+            });
+        } else {
+            $sessionCart = session()->get('cart', []);
+            $items = collect($sessionCart)->map(function ($item) {
+                return [
+                    'id' => $item['variant_id'],
+                    'slug' => $item['slug'] ?? null,
+                    'name' => $item['name'] ?? 'Sản phẩm',
+                    'image' => $item['image'] ?? 'default.jpg',
+                    'price' => $item['price'] ?? 0,
+                    'quantity' => $item['quantity'] ?? 1,
+                ];
+            });
+        }
+
+        // Tính tổng
+        $subtotal = $items->sum(fn($i) => $i['price'] * $i['quantity']);
+        $vat = $subtotal * 0.2;
+        $total = $subtotal + $vat;
+
+        $vouchers = Discount::where('status', 'active')->get();
+        dd($items);
+
+        return view('client.partials.miniCart', compact('items', 'subtotal', 'vat', 'total', 'vouchers'));
     }
-
-    // Tính tổng
-    $subtotal = $items->sum(fn($i) => $i['price'] * $i['quantity']);
-    $vat = $subtotal * 0.2;
-    $total = $subtotal + $vat;
-
-    $vouchers = Discount::where('status', 'active')->get();
-    dd($items);
-
-    return view('client.partials.miniCart', compact('items', 'subtotal', 'vat', 'total', 'vouchers'));
-}
 
 
     /**
@@ -116,11 +116,10 @@ class CartController extends Controller
         //     'message' => 'Đã thêm vào giỏ hàng',
         // ]);
         return response()->json([
-    'success' => true,
-    'message' => 'Đã thêm vào giỏ hàng',
-    'slug' => $variant->product->slug,
-]);
-
+            'success' => true,
+            'message' => 'Đã thêm vào giỏ hàng',
+            'slug' => $variant->product->slug,
+        ]);
     }
 
     /**
@@ -142,53 +141,51 @@ class CartController extends Controller
     /**
      * Trang thanh toán
      */
-    
-       public function checkout()
-{
-    $user = Auth::user();
-    $items = collect();
 
-    if ($user) {
-        $cartItems = CartItem::with(['productVariant.product'])
-            ->where('user_id', $user->id)
-            ->get();
+    public function checkout()
+    {
+        $user = Auth::user();
+        $items = collect();
 
-        $items = $cartItems->map(function ($item) {
-            $variant = $item->productVariant;
-            $product = $variant?->product;
+        if ($user) {
+            $cartItems = CartItem::with(['productVariant.product'])
+                ->where('user_id', $user->id)
+                ->get();
 
-            return [
-                'id' => $item->id,
-                'slug' => $product?->slug,
-                'name' => $product?->name ?? 'Sản phẩm',
-                'image' => $variant?->image ?? $product?->image ?? 'default.jpg',
-                'price' => $item->unit_price ?? $variant?->price ?? 0,
-                'quantity' => $item->quantity ?? 1,
-            ];
-        });
-    } else {
-        $sessionCart = session()->get('cart', []);
-        $items = collect($sessionCart)->map(function ($item) {
-            return [
-                'id' => $item['variant_id'],
-                'slug' => $item['slug'] ?? null,
-                'name' => $item['name'] ?? 'Sản phẩm',
-                'image' => $item['image'] ?? 'default.jpg',
-                'price' => $item['price'] ?? 0,
-                'quantity' => $item['quantity'] ?? 1,
-            ];
-        });
-    }
+            $items = $cartItems->map(function ($item) {
+                $variant = $item->productVariant;
+                $product = $variant?->product;
 
-    $subtotal = $items->sum(fn($i) => $i['price'] * $i['quantity']);
-    $vat = $subtotal * 0.2;
-    $total = $subtotal + $vat;
+                return [
+                    'id' => $item->id,
+                    'slug' => $product?->slug,
+                    'name' => $product?->name ?? 'Sản phẩm',
+                    'image' => $variant?->image ?? $product?->image ?? 'default.jpg',
+                    'price' => $item->unit_price ?? $variant?->price ?? 0,
+                    'quantity' => $item->quantity ?? 1,
+                ];
+            });
+        } else {
+            $sessionCart = session()->get('cart', []);
+            $items = collect($sessionCart)->map(function ($item) {
+                return [
+                    'id' => $item['variant_id'],
+                    'slug' => $item['slug'] ?? null,
+                    'name' => $item['name'] ?? 'Sản phẩm',
+                    'image' => $item['image'] ?? 'default.jpg',
+                    'price' => $item['price'] ?? 0,
+                    'quantity' => $item['quantity'] ?? 1,
+                ];
+            });
+        }
 
-    $vouchers = Discount::where('status', 'active')->get();
+        $subtotal = $items->sum(fn($i) => $i['price'] * $i['quantity']);
+        $vat = $subtotal * 0.2;
+        $total = $subtotal + $vat;
 
-    return view('client.pages.checkout', compact('items', 'subtotal', 'vat', 'total', 'vouchers'));
+        $vouchers = Discount::where('status', 'active')->get();
 
-
+        return view('client.pages.checkout', compact('items', 'subtotal', 'vat', 'total', 'vouchers'));
     }
 
     /**
@@ -217,7 +214,7 @@ class CartController extends Controller
         $vat = $subtotal * 0.2;
         $total = $subtotal + $vat;
 
-return view('client.partials.miniCart', compact('items', 'subtotal', 'vat', 'total', 'vouchers'));
+        return view('client.partials.miniCart', compact('items', 'subtotal', 'vat', 'total', 'vouchers'));
     }
 
     public function updateQuantity(Request $request)
@@ -234,6 +231,4 @@ return view('client.partials.miniCart', compact('items', 'subtotal', 'vat', 'tot
         CartItem::destroy($id);
         return response()->json(['success' => true]);
     }
-
-
 }

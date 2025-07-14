@@ -55,7 +55,12 @@
                                     <li>
                                         <a class="dropdown-item"
                                             style="display: block; width: 100%; padding: 0.5rem 1rem; color: #212529; text-align: inherit; background-color: transparent; border: 0; font-size: 1rem;"
-                                            href="{{ route('profile.index') }}">Tài khoản của tôi</a>
+                                            href="{{ route('profile.index') }}">Thông tin cá nhân</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item"
+                                            style="display: block; width: 100%; padding: 0.5rem 1rem; color: #212529; text-align: inherit; background-color: transparent; border: 0; font-size: 1rem;"
+                                            href="{{ route('orders.list') }}">Đơn hàng</a>
                                     </li>
                                     <li>
                                         <form action="{{ route('logout') }}" method="POST">

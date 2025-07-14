@@ -106,12 +106,11 @@ Route::middleware(['auth'])->group(function () {
         ->middleware(['throttle:6,1']) // Middleware throttle vẫn được giữ nguyên
         ->name('verification.send'); //throttle:6,1 giới hạn người dùng gửi yêu cầu xác thực email 6 lần trong 1 phút
 
-         Route::post('/notifications/{id}/read', function ($id) {
+    Route::post('/notifications/{id}/read', function ($id) {
         $notification = auth()->user()->notifications()->findOrFail($id);
         $notification->markAsRead();
         return response()->noContent();
     })->name('notifications.read');
-
 });
 
 Route::get('/test-notify', function () {
@@ -249,7 +248,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::delete('/forceDeleteUser/{id}', [AccountUsersController::class, 'forceDeleteUser'])->name('forceDeleteUser');
         Route::post('/resetPassUser/{id}', [AccountUsersController::class, 'resetPassUser'])->name('resetPassUser');
         Route::get('/orders/{order}/ajax-details', [AccountUsersController::class, 'getAjaxOrderDetails'])
-            ->name('order.ajaxDetails');   
+            ->name('order.ajaxDetails');
         // ROUTE MỚI CHO PHÂN QUYỀN
         Route::post('toggleUserRole/{user}', [AccountUsersController::class, 'toggleUserRole'])->name('toggleUserRole');
         // Admins
@@ -435,9 +434,18 @@ route::prefix('cart')->middleware('auth')->name('cart.')->group(function () {
     Route::post('/update-quantity/{id}', [CartController::class, 'updateQuantity'])->name('updateQuantity');
     Route::post('/delete-multiple', [CartController::class, 'deleteMultiple'])->name('deleteMultiple');
 });
-route::get('/checkout', [CheckoutController::class, 'index'])->middleware('auth')->name('checkout.index');
-Route::get('/checkout/data', [CheckoutController::class, 'getCheckoutData'])->middleware('auth')->name('checkout.data');
-Route::post('/checkout/submit', [CheckoutController::class, 'submit'])->name('checkout.submit');
+
+route::middleware('auth')->prefix('checkout')->name('checkout.')->group(function () {
+    Route::get('/', [CheckoutController::class, 'index'])->name('index');
+    Route::get('/data', [CheckoutController::class, 'getCheckoutData'])->name('data');
+    Route::post('/submit', [CheckoutController::class, 'submit'])->name('submit');
+});
+
+route::middleware('auth')->prefix('orders')->name('orders.')->group(function () {
+    Route::get('/', [CheckoutController::class, 'list'])->name('list');
+    Route::get('/{order:sku}', [CheckoutController::class, 'show'])->name('show');
+    Route::post('/cancel/{sku}', [CheckoutController::class, 'cancel'])->name('cancel');
+});
 
 
 Route::get('/blog/{slug}', [App\Http\Controllers\client\BlogDetailController::class, 'show'])->name('blog.detail');
@@ -448,4 +456,3 @@ Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product
 
 Route::post('/review/submit', [ProductClientController::class, 'submitReview'])->name('client.review.submit');
 Route::post('/comment/submit', [ProductClientController::class, 'submitComment'])->name('client.comment.submit');
-

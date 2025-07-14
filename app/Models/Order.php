@@ -55,6 +55,15 @@ class Order extends Model
         return !in_array($this->order_status, $nonCancellableStatuses);
     }
 
+    public function canBeCancel(): bool
+    {
+        $nonCancellableStatuses = ['Đang vận chuyển', 'Giao hàng thành công', 'Hủy đơn'];
+
+        return !in_array($this->order_status, $nonCancellableStatuses)
+            && $this->payment_status !== 'paid';
+    }
+
+
     public static function generateUniqueSku()
     {
         do {
