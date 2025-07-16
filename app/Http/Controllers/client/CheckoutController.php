@@ -13,12 +13,14 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\DiscountUsage;
 use App\Models\PaymentMethod;
+use App\Mail\OrderInvoiceMail;
 use App\Models\ProductVariant;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Mail;
 
 class CheckoutController extends Controller
 {
@@ -241,6 +243,8 @@ class CheckoutController extends Controller
                     'used_at' => now(),
                 ]);
             }
+            $order->load(['items', 'user']);
+            Mail::to($user->email)->queue(new OrderInvoiceMail($order, $user));
 
             DB::commit();
             return response()->json(['success' => true]);
