@@ -72,20 +72,19 @@
             <i class="bi bi-three-dots-vertical"></i>
         </button>
         <ul class="dropdown-menu dropdown-menu-end shadow">
-            <li>
+            {{-- <li>
                 <a href="{{ route('admin.discount.historyDetail', $usage->id) }}" class="dropdown-item">
                     <i class="bi bi-eye text-primary me-2"></i> Xem
                 </a>
-            </li>
+            </li> --}}
+              <li>
+        <a href="{{ route('admin.orders.show', $usage->order->id) }}" class="dropdown-item">
+            <i class="bi bi-eye text-primary me-2"></i> Xem đơn hàng
+        </a>
+    </li>
            
             <li>
-                {{-- <form action="" method="POST" onsubmit="return confirm('Bạn có muốn xóa mã này không?')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="dropdown-item">
-                        <i class="bi bi-trash text-danger me-2"></i> Xóa
-                    </button>
-                </form> --}}
+               
             </li>
         </ul>
     </div>

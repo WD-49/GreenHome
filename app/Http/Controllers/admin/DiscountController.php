@@ -436,7 +436,8 @@ $products = Product::with(['productVariants'])->get();
             });
         }
 
-        $usages = $query->orderByDesc('used_at')->paginate(20);
+      $usages = $query->with('order')->orderByDesc('used_at')->paginate(20);
+
         // dd($usages);
 
         return view('admin.discount.history', compact('usages'));

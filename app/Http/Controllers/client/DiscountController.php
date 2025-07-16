@@ -16,66 +16,120 @@ class DiscountController extends Controller
 
 
 
-
     public function showEligibleProducts(Request $request, $code)
 {
+    
+    // Lấy voucher
     $voucher = Discount::where('code', $code)->firstOrFail();
 
+    // Query sản phẩm áp dụng mã giảm giá
     $products = Product::query()
-        ->whereHas('discounts', fn($q) => $q->where('code', $code))
+        ->when($voucher->applies_to_all_products, function ($query) {
+            $query->whereNull('deleted_at');
+        }, function ($query) use ($code) {
+            $query->whereHas('discounts', function ($q) use ($code) {
+                $q->where('code', $code);
+            });
+        })
         ->with(['brand', 'productVariants', 'reviews'])
         ->withCount('reviews')
         ->withAvg('reviews', 'rating');
 
-    // Lọc theo danh mục
-   $categoryId = $request->input('category_id');
-if (!empty($categoryId)) {
-    $products->where('category_id', $categoryId);
+
+     
+             // Tìm kiếm theo tên sản phẩm hoặc mô tả
+if ($request->filled('search')) {
+    $searchTerm = $request->input('search');
+    $products->where(function ($query) use ($searchTerm) {
+        $query->where('name', 'like', '%' . $searchTerm . '%')
+              ->orWhere('description', 'like', '%' . $searchTerm . '%');
+    });
 }
 
-    // Lọc theo thương hiệu
-    $brandIds = $request->input('brand_id', []);
-    if (!empty($brandIds)) {
-        $products->whereIn('brand_id', (array) $brandIds);
-    }
 
-    // Lọc theo biến thể (attribute_values)
+
+
+
+
+    // ✅ Lọc danh mục
+    $selectedCategories = array_filter($request->input('categories', []));
+        if (!empty($selectedCategories)) {
+            $products->whereIn('category_id', $selectedCategories);
+        }
+     // Lọc thương hiệu
+        $selectedBrandId = $request->input('brand_id');
+        if (!empty($selectedBrandId)) {
+            $products->where('brand_id', $selectedBrandId);
+        }
+
+
+    // ✅ Lọc theo số sao đánh giá
+     // Lọc theo số sao đánh giá
+        if ($request->filled('rating')) {
+    $star = intval($request->input('rating'));
+
+    $productsQuery->whereIn('id', function ($sub) use ($star) {
+        $sub->select('products.id')
+            ->from('products')
+            ->join('product_variants', 'products.id', '=', 'product_variants.product_id')
+            ->join('reviews', 'product_variants.id', '=', 'reviews.product_variant_id')
+            ->whereNull('reviews.deleted_at')
+            ->groupBy('products.id')
+            ->havingRaw('AVG(reviews.rating) >= ?', [$star])
+            ->havingRaw('AVG(reviews.rating) < ?', [$star + 1]);
+    }); 
+
+    
+}
+
+
+    // ✅ Lọc theo biến thể (attribute_values)
     if ($request->filled('attribute_values')) {
-        $products->whereHas('productVariants.attributeValues', function ($q) use ($request) {
-            $q->whereIn('attribute_value_id', $request->attribute_values);
+        $attributeValueIds = collect($request->input('attribute_values', []))->map(fn($id) => (int) $id);
+
+        // Lấy danh sách Attribute ID và group lại theo thuộc tính
+        $attributeValues = AttributeValue::with('attribute')->whereIn('id', $attributeValueIds)->get();
+        $groupedByAttr = $attributeValues->groupBy(fn($val) => $val->attribute->id);
+
+        foreach ($groupedByAttr as $attributeId => $values) {
+            $valueIds = $values->pluck('id')->toArray();
+
+            $products->whereHas('productVariants.productVariantValues', function ($q) use ($valueIds) {
+                $q->whereIn('attribute_value_id', $valueIds);
+            });
+        }
+    }
+
+    // ✅ Lọc theo khoảng giá
+    $min = $request->input('min_price');
+    $max = $request->input('max_price');
+    if ($min !== null || $max !== null) {
+        $min = is_numeric($min) ? floatval($min) : 0;
+        $max = is_numeric($max) && floatval($max) > 0 ? floatval($max) : 1000000000;
+
+        if ($min > $max) {
+            [$min, $max] = [$max, $min];
+        }
+
+        $products->whereHas('productVariants', function ($q) use ($min, $max) {
+            $q->whereBetween('price', [$min, $max]);
         });
     }
 
-    // Lọc theo đánh giá
-    if ($request->filled('rating')) {
-        $products->having('reviews_avg_rating', '>=', (int) $request->rating);
-    }
-
-    // Lọc theo giá
-    if ($request->filled('min_price') || $request->filled('max_price')) {
-        $products->whereHas('productVariants', function ($q) use ($request) {
-            if ($request->filled('min_price')) {
-                $q->where('price', '>=', $request->min_price);
-            }
-            if ($request->filled('max_price')) {
-                $q->where('price', '<=', $request->max_price);
-            }
-        });
-    }
-
-    // Sắp xếp
+    // ✅ Sắp xếp
     if ($request->filled('sort')) {
         match ($request->sort) {
             'latest' => $products->latest(),
             'oldest' => $products->oldest(),
-         'hot' => $products->orderByDesc('created_at'), // hoặc orderBy('reviews_avg_rating', 'desc')
-
-            default  => null,
+            'hot' => $products->orderByDesc('created_at'), // Hoặc theo reviews_avg_rating
+            default => null,
         };
     }
 
+    // ✅ Phân trang
     $products = $products->paginate(12);
 
+    // ✅ Dữ liệu filter
     $categories = Category::withCount('products')->get();
     $brands = Brand::withCount('products')->get();
     $attributeValues = AttributeValue::with('attribute')->get();
@@ -88,6 +142,7 @@ if (!empty($categoryId)) {
         'attributeValues'
     ));
 }
+
 
 
 

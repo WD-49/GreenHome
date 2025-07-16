@@ -21,6 +21,9 @@ class ShopController extends Controller
         $productsQuery = Product::query()
             ->with(['brand', 'productVariants.productVariantValues', 'productVariants.reviews'])
             ->where('status', 1);
+
+
+            
             // Tìm kiếm theo tên sản phẩm hoặc mô tả
 if ($request->filled('search')) {
     $searchTerm = $request->input('search');
