@@ -68,7 +68,7 @@ if ($request->filled('search')) {
         if ($request->filled('rating')) {
     $star = intval($request->input('rating'));
 
-    $productsQuery->whereIn('id', function ($sub) use ($star) {
+    $products->whereIn('id', function ($sub) use ($star) {
         $sub->select('products.id')
             ->from('products')
             ->join('product_variants', 'products.id', '=', 'product_variants.product_id')
