@@ -1,27 +1,6 @@
+{{-- resources/views/client/pages/profile.blade.php --}}
 @extends('layouts.app')
 @section('title', 'Thông tin cá nhân của ' . $user->name) {{-- Thay đổi tiêu đề cho phù hợp với trang cá nhân --}}
-
-{{-- Đặt ở đầu phần nội dung chính của trang --}}
-@if (session('success'))
-    <div class="alert alert-success">
-        {{ session('success') }}
-    </div>
-@endif
-@if (session('error'))
-    <div class="alert alert-danger">
-        {{ session('error') }}
-    </div>
-@endif
-{{-- Đây là khối chung để hiển thị tất cả lỗi validation nếu bạn có --}}
-@if ($errors->any())
-    <div class="alert alert-danger">
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
 
 <style>
     .avatar-xxl {
@@ -116,6 +95,27 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
             integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
     </head>
+    {{-- Đặt ở đầu phần nội dung chính của trang --}}
+    @if (session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
+    @if (session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
+    {{-- Đây là khối chung để hiển thị tất cả lỗi validation nếu bạn có --}}
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     <div class="container-xxl">
         <div class="py-3 d-flex align-items-sm-center flex-sm-row flex-column">
             <div class="flex-grow-1">
@@ -312,7 +312,7 @@
                                             </div>
                                         @enderror
                                     </div>
-                                    <div class="form-group mb-3">
+                                    {{-- <div class="form-group mb-3">
                                         <label for="address">Địa chỉ:</label>
                                         <input type="text" class="form-control" id="address" name="address"
                                             value="{{ old('address', $data['profile']->address ?? '') }}">
@@ -321,13 +321,72 @@
                                                 {{ $message }}
                                             </div>
                                         @enderror
+                                    </div> --}}
+                                    @php
+                                        $addressParts = explode(', ', $data['profile']->address ?? '');
+                                        $street   = $addressParts[0] ?? '';
+                                        $ward     = $addressParts[1] ?? '';
+                                        $district = $addressParts[2] ?? '';
+                                        $province = $addressParts[3] ?? '';
+                                    @endphp
+                                    <div class="form-group mt-3">
+                                        <label for="province">Tỉnh/Thành phố</label>
+                                        <select id="province" class="form-control">
+                                            <option value="">-- Chọn Tỉnh/TP --</option>
+                                        </select>
+                                        @error('address')
+                                            <div class="invalid-feedback">
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
                                     </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="district">Quận/Huyện</label>
+                                        <select id="district" class="form-control" disabled>
+                                            <option value="">-- Chọn Quận/Huyện --</option>
+                                        </select>
+                                        @error('address')
+                                            <div class="invalid-feedback">
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="ward">Phường/Xã</label>
+                                        <select id="ward" class="form-control" disabled>
+                                            <option value="">-- Chọn Phường/Xã --</option>
+                                        </select>
+                                        @error('address')
+                                            <div class="invalid-feedback">
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="street">Số nhà, tên đường</label>
+                                        <input type="text" id="street" class="form-control" value="{{ old('street', $street) }}">
+                                        @error('address')
+                                            <div class="invalid-feedback">
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
+
+                                    {{-- Trường ẩn để lưu chuỗi đầy đủ --}}
+                                    {{-- <input type="hidden" name="address" id="full_address"> input ẩn không được xóa, lưu dl ẩn kho sửa địa chỉ --}} 
+
+                                    {{-- Trường ẩn để lưu chuỗi đầy đủ --}}
+                                    <input type="hidden" name="address" id="full_address">
                                     <div class="form-group mb-3">
                                         <label for="gender">Giới tính:</label>
                                         <select class="form-control" id="gender" name="gender">
                                             <option value=""
                                                 {{ old('gender', $data['profile']->gender ?? '') == '' ? 'selected' : '' }}>
-                                                -- Chọn giới tính --</option>
+                                                -- Chọn giới tính --
+                                            </option>
                                             <option value="nam"
                                                 {{ old('gender', $data['profile']->gender ?? '') == 'nam' ? 'selected' : '' }}>
                                                 Nam</option>
@@ -892,6 +951,89 @@
         <script>
             $(document).ready(function() {
                 const csrfTokenGlobal = $('meta[name="csrf-token"]').attr('content');
+
+                // BẮT ĐẦU PHẦN LOAD ĐỊA CHỈ
+                const oldProvince = @json($province);
+                const oldDistrict = @json($district);
+                const oldWard     = @json($ward);
+
+
+                // Load danh sách Tỉnh
+                $.get('https://provinces.open-api.vn/api/?depth=1', function (provinces) {
+                    $('#province').html('<option value="">-- Chọn Tỉnh/TP --</option>');
+                    provinces.forEach(p => {
+                        const selected = p.name === oldProvince ? 'selected' : '';
+                        $('#province').append(`<option value="${p.code}" ${selected}>${p.name}</option>`);
+                    });
+
+                    // Nếu có tỉnh cũ → load quận
+                    const selectedProvince = provinces.find(p => p.name === oldProvince);
+                    if (selectedProvince) {
+                        loadDistricts(selectedProvince.code, oldDistrict, oldWard);
+                    }
+                });
+
+                // Khi chọn tỉnh → load quận
+                $('#province').on('change', function () {
+                    const provinceCode = $(this).val();
+                    loadDistricts(provinceCode);
+                });
+
+                // Hàm load quận
+                function loadDistricts(provinceCode, selectedDistrictName = null, selectedWardName = null) {
+                    if (!provinceCode) return;
+                    $('#district').html('<option>Đang tải...</option>').prop('disabled', true);
+                    $('#ward').html('<option>-- Chọn Phường/Xã --</option>').prop('disabled', true);
+
+                    $.get(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`, function (provinceData) {
+                        $('#district').html('<option value="">-- Chọn Quận/Huyện --</option>');
+                        provinceData.districts.forEach(d => {
+                            const selected = d.name === selectedDistrictName ? 'selected' : '';
+                            $('#district').append(`<option value="${d.code}" ${selected}>${d.name}</option>`);
+                        });
+                        $('#district').prop('disabled', false);
+
+                        // Nếu có quận cũ → load phường
+                        const selectedDistrict = provinceData.districts.find(d => d.name === selectedDistrictName);
+                        if (selectedDistrict && selectedWardName) {
+                            loadWards(selectedDistrict.code, selectedWardName);
+                        }
+                    });
+                }
+
+                // Khi chọn quận → load phường
+                $('#district').on('change', function () {
+                    const districtCode = $(this).val();
+                    loadWards(districtCode);
+                });
+
+                // Hàm load phường
+                function loadWards(districtCode, selectedWardName = null) {
+                    if (!districtCode) return;
+                    $('#ward').html('<option>Đang tải...</option>').prop('disabled', true);
+
+                    $.get(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`, function (districtData) {
+                        $('#ward').html('<option value="">-- Chọn Phường/Xã --</option>');
+                        districtData.wards.forEach(w => {
+                            const selected = w.name === selectedWardName ? 'selected' : '';
+                            $('#ward').append(`<option value="${w.code}" ${selected}>${w.name}</option>`);
+                        });
+                        $('#ward').prop('disabled', false);
+                    });
+                }
+
+                // Ghép địa chỉ khi submit
+                $('form').on('submit', function () {
+                    const province = $('#province option:selected').text();
+                    const district = $('#district option:selected').text();
+                    const ward = $('#ward option:selected').text();
+                    const street = $('#street').val();
+
+                    const fullAddress = `${street}, ${ward}, ${district}, ${province}`;
+                    $('#full_address').val(fullAddress);
+                });
+
+                // HẾT PHẦN LOAD ĐỊA CHỈ API
 
                 // Khởi tạo tất cả tooltips khi trang tải
                 if ($.fn.tooltip) { // Kiểm tra nếu Bootstrap tooltip đã được tải
