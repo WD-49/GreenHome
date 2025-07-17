@@ -8,37 +8,72 @@
 </head>
 
 <body
-    style="font-family: Arial, sans-serif; font-size:14px; color:#333; background-color:#f9f9f9; margin:0; padding:20px;">
+    style="font-family: Arial, sans-serif; font-size:16px; color:#333; background-color:#f9f9f9; margin:0; padding:20px;">
 
     <table width="100%" cellpadding="0" cellspacing="0"
-        style="max-width: 600px; margin: 0 auto; background: #fff; border-collapse: collapse; border: 1px solid #e0e0e0;">
+        style="max-width: 1200px; margin: 0 auto; background: #fff; border-collapse: collapse; border: 1px solid #e0e0e0;">
         <tr>
-            <td style="padding: 20px; text-align: center;">
+            <td style="padding: 28px; text-align: center;">
                 <h2 style="margin: 0;">Thông tin đơn hàng</h2>
                 <p style="margin: 5px 0;">Mã đơn: <strong>{{ $order->sku }}</strong></p>
             </td>
         </tr>
 
+        <!-- Hàng ngang chứa 3 cột: Người đặt, Người nhận, Chi tiết -->
         <tr>
-            <td style="padding: 20px;">
-                <h3 style="margin-bottom: 5px;">Người đặt</h3>
-                <p style="margin: 0;">{{ $user->name }}</p>
-                <p style="margin: 0;">{{ $user->profile->address ?? '' }}</p>
-                <p style="margin: 0;">{{ $user->email }} | {{ $user->profile->phone ?? '' }}</p>
+            <td style="padding: 28px;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="width: 100%; table-layout: fixed;">
+                    <tr>
+                        <!-- Người đặt -->
+                        <td style="vertical-align: top; width: 33.33%; padding-right: 10px;">
+                            <h4 style="margin-bottom: 5px;">Người đặt</h4>
+                            <p style="margin: 0;">{{ $user->name }}</p>
+                            <p style="margin: 0;">{{ $user->profile->address ?? '' }}</p>
+                            <p style="margin: 0;">{{ $user->email }}</p>
+                            <p style="margin: 0;">{{ $user->profile->phone ?? '' }}</p>
+                        </td>
+
+                        <!-- Người nhận -->
+                        <td style="vertical-align: top; width: 33.33%; padding-right: 10px;">
+                            <h4 style="margin-bottom: 5px;">Người nhận</h4>
+                            <p style="margin: 0;">{{ $order->shipping_name }}</p>
+                            <p style="margin: 0;">{{ $order->shipping_address }}</p>
+                            <p style="margin: 0;">{{ $order->shipping_phone }}</p>
+                        </td>
+
+                        <!-- Chi tiết -->
+                        <td style="vertical-align: top; width: 33.33%;">
+                            @php
+                                $paymentStatusMap = [
+                                    'pending' => ['Chờ thanh toán', '#6c757d'],
+                                    'paid' => ['Đã thanh toán', '#198754'],
+                                    'failed' => ['Thanh toán thất bại', '#dc3545'],
+                                ];
+                                [$paymentLabel, $paymentColor] = $paymentStatusMap[$order->payment_status] ?? [
+                                    'Không rõ',
+                                    '#333',
+                                ];
+                            @endphp
+                            <h4 style="margin-bottom: 5px;">Chi tiết</h4>
+                            <p style="margin: 0;"><strong>Mã đơn:</strong> {{ $order->sku }}</p>
+                            <p style="margin: 0;"><strong>Phương thức:</strong> {{ $order->payment_method_name }}</p>
+                            <p style="margin: 0;"><strong>Trạng thái đơn:</strong> {{ $order->order_status }}</p>
+                            <p style="margin: 0;">
+                                <strong>Trạng thái TT:</strong>
+                                <span
+                                    style="color: white; background: {{ $paymentColor }}; padding: 2px 6px; border-radius: 4px; font-size: 12px;">
+                                    {{ $paymentLabel }}
+                                </span>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
             </td>
         </tr>
 
-        <tr>
-            <td style="padding: 20px;">
-                <h3 style="margin-bottom: 5px;">Người nhận</h3>
-                <p style="margin: 0;">{{ $order->shipping_name }}</p>
-                <p style="margin: 0;">{{ $order->shipping_address }}</p>
-                <p style="margin: 0;">{{ $order->shipping_phone }}</p>
-            </td>
-        </tr>
 
         <tr>
-            <td style="padding: 20px;">
+            <td style="padding: 28px;">
                 <h3>Chi tiết đơn hàng</h3>
                 <table width="100%" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
                     <thead>
@@ -75,7 +110,7 @@
         </tr>
 
         <tr>
-            <td style="padding: 20px;">
+            <td style="padding: 28px;">
                 <table width="100%" style="border-collapse: collapse;">
                     <tr>
                         <td align="left"><strong>Tổng tiền sản phẩm:</strong></td>
@@ -112,7 +147,7 @@
         </tr>
 
         <tr>
-            <td style="padding: 20px; text-align: center; font-size: 13px; color: #888;">
+            <td style="padding: 28px; text-align: center; font-size: 13px; color: #888;">
                 Cảm ơn bạn đã mua hàng tại GreenHome!<br>
                 Nếu có bất kỳ câu hỏi nào về đơn hàng, vui lòng liên hệ với chúng tôi qua email hoặc số điện thoại
                 trên trang web.<br>
