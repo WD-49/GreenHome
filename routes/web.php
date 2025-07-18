@@ -6,13 +6,15 @@ use Doctrine\DBAL\Schema\Index;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
+use App\Http\Controllers\PaymentController;
+use Doctrine\DBAL\Schema\Index as DBALIndex;
 use App\Http\Controllers\admin\BlogController;
 use App\Http\Controllers\Auth\LoginController;
+
 use App\Http\Controllers\admin\BrandController;
+
 use App\Http\Controllers\admin\OrderController;
-
 use App\Http\Controllers\client\CartController;
-
 use App\Http\Controllers\client\HomeController;
 use App\Http\Controllers\Client\ShopController;
 use App\Http\Controllers\admin\BannerController;
@@ -22,14 +24,14 @@ use App\Http\Controllers\Admin\WebInfoController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\admin\CategoryController;
 use App\Http\Controllers\admin\DiscountController;
+
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\Client\ProfileController;
 
 use App\Http\Controllers\admin\AttributeController;
+
 use App\Http\Controllers\admin\DashboardController;
-
 use App\Http\Controllers\client\CheckoutController;
-
 use App\Http\Controllers\client\WishlistController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\admin\OrderStatusController;
@@ -47,7 +49,6 @@ use App\Http\Controllers\admin\Product\ProductVariantController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\client\BlogController as ClientBlogController;
 use App\Http\Controllers\Client\DiscountController as ClientDiscountController;
-use Doctrine\DBAL\Schema\Index as DBALIndex;
 
 
 Route::get('/test-reset/{token}', function ($token) {
@@ -446,6 +447,11 @@ route::middleware('auth')->prefix('orders')->name('orders.')->group(function () 
     Route::get('/{order:sku}', [CheckoutController::class, 'show'])->name('show');
     Route::post('/cancel/{sku}', [CheckoutController::class, 'cancel'])->name('cancel');
 });
+
+// web.php
+Route::post('/checkout/payment', [PaymentController::class, 'createPaymentUrl'])->name('payment.vnpay');
+Route::get('/payment/vnpay-return', [PaymentController::class, 'vnpayReturn'])->name('payment.vnpay.return');
+
 
 
 Route::get('/blog/{slug}', [App\Http\Controllers\client\BlogDetailController::class, 'show'])->name('blog.detail');

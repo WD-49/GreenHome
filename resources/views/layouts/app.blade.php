@@ -50,16 +50,6 @@
     <!-- Header -->
     <header>
         @include('client.partials.header')
-        {{-- @auth
-    @if (!Auth::user()->hasVerifiedEmail())
-        <div class="email-verify-reminder">
-            <a href="{{ route('profile.index') }}" title="Xác minh email để sử dụng đầy đủ tính năng!">
-                <i class="ri-error-warning-line"></i>
-                <span>Chưa xác minh email</span>
-            </a>
-        </div>
-    @endif
-@endauth --}}
 
     </header>
 
@@ -187,7 +177,7 @@
 
     {{-- js cho thông báo --}}
     {{-- do dòng này --}}
-    @Vite(['resources/js/app.js']); 
+    @Vite(['resources/js/app.js']);
     @stack('scripts')
 </body>
 
