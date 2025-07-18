@@ -512,13 +512,18 @@
                 .then(res => res.json())
                 .then(res => {
                     if (res.success) {
-                        alert('Đặt hàng thành công! Cảm ơn bạn đã mua sắm tại GreenHome.');
-
-                        window.location.href = '/'; // hoặc trang cảm ơn
+                        if (res.redirect_url) {
+                            // Nếu backend trả về link thanh toán, redirect sang đó
+                            window.location.href = res.redirect_url;
+                        } else {
+                            alert('Đặt hàng thành công! Cảm ơn bạn đã mua sắm tại GreenHome.');
+                            window.location.href = '/'; // hoặc trang cảm ơn
+                        }
                     } else {
                         alert(res.message || 'Đặt hàng thất bại. Vui lòng thử lại.');
                     }
                 })
+
                 .catch(err => {
                     console.error(err);
                     alert('Có lỗi xảy ra khi đặt hàng.');

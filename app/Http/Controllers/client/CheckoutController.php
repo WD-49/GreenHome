@@ -21,6 +21,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
+use App\Http\Controllers\PaymentController;
 
 class CheckoutController extends Controller
 {
@@ -247,6 +248,15 @@ class CheckoutController extends Controller
             Mail::to($user->email)->queue(new OrderInvoiceMail($order, $user));
 
             DB::commit();
+            log::info('payment method: ' . $paymentMethod->name);
+            if (strtoupper($paymentMethod->name) === 'VNPAY') {
+                $redirectUrl = app(PaymentController::class)->createPaymentUrl($order);
+                return response()->json([
+                    'success' => true,
+                    'redirect_url' => $redirectUrl,
+                ]);
+            }
+
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
             DB::rollBack();
