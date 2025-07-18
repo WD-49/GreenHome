@@ -25,8 +25,11 @@
                     <input type="date" id="filter-to" class="form-control">
                 </div>
                 <div class="col-md-4 d-flex align-items-end">
-                    <button class="btn btn-primary" id="apply-filter">Áp dụng</button>
+                    <button class="btn btn-success" id="apply-filter">Áp dụng</button>
+                    <a href="{{ route('admin.dashboard') }}"><button class="btn btn-primary">làm
+                            mới</button></a>
                 </div>
+
             </div>
 
             <div class="row g-3">
@@ -209,12 +212,12 @@
                         <div class="border border-dark rounded-2 me-2 widget-icons-sections">
                             <i data-feather="bar-chart" class="widgets-icons"></i>
                         </div>
-                        <h5 class="card-title mb-0">Repeat Customer Rate</h5>
+                        <h5 class="card-title mb-0">Tỷ lệ khách hàng quay lại mua hàng</h5>
                     </div>
 
                 </div>
 
-                <div style="overflow-x:auto; white-space: nowrap;">
+                <div style="overflow-x: auto;">
                     <div id="repeat-customer-per-week" class="apex-charts" style="min-width: 900px;"></div>
                 </div>
 
@@ -229,6 +232,7 @@
     <script>
         const endpoint = '/admin/dashboard';
         let salesChart = null;
+        let repeatCustomerChart = null; // global
 
         document.addEventListener('DOMContentLoaded', () => {
             const today = new Date();
@@ -293,6 +297,8 @@
                 });
         }
 
+
+
         function fetchRepeatCustomerRate(range = 'day', from = '', to = '') {
             let url = `${endpoint}/repeat-customer-rate?range=${range}`;
             if (from && to) {
@@ -302,27 +308,38 @@
             fetch(url)
                 .then(res => res.json())
                 .then(data => {
-                    document.getElementById('repeat-customer-per-week').innerHTML = '';
-                    new ApexCharts(document.querySelector("#repeat-customer-per-week"), {
+                    if (repeatCustomerChart) {
+                        repeatCustomerChart.destroy();
+                    }
+
+                    repeatCustomerChart = new ApexCharts(document.querySelector("#repeat-customer-per-week"), {
                         chart: {
                             type: 'line',
                             height: 300,
                             width: Math.max(900, data.repeat_customer_labels.length * 100),
                             toolbar: {
                                 show: false
-                            }
+                            },
+                            zoom: {
+                                enabled: true,
+                                type: 'x',
+                                autoScaleYaxis: true
+                            },
+                            animations: {
+                                enabled: true
+                            },
                         },
                         series: [{
                                 name: 'New Customer',
-                                data: data.repeat_customer_new
+                                data: data.repeat_customer_new || []
                             },
                             {
                                 name: 'Old Customer',
-                                data: data.repeat_customer_old
+                                data: data.repeat_customer_old || []
                             }
                         ],
                         xaxis: {
-                            categories: data.repeat_customer_labels
+                            categories: data.repeat_customer_labels || []
                         },
                         colors: ['#3b82f6', '#34d399'],
                         stroke: {
@@ -332,14 +349,20 @@
                             size: 4
                         },
                         tooltip: {
+                            enabled: true,
+                            shared: true,
+                            intersect: false,
                             y: {
                                 formatter: val => `${val} đơn`
                             }
                         }
-                    }).render();
+                    });
 
+
+                    repeatCustomerChart.render();
                 });
         }
+
 
         function renderSalesReport(year, from = '', to = '', filterIncome = false) {
             let url = `${endpoint}/sales-report-income?year=${year}`;
