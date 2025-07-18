@@ -10,23 +10,10 @@
                 <form class="cr-search" action="{{ route('shop.index') }}" method="GET">
                     <input class="search-input" type="text" name="search" value="{{ request('search') }}"
                         placeholder="Tìm Kiếm...">
-
-                    <select class="form-select" name="category_id">
-                        <option value="">Danh Mục</option>
-                        @foreach ($headerCategories as $cat)
-                            <option value="{{ $cat->id }}"
-                                {{ request('category_id') == $cat->id ? 'selected' : '' }}>
-                                {{ $cat->name }}
-                            </option>
-                        @endforeach
-
-                    </select>
-
                     <button type="submit" class="search-btn">
                         <i class="ri-search-line"></i>
                     </button>
                 </form>
-
                 <div class="cr-right-bar">
                     <ul class="navbar-nav">
                         <li class="nav-item dropdown">
@@ -339,4 +326,4 @@
             return new bootstrap.Tooltip(el);
         });
     });
-</script>
+</script> 

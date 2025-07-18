@@ -82,20 +82,6 @@
                 <div class="col-lg-3">
                     <div class="cr-shop-sideview">
                         <form action="{{ route('shop.index') }}" method="GET" id="filter-form" class="mb-4">
-
-                            {{-- Tìm kiếm tên sản phẩm --}}
-                            <div class="mb-3">
-                                <label class="fw-bold">Tìm kiếm sản phẩm:</label>
-                                <div class="input-group">
-                                    <input type="text" name="search" class="form-control" placeholder="Nhập từ khóa..."
-                                        value="{{ request('search') }}">
-                                    <button class="btn btn-outline-secondary" type="submit">
-                                        <i class="ri-search-line"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-
                             <div class="mb-3">
                                 {{-- Lọc Theo Danh Mục----------------------------------------------------------- --}}
                                 <label class="fw-bold">Danh mục:</label>
@@ -319,9 +305,7 @@
                                                             <i class="ri-star-line text-warning"></i>
                                                         @endfor
                                                     </div>
-                                                    <div class="text-muted small">
-                                                        ({{ $avg }} / {{ $count }} đánh giá)
-                                                    </div>
+                                                    
                                                 </div>
 
                                             </div>
