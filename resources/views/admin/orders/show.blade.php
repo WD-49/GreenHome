@@ -177,6 +177,7 @@
                                 <th>Số lượng</th>
                                 <th>Tổng giá</th>
                                 <th>Giảm giá (sp)</th>
+                                <th>Note</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -200,6 +201,13 @@
                                     @php
                                         $totalOrderAmount += $item->total_price;
                                     @endphp
+                                    <td>
+                                        @if ($order->note)
+                                            {{$order->note}}
+                                        @else
+                                            Không có
+                                        @endif
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>

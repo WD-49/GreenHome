@@ -36,17 +36,17 @@ class ProfileController extends Controller
         $data['orders'] = Order::where('user_id', $user->id)
             ->with('items') // Tải trước các mục đơn hàng và biến thể sản phẩm
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(5);
 
         $data['reviews'] = Review::where('user_id', $user->id)
              // Tải trước biến thể sản phẩm và sản phẩm của nó
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(5);
 
         $data['comments'] = Comment::where('user_id', $user->id)
             ->with('product') // Tải trước sản phẩm liên quan đến bình luận
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(5);
 
         $cart = Cart::where('user_id', $user->id)
             ->with('items.productVariant.product') // Tải quan hệ
@@ -65,7 +65,7 @@ class ProfileController extends Controller
         $data['wishlistItems'] = Wishlist::where('user_id', $user->id)
             ->with('product') // Tải trước sản phẩm
             ->orderBy('add_at', 'desc')
-            ->get();
+            ->paginate(5);
         // dd($data['orders']);
         // Trả về view chính của trang profile
         return view('client.pages.profile', compact('user', 'tab', 'data'));
