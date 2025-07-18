@@ -293,22 +293,16 @@
                         </li>
 
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="{{ route('blog.index') }}">
+                            <a class="nav-link" href="{{ route('blog.index') }}">
                                 Bài viết
                             </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="">Left
-                                        Sidebar</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="blog-detail-full-width.html">Detail
-                                        Full
-                                        Width</a>
-                                </li>
-                            </ul>
                         </li>
-
+                        
+                        <li class="nav-item dropdown">
+                            <a class="nav-link" href="{{ route('support.index') }}">
+                                Trợ giúp
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </nav>

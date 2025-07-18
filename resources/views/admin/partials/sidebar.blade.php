@@ -142,7 +142,14 @@
                 <i data-feather="file-text"></i>
                 <span> Danh mục bài viết </span>
             </a>
-        </li>
+            </li>
+            <li>
+                <a class='tp-link' href='
+                {{ route('admin.faqs.index') }}'>
+                     <i data-feather="message-circle"></i>
+                    <span>Chăm sóc khách hàng</span>
+                </a>
+            </li>
         <li>
             <a class='tp-link' href='{{ route('admin.blogs.index') }}'>
                 <i data-feather="calendar"></i>

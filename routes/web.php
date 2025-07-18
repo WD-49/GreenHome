@@ -43,10 +43,12 @@ use App\Http\Controllers\client\ProductClientController;
 use App\Http\Controllers\admin\Product\ProductController;
 use App\Http\Controllers\admin\Account\AccountAdminController;
 use App\Http\Controllers\admin\Account\AccountUsersController;
+use App\Http\Controllers\admin\FaqController;
 use App\Http\Controllers\admin\Product\ProductVariantController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\client\BlogController as ClientBlogController;
 use App\Http\Controllers\Client\DiscountController as ClientDiscountController;
+use App\Http\Controllers\client\SupportController;
 use Doctrine\DBAL\Schema\Index as DBALIndex;
 
 
@@ -60,6 +62,9 @@ Route::get('/test-reset/{token}', function ($token) {
 Route::get('/category/{id}', [HomeController::class, 'category'])->name('shop.category');
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/category-id/{id}', [ProductController::class, 'getProductsByCategoryId']);
+
+// support
+Route::get('/support', [SupportController::class, 'index'])->name('support.index');
 
 //wishlist 
 Route::middleware('auth')->prefix('wishlist')->group(function () {
@@ -121,7 +126,7 @@ Route::get('/test-notify', function () {
 
 
 // route của trang admin
-Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login-submit', [AdminAuthController::class, 'login'])->name('login.submit');
@@ -134,6 +139,14 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::get('/dashboard/top-selling-products', [DashboardController::class, 'topSellingProducts']);
     Route::get('/dashboard/sales-report-income', [DashboardController::class, 'salesReportIncome']);
 
+    // Faq
+    Route::prefix('/faqs')->name('faqs.')->group(function() {
+        Route::get('/', [FaqController::class,"index"])->name('index');
+        Route::delete('/destroy', [FaqController::class,"destroy"])->name('destroy');
+        Route::get('/edit/{id}', [FaqController::class,"edit"])->name('edit');
+        Route::get('/create', [FaqController::class,"create"])->name('create');
+        Route::post('/store', [FaqController::class,"store"])->name('store');
+    });
     // Quản lý sản phẩm
     Route::prefix('/products')->name('products.')->group(function () {
 
