@@ -145,7 +145,7 @@
                                 </div>
                             </div>
                             <span class="cr-check-order-btn">
-                                <a class="cr-button mt-30" href="#" id="place-order-btn">Place Order</a>
+                                <a class="cr-button mt-30" href="#" id="place-order-btn">Đặt hàng</a>
                             </span>
                         </div>
                     </div>
