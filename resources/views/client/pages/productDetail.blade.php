@@ -1,6 +1,64 @@
 @extends('layouts.app')
 
 @section('content')
+    @push('styles')
+        <style>
+            .rating-wrapper {
+                display: flex;
+                flex-direction: row-reverse;
+                justify-content: flex-end;
+                /* ← CHỈNH LẠI Ở ĐÂY */
+                gap: 8px;
+            }
+
+            .rating-wrapper input[type="radio"] {
+                display: none;
+            }
+
+            .rating-wrapper label {
+                font-size: 24px;
+                color: #ccc;
+                cursor: pointer;
+                transition: color 0.2s;
+            }
+
+            .rating-wrapper input:checked~label,
+            .rating-wrapper label:hover,
+            .rating-wrapper label:hover~label {
+                color: #ffc107;
+            }
+
+            /* Ảnh mặc định cho Grid View */
+            .product-img {
+                width: 100%;
+                height: 225px;
+                object-fit: cover;
+                border-radius: 6px;
+                display: block;
+            }
+
+            /* Cha chứa ảnh - Grid View */
+            .cr-left,
+            .cr-product-image {
+                width: 100%;
+                height: 225px;
+            }
+
+            /* List View - Kích thước cố định */
+            .grid-row-active .cr-left,
+            .grid-row-active .cr-product-image {
+                width: 350px;
+                height: 280px;
+                flex-shrink: 0;
+            }
+
+            .grid-row-active .product-img {
+                width: 350px;
+                height: 280px;
+                object-fit: cover;
+            }
+        </style>
+    @endpush
     <!-- Breadcrumb -->
     <section class="section-breadcrumb">
         <div class="cr-breadcrumb-image">
