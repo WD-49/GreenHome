@@ -158,6 +158,13 @@ class CheckoutController extends Controller
             DB::beginTransaction();
 
             $user = auth()->user();
+            if (is_null($user->email_verified_at)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vui lòng xác minh email trước khi đặt hàng.',
+                    'redirect_url' => route('profile.index'),
+                ], 403);
+            }
 
             $paymentMethod = PaymentMethod::findOrFail($data['payment_method_id']);
             $discountApplied = !empty($data['discount_id'])

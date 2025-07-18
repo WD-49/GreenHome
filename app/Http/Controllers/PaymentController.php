@@ -91,6 +91,8 @@ class PaymentController extends Controller
                 } else {
                     // Thanh toán thất bại
                     $order->payment_status = 'failed';
+                    $order->order_status = 'Hủy đơn'; // Cập nhật trạng thái đơn hàng
+                    $order->cancel_reason = 'Thanh toán không thành công';
                     $order->save();
 
                     return view('client.payment.failed', ['data' => $inputData]);

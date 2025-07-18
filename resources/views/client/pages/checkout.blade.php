@@ -521,6 +521,10 @@
                         }
                     } else {
                         alert(res.message || 'Đặt hàng thất bại. Vui lòng thử lại.');
+                        if (res.redirect_url) {
+                            // Redirect đến trang xác minh email hoặc profile
+                            window.location.href = res.redirect_url;
+                        }
                     }
                 })
 
