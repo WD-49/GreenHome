@@ -125,7 +125,7 @@
                     @endphp
 
                     <div class="cr-size-and-weight">
-                        <div class="cr-review-star">
+                        {{-- <div class="cr-review-star">
                             <div class="cr-star">
                                 @for ($i = 1; $i <= 5; $i++)
                                     <i class="ri-star-{{ $i <= $avgRating ? 'fill' : 'line' }}"></i>
@@ -133,7 +133,7 @@
                             </div>
                             <p>({{ $totalReviews }} lượt đánh giá | {{ $avgRating }}★ | {{ $totalStar }} sao tổng)
                             </p>
-                        </div>
+                        </div> --}}
                         <div class="list">
                             <ul>
                                 <li><label>Thương Hiệu <span>:</span></label>{{ $product->brand->name ?? '' }}</li>
@@ -211,15 +211,15 @@
                         <ul class="nav nav-tabs" id="myTab" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="description-tab" data-bs-toggle="tab"
-                                    data-bs-target="#description" type="button" role="tab">Description</button>
+                                    data-bs-target="#description" type="button" role="tab">Mô tả</button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#review"
-                                    type="button" role="tab">Review</button>
+                                    type="button" role="tab">Đánh giá</button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="comment-tab" data-bs-toggle="tab" data-bs-target="#comment"
-                                    type="button" role="tab">Comment</button>
+                                    type="button" role="tab">Bình luận</button>
                             </li>
                         </ul>
 

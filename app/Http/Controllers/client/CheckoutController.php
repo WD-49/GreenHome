@@ -27,7 +27,7 @@ class CheckoutController extends Controller
 {
     public function index(Request $request)
     {
-        $user = Auth::user();
+        $user = Auth::user()->load('profile');
 
         return view('client.pages.checkout', [
             'user' => $user,

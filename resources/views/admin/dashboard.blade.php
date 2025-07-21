@@ -525,7 +525,6 @@
                     <img class="avatar-md p-1 rounded-circle bg-primary-subtle img-fluid me-3" src="${imgSrc}">
                     <div class="product-body align-self-center">
                         <h6 class="m-0 fw-semibold">${product.product_name}</h6>
-                        <p class="mb-0 mt-1 text-muted">SKU: ${product.product_sku ?? ''}</p>
                         <p class="mb-0 mt-1 text-muted">${product.product_attribute ?? ''}</p>
                     </div>
                 </div>

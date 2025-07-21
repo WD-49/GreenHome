@@ -88,13 +88,14 @@
                                                 <span class="cr-bill-wrap cr-bill-half">
                                                     <label>Họ và tên</label>
                                                     <input type="text" name="fullname" placeholder="Nhập họ và tên"
-                                                        required>
+                                                        value="{{ old('fullname', $user->name ?? '') }}" required>
+
                                                 </span>
 
                                                 <span class="cr-bill-wrap cr-bill-half">
                                                     <label>Số điện thoại</label>
                                                     <input type="text" name="phone" placeholder="Số điện thoại"
-                                                        required>
+                                                        value="{{ old('phone', $user->profile->phone ?? '') }}" required>
                                                 </span>
 
 
