@@ -119,7 +119,7 @@ Route::get('/test-notify', function () {
     $user->notify(new \App\Notifications\VerifyEmailReminder());
     return 'Notification sent';
 });
-
+// 
 
 // route của trang admin
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
