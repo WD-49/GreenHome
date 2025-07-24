@@ -18,6 +18,10 @@
             {{ session('warning') }}
         </div>
     @endif
+    <head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+            integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+    </head>
     <!-- Breadcrumb -->
     <section class="section-breadcrumb">
         <div class="cr-breadcrumb-image">
@@ -69,14 +73,20 @@
                             </div>
                             <div class="form-group">
                                 <label>Mật khẩu*</label>
-                                <input id="password" type="password" placeholder="Nhập mật khẩu"
-                                    class="cr-form-control @error('password') is-invalid @enderror" name="password"
-                                    autocomplete="current-password">
-                                @error('password')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
+                                <div class="d-flex">
+                                    <input id="password" type="password" placeholder="Nhập mật khẩu"
+                                        class="cr-form-control @error('password') is-invalid @enderror" name="password"
+                                        autocomplete="current-password">
+                                    <button class="btn btn-outline-secondary" type="button" id="toggleCurrentPassword"
+                                        style="border-left: none;">
+                                        <i class="fa fa-eye"></i>
+                                    </button>
+                                    @error('password')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
                             </div>
                             <div class="remember">
                                 <span class="form-group custom" style="display: none;">
@@ -101,3 +111,52 @@
     <!-- Footer -->
     @include('client.partials.sideTool')
 @endsection
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleCurrentPassword = document.getElementById('toggleCurrentPassword');
+        // Sửa ID của input mật khẩu từ 'current_password' thành 'password'
+        const currentPasswordInput = document.getElementById('password');
+
+        if (toggleCurrentPassword && currentPasswordInput) {
+            toggleCurrentPassword.addEventListener('click', function() {
+                const type = currentPasswordInput.getAttribute('type') === 'password' ? 'text' :
+                    'password';
+                currentPasswordInput.setAttribute('type', type);
+                this.querySelector('i').classList.toggle('fa-eye');
+                this.querySelector('i').classList.toggle('fa-eye-slash');
+            });
+        }
+
+        // Các phần mã dưới đây (toggleNewPassword, toggleConfirmPassword) không cần thiết
+        // cho trang đăng nhập này vì không có các trường mật khẩu mới/xác nhận.
+        // Bạn có thể giữ hoặc xóa chúng tùy ý nếu chúng chỉ dành cho trang profile.
+        const toggleNewPassword = document.getElementById('toggleNewPassword');
+        const newPasswordInput = document.getElementById('new_password');
+
+        if (toggleNewPassword && newPasswordInput) {
+            toggleNewPassword.addEventListener('click', function() {
+                const type = newPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                newPasswordInput.setAttribute('type', type);
+                this.querySelector('i').classList.toggle('fa-eye');
+                this.querySelector('i').classList.toggle('fa-eye-slash');
+            });
+        }
+
+        const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+        const confirmPasswordInput = document.getElementById('new_password_confirmation');
+
+        if (toggleConfirmPassword && confirmPasswordInput) {
+            toggleConfirmPassword.addEventListener('click', function() {
+                const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' :
+                    'password';
+                confirmPasswordInput.setAttribute('type', type);
+                this.querySelector('i').classList.toggle('fa-eye');
+                this.querySelector('i').classList.toggle('fa-eye-slash');
+            });
+        }
+    });
+</script>
+@endpush
