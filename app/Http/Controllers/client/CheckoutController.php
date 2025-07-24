@@ -170,6 +170,13 @@ class CheckoutController extends Controller
             $discountApplied = !empty($data['discount_id'])
                 ? Discount::findOrFail($data['discount_id'])
                 : null;
+
+            if ($discountApplied && $discountApplied->quantity <= 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Mã giảm giá đã hết lượt sử dụng.',
+                ], 400);
+            }
             Log::info($discountApplied);
 
             $order = Order::create([
@@ -199,7 +206,7 @@ class CheckoutController extends Controller
                 $sourcePath = storage_path('app/public/' . $item['product_variant']['image']);
                 $destinationPath = storage_path('app/public/images/orderItem/' . $filename);
                 // Kiểm tra và sao chép hình ảnh sản phẩm
-                if (File::exists($sourcePath) && !File::exists($destinationPath)) {
+                if (File::exists($sourcePath) && File::isFile($sourcePath) && !File::exists($destinationPath)) {
                     File::ensureDirectoryExists(dirname($destinationPath));
                     File::copy($sourcePath, $destinationPath);
                 }
@@ -250,6 +257,7 @@ class CheckoutController extends Controller
                     'discount_code' => $discountApplied->code,
                     'used_at' => now(),
                 ]);
+                $discountApplied->decrement('quantity');
             }
             $order->load(['items', 'user']);
             Mail::to($user->email)->queue(new OrderInvoiceMail($order, $user));
@@ -316,21 +324,32 @@ class CheckoutController extends Controller
             // Cập nhật kho
             foreach ($order->items as $item) {
                 if ($item->product_variant_sku) {
-                    $variant = \App\Models\ProductVariant::where('sku', $item->product_variant_sku)->lockForUpdate()->first();
+                    $variant = ProductVariant::where('sku', $item->product_variant_sku)->lockForUpdate()->first();
                     if ($variant) {
                         $variant->increment('quantity', $item->quantity);
                     }
                 }
             }
 
+
             // Cập nhật trạng thái và lý do hủy
             $order->order_status = 'Hủy đơn';
             $order->cancel_reason = request('cancel_reason');
             $order->save();
 
+            // xử lý mã giảm giá sau khi hủy đơn
+            if ($order->discount_code) {
+                $discount = Discount::where('code', $order->discount_code)->first();
+                if ($discount) {
+                    $discount->increment('quantity');
+
+                    DiscountUsage::where('order_id', $order->id)->delete();
+                }
+            }
+
             DB::commit();
 
-            return redirect()->route('orders.list')->with('success', 'Đã hủy đơn hàng và hoàn tồn kho.');
+            return redirect()->route('orders.list')->with('success', 'Đơn hàng đã được hủy thành công.');
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Hủy đơn thất bại: ' . $e->getMessage());
