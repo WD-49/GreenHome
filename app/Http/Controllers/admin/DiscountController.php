@@ -446,4 +446,29 @@ $products = Product::with(['productVariants'])->get();
         $usage = DiscountUsage::with(['discount', 'user', 'product', 'order'])->findOrFail($id);
         return view('admin.discount.history_detail', compact('usage'));
     }
+public function ajaxFilter(Request $request, $code)
+{
+    $voucher = Discount::where('code', $code)->firstOrFail();
+
+    $products = Product::query()
+        ->when($voucher->applies_to_all_products, function ($query) {
+            $query->withoutTrashed();
+        }, function ($query) use ($voucher) {
+            $query->whereHas('discounts', function ($q) use ($voucher) {
+                $q->where('discounts.id', $voucher->id);
+            });
+        });
+
+    if ($request->filled('search')) {
+        $products->where('name', 'like', '%' . $request->search . '%');
+    }
+
+    $products = $products->with(['brand', 'productVariants'])->paginate(12);
+
+    // Trả về 1 partial view HTML (chỉ phần danh sách sản phẩm)
+    return view('client.pages.components.product_list', compact('products'))->render();
 }
+
+
+}
+
