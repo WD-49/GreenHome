@@ -18,6 +18,28 @@
             {{ session('warning') }}
         </div>
     @endif
+    <style>
+        .btn-social-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            text-decoration: none;
+        }
+
+        .btn-google {
+            background-color: #dd4b39;
+        }
+
+        .btn-facebook {
+            background-color: #3b5998;
+        }
+    </style>
+
     <head>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
             integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -101,6 +123,18 @@
                                     Bạn chưa có tài khoản?
                                 </a>
                             </div>
+                            {{-- Thêm các nút đăng nhập Socialite --}}
+                            <div class="social-login mt-3 text-center">
+                                <p>Hoặc đăng nhập bằng</p>
+                                <div class="d-flex justify-content-center">
+                                    <a href="{{ route('auth.google') }}" class="btn btn-social-icon btn-google mx-2">
+                                        <i class="fab fa-google"></i>
+                                    </a>
+                                    {{-- <a href="{{ route('auth.facebook') }}" class="btn btn-social-icon btn-facebook mx-2">
+                                        <i class="fab fa-facebook-f"></i>
+                                    </a> --}}
+                                </div>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -114,49 +148,49 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 @push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const toggleCurrentPassword = document.getElementById('toggleCurrentPassword');
-        // Sửa ID của input mật khẩu từ 'current_password' thành 'password'
-        const currentPasswordInput = document.getElementById('password');
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleCurrentPassword = document.getElementById('toggleCurrentPassword');
+            // Sửa ID của input mật khẩu từ 'current_password' thành 'password'
+            const currentPasswordInput = document.getElementById('password');
 
-        if (toggleCurrentPassword && currentPasswordInput) {
-            toggleCurrentPassword.addEventListener('click', function() {
-                const type = currentPasswordInput.getAttribute('type') === 'password' ? 'text' :
-                    'password';
-                currentPasswordInput.setAttribute('type', type);
-                this.querySelector('i').classList.toggle('fa-eye');
-                this.querySelector('i').classList.toggle('fa-eye-slash');
-            });
-        }
+            if (toggleCurrentPassword && currentPasswordInput) {
+                toggleCurrentPassword.addEventListener('click', function() {
+                    const type = currentPasswordInput.getAttribute('type') === 'password' ? 'text' :
+                        'password';
+                    currentPasswordInput.setAttribute('type', type);
+                    this.querySelector('i').classList.toggle('fa-eye');
+                    this.querySelector('i').classList.toggle('fa-eye-slash');
+                });
+            }
 
-        // Các phần mã dưới đây (toggleNewPassword, toggleConfirmPassword) không cần thiết
-        // cho trang đăng nhập này vì không có các trường mật khẩu mới/xác nhận.
-        // Bạn có thể giữ hoặc xóa chúng tùy ý nếu chúng chỉ dành cho trang profile.
-        const toggleNewPassword = document.getElementById('toggleNewPassword');
-        const newPasswordInput = document.getElementById('new_password');
+            // Các phần mã dưới đây (toggleNewPassword, toggleConfirmPassword) không cần thiết
+            // cho trang đăng nhập này vì không có các trường mật khẩu mới/xác nhận.
+            // Bạn có thể giữ hoặc xóa chúng tùy ý nếu chúng chỉ dành cho trang profile.
+            const toggleNewPassword = document.getElementById('toggleNewPassword');
+            const newPasswordInput = document.getElementById('new_password');
 
-        if (toggleNewPassword && newPasswordInput) {
-            toggleNewPassword.addEventListener('click', function() {
-                const type = newPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                newPasswordInput.setAttribute('type', type);
-                this.querySelector('i').classList.toggle('fa-eye');
-                this.querySelector('i').classList.toggle('fa-eye-slash');
-            });
-        }
+            if (toggleNewPassword && newPasswordInput) {
+                toggleNewPassword.addEventListener('click', function() {
+                    const type = newPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    newPasswordInput.setAttribute('type', type);
+                    this.querySelector('i').classList.toggle('fa-eye');
+                    this.querySelector('i').classList.toggle('fa-eye-slash');
+                });
+            }
 
-        const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
-        const confirmPasswordInput = document.getElementById('new_password_confirmation');
+            const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+            const confirmPasswordInput = document.getElementById('new_password_confirmation');
 
-        if (toggleConfirmPassword && confirmPasswordInput) {
-            toggleConfirmPassword.addEventListener('click', function() {
-                const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' :
-                    'password';
-                confirmPasswordInput.setAttribute('type', type);
-                this.querySelector('i').classList.toggle('fa-eye');
-                this.querySelector('i').classList.toggle('fa-eye-slash');
-            });
-        }
-    });
-</script>
+            if (toggleConfirmPassword && confirmPasswordInput) {
+                toggleConfirmPassword.addEventListener('click', function() {
+                    const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' :
+                        'password';
+                    confirmPasswordInput.setAttribute('type', type);
+                    this.querySelector('i').classList.toggle('fa-eye');
+                    this.querySelector('i').classList.toggle('fa-eye-slash');
+                });
+            }
+        });
+    </script>
 @endpush

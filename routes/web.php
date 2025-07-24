@@ -26,10 +26,11 @@ use App\Http\Controllers\admin\CategoryController;
 use App\Http\Controllers\admin\DiscountController;
 
 use App\Http\Controllers\Auth\AdminAuthController;
+use App\Http\Controllers\Auth\SocialiteController;
+
 use App\Http\Controllers\Client\ProfileController;
 
 use App\Http\Controllers\admin\AttributeController;
-
 use App\Http\Controllers\admin\DashboardController;
 use App\Http\Controllers\client\CheckoutController;
 use App\Http\Controllers\client\WishlistController;
@@ -50,6 +51,20 @@ use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\client\BlogController as ClientBlogController;
 use App\Http\Controllers\Client\DiscountController as ClientDiscountController;
 
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
+Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('/register', [RegisterController::class, 'register']);
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+// Routes cho Google Login
+Route::get('/auth/google', [SocialiteController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('/auth/google/callback', [SocialiteController::class, 'handleGoogleCallback']);
+
+// Routes cho Facebook Login
+Route::get('/auth/facebook', [SocialiteController::class, 'redirectToFacebook'])->name('auth.facebook');
+Route::get('/auth/facebook/callback', [SocialiteController::class, 'handleFacebookCallback']);
+
 // route của trang client
 // trang trủ
 Route::get('/category/{id}', [HomeController::class, 'category'])->name('shop.category');
@@ -65,15 +80,6 @@ Route::middleware('auth')->prefix('wishlist')->group(function () {
 
 Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
 Route::post('/wishlist/update-options', [WishlistController::class, 'updateOptions'])->name('wishlist.updateOptions');
-
-// // Route::get('/blog', [HomeController::class, 'blog'])->name('blog'); ví dụ.
-
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);
-Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-Route::post('/register', [RegisterController::class, 'register']);
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-
 
 // Route form gửi yêu cầu và xử lý của bạn
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('forgot-password.form');
@@ -122,12 +128,6 @@ Route::get('/test-notify', function () {
 
 // route của trang admin
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
-
-    Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login-submit', [AdminAuthController::class, 'login'])->name('login.submit');
-    Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
-
-
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/data', [DashboardController::class, 'data']);
     Route::get('/dashboard/repeat-customer-rate', [DashboardController::class, 'repeatCustomerRate']);
