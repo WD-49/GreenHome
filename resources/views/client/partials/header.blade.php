@@ -192,7 +192,7 @@
                                                 <ul class="cat-list">
                                                     @forelse($cat->products as $product)
                                                         <li>
-                                                            <a href="{{ route('product.show', $product->slug) }}">
+                                                            <a href="{{ route('productDetail', $product->slug) }}">
                                                                 {{ $product->name }}
                                                             </a>
                                                         </li>
@@ -326,4 +326,4 @@
             return new bootstrap.Tooltip(el);
         });
     });
-</script> 
+</script>

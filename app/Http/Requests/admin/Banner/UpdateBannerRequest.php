@@ -11,26 +11,25 @@ class UpdateBannerRequest extends FormRequest
         return true;
     }
 
-public function rules()
-{
-    return [
-        'name' => 'required|string|max:255',
-        'description' => 'nullable|string',
-        'link' => 'nullable|url',
-        'priority' => 'nullable|integer',
-        'status' => 'required|boolean',
-        'img' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-           'type' => 'required|string|in:slider,category_banner,discount_banner',
-        'category_id' => 'nullable|exists:categories,id',
-    ];
-}
+    public function rules()
+    {
+        return [
+            'name' => 'nullable|string|max:255', // Không bắt buộc
+            'description' => 'nullable|string',
+            'link' => 'nullable|url',
+            'priority' => 'nullable|integer',
+            'status' => 'required|boolean',
+            'img' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048', // Bắt buộc
+            'type' => 'required|string|in:slider,category_banner,discount_banner',
+            'category_id' => 'nullable|exists:categories,id',
+        ];
+    }
 
 
 
     public function messages(): array
     {
         return [
-            'name.required' => 'Vui lòng nhập tên banner.',
             'name.string' => 'Tên banner phải là chuỗi.',
             'name.max' => 'Tên banner tối đa 255 ký tự.',
             'status.required' => 'Vui lòng chọn trạng thái.',
