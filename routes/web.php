@@ -50,13 +50,6 @@ use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\client\BlogController as ClientBlogController;
 use App\Http\Controllers\Client\DiscountController as ClientDiscountController;
 
-
-use App\Models\User;
-Route::get('/test-reset/{token}', function ($token) {
-    return "Test token: " . $token;
-})->name('test.reset');
-
-
 // route của trang client
 // trang trủ
 Route::get('/category/{id}', [HomeController::class, 'category'])->name('shop.category');
@@ -95,6 +88,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::get('/{comment}/details-with-product', [CommentController::class, 'getCommentDetailsWithProduct'])
         ->name('detailWithProduct');
+    Route::post('/profile/password-update', [ProfileController::class, 'updatePassword'])->name('profile.updatePassword');
     // Các route xác minh email CHUẨN
     Route::get('/email/verify', [EmailVerificationPromptController::class, '__invoke'])
         ->name('verification.notice');
