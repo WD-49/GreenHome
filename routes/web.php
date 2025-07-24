@@ -51,6 +51,7 @@ use App\Http\Controllers\client\BlogController as ClientBlogController;
 use App\Http\Controllers\Client\DiscountController as ClientDiscountController;
 
 
+use App\Models\User;
 Route::get('/test-reset/{token}', function ($token) {
     return "Test token: " . $token;
 })->name('test.reset');
@@ -108,10 +109,14 @@ Route::middleware(['auth'])->group(function () {
         ->name('verification.send'); //throttle:6,1 giới hạn người dùng gửi yêu cầu xác thực email 6 lần trong 1 phút
 
     Route::post('/notifications/{id}/read', function ($id) {
-        $notification = auth()->user()->notifications()->findOrFail($id);
-        $notification->markAsRead();
-        return response()->noContent();
-    })->name('notifications.read');
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $notification = $user->notifications()->find($id);
+        if ($notification) {
+            $notification->markAsRead();
+        }
+        return response()->json(['status' => 'read']);
+    });
 });
 
 Route::get('/test-notify', function () {
