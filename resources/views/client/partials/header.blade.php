@@ -2,7 +2,7 @@
     <div class="row">
         <div class="col-lg-12">
             <div class="top-header">
-                <a href="index.html" class="cr-logo">
+                <a href="{{ route('home')}}" class="cr-logo">
                     <img src="{{ asset('assets_client/assets/img/logo/logo.png') }}" alt="logo" class="logo">
                     <img src="{{ asset('assets_client/assets/img/logo/dark-logo.png') }}" alt="logo"
                         class="dark-logo">
