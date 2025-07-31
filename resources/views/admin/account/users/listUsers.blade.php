@@ -54,11 +54,6 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">Danh sách người dùng</h5>
-                        <div>
-                            <a href="{{ route('admin.account.trashedUsers') }}" class="btn btn-danger shadow-sm">
-                                <i class="fas fa-trash-restore fa-sm text-white-50"></i> Thùng rác
-                            </a>
-                        </div>
                     </div>
 
                     <div class="card-body">
@@ -102,10 +97,6 @@
                                                     class="btn btn-info btn-sm" title="Xem chi tiết">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-
-                                                {{-- NÚT PHÂN QUYỀN --}}
-                                                {{-- Điều kiện để nút phân quyền hiển thị (ví dụ: không cho phép phân quyền chính mình nếu bạn là admin) --}}
-
                                                 <button type="button"
                                                     class="btn btn-{{ $user->role == 'client' ? 'warning' : 'primary' }} btn-sm toggle-role-btn"
                                                     data-user-id="{{ $user->id }}"
@@ -113,26 +104,6 @@
                                                     title="{{ $user->role == 'client' ? 'Chuyển thành Admin' : 'Chuyển thành Client' }}">
                                                     <i class="fas fa-user-shield"></i> {{-- Icon cho phân quyền --}}
                                                 </button>
-
-
-                                                {{-- <form action="{{ route('admin.account.softDeleteUser', $user->id) }}"
-                                                    method="POST" class="d-inline"
-                                                    onsubmit="return confirm('Bạn có chắc chắn muốn xóa tạm thời người dùng này không?')">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-danger btn-sm"
-                                                        title="Xóa tạm thời">
-                                                        <i class="fas fa-trash-alt"></i>
-                                                    </button>
-                                                </form> --}}
-                                                <form action="{{ route('admin.account.resetPassUser', $user->id) }}"
-                                                    method="POST" class="d-inline"
-                                                    onsubmit="return confirm('Bạn có chắc muốn đặt lại mật khẩu cho người dùng này không?')">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-secondary btn-sm"
-                                                        title="Reset mật khẩu">
-                                                        <i class="fas fa-key"></i>
-                                                    </button>
-                                                </form>
                                             </div>
                                         </td>
                                     </tr>
