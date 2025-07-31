@@ -214,10 +214,6 @@
                                     data-bs-target="#description" type="button" role="tab">Mô tả</button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#review"
-                                    type="button" role="tab">Đánh giá</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="comment-tab" data-bs-toggle="tab" data-bs-target="#comment"
                                     type="button" role="tab">Bình luận</button>
                             </li>
@@ -232,118 +228,9 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Review -->
-                            <div class="tab-pane fade" id="review" role="tabpanel">
-                                <div class="cr-tab-content-from">
-                                    <div class="post">
-                                        @forelse ($reviews as $review)
-                                            <div class="content {{ !$loop->first ? 'mt-30' : '' }}">
-                                                <img src="{{ asset('storage/' . ($review->user->avatar ?? 'default-avatar.jpg')) }}"
-                                                    alt="review"
-                                                    onerror="if(!this.dataset.error) { this.dataset.error = true; this.src='{{ asset('images/default-avatar.jpg') }}'; }">
-                                                <div class="details">
-                                                    <span
-                                                        class="date">{{ \Carbon\Carbon::parse($review->created_at)->locale('vi')->isoFormat('D [tháng] M, YYYY') }}</span>
-                                                    <span class="name">{{ $review->user->name ?? 'Guest' }}</span>
-                                                    <span class="name">{{ $review->title ?? '' }}</span>
-
-                                                </div>
-                                                <div class="cr-t-review-rating">
-                                                    @for ($i = 1; $i <= 5; $i++)
-                                                        <i
-                                                            class="ri-star-s-{{ $i <= $review->rating ? 'fill' : 'line' }}"></i>
-                                                    @endfor
-
-                                                </div>
-                                            </div>
-                                            <p>{{ $review->content }}</p>
-                                            @if ($review->images && $review->images->count())
-                                                <div class="review-images mt-2">
-                                                    @foreach ($review->images as $image)
-                                                        <img src="{{ asset('storage/' . $image->image) }}"
-                                                            alt="Review Image"
-                                                            style="width: 100px; height: auto; border-radius: 6px; margin-right: 8px;"
-                                                            loading="lazy"
-                                                            onerror="this.src='{{ asset('images/default-image.jpg') }}'">
-                                                    @endforeach
-                                                </div>
-                                            @endif
-                                        @empty
-                                            <div class="no-reviews">
-                                                <p>Chưa có đánh giá nào cho sản phẩm này.</p>
-                                            </div>
-                                        @endforelse
-
-                                    </div>
-
-                                    <!-- Debug info (xóa sau khi test) -->
-
-
-                                    <h4 class="heading">Thêm đánh giá </h4>
-                                    @if (session('success'))
-                                        <div class="alert alert-success">{{ session('success') }}</div>
-                                    @endif
-
-                                    @php
-                                        $variant = $product->productVariants->first();
-                                    @endphp
-
-                                    <form action="{{ route('client.review.submit') }}" method="POST"
-                                        enctype="multipart/form-data">
-                                        @csrf
-                                        <input type="hidden" name="product_variant_id" value="{{ $variant->id }}">
-
-                                        <div class="cr-ratting-star mb-2">
-                                            <span>Đánh giá:</span>
-                                            <div class="cr-t-review-rating d-flex">
-                                                @for ($i = 1; $i <= 5; $i++)
-                                                    <label class="rating-label"
-                                                        style="cursor: pointer; margin-right: 4px;">
-                                                        <input type="radio" name="rating" value="{{ $i }}"
-                                                            style="display: none;" required>
-                                                        <i class="ri-star-s-line fs-5 text-warning"></i>
-                                                    </label>
-                                                @endfor
-                                            </div>
-                                        </div>
-
-                                        <div class="cr-ratting-input">
-                                            <input type="text" value="{{ Auth::user()->name ?? '' }}" disabled
-                                                placeholder="Tên của bạn">
-                                        </div>
-
-                                        <div class="cr-ratting-input">
-                                            <input type="email" value="{{ Auth::user()->email ?? '' }}" disabled
-                                                placeholder="Email của bạn">
-                                        </div>
-
-                                        <div class="cr-ratting-input">
-                                            <input name="title" placeholder="Tiêu đề (ví dụ: Rất hài lòng)"
-                                                type="text" maxlength="150" required>
-                                        </div>
-                                        <div class="cr-ratting-input mb-3">
-                                            <label for="images">Ảnh đính kèm :</label>
-                                            <input type="file" name="images[]" id="imageInput" multiple
-                                                accept="image/*" class="form-control">
-                                            <div id="preview" class="mt-2 d-flex flex-wrap gap-2"></div>
-                                        </div>
-
-                                        <div class="cr-ratting-input form-submit">
-                                            <textarea name="content" placeholder="Nhận xét chi tiết của bạn về sản phẩm" required></textarea>
-                                            <button class="cr-button" type="submit">Gửi đánh giá</button>
-                                        </div>
-                                    </form>
-
-
-
-
-                                </div>
-                            </div>
-
                             <!-- Comment -->
                             <div class="tab-pane fade" id="comment" role="tabpanel">
-                                <div class="cr-tab-content-from">
+                                <div class="cr-tab-content-from"> 
                                     <div class="post">
                                         @php $comments = $product->comments->whereNull('rating'); @endphp
                                         @forelse ($comments as $comment)
@@ -396,9 +283,6 @@
 
                                         <button type="submit" class="cr-button">Gửi bình luận</button>
                                     </form>
-
-
-
                                 </div>
                             </div>
                         </div>
