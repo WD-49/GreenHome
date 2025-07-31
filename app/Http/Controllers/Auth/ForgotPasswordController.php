@@ -17,6 +17,8 @@ class ForgotPasswordController extends Controller
      *
      * @return \Illuminate\View\View
      */
+
+    // Hàm này sẽ hiển thị form yêu cầu gửi link đặt lại mật khẩu
     public function showLinkRequestForm()
     {
         return view('auth.passwords.email');
@@ -28,6 +30,8 @@ class ForgotPasswordController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse
      */
+
+    // Hàm này sẽ xử lý việc gửi email đặt lại mật khẩu
     public function handle(Request $request)
     {
         // 1. Validate email
@@ -40,12 +44,12 @@ class ForgotPasswordController extends Controller
             return back()->withErrors(['email' => 'Email không tồn tại trong hệ thống.']);
         }
 
-        // 3. Check email verification
+        // 3. Check người dùng đã xác thực email chưa
         // if (is_null($user->email_verified_at)) {
         //     return back()->withErrors(['email' => 'Email này chưa được xác thực ở hệ thống. Vui lòng xác thực email của bạn trước khi khôi phục mật khẩu.']);
-        // }
+        // } 
 
-        // 4. Create password reset token
+        // 4. Tạo token đặt lại mật khẩu
         // Sử dụng broker của Laravel để tạo token và lưu vào bảng password_reset_tokens
         $token = Password::broker()->createToken($user);
 

@@ -14,6 +14,8 @@ class SocialiteController extends Controller
     /**
      * Redirect the user to the Google authentication page.
      */
+
+    // Hàm này sẽ chuyển hướng người dùng đến trang xác thực của Google
     public function redirectToGoogle()
     {
         return Socialite::driver('google')->redirect();
@@ -22,6 +24,8 @@ class SocialiteController extends Controller
     /**
      * Obtain the user information from Google.
      */
+
+    // Hàm này sẽ xử lý callback từ Google sau khi người dùng xác thực
     public function handleGoogleCallback()
     {
         try {
