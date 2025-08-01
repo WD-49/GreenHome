@@ -57,7 +57,9 @@ class ProductClientController extends Controller
             ->unique()
             ->values();
 
-        return view('client.pages.productDetail', compact('product', 'relatedProducts', 'attributes'));
+             $reviews = $product->reviews()->with('user')->get();
+
+        return view('client.pages.productDetail', compact('product', 'relatedProducts', 'attributes','reviews'));
     }
 
 
