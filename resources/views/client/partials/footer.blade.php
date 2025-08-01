@@ -31,23 +31,23 @@
 
             <div class="col-xl-2 col-lg-3 col-sm-12 col-12 cr-footer-border">
                 <div class="cr-footer">
-                    <h4 class="cr-sub-title">Company <span class="cr-heading-res"></span></h4>
+                    <h4 class="cr-sub-title">Doanh nghiệp <span class="cr-heading-res"></span></h4>
                     <ul class="cr-footer-links cr-footer-dropdown">
-                        <li><a href="about.html">About Us</a></li>
-                        <li><a href="track-order.html">Delivery Information</a></li>
-                        <li><a href="policy.html">Privacy Policy</a></li>
-                        <li><a href="terms.html">Terms & Conditions</a></li>
-                        <li><a href="contact-us.html">Contact Us</a></li>
-                        <li><a href="faq.html">Support Center</a></li>
+                        <li><a href="about.html">Giới thiệu</a></li>
+                        <li><a href="track-order.html">Thông tin giao hàng</a></li>
+                        <li><a href="policy.html">Chính sách bảo mật</a></li>
+                        <li><a href="terms.html">Điều khoản & điều kiện</a></li>
+                        <li><a href="contact-us.html">Liên hệ với chúng tôi</a></li>
+                        <li><a href="faq.html">Trung tâm hỗ trợ</a></li>
                     </ul>
                 </div>
             </div>
 
             <div class="col-xl-2 col-lg-3 col-sm-12 col-12 cr-footer-border">
                 <div class="cr-footer">
-                    <h4 class="cr-sub-title">Category <span class="cr-heading-res"></span></h4>
+                    <h4 class="cr-sub-title">Danh mục <span class="cr-heading-res"></span></h4>
                     <ul class="cr-footer-links cr-footer-dropdown">
-                        @foreach($footerCategories as $category)
+                        @foreach ($footerCategories as $category)
                             <li><a href="{{ route('category.show', $category->slug) }}">{{ $category->name }}</a></li>
                         @endforeach
                     </ul>
@@ -77,7 +77,8 @@
                                 @for ($i = 1; $i <= 8; $i++)
                                     <div class="swiper-slide">
                                         <a href="#" class="cr-payment-image">
-                                            <img src="{{ asset('assets_client/assets/img/insta/' . $i . '.jpg') }}" alt="insta">
+                                            <img src="{{ asset('assets_client/assets/img/insta/' . $i . '.jpg') }}"
+                                                alt="insta">
                                             <div class="payment-overlay"></div>
                                         </a>
                                     </div>
@@ -91,7 +92,8 @@
 
         <div class="cr-last-footer">
             <p>&copy; <span id="copyright_year"></span>
-                <a href="index.html">Carrot</a>, All rights reserved.</p>
+                <a href="index.html">Carrot</a>, All rights reserved.
+            </p>
         </div>
     </div>
 </footer>

@@ -2,8 +2,9 @@
     <div class="row">
         <div class="col-lg-12">
             <div class="top-header">
-                <a href="{{ route('home')}}" class="cr-logo">
-                    <img src="{{ asset('assets_client/assets/img/logo/logo.png') }}" alt="logo" class="logo">
+                <a href="{{ route('home') }}" class="cr-logo">
+                    <img src="{{ asset('assets_client/assets/img/logo/GreenHome_logo.png') }}" alt="logo"
+                        class="logo">
                     <img src="{{ asset('assets_client/assets/img/logo/dark-logo.png') }}" alt="logo"
                         class="dark-logo">
                 </a>
@@ -144,7 +145,6 @@
                     </a>
                     <a href="javascript:void(0)" class="cr-right-bar-item voucher-toggle">
                         <i class="ri-ticket-line"></i>
-                        <span>Voucher</span>
                     </a>
 
 
@@ -247,7 +247,7 @@
                     <ul class="navbar-nav">
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('home') }}">
-                                Home
+                                Trang chủ
                             </a>
                         </li>
                         <li class="nav-item dropdown">
@@ -279,21 +279,10 @@
 
                         </li>
 
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="{{ route('blog.index') }}">
+                        <li class="nav-item ">
+                            <a class="nav-link" href="{{ route('blog.index') }}">
                                 Bài viết
                             </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="">Left
-                                        Sidebar</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="blog-detail-full-width.html">Detail
-                                        Full
-                                        Width</a>
-                                </li>
-                            </ul>
                         </li>
 
                     </ul>

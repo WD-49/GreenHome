@@ -456,10 +456,11 @@ Route::get('/payment/vnpay-return', [PaymentController::class, 'vnpayReturn'])->
 
 
 
-Route::get('/blog/{slug}', [App\Http\Controllers\client\BlogDetailController::class, 'show'])->name('blog.detail');
+Route::get('/blog/{slug}', [App\Http\Controllers\client\BlogDetailController::class, 'show'])->name('blog.detail'); // ? route gi day?
 
 Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');
 
-Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show');
+
+Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show'); // ? route gi day?
 
 Route::post('/comment/submit', [ProductClientController::class, 'submitComment'])->name('client.comment.submit');
