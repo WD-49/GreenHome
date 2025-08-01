@@ -276,8 +276,6 @@
                                                         @endif
                                                     </a>
                                                 </div>
-                                                <a class="cr-shopping-bag" href="#"><i
-                                                        class="ri-shopping-bag-line"></i></a>
                                             </div>
                                         </div>
 
