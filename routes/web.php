@@ -446,6 +446,9 @@ route::middleware('auth')->prefix('orders')->name('orders.')->group(function () 
     Route::get('/{order:sku}', [CheckoutController::class, 'show'])->name('show');
     Route::post('/cancel/{sku}', [CheckoutController::class, 'cancel'])->name('cancel');
 });
+Route::post('/review/submit', [CheckoutController::class, 'submitReview'])->name('client.review.submit');
+
+
 
 // web.php
 Route::post('/checkout/payment', [PaymentController::class, 'createPaymentUrl'])->name('payment.vnpay');
@@ -459,5 +462,4 @@ Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('categ
 
 Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show');
 
-Route::post('/review/submit', [ProductClientController::class, 'submitReview'])->name('client.review.submit');
 Route::post('/comment/submit', [ProductClientController::class, 'submitComment'])->name('client.comment.submit');

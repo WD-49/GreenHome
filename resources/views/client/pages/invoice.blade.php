@@ -3,6 +3,7 @@
 @push('styles')
     <link href="{{ asset('assets/css/vendor/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/css/invoice-custom.css') }}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 @endpush
 
 @section('content')
@@ -142,6 +143,7 @@
                                                     <th>tổng tiền</th>
                                                     <th>giảm giá</th>
                                                     <th>Tổng tiền</th>
+                                                    <th></th>
                                                 </tr>
                                             </thead>
 
@@ -163,6 +165,7 @@
                                                                     </div>
                                                                 @endif
                                                             </div>
+
                                                         </td>
 
                                                         <td>{{ number_format($item->unit_price, 0, ',', '.') }}đ </td>
@@ -172,6 +175,18 @@
                                                         <td>-{{ number_format($item->discount_amount, 0, ',', '.') ?? 0 }}đ
                                                         </td>
                                                         <td>{{ number_format($item->total_price, 0, ',', '.') }}đ </td>
+                                                        <td>
+                                                            @if ($order->order_status === 'Giao hàng thành công' && $order->payment_status === 'paid' && !$item->review)
+                                                                <button class="btn btn-outline-warning btn-sm p-2"
+                                                                    onclick="showReviewModal({{ $item->id }}, '{{ $item->product_name }}', '{{ $item->product_attribute ?? '' }}')"
+                                                                    title="Đánh giá sản phẩm">
+                                                                    <i class="fas fa-star"></i> {{-- Font Awesome icon --}}
+                                                                </button>
+                                                            @else
+                                                                <span class="text-success"></span>
+                                                            @endif
+                                                        </td>
+
 
                                                     </tr>
                                                 @endforeach
@@ -260,4 +275,124 @@
             </div>
         </div>
     </div>
+
+    {{-- Modal đánh giá sản phẩm --}}
+    <div id="reviewModal" class="modal fade" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Đánh giá sản phẩm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="reviewForm" action="{{ route('client.review.submit') }}" method="POST"
+                        enctype="multipart/form-data">
+                        @csrf
+                        <input type="hidden" name="order_item_id" id="orderItemId">
+
+                        <!-- Input tiêu đề -->
+                        <div class="mb-3">
+                            <label for="reviewTitle" class="form-label">Tiêu đề đánh giá</label>
+                            <input type="text" name="title" id="reviewTitle" class="form-control"
+                                placeholder="Nhập tiêu đề đánh giá" required>
+                        </div>
+
+                        <!-- Hàng sao -->
+                        <div class="mb-3">
+                            <label class="form-label">Số sao đánh giá</label>
+                            <div id="starRating" class="d-flex">
+                                @for ($i = 1; $i <= 5; $i++)
+                                    <i class="fas fa-star text-muted" data-value="{{ $i }}"
+                                        onclick="selectStarRating({{ $i }})"
+                                        style="cursor: pointer; font-size: 24px; margin-right: 5px;"></i>
+                                @endfor
+                            </div>
+                            <input type="hidden" name="rating" id="ratingValue" required>
+                        </div>
+
+                        <!-- Nội dung đánh giá -->
+                        <div class="mb-3">
+                            <label for="reviewContent" class="form-label">Nội dung đánh giá</label>
+                            <textarea name="content" id="reviewContent" class="form-control" rows="3" required></textarea>
+                        </div>
+
+                        <!-- Hình ảnh -->
+                        <div class="mb-3">
+                            <label for="reviewImages" class="form-label">Hình ảnh (Tối đa 3 ảnh)</label>
+                            <input type="file" name="images[]" id="reviewImages" class="form-control" multiple
+                                onchange="previewImages(this)">
+                            <div id="imagePreviewContainer" class="mt-3"></div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Gửi đánh giá</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
+
+@push('scripts')
+    <script>
+        function showReviewModal(orderItemId, productName, productAttribute = null) {
+            document.getElementById('orderItemId').value = orderItemId;
+
+            let modalTitle = `Đánh giá sản phẩm: ${productName}`;
+            if (productAttribute) {
+                modalTitle += ` (Loại: ${productAttribute})`;
+            }
+
+            document.getElementById('reviewModal').querySelector('.modal-title').textContent = modalTitle;
+            new bootstrap.Modal(document.getElementById('reviewModal')).show();
+        }
+
+        function validateImageCount(input) {
+            if (input.files.length > 3) {
+                alert('Bạn chỉ được tải tối đa 3 ảnh.');
+                input.value = ''; // Reset input nếu vượt quá giới hạn
+            }
+        }
+
+        function previewImages(input) {
+            const container = document.getElementById('imagePreviewContainer');
+            container.innerHTML = ''; // Xóa nội dung cũ
+
+            if (input.files.length > 3) {
+                alert('Bạn chỉ được tải tối đa 3 ảnh.');
+                input.value = ''; // Reset input nếu vượt quá giới hạn
+                return;
+            }
+
+            Array.from(input.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.width = '100px';
+                    img.style.height = '100px';
+                    img.style.objectFit = 'cover';
+                    img.style.marginRight = '10px';
+                    img.style.border = '1px solid #ddd';
+                    img.style.borderRadius = '5px';
+                    container.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function selectStarRating(value) {
+            const stars = document.querySelectorAll('#starRating .fa-star');
+            stars.forEach(star => {
+                const starValue = parseInt(star.getAttribute('data-value'));
+                if (starValue <= value) {
+                    star.classList.remove('text-muted');
+                    star.classList.add('text-warning'); // Đổi màu sao thành vàng
+                } else {
+                    star.classList.remove('text-warning');
+                    star.classList.add('text-muted'); // Đổi màu sao thành xám
+                }
+            });
+            document.getElementById('ratingValue').value = value; // Gán giá trị sao vào input ẩn
+        }
+    </script>
+@endpush

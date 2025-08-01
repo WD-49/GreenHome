@@ -5,6 +5,7 @@ namespace App\Http\Controllers\client;
 use App\Models\Cart;
 use App\Models\User;
 use App\Models\Order;
+use App\Models\Review;
 use App\Models\WebInfo;
 use App\Models\CartItem;
 use App\Models\Discount;
@@ -286,6 +287,7 @@ class CheckoutController extends Controller
     {
         $user = Auth::user();
         $orders = Order::where('user_id', $user->id)
+            ->with(['items.review'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
         return view('client.pages.viewOrder', compact('orders', 'user'));
@@ -301,7 +303,7 @@ class CheckoutController extends Controller
             return redirect()->route('orders.list')->with('error', 'Bạn không có quyền xem đơn hàng này.');
         }
 
-        $order->load('items');
+        $order->load('items.review');
 
         return view('client.pages.invoice', compact('order', 'user'));
     }
@@ -355,5 +357,38 @@ class CheckoutController extends Controller
             Log::error('Hủy đơn thất bại: ' . $e->getMessage());
             return redirect()->route('orders.list')->with('error', 'Có lỗi xảy ra khi hủy đơn hàng. Vui lòng thử lại.');
         }
+    }
+
+    public function submitReview(Request $request)
+    {
+        // 
+        $data = $request->validate([
+            'order_item_id' => 'required|exists:order_items,id',
+            'title' => 'required|string|max:255',
+            'rating' => 'required|integer|min:1|max:5',
+            'content' => 'required|string',
+            'images.*' => 'nullable|image|max:2048',
+        ]);
+
+        $orderItem = OrderItem::findOrFail($data['order_item_id']);
+        $productVariant = ProductVariant::where('sku', $orderItem->product_variant_sku)->firstOrFail();
+
+        $review = Review::create([
+            'order_item_id' => $data['order_item_id'],
+            'product_variant_id' => $productVariant->id,
+            'user_id' => auth()->id(),
+            'title' => $data['title'],
+            'rating' => $data['rating'],
+            'content' => $data['content'],
+        ]);
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $image = $image->store('reviews', 'public');
+                $review->images()->create(['image' => $image]);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Đánh giá đã được gửi thành công.');
     }
 }
