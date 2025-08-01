@@ -15,6 +15,8 @@ class EmailVerificationPromptController extends Controller
     /**
      * Display the email verification prompt.
      */
+
+    // Hàm này sẽ hiển thị trang yêu cầu xác minh email
     public function __invoke(Request $request): RedirectResponse|View
     {
         return $request->user()->hasVerifiedEmail()
@@ -25,6 +27,8 @@ class EmailVerificationPromptController extends Controller
     /**
      * Send a new email verification notification.
      */
+
+    // Hàm này sẽ gửi email xác minh đến người dùng
     public function sendVerificationEmail(Request $request): RedirectResponse
     {
         // Kiểm tra giới hạn tần suất gửi

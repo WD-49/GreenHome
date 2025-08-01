@@ -23,13 +23,15 @@ use Illuminate\Validation\ValidationException;
 
 class ProfileController extends Controller
 {
-    public function index($tab = 'info') // $tab vẫn được dùng để xác định tab nào active ban đầu
+    public function index(Request $request) // $tab vẫn được dùng để xác định tab nào active ban đầu
     {
         $user = Auth::user();
         // dd($user);
         if (!$user) {
             return redirect()->route('login')->with('error', 'Bạn cần đăng nhập để xem trang cá nhân.');
         }
+
+        $tab = $request->input('tab', 'info');
 
         $data = [];
         // Lấy tất cả dữ liệu cho TẤT CẢ CÁC TAB
@@ -66,7 +68,7 @@ class ProfileController extends Controller
 
         $data['wishlistItems'] = Wishlist::where('user_id', $user->id)
             ->with('product') // Tải trước sản phẩm
-            ->orderBy('add_at', 'desc')
+            ->orderBy('priority', 'desc')
             ->paginate(5);
         // dd($data['orders']);
         // Trả về view chính của trang profile
