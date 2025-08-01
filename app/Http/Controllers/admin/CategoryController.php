@@ -65,45 +65,55 @@ class CategoryController extends Controller
         return view('admin.categories.create');
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => ['required', 'array'], // Mảng tên danh mục
-            'name.*' => ['required', 'string', 'max:255', 'distinct'],
-            'description' => ['nullable', 'array'],
-            'description.*' => ['nullable', 'string'],
-            'status' => ['required', 'array'],
-            'status.*' => ['required', 'in:0,1'],
-        ], [
-            'name.required' => 'Tên danh mục là bắt buộc.',
-            'name.*.required' => 'Tên danh mục không được để trống.',
-            'name.*.distinct' => 'Tên danh mục không được trùng.',
-            'status.required' => 'Trạng thái là bắt buộc.',
-        ]);
+public function store(Request $request)
+{
+    $request->validate([
+        'name' => ['required', 'array'], // Mảng tên danh mục
+        'name.*' => ['required', 'string', 'max:255', 'distinct'],
+        'description' => ['nullable', 'array'],
+        'description.*' => ['nullable', 'string'],
+        'status' => ['required', 'array'],
+        'status.*' => ['required', 'in:0,1'],
+    ], [
+        'name.required' => 'Tên danh mục là bắt buộc.',
+        'name.*.required' => 'Tên danh mục không được để trống.',
+        'name.*.distinct' => 'Tên danh mục không được trùng.',
+        'status.required' => 'Trạng thái là bắt buộc.',
+    ]);
 
-        if ($request->has('name') && is_array($request->name)) {
-            foreach ($request->name as $index => $name) {
-                $slug = Str::slug($name);
+    if ($request->has('name') && is_array($request->name)) {
+        $slugs = [];
 
-                // Kiểm tra slug có bị trùng hay không
-                $existingSlug = Category::where('slug', $slug)->first();
-                if ($existingSlug) {
-                    $slug = $slug . '-' . uniqid();
-                }
+        foreach ($request->name as $index => $name) {
+            $slug = Str::slug($name);
 
-                $category = new Category();
-                $category->name = $name;
-                $category->slug = $slug;
-                $category->description = isset($request->description[$index]) ? $request->description[$index] : null;
-                $category->status = isset($request->status[$index]) ? $request->status[$index] : 1;
-                $category->save();
+            // Kiểm tra slug đã tồn tại trong database hoặc trùng trong mảng gửi lên
+            if (Category::where('slug', $slug)->exists() || in_array($slug, $slugs)) {
+                return back()->withErrors(['name.' . $index => 'Danh mục "' . $name . '" đã tồn tại.'])->withInput();
             }
 
-            return redirect()->route('admin.categories.index')->with('success', 'Thêm danh mục thành công.');
-        } else {
-            return back()->withErrors(['name' => 'Danh mục không hợp lệ.']);
+            // Lưu lại slug để kiểm tra các mục tiếp theo không trùng
+            $slugs[] = $slug;
         }
+
+        // Nếu không có slug nào bị trùng thì tiến hành lưu
+        foreach ($request->name as $index => $name) {
+            $slug = $slugs[$index];
+
+            $category = new Category();
+            $category->name = $name;
+            $category->slug = $slug;
+            $category->description = $request->description[$index] ?? null;
+            $category->status = $request->status[$index] ?? 1;
+            $category->save();
+        }
+
+        return redirect()->route('admin.categories.index')->with('success', 'Thêm danh mục thành công.');
+    } else {
+        return back()->withErrors(['name' => 'Danh mục không hợp lệ.']);
     }
+}
+
 
     public function edit($slug)
     {
