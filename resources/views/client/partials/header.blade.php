@@ -5,6 +5,7 @@
                 <a href="{{ route('home') }}" class="cr-logo">
                     <img src="{{ asset('assets_client/assets/img/logo/GreenHome_logo.png') }}" alt="logo"
                         class="logo">
+
                     <img src="{{ asset('assets_client/assets/img/logo/dark-logo.png') }}" alt="logo"
                         class="dark-logo">
                 </a>
@@ -259,11 +260,10 @@
                                     @foreach ($categories3 as $category)
                                         <li>
                                             <a class="dropdown-item"
-                                                href="{{ route('category.show', $category->slug) }}">
-
-
+                                                href="{{ route('shop.index', ['categories[]' => $category->id]) }}">
                                                 {{ $category->name }}
                                             </a>
+
                                         </li>
                                     @endforeach
                                 @endisset

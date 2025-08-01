@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class WishList extends Model
 {
     public $timestamps = false; 
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
 
     protected $table = 'wishlists'; // 🛠️ CHÍNH XÁC tên bảng trong migration của bạn

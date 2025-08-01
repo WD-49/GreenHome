@@ -263,7 +263,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::post('/restoreAdmin/{id}', [AccountAdminController::class, 'restoreAdmin'])->name('restoreAdmin');
         Route::delete('/forceDeleteAdmin/{id}', [AccountAdminController::class, 'forceDeleteAdmin'])->name('forceDeleteAdmin');
         Route::post('/resetPassAdmin/{id}', [AccountAdminController::class, 'resetPassAdmin'])->name('resetPassAdmin');
-        // // ROUTE MỚI CHO PHÂN QUYỀN
+        // ROUTE MỚI CHO PHÂN QUYỀN
         // Route::post('toggleUserRole/{admin}', [AccountAdminController::class, 'toggleUserRole'])->name('toggleUserRole');
     });
 
@@ -462,5 +462,6 @@ Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('categ
 
 
 Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show'); // ? route gi day?
+
 
 Route::post('/comment/submit', [ProductClientController::class, 'submitComment'])->name('client.comment.submit');

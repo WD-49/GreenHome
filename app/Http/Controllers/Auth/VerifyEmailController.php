@@ -13,6 +13,8 @@ class VerifyEmailController extends Controller
     /**
      * Mark the authenticated user's email address as verified.
      */
+
+    // Hàm này sẽ xác minh email của người dùng
     public function __invoke(Request $request): RedirectResponse
     {
         // dd($request->user());

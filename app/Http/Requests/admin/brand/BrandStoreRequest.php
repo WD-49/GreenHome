@@ -33,11 +33,14 @@ class BrandStoreRequest extends FormRequest
 public function messages(): array
 {
     return [
-        'name.required' => 'Vui lòng nhập tên thương hiệu.',
-        'name.max' => 'Tên thương hiệu không được vượt quá 20 ký tự.',
-        'name.unique' => 'Tên thương hiệu đã tồn tại.',
-        'description.required' => 'Vui lòng nhập mô tả.',
+        'brands.required' => 'Vui lòng thêm ít nhất một thương hiệu.',
+        'brands.*.name.required' => 'Vui lòng nhập tên thương hiệu.',
+        'brands.*.name.max' => 'Tên thương hiệu không được vượt quá 20 ký tự.',
+        'brands.*.name.unique' => 'Tên thương hiệu đã tồn tại.',
+        'brands.*.name.distinct' => 'Tên thương hiệu bị trùng lặp trong danh sách.',
+        'brands.*.description.required' => 'Vui lòng nhập mô tả thương hiệu.',
     ];
 }
+
 
 }
