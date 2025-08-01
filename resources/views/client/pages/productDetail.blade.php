@@ -213,6 +213,10 @@
                                 <button class="nav-link active" id="description-tab" data-bs-toggle="tab"
                                     data-bs-target="#description" type="button" role="tab">Mô tả</button>
                             </li>
+                             <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#review"
+                                    type="button" role="tab">Review</button>
+                            </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="comment-tab" data-bs-toggle="tab" data-bs-target="#comment"
                                     type="button" role="tab">Bình luận</button>
@@ -225,6 +229,50 @@
                                 <div class="cr-tab-content">
                                     <div class="cr-description">
                                         <p>{!! $product->description !!}</p>
+                                    </div>
+                                </div>
+                            </div>
+                             <div class="tab-pane fade" id="review" role="tabpanel">
+                                <div class="cr-tab-content-from">
+                                    <div class="post">
+                                        @forelse ($reviews as $review)
+                                            <div class="content {{ !$loop->first ? 'mt-30' : '' }}">
+                                                <img src="{{ asset('storage/' . ($review->user->avatar ?? 'default-avatar.jpg')) }}"
+                                                    alt="review"
+                                                    onerror="if(!this.dataset.error) { this.dataset.error = true; this.src='{{ asset('images/default-avatar.jpg') }}'; }">
+                                                <div class="details">
+                                                    <span
+                                                        class="date">{{ \Carbon\Carbon::parse($review->created_at)->locale('vi')->isoFormat('D [tháng] M, YYYY') }}</span>
+                                                    <span class="name">{{ $review->user->name ?? 'Guest' }}</span>
+                                                    <span class="name">{{ $review->title ?? '' }}</span>
+
+                                                </div>
+                                                <div class="cr-t-review-rating">
+                                                    @for ($i = 1; $i <= 5; $i++)
+                                                        <i
+                                                            class="ri-star-s-{{ $i <= $review->rating ? 'fill' : 'line' }}"></i>
+                                                    @endfor
+
+                                                </div>
+                                            </div>
+                                            <p>{{ $review->content }}</p>
+                                            @if ($review->images && $review->images->count())
+                                                <div class="review-images mt-2">
+                                                    @foreach ($review->images as $image)
+                                                        <img src="{{ asset('storage/' . $image->image) }}"
+                                                            alt="Review Image"
+                                                            style="width: 100px; height: auto; border-radius: 6px; margin-right: 8px;"
+                                                            loading="lazy"
+                                                            onerror="this.src='{{ asset('images/default-image.jpg') }}'">
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        @empty
+                                            <div class="no-reviews">
+                                                <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+                                            </div>
+                                        @endforelse
+
                                     </div>
                                 </div>
                             </div>
