@@ -238,9 +238,10 @@
                                         </div>
                                         <div class="cr-product-details">
                                             <div class="cr-brand">
-                                                <a href="#">{{ $product->category->name ?? '' }}</a>
+                                                <a href="">{{ $product->category->name ?? '' }}</a>
                                             </div>
-                                            <a href="#" class="title">{{ $product->name }}</a>
+                                            <a href="{{ route('productDetail', $product->slug) }}"
+                                                class="title">{{ $product->name }}</a>
 
                                             {{-- ✅ Hiển thị đúng giá biến thể đầu tiên --}}
                                             <p class="cr-price">
@@ -557,7 +558,7 @@
                                                 <a href="#">{{ $blog->category->name ?? 'Uncategorized' }}</a>
                                             </span>
                                             <h5>{{ $blog->title }}</h5>
-                                            <a class="read" href="">Đọc thêm</a>
+                                            <a class="read" href="{{ route('blog.show', $blog->slug) }}">Đọc thêm</a>
                                         </div>
 
                                         <div class="cr-blog-image">

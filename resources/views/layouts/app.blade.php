@@ -12,13 +12,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="keywords" content="ecommerce, market, shop, mart, cart, deal, multipurpose, marketplace">
-    <meta name="description" content="Carrot - Multipurpose eCommerce HTML Template.">
+    <meta name="description" content="GreenHome.">
     <meta name="author" content="ashishmaraviya">
 
-    <title>Carrot - Multipurpose eCommerce HTML Template</title>
+    <title>GreenHome</title>
 
     <!-- App favicon -->
-    <link rel="shortcut icon" href="{{ asset('assets_client/assets/img/logo/favicon.png') }}">
+    <link rel="shortcut icon" href="{{ asset('assets_client/assets/img/logo/GreenHome_logo.png') }}">
 
     <!-- Icon CSS -->
     <link rel="stylesheet" href="{{ asset('assets_client/assets/css/vendor/materialdesignicons.min.css') }}">
@@ -150,7 +150,7 @@
     @include('client.partials.sideTool')
     <!-- Voucher Modal -->
     @include('client.partials.voucherModal')
-    
+
 
 
 

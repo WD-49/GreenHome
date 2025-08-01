@@ -189,7 +189,7 @@
                                 <button type="button" class="minus">-</button>
                             </div>
                             <div class="cr-add-button">
-                                <button type="button" class="cr-button add-to-cart">Add to cart</button>
+                                <button type="button" class="cr-button add-to-cart">Thêm vào giỏ</button>
                             </div>
                             <div class="cr-card-icon">
                                  <a href="javascript:void(0);" class="wishlist-button"
@@ -283,7 +283,7 @@
                             </div>
                             <!-- Comment -->
                             <div class="tab-pane fade" id="comment" role="tabpanel">
-                                <div class="cr-tab-content-from"> 
+                                <div class="cr-tab-content-from">
                                     <div class="post">
                                         @php $comments = $product->comments->whereNull('rating'); @endphp
                                         @forelse ($comments as $comment)

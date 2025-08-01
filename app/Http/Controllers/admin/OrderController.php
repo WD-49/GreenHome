@@ -61,7 +61,6 @@ class OrderController extends Controller
         $query = Order::with([
             'user',
             'items',
-            'items', // Đã sửa tên quan hệ ở model ProductVariant
         ])->latest();
 
         // Lọc theo mã đơn hàng (sku hoặc id)
@@ -121,6 +120,7 @@ class OrderController extends Controller
             'items' => function ($query) {
                 $query->withTrashed();
             },
+
         ])
             ->withTrashed()
             ->findOrFail($id);

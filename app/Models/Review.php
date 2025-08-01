@@ -14,7 +14,8 @@ class Review extends Model
 
     protected $fillable = [
         'user_id',
-        'product_variant_id', 
+        'product_variant_id',
+        'order_item_id',
         'rating',
         'title',
         'content',
@@ -42,5 +43,9 @@ class Review extends Model
     public function images()
     {
         return $this->hasMany(\App\Models\ReviewImage::class);
+    }
+    public function orderItem()
+    {
+        return $this->belongsTo(OrderItem::class);
     }
 }

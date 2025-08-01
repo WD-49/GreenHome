@@ -446,6 +446,9 @@ route::middleware('auth')->prefix('orders')->name('orders.')->group(function () 
     Route::get('/{order:sku}', [CheckoutController::class, 'show'])->name('show');
     Route::post('/cancel/{sku}', [CheckoutController::class, 'cancel'])->name('cancel');
 });
+Route::post('/review/submit', [CheckoutController::class, 'submitReview'])->name('client.review.submit');
+
+
 
 // web.php
 Route::post('/checkout/payment', [PaymentController::class, 'createPaymentUrl'])->name('payment.vnpay');
@@ -453,10 +456,12 @@ Route::get('/payment/vnpay-return', [PaymentController::class, 'vnpayReturn'])->
 
 
 
-Route::get('/blog/{slug}', [App\Http\Controllers\client\BlogDetailController::class, 'show'])->name('blog.detail');
+Route::get('/blog/{slug}', [App\Http\Controllers\client\BlogDetailController::class, 'show'])->name('blog.detail'); // ? route gi day?
 
 Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');
 
-Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show');
+
+Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show'); // ? route gi day?
+
 
 Route::post('/comment/submit', [ProductClientController::class, 'submitComment'])->name('client.comment.submit');
