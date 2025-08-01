@@ -50,13 +50,18 @@ class WishlistController extends Controller
     }
 
     public function remove(Request $request)
-    {
-        WishList::where('user_id', Auth::id())
-            ->where('product_id', $request->product_id)
-            ->delete();
+{
+    $wishlist = WishList::where('user_id', Auth::id())
+        ->where('product_id', $request->product_id)
+        ->first();
 
-        return response()->json(['success' => true, 'message' => 'Đã xóa khỏi wishlist']);
+    if ($wishlist) {
+        $wishlist->forceDelete(); // ← Xóa vĩnh viễn
     }
+
+    return response()->json(['success' => true, 'message' => 'Đã xóa khỏi wishlist']);
+}
+
 
     public function toggle(Request $request)
     {

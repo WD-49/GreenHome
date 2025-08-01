@@ -219,9 +219,14 @@
                                                 <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}">
                                             </div>
                                             <div class="cr-side-view">
-                                                <a href="javascript:void(0)" class="wishlist">
-                                                    <i class="ri-heart-line"></i>
-                                                </a>
+                                                <a href="javascript:void(0);" class="wishlist-button"
+                                                        data-product-id="{{ $product->id }}">
+                                                        @if (in_array($product->id, $wishlistProductIds ?? []))
+                                                            <i class="ri-heart-fill text-danger"></i>
+                                                        @else
+                                                            <i class="ri-heart-line"></i>
+                                                        @endif
+                                                    </a>
                                                 <a class="model-oraganic-product" data-bs-toggle="modal" href="#quickview"
                                                     role="button">
                                                     <i class="ri-eye-line"></i>
@@ -576,3 +581,39 @@
         </div>
     </section>
 @endsection
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        // CSRF token setup
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            xhrFields: {
+                withCredentials: true
+            }
+        });
+
+        // Wishlist toggle
+        $(document).on('click', '.wishlist-button', function(e) {
+            e.preventDefault();
+            const $btn = $(this);
+            const productId = $btn.data('product-id');
+
+            $.post('{{ route('wishlist.toggle') }}', {
+                product_id: productId
+            }, function(res) {
+                if (res.added) {
+                    $btn.find('i').removeClass('ri-heart-line').addClass('ri-heart-fill text-danger');
+                } else {
+                    $btn.find('i').removeClass('ri-heart-fill text-danger').addClass('ri-heart-line');
+                }
+                alert(res.message);
+            }).fail(function(xhr) {
+                alert(xhr.status === 401 ? 'Vui lòng đăng nhập để thêm vào wishlist' : 'Đã có lỗi xảy ra!');
+            });
+        });
+    });
+</script>
+@endpush
+
