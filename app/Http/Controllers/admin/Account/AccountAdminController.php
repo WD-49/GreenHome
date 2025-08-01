@@ -46,18 +46,6 @@ class AccountAdminController extends Controller
     // Phương thức mới để thay đổi vai trò người dùng
     public function toggleUserRole(Request $request, User $user)
     {
-        // --- CẢNH BÁO: ĐÃ BỎ KIỂM TRA QUYỀN HẠN CẤP ĐỘ CAO CHO MỤC ĐÍCH TEST.
-        // --- HÃY ĐẢM BẢO THÊM LẠI KIỂM TRA QUYỀN TRƯỚC KHI ĐƯA LÊN PRODUCTION!
-        // Ví dụ kiểm tra quyền hạn (nên sử dụng Gates/Policies của Laravel):
-        // if (!auth()->check() || auth()->user()->role !== 'admin') {
-        //     return response()->json(['success' => false, 'message' => 'Bạn không có quyền thực hiện hành động này.'], 403);
-        // }
-
-        // Không cho phép người dùng thay đổi vai trò của chính mình
-        // if (auth()->check() && auth()->user()->id === $user->id) {
-        //     return response()->json(['success' => false, 'message' => 'Bạn không thể thay đổi vai trò của chính mình.'], 403);
-        // }
-
         $newRole = $request->input('new_role');
 
         // Xác thực vai trò mới hợp lệ
@@ -277,22 +265,10 @@ class AccountAdminController extends Controller
             'name' => $order->shipping_name ?? 'N/A',
             'phone' => $order->shipping_phone ?? 'N/A',
             'address_line1' => $order->shipping_address ?? 'N/A',
-            // Không có ward, district, city riêng cho shipping trong bảng orders
-            // Nếu bạn muốn lấy từ user_profiles, bạn cần có user_id trên order và load profile của user đó
             'ward' => null,
             'district' => null,
             'city' => null,
         ];
-
-        // Nếu bạn muốn thử lấy thông tin phường/xã/thành phố từ user_profile của người đặt hàng (nếu có)
-        // bạn cần đảm bảo $order->user và $order->user->profile được load
-        // Ví dụ:
-        // if ($order->user && $order->user->profile) {
-        //     $shippingAddressData['ward'] = $order->user->profile->ward;
-        //     $shippingAddressData['district'] = $order->user->profile->district;
-        //     $shippingAddressData['city'] = $order->user->profile->city;
-        // }
-
 
         // CHUYỂN ĐỔI TRẠNG THÁI THANH TOÁN
         $paymentStatusDisplay = $order->payment_status; // Giữ giá trị gốc
