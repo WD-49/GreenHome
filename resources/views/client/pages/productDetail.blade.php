@@ -192,14 +192,14 @@
                                 <button type="button" class="cr-button add-to-cart">Thêm vào giỏ</button>
                             </div>
                             <div class="cr-card-icon">
-                                 <a href="javascript:void(0);" class="wishlist-button"
-                                                        data-product-id="{{ $product->id }}">
-                                                        @if (in_array($product->id, $wishlistProductIds ?? []))
-                                                            <i class="ri-heart-fill text-danger"></i>
-                                                        @else
-                                                            <i class="ri-heart-line"></i>
-                                                        @endif
-                                                    </a>
+                                <a href="javascript:void(0);" class="wishlist-button"
+                                    data-product-id="{{ $product->id }}">
+                                    @if (in_array($product->id, $wishlistProductIds ?? []))
+                                        <i class="ri-heart-fill text-danger"></i>
+                                    @else
+                                        <i class="ri-heart-line"></i>
+                                    @endif
+                                </a>
                                 <a class="model-oraganic-product" data-bs-toggle="modal" href="#quickview" role="button">
                                     <i class="ri-eye-line"></i>
                                 </a>
@@ -218,9 +218,9 @@
                                 <button class="nav-link active" id="description-tab" data-bs-toggle="tab"
                                     data-bs-target="#description" type="button" role="tab">Mô tả</button>
                             </li>
-                             <li class="nav-item" role="presentation">
+                            <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#review"
-                                    type="button" role="tab">Review</button>
+                                    type="button" role="tab">Đánh giá</button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="comment-tab" data-bs-toggle="tab" data-bs-target="#comment"
@@ -237,7 +237,7 @@
                                     </div>
                                 </div>
                             </div>
-                             <div class="tab-pane fade" id="review" role="tabpanel">
+                            <div class="tab-pane fade" id="review" role="tabpanel">
                                 <div class="cr-tab-content-from">
                                     <div class="post">
                                         @forelse ($reviews as $review)
@@ -524,36 +524,39 @@
                 });
             });
             $(document).ready(function() {
-        // CSRF token setup
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            xhrFields: {
-                withCredentials: true
-            }
-        });
+                // CSRF token setup
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    }
+                });
 
-        // Wishlist toggle
-        $(document).on('click', '.wishlist-button', function(e) {
-            e.preventDefault();
-            const $btn = $(this);
-            const productId = $btn.data('product-id');
+                // Wishlist toggle
+                $(document).on('click', '.wishlist-button', function(e) {
+                    e.preventDefault();
+                    const $btn = $(this);
+                    const productId = $btn.data('product-id');
 
-            $.post('{{ route('wishlist.toggle') }}', {
-                product_id: productId
-            }, function(res) {
-                if (res.added) {
-                    $btn.find('i').removeClass('ri-heart-line').addClass('ri-heart-fill text-danger');
-                } else {
-                    $btn.find('i').removeClass('ri-heart-fill text-danger').addClass('ri-heart-line');
-                }
-                alert(res.message);
-            }).fail(function(xhr) {
-                alert(xhr.status === 401 ? 'Vui lòng đăng nhập để thêm vào wishlist' : 'Đã có lỗi xảy ra!');
+                    $.post('{{ route('wishlist.toggle') }}', {
+                        product_id: productId
+                    }, function(res) {
+                        if (res.added) {
+                            $btn.find('i').removeClass('ri-heart-line').addClass(
+                                'ri-heart-fill text-danger');
+                        } else {
+                            $btn.find('i').removeClass('ri-heart-fill text-danger').addClass(
+                                'ri-heart-line');
+                        }
+                        alert(res.message);
+                    }).fail(function(xhr) {
+                        alert(xhr.status === 401 ? 'Vui lòng đăng nhập để thêm vào wishlist' :
+                            'Đã có lỗi xảy ra!');
+                    });
+                });
             });
-        });
-    });
         </script>
     @endpush
 @endsection

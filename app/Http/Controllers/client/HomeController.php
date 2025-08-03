@@ -33,7 +33,7 @@ class HomeController extends Controller
             $query->orderBy('view', 'desc')->take(8);
         }])->get();
 
-        $randomProducts = Product::inRandomOrder()->take(8)->get();
+        $randomProducts = Product::orderByDesc('view')->take(8)->get();
         $categories2 = Category::with(['products' => function ($query) {
             $query->latest()->take(8);
         }])->get();
