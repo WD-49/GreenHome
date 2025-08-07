@@ -15,19 +15,23 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class ProfileController extends Controller
 {
-    public function index($tab = 'info') // $tab vẫn được dùng để xác định tab nào active ban đầu
+    public function index(Request $request) // $tab vẫn được dùng để xác định tab nào active ban đầu
     {
         $user = Auth::user();
         // dd($user);
         if (!$user) {
             return redirect()->route('login')->with('error', 'Bạn cần đăng nhập để xem trang cá nhân.');
         }
+
+        $tab = $request->input('tab', 'info');
 
         $data = [];
         // Lấy tất cả dữ liệu cho TẤT CẢ CÁC TAB
@@ -64,7 +68,7 @@ class ProfileController extends Controller
 
         $data['wishlistItems'] = Wishlist::where('user_id', $user->id)
             ->with('product') // Tải trước sản phẩm
-            ->orderBy('add_at', 'desc')
+            ->orderBy('priority', 'desc')
             ->paginate(5);
         // dd($data['orders']);
         // Trả về view chính của trang profile
@@ -134,6 +138,45 @@ class ProfileController extends Controller
             // Log lỗi hoặc hiển thị thông báo lỗi chung
             Log::error('Update Profile Error: ' . $e->getMessage(), ['user_id' => $user->id, 'request' => $request->all()]);
             return redirect()->back()->withInput()->with('error', 'Có lỗi xảy ra khi cập nhật thông tin: ' . $e->getMessage());
+        }
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $user = Auth::user();
+
+        // 1. Xác thực dữ liệu đầu vào
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:8|confirmed', // 'confirmed' sẽ tự động so khớp với new_password_confirmation
+        ], [
+            'current_password.required' => 'Mật khẩu hiện tại không được để trống.',
+            'new_password.required' => 'Mật khẩu mới không được để trống.',
+            'new_password.min' => 'Mật khẩu mới phải có ít nhất 8 ký tự.',
+            'new_password.confirmed' => 'Xác nhận mật khẩu mới không khớp.',
+        ]);
+
+        // 2. Kiểm tra mật khẩu hiện tại
+        if (!Hash::check($request->current_password, $user->password)) {
+            // Log lỗi để debug nếu cần
+            Log::warning('Lỗi đổi mật khẩu: Mật khẩu hiện tại không đúng.', [
+                'user_id' => $user->id,
+                'input_current_password' => $request->current_password, // Không nên log mật khẩu thật trong môi trường production
+            ]);
+            throw ValidationException::withMessages([
+                'current_password' => ['Mật khẩu hiện tại không đúng.'],
+            ]);
+        }
+
+        // 3. Cập nhật mật khẩu mới
+        try {
+            $user->password = Hash::make($request->new_password);
+            $user->save();
+
+            return redirect()->route('profile.index', ['tab' => 'password'])->with('success', 'Mật khẩu của bạn đã được cập nhật thành công!');
+        } catch (\Exception $e) {
+            Log::error('Lỗi khi cập nhật mật khẩu: ' . $e->getMessage(), ['user_id' => $user->id]);
+            return redirect()->back()->withInput()->with('error', 'Có lỗi xảy ra khi cập nhật mật khẩu: ' . $e->getMessage());
         }
     }
 }

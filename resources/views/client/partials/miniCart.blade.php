@@ -16,8 +16,8 @@
                 </table>
             </div>
             <div class="cart_btn">
-                <a href="{{ route('cart.view') }}" class="cr-button">View Cart</a>
-                <a href="checkout.html" class="cr-btn-secondary">Checkout</a>
+                <a href="{{ route('cart.view') }}" class="cr-button">Xem chi tiết</a>
+                {{-- <a href="checkout.html" class="cr-btn-secondary">Checkout</a> --}}
             </div>
         </div>
     </div>
@@ -67,11 +67,11 @@
 
                 html += `
                         <li data-id="${item.id}" data-max="${variant.quantity}">
-                            <a href="/product/${product.slug}" class="crside_pro_img">
+                            <a href="/san-pham/${product.slug}" class="crside_pro_img">
                                 <img src="/storage/${image}" alt="${product.name}">
                             </a>
                             <div class="cr-pro-content">
-                                <a href="/product/${product.slug}" class="cart_pro_title">${product.name}</a>
+                                <a href="/san-pham/${product.slug}" class="cart_pro_title">${product.name}</a>
                                 <span class="cart-price"><span>${formatVND(price)}</span> x ${quantity}</span>
                                 <div class="cr-cart-qty">
                                     <div class="cart-qty-plus-minus">

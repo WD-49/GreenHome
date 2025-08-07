@@ -287,6 +287,12 @@
                                     </span>
                                 </a>
                             </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link p-2" data-tab="password" style="color: #000000;">
+                                    <span class="d-block d-sm-none"><i class="fas fa-lock"></i></span>
+                                    <span class="d-none d-sm-block">Đổi mật khẩu</span>
+                                </a>
+                            </li>
                         </ul>
 
                         {{-- NỘI DUNG CÁC TAB - Tất cả trong một div.tab-content --}}
@@ -964,11 +970,68 @@
                                         </div>
                                     @endif
                                     <div class="mt-3">
-                                            {{ $data['wishlistItems']->appends(['tab' => 'wishlistItems'])->links() }}
-                                        </div>
+                                        {{ $data['wishlistItems']->appends(['tab' => 'wishlistItems'])->links() }}
+                                    </div>
                                 </div>
 
                             </div> {{-- End tab-content --}}
+
+                            {{-- Tab Content - Đổi mật khẩu (Password) --}}
+                            <div id="password" class="tab-content-item {{ $tab == 'password' ? 'active' : '' }}">
+                                <h3 style="color: #64B496;">Đổi mật khẩu</h3>
+                                <form action="{{ route('profile.updatePassword') }}" method="POST">
+                                    @csrf
+                                    <div class="form-group mb-3">
+                                        <label for="current_password">Mật khẩu hiện tại:</label>
+                                        <div class="input-group">
+                                            <input type="password"
+                                                class="form-control @error('current_password') is-invalid @enderror"
+                                                id="current_password" name="current_password" required>
+                                            <button class="btn btn-outline-secondary" type="button"
+                                                id="toggleCurrentPassword" style="border-left: none;">
+                                                <i class="fa fa-eye"></i>
+                                            </button>
+                                            @error('current_password')
+                                                {{-- Validation feedback should still be outside the input-group if you want it to display below --}}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ $message }}
+                                                </div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="new_password">Mật khẩu mới:</label>
+                                        <div class="input-group">
+                                            <input type="password"
+                                                class="form-control @error('new_password') is-invalid @enderror"
+                                                id="new_password" name="new_password" required>
+                                            <button class="btn btn-outline-secondary" type="button" id="toggleNewPassword">
+                                                <i class="fa fa-eye"></i>
+                                            </button>
+                                            @error('new_password')
+                                                <div class="invalid-feedback">
+                                                    {{ $message }}
+                                                </div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="new_password_confirmation">Xác nhận mật khẩu mới:</label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control" id="new_password_confirmation"
+                                                name="new_password_confirmation" required>
+                                            <button class="btn btn-outline-secondary" type="button"
+                                                id="toggleConfirmPassword">
+                                                <i class="fa fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary">Cập nhật mật khẩu</button>
+                                </form>
+                            </div>
                         </div> {{-- End card-body --}}
                     </div> {{-- End card --}}
                 </div> {{-- End col-12 --}}
@@ -976,6 +1039,8 @@
         </div> {{-- End container-xxl --}}
     @endsection
 
+
+    {{-- Phần cho nút ẩn hiện password --}}
     {{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     @push('scripts')
@@ -1558,6 +1623,48 @@
                         }
                     });
                 });
+            });
+        </script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const toggleCurrentPassword = document.getElementById('toggleCurrentPassword');
+                const currentPasswordInput = document.getElementById('current_password');
+
+                if (toggleCurrentPassword && currentPasswordInput) {
+                    toggleCurrentPassword.addEventListener('click', function() {
+                        const type = currentPasswordInput.getAttribute('type') === 'password' ? 'text' :
+                            'password';
+                        currentPasswordInput.setAttribute('type', type);
+                        this.querySelector('i').classList.toggle('fa-eye');
+                        this.querySelector('i').classList.toggle('fa-eye-slash');
+                    });
+                }
+
+                const toggleNewPassword = document.getElementById('toggleNewPassword');
+                const newPasswordInput = document.getElementById('new_password');
+
+                if (toggleNewPassword && newPasswordInput) {
+                    toggleNewPassword.addEventListener('click', function() {
+                        const type = newPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                        newPasswordInput.setAttribute('type', type);
+                        this.querySelector('i').classList.toggle('fa-eye');
+                        this.querySelector('i').classList.toggle('fa-eye-slash');
+                    });
+                }
+
+                const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+                const confirmPasswordInput = document.getElementById('new_password_confirmation');
+
+                if (toggleConfirmPassword && confirmPasswordInput) {
+                    toggleConfirmPassword.addEventListener('click', function() {
+                        const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' :
+                            'password';
+                        confirmPasswordInput.setAttribute('type', type);
+                        this.querySelector('i').classList.toggle('fa-eye');
+                        this.querySelector('i').classList.toggle('fa-eye-slash');
+                    });
+                }
             });
         </script>
     @endpush

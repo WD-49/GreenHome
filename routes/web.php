@@ -26,10 +26,11 @@ use App\Http\Controllers\admin\CategoryController;
 use App\Http\Controllers\admin\DiscountController;
 
 use App\Http\Controllers\Auth\AdminAuthController;
+use App\Http\Controllers\Auth\SocialiteController;
+
 use App\Http\Controllers\Client\ProfileController;
 
 use App\Http\Controllers\admin\AttributeController;
-
 use App\Http\Controllers\admin\DashboardController;
 use App\Http\Controllers\client\CheckoutController;
 use App\Http\Controllers\client\WishlistController;
@@ -50,11 +51,19 @@ use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\client\BlogController as ClientBlogController;
 use App\Http\Controllers\Client\DiscountController as ClientDiscountController;
 
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
+Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('/register', [RegisterController::class, 'register']);
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-Route::get('/test-reset/{token}', function ($token) {
-    return "Test token: " . $token;
-})->name('test.reset');
+// Routes cho Google Login
+Route::get('/auth/google', [SocialiteController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('/auth/google/callback', [SocialiteController::class, 'handleGoogleCallback']);
 
+// Routes cho Facebook Login
+Route::get('/auth/facebook', [SocialiteController::class, 'redirectToFacebook'])->name('auth.facebook');
+Route::get('/auth/facebook/callback', [SocialiteController::class, 'handleFacebookCallback']);
 
 // route của trang client
 // trang trủ
@@ -72,15 +81,6 @@ Route::middleware('auth')->prefix('wishlist')->group(function () {
 Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
 Route::post('/wishlist/update-options', [WishlistController::class, 'updateOptions'])->name('wishlist.updateOptions');
 
-// // Route::get('/blog', [HomeController::class, 'blog'])->name('blog'); ví dụ.
-
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);
-Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-Route::post('/register', [RegisterController::class, 'register']);
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-
-
 // Route form gửi yêu cầu và xử lý của bạn
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('forgot-password.form');
 Route::post('/forgot-password', [ForgotPasswordController::class, 'handle'])->name('forgot-password.handle'); // Sử dụng lại route này
@@ -94,6 +94,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::get('/{comment}/details-with-product', [CommentController::class, 'getCommentDetailsWithProduct'])
         ->name('detailWithProduct');
+    Route::post('/profile/password-update', [ProfileController::class, 'updatePassword'])->name('profile.updatePassword');
     // Các route xác minh email CHUẨN
     Route::get('/email/verify', [EmailVerificationPromptController::class, '__invoke'])
         ->name('verification.notice');
@@ -108,10 +109,14 @@ Route::middleware(['auth'])->group(function () {
         ->name('verification.send'); //throttle:6,1 giới hạn người dùng gửi yêu cầu xác thực email 6 lần trong 1 phút
 
     Route::post('/notifications/{id}/read', function ($id) {
-        $notification = auth()->user()->notifications()->findOrFail($id);
-        $notification->markAsRead();
-        return response()->noContent();
-    })->name('notifications.read');
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $notification = $user->notifications()->find($id);
+        if ($notification) {
+            $notification->markAsRead();
+        }
+        return response()->json(['status' => 'read']);
+    });
 });
 
 Route::get('/test-notify', function () {
@@ -119,16 +124,10 @@ Route::get('/test-notify', function () {
     $user->notify(new \App\Notifications\VerifyEmailReminder());
     return 'Notification sent';
 });
-
+// 
 
 // route của trang admin
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
-
-    Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login-submit', [AdminAuthController::class, 'login'])->name('login.submit');
-    Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
-
-
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/data', [DashboardController::class, 'data']);
     Route::get('/dashboard/repeat-customer-rate', [DashboardController::class, 'repeatCustomerRate']);
@@ -264,7 +263,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::post('/restoreAdmin/{id}', [AccountAdminController::class, 'restoreAdmin'])->name('restoreAdmin');
         Route::delete('/forceDeleteAdmin/{id}', [AccountAdminController::class, 'forceDeleteAdmin'])->name('forceDeleteAdmin');
         Route::post('/resetPassAdmin/{id}', [AccountAdminController::class, 'resetPassAdmin'])->name('resetPassAdmin');
-        // // ROUTE MỚI CHO PHÂN QUYỀN
+        // ROUTE MỚI CHO PHÂN QUYỀN
         // Route::post('toggleUserRole/{admin}', [AccountAdminController::class, 'toggleUserRole'])->name('toggleUserRole');
     });
 
@@ -449,6 +448,9 @@ route::middleware('auth')->prefix('orders')->name('orders.')->group(function () 
     Route::get('/{order:sku}', [CheckoutController::class, 'show'])->name('show');
     Route::post('/cancel/{sku}', [CheckoutController::class, 'cancel'])->name('cancel');
 });
+Route::post('/review/submit', [CheckoutController::class, 'submitReview'])->name('client.review.submit');
+
+
 
 // web.php
 Route::post('/checkout/payment', [PaymentController::class, 'createPaymentUrl'])->name('payment.vnpay');
@@ -456,11 +458,12 @@ Route::get('/payment/vnpay-return', [PaymentController::class, 'vnpayReturn'])->
 
 
 
-Route::get('/blog/{slug}', [App\Http\Controllers\client\BlogDetailController::class, 'show'])->name('blog.detail');
+Route::get('/blog/{slug}', [App\Http\Controllers\client\BlogDetailController::class, 'show'])->name('blog.detail'); // ? route gi day?
 
 Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');
 
-Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show');
 
-Route::post('/review/submit', [ProductClientController::class, 'submitReview'])->name('client.review.submit');
+Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show'); // ? route gi day?
+
+
 Route::post('/comment/submit', [ProductClientController::class, 'submitComment'])->name('client.comment.submit');

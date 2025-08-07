@@ -81,6 +81,7 @@
                                 <th>Trạng thái đơn</th>
                                 <th>Thanh toán</th>
                                 <th></th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -123,6 +124,7 @@
                                         @endphp
                                         <span class="badge bg-{{ $payClass }}">{{ $payLabel }}</span>
                                     </td>
+
                                     <td>
                                         <div class="dropdown">
                                             <button class="btn p-0 border-0 bg-transparent" type="button"

@@ -2,31 +2,20 @@
     <div class="row">
         <div class="col-lg-12">
             <div class="top-header">
-                <a href="index.html" class="cr-logo">
-                    <img src="{{ asset('assets_client/assets/img/logo/logo.png') }}" alt="logo" class="logo">
+                <a href="{{ route('home') }}" class="cr-logo">
+                    <img src="{{ asset('assets_client/assets/img/logo/GreenHome_logo.png') }}" alt="logo"
+                        class="logo">
+
                     <img src="{{ asset('assets_client/assets/img/logo/dark-logo.png') }}" alt="logo"
                         class="dark-logo">
                 </a>
                 <form class="cr-search" action="{{ route('shop.index') }}" method="GET">
                     <input class="search-input" type="text" name="search" value="{{ request('search') }}"
                         placeholder="Tìm Kiếm...">
-
-                    <select class="form-select" name="category_id">
-                        <option value="">Danh Mục</option>
-                        @foreach ($headerCategories as $cat)
-                            <option value="{{ $cat->id }}"
-                                {{ request('category_id') == $cat->id ? 'selected' : '' }}>
-                                {{ $cat->name }}
-                            </option>
-                        @endforeach
-
-                    </select>
-
                     <button type="submit" class="search-btn">
                         <i class="ri-search-line"></i>
                     </button>
                 </form>
-
                 <div class="cr-right-bar">
                     <ul class="navbar-nav">
                         <li class="nav-item dropdown">
@@ -157,7 +146,6 @@
                     </a>
                     <a href="javascript:void(0)" class="cr-right-bar-item voucher-toggle">
                         <i class="ri-ticket-line"></i>
-                        <span>Voucher</span>
                     </a>
 
 
@@ -205,7 +193,7 @@
                                                 <ul class="cat-list">
                                                     @forelse($cat->products as $product)
                                                         <li>
-                                                            <a href="{{ route('product.show', $product->slug) }}">
+                                                            <a href="{{ route('productDetail', $product->slug) }}">
                                                                 {{ $product->name }}
                                                             </a>
                                                         </li>
@@ -260,7 +248,7 @@
                     <ul class="navbar-nav">
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('home') }}">
-                                Home
+                                Trang chủ
                             </a>
                         </li>
                         <li class="nav-item dropdown">
@@ -272,11 +260,10 @@
                                     @foreach ($categories3 as $category)
                                         <li>
                                             <a class="dropdown-item"
-                                                href="{{ route('category.show', $category->slug) }}">
-
-
+                                                href="{{ route('shop.index', ['categories[]' => $category->id]) }}">
                                                 {{ $category->name }}
                                             </a>
+
                                         </li>
                                     @endforeach
                                 @endisset
@@ -292,21 +279,10 @@
 
                         </li>
 
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="{{ route('blog.index') }}">
+                        <li class="nav-item ">
+                            <a class="nav-link" href="{{ route('blog.index') }}">
                                 Bài viết
                             </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="">Left
-                                        Sidebar</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="blog-detail-full-width.html">Detail
-                                        Full
-                                        Width</a>
-                                </li>
-                            </ul>
                         </li>
 
                     </ul>

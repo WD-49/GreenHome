@@ -79,7 +79,7 @@ class PaymentController extends Controller
             $orderId = $inputData['vnp_TxnRef'] ?? null; // Mã đơn hàng
             $responseCode = $inputData['vnp_ResponseCode'] ?? '';
 
-            $order = Order::where('sku', $orderId)->first();
+            $order = Order::with('items')->where('sku', $orderId)->first();
 
             if ($order) {
                 if ($responseCode == '00') {
@@ -91,7 +91,21 @@ class PaymentController extends Controller
                 } else {
                     // Thanh toán thất bại
                     $order->payment_status = 'failed';
+                    $order->order_status = 'Hủy đơn';
+                    $order->cancel_reason = 'Thanh toán không thành công';
                     $order->save();
+
+                    // Hoàn lại tồn kho sản phẩm
+                    foreach ($order->items as $item) {
+                        if ($item->product_variant_sku) {
+                            // Tìm sản phẩm theo SKU
+                            $variant = \App\Models\ProductVariant::where('sku', $item->product_variant_sku)->first();
+                            if ($variant) {
+                                $variant->quantity += $item->quantity;
+                                $variant->save();
+                            }
+                        }
+                    }
 
                     return view('client.payment.failed', ['data' => $inputData]);
                 }

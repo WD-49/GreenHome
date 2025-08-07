@@ -82,20 +82,6 @@
                 <div class="col-lg-3">
                     <div class="cr-shop-sideview">
                         <form action="{{ route('shop.index') }}" method="GET" id="filter-form" class="mb-4">
-
-                            {{-- Tìm kiếm tên sản phẩm --}}
-                            <div class="mb-3">
-                                <label class="fw-bold">Tìm kiếm sản phẩm:</label>
-                                <div class="input-group">
-                                    <input type="text" name="search" class="form-control" placeholder="Nhập từ khóa..."
-                                        value="{{ request('search') }}">
-                                    <button class="btn btn-outline-secondary" type="submit">
-                                        <i class="ri-search-line"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-
                             <div class="mb-3">
                                 {{-- Lọc Theo Danh Mục----------------------------------------------------------- --}}
                                 <label class="fw-bold">Danh mục:</label>
@@ -290,8 +276,6 @@
                                                         @endif
                                                     </a>
                                                 </div>
-                                                <a class="cr-shopping-bag" href="#"><i
-                                                        class="ri-shopping-bag-line"></i></a>
                                             </div>
                                         </div>
 
@@ -299,48 +283,39 @@
                                         <div class="cr-product-details flex-grow-1">
                                             <div class="cr-brand">
                                                 <a href="#">{{ $product->brand->name ?? '' }}</a>
-                                                @php
-                                                    $variantReviews = $product->productVariants->flatMap->reviews;
-                                                    $avg = round($variantReviews->avg('rating'), 1);
-                                                    $fullStars = floor($avg);
-                                                    $halfStar = $avg - $fullStars >= 0.5;
-                                                    $emptyStars = 5 - $fullStars - ($halfStar ? 1 : 0);
-                                                    $count = $variantReviews->count();
-                                                @endphp
-                                                <div class="text-center" style="line-height: 1.2;">
-                                                    <div class="mb-1">
-                                                        @for ($i = 0; $i < $fullStars; $i++)
-                                                            <i class="ri-star-fill text-warning"></i>
-                                                        @endfor
-                                                        @if ($halfStar)
-                                                            <i class="ri-star-half-line text-warning"></i>
-                                                        @endif
-                                                        @for ($i = 0; $i < $emptyStars; $i++)
-                                                            <i class="ri-star-line text-warning"></i>
-                                                        @endfor
-                                                    </div>
-                                                    <div class="text-muted small">
-                                                        ({{ $avg }} / {{ $count }} đánh giá)
-                                                    </div>
-                                                </div>
-
                                             </div>
 
                                             <a href="{{ route('productDetail', $product->slug) }}" class="title">
                                                 {{ $product->name }}
                                             </a>
-                                            <div class="text product-description d-none">
-                                                {!! $product->description !!}
+                                            @php
+                                                $variantReviews = $product->productVariants->flatMap->reviews;
+                                                $avg = round($variantReviews->avg('rating'), 1);
+                                                $fullStars = floor($avg);
+                                                $halfStar = $avg - $fullStars >= 0.5;
+                                                $emptyStars = 5 - $fullStars - ($halfStar ? 1 : 0);
+                                                $count = $variantReviews->count();
+                                            @endphp
+                                            <div class="mb-1" style="line-height: 1.2;">
+                                                @for ($i = 0; $i < $fullStars; $i++)
+                                                    <i class="ri-star-fill text-warning"></i>
+                                                @endfor
+                                                @if ($halfStar)
+                                                    <i class="ri-star-half-line text-warning"></i>
+                                                @endif
+                                                @for ($i = 0; $i < $emptyStars; $i++)
+                                                    <i class="ri-star-line text-warning"></i>
+                                                @endfor
                                             </div>
 
-
-
+                                            <div class="text product-sort_des d-none">
+                                                {!! $product->sort_des !!}
+                                            </div>
 
                                             <ul class="list">
-                                                <li><label>Brand :</label> {{ $product->brand->name ?? '' }}</li>
+                                                <li><label>Danh mục :</label> {{ $product->category->name ?? '' }}</li>
                                             </ul>
 
-                                            {{-- Giá --}}
                                             @php
                                                 $prices = optional($product->productVariants)->pluck('price')->filter();
                                             @endphp
@@ -360,6 +335,7 @@
                                                 <p class="cr-price"><span class="new-price"></span></p>
                                             @endif
                                         </div>
+
                                     </div>
                                 </div>
                             @endforeach
@@ -441,12 +417,12 @@
                 const $productList = $('#product-list');
 
                 if (listMode) {
-                    $productList.find('.product-description').removeClass('d-none');
+                    $productList.find('.product-sort_des').removeClass('d-none');
                     $productList.addClass('grid-row-active');
                     $productList.find('.cr-product-box').removeClass('col-xxl-3 col-xl-4 col-6').addClass('col-12');
                     $productList.find('.cr-product-card').addClass('d-flex flex-row gap-3');
                 } else {
-                    $productList.find('.product-description').addClass('d-none');
+                    $productList.find('.product-sort_des').addClass('d-none');
                     $productList.removeClass('grid-row-active');
                     $productList.find('.cr-product-box').removeClass('col-12').addClass('col-xxl-3 col-xl-4 col-6');
                     $productList.find('.cr-product-card').removeClass('d-flex flex-row gap-3');

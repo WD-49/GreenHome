@@ -57,48 +57,11 @@ class ProductClientController extends Controller
             ->unique()
             ->values();
 
-        // Lấy danh sách đánh giá đã duyệt kèm ảnh và user
-        $reviews = $product->reviews()
-            ->where('reviews.status', 'approved')
-            ->latest()
-            ->with('user')
-            ->get();
+             $reviews = $product->reviews()->with('user')->get();
 
-        return view('client.pages.productDetail', compact('product', 'relatedProducts', 'attributes', 'reviews'));
+        return view('client.pages.productDetail', compact('product', 'relatedProducts', 'attributes','reviews'));
     }
 
-    public function submitReview(Request $request)
-    {
-        $request->validate([
-            'product_variant_id' => 'required|exists:product_variants,id',
-            'rating'             => 'required|integer|min:1|max:5',
-            'title'              => 'required|string|max:150',
-            'content'            => 'required|string|max:1000',
-            'images.*'           => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:2048',
-        ]);
-
-        $review = Review::create([
-            'user_id'            => Auth::id(),
-            'product_variant_id' => $request->product_variant_id,
-            'rating'             => $request->rating,
-            'title'              => $request->title,
-            'content'            => $request->content,
-            'status'             => 'pending',
-        ]);
-
-        // Lưu ảnh nếu có
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $file) {
-                $path = $file->store('reviews', 'public');
-
-                $review->images()->create([
-                    'image' => $path,
-                ]);
-            }
-        }
-
-        return redirect()->back()->with('success', 'Đánh giá của bạn đã được gửi và đang chờ duyệt.');
-    }
 
     public function submitComment(Request $request)
     {
@@ -111,7 +74,7 @@ class ProductClientController extends Controller
             'user_id'    => Auth::id(),
             'product_id' => $request->product_id,
             'content'    => $request->content,
-            'status'     => 'hiển thị',
+            'status'     => 'chưa duyệt',
         ]);
 
         return redirect()->back()->with('success', 'Bình luận của bạn đã được gửi và đang chờ duyệt.');

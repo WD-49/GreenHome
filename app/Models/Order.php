@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Order extends Model
 {
@@ -61,6 +61,20 @@ class Order extends Model
 
         return !in_array($this->order_status, $nonCancellableStatuses)
             && $this->payment_status !== 'paid';
+    }
+
+    protected static function booted()
+    {
+        static::updated(function ($order) {
+            // Nếu trạng thái đơn hàng là "Giao hàng thành công" thì cập nhật trạng thái thanh toán
+            if (
+                $order->order_status === 'Giao hàng thành công' &&
+                $order->payment_status !== 'paid'
+            ) {
+                $order->payment_status = 'paid';
+                $order->saveQuietly(); // dùng saveQuietly để tránh vòng lặp sự kiện
+            }
+        });
     }
 
 

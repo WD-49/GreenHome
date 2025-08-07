@@ -1,6 +1,7 @@
 @extends('layouts.app') {{-- Hoặc layout khác của bạn --}}
 
 @section('content')
+{{-- Trang Gửi Mail Xác Minh Email Khi Đăng Ký mới Ở Hệ thống --}}
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-8">

@@ -88,13 +88,14 @@
                                                 <span class="cr-bill-wrap cr-bill-half">
                                                     <label>Họ và tên</label>
                                                     <input type="text" name="fullname" placeholder="Nhập họ và tên"
-                                                        required>
+                                                        value="{{ old('fullname', $user->name ?? '') }}" required>
+
                                                 </span>
 
                                                 <span class="cr-bill-wrap cr-bill-half">
                                                     <label>Số điện thoại</label>
                                                     <input type="text" name="phone" placeholder="Số điện thoại"
-                                                        required>
+                                                        value="{{ old('phone', $user->profile->phone ?? '') }}" required>
                                                 </span>
 
 
@@ -145,7 +146,7 @@
                                 </div>
                             </div>
                             <span class="cr-check-order-btn">
-                                <a class="cr-button mt-30" href="#" id="place-order-btn">Place Order</a>
+                                <a class="cr-button mt-30" href="#" id="place-order-btn">Đặt hàng</a>
                             </span>
                         </div>
                     </div>
@@ -521,6 +522,10 @@
                         }
                     } else {
                         alert(res.message || 'Đặt hàng thất bại. Vui lòng thử lại.');
+                        if (res.redirect_url) {
+                            // Redirect đến trang xác minh email hoặc profile
+                            window.location.href = res.redirect_url;
+                        }
                     }
                 })
 
