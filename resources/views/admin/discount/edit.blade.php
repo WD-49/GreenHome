@@ -78,11 +78,19 @@
                 <label class="form-label">Mô tả</label>
                 <textarea name="description" class="form-control" required>{{ old('description', $discount->description) }}</textarea>
             </div>
-
             <div class="mb-3">
-                <label class="form-label">Mã giảm giá</label>
-                <input type="text" name="code" class="form-control" value="{{ old('code', $discount->code) }}" required>
-            </div>
+    <label class="form-label">Mã</label>
+    <div class="input-group">
+        <input type="text" name="code" id="voucher-code" class="form-control"
+            value="{{ old('code', $discount->code) }}">
+        <button type="button" class="btn btn-outline-secondary" onclick="generateCode()">Tạo mã</button>
+    </div>
+    <small id="code-status" class="text-muted"></small>
+    @error('code')
+        <div class="text-danger">{{ $message }}</div>
+    @enderror
+</div>
+
 
             <div class="mb-3">
                 <label class="form-label">Loại giảm giá</label>
@@ -100,7 +108,12 @@
                         {{ old('discount_type', $discount->discount_type) == 'fixed' ? 'VND' : '%' }}
                     </span>
                 </div>
+                @error('discount_value')
+    <div class="text-danger">{{ $message }}</div>
+@enderror
             </div>
+         
+
 
             <div class="mb-3">
                 <label class="form-label">Giá trị đơn hàng tối thiểu</label>
@@ -108,12 +121,6 @@
                 @error('min_order_value') <div class="text-danger">{{ $message }}</div> @enderror
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Giá trị đơn hàng tối đa</label>
-                <input type="number" name="max_order_value" class="form-control" value="{{ old('max_order_value', $discount->max_order_value) }}">
-                @error('max_order_value') <div class="text-danger">{{ $message }}</div> @enderror
-            </div>
-     
              <div class="mb-3">
                 <label class="form-label">Giá trị giảm tối đa</label>
                 <input type="number" name="max_discount" class="form-control" value="{{ old('max_discount', $discount->max_discount) }}">
@@ -238,6 +245,26 @@
         appliesToAllSelect.addEventListener('change', toggleProductBox);
         searchBox.addEventListener('keyup', filterProducts);
     });
+    async function generateCode(length = 10) {
+        const status = document.getElementById('code-status');
+        status.textContent = 'Đang tạo mã...';
+
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const getRandom = () =>
+            Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+
+        let code, exists;
+
+        do {
+            code = getRandom();
+            const res = await fetch(`/admin/discount/check-voucher-code?code=${code}`);
+
+            exists = (await res.json()).exists;
+        } while (exists);
+
+        document.getElementById('voucher-code').value = code;
+        status.textContent = 'Đã tạo mã duy nhất!';
+    }
 </script>
 
 @endsection

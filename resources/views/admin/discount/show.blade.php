@@ -137,7 +137,7 @@
                         ($discount->discount_type === 'percentage' ? '%' : ' VNĐ'),
                     'Ngày bắt đầu' => \Carbon\Carbon::parse($discount->start_date)->format('d/m/Y H:i'),
                     'Ngày kết thúc' => \Carbon\Carbon::parse($discount->end_date)->format('d/m/Y H:i'),
-                    'Giá trị đơn hàng tối đa' => number_format($discount->max_order_value, 0) . ' VNĐ',
+                    <!-- 'Giá trị đơn hàng tối đa' => number_format($discount->max_order_value, 0) . ' VNĐ', -->
                     'Giá trị đơn hàng tối thiểu' => number_format($discount->min_order_value, 0) . ' VNĐ',
                     'Giá trị giảm tối đa' => number_format($discount->max_discount, 0) . ' VNĐ',
                     'Số lượng mã' => $discount->quantity,
