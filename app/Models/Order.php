@@ -93,4 +93,25 @@ class Order extends Model
 
         return $sku;
     }
+
+    public function checkAndExpireVnpayOrder()
+    {
+        // Chỉ kiểm tra đơn thanh toán VNPAY đang pending
+        if (
+            $this->payment_method_name === 'VNPAY' &&
+            $this->payment_status === 'pending' &&
+            $this->created_at->diffInHours(now()) > 24
+        ) {
+            // Cập nhật trạng thái đơn hàng
+            $this->order_status = 'Hủy đơn';
+            $this->cancel_reason = 'Đơn hàng quá hạn thanh toán online';
+            $this->payment_status = 'failed';
+            $this->updated_at = now();
+            $this->save();
+
+            return false;
+        }
+
+        return true;
+    }
 }

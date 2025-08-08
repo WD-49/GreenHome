@@ -84,28 +84,28 @@ class PaymentController extends Controller
             if ($order) {
                 if ($responseCode == '00') {
                     // Thanh toán thành công
+                    $order->order_status = 'Xác nhận';
                     $order->payment_status = 'paid';
                     $order->save();
 
                     return view('client.payment.success', ['data' => $inputData]);
                 } else {
                     // Thanh toán thất bại
-                    $order->payment_status = 'failed';
-                    $order->order_status = 'Hủy đơn';
-                    $order->cancel_reason = 'Thanh toán không thành công';
+                    $order->payment_status = 'pending';
+                    $order->order_status = 'Xác nhận';
                     $order->save();
 
-                    // Hoàn lại tồn kho sản phẩm
-                    foreach ($order->items as $item) {
-                        if ($item->product_variant_sku) {
-                            // Tìm sản phẩm theo SKU
-                            $variant = \App\Models\ProductVariant::where('sku', $item->product_variant_sku)->first();
-                            if ($variant) {
-                                $variant->quantity += $item->quantity;
-                                $variant->save();
-                            }
-                        }
-                    }
+                    // // Hoàn lại tồn kho sản phẩm
+                    // foreach ($order->items as $item) {
+                    //     if ($item->product_variant_sku) {
+                    //         // Tìm sản phẩm theo SKU
+                    //         $variant = \App\Models\ProductVariant::where('sku', $item->product_variant_sku)->first();
+                    //         if ($variant) {
+                    //             $variant->quantity += $item->quantity;
+                    //             $variant->save();
+                    //         }
+                    //     }
+                    // }
 
                     return view('client.payment.failed', ['data' => $inputData]);
                 }

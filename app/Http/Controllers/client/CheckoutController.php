@@ -16,6 +16,7 @@ use App\Models\DiscountUsage;
 use App\Models\PaymentMethod;
 use App\Mail\OrderInvoiceMail;
 use App\Models\ProductVariant;
+use App\Jobs\CancelVnpayOrderJob;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
@@ -261,11 +262,14 @@ class CheckoutController extends Controller
                 $discountApplied->decrement('quantity');
             }
             $order->load(['items', 'user']);
+            log::info('user: ' . $user);
             Mail::to($user->email)->queue(new OrderInvoiceMail($order, $user));
+
 
             DB::commit();
             log::info('payment method: ' . $paymentMethod->name);
             if (strtoupper($paymentMethod->name) === 'VNPAY') {
+                CancelVnpayOrderJob::dispatch($order->id)->delay(now()->addHours(24));
                 $redirectUrl = app(PaymentController::class)->createPaymentUrl($order);
                 return response()->json([
                     'success' => true,

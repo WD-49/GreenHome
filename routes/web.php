@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Log;
 use Dom\Comment;
 use App\Jobs\SendTestMailJob;
 use Doctrine\DBAL\Schema\Index;
@@ -50,6 +51,11 @@ use App\Http\Controllers\admin\Product\ProductVariantController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\client\BlogController as ClientBlogController;
 use App\Http\Controllers\Client\DiscountController as ClientDiscountController;
+
+Route::get('/test-log', function () {
+    Log::debug('Testing logging functionality');
+    return 'Log test triggered';
+});
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);

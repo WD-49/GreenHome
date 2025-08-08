@@ -298,9 +298,8 @@
 
                 discounts.forEach(discount => {
                     const min = parseFloat(discount.min_order_value || 0);
-                    const max = parseFloat(discount.max_order_value || Infinity);
 
-                    if (orderTotal >= min && orderTotal <= max) {
+                    if (orderTotal >= min) {
                         const option = document.createElement('option');
                         option.value = discount.id;
                         option.textContent = discount.title;
@@ -338,7 +337,7 @@
                 <div><strong>Mã:</strong> ${discount.code}</div>
                 <div><strong>Giá trị:</strong> ${discount.discount_type === 'percentage' ? discount.discount_value + '%' : formatVND(discount.discount_value)}</div>
                 <div><strong>Giảm tối đa:</strong> ${formatVND(discount.max_discount)}</div>
-                <div><strong>Áp dụng cho đơn từ:</strong> ${formatVND(discount.min_order_value)} - ${formatVND(discount.max_order_value)}</div>
+                <div><strong>Áp dụng cho đơn từ:</strong> ${formatVND(discount.min_order_value)} Trở lên</div>
             `;
 
                 const result = applyDiscount(items, discount, shippingFee);
