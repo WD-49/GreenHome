@@ -33,6 +33,7 @@ class StoreAttributeValueRequest extends FormRequest
             'name.required' => 'Vui lòng nhập giá trị.',
             'name.string' => 'Giá trị phải là chuỗi.',
             'name.max' => 'Giá trị tối đa 255 ký tự.',
+            'name.unique' => "Giá trị đã tồn tại"
         ];
     }
 
