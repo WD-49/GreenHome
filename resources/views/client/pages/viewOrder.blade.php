@@ -101,6 +101,7 @@
                                                 'Xác nhận' => 'primary',
                                                 'Đang vận chuyển' => 'info',
                                                 'Giao hàng thành công' => 'success',
+                                                'Đã nhận hàng' => 'success',
                                                 'Đã hủy' => 'danger',
                                             ];
 
@@ -140,6 +141,7 @@
                                                         <i class="ri-eye-line me-1"></i> Xem chi tiết
                                                     </a>
                                                 </li>
+
                                                 @if ($order->canBePay())
                                                     <li>
                                                         <a class="dropdown-item"

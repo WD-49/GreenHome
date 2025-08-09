@@ -71,7 +71,7 @@ class CancelVnpayOrderJob implements ShouldQueue
 
             // Cập nhật trạng thái đơn hàng
             $order->order_status = 'Hủy đơn';
-            $order->cancel_reason = 'Đơn hàng đã bị hủy do quá hạn thanh toán online';
+            $order->cancel_reason = 'Đơn hàng đã bị hủy do quá hạn thanh toán online, bạn cần thanh toán trong vòng 24h kể từ khi đặt hàng.';
             $order->payment_status = 'failed';
             $order->updated_at = now();
             $order->save();

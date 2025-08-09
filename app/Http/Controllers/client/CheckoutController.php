@@ -395,4 +395,16 @@ class CheckoutController extends Controller
 
         return redirect()->back()->with('success', 'Đánh giá đã được gửi thành công.');
     }
+    public function confirmReceived(Order $order)
+    {
+        if ($order->order_status !== 'Giao hàng thành công') {
+            return back()->with('error', 'Đơn hàng này chưa thể xác nhận.');
+        }
+
+        $order->update([
+            'order_status' => 'Đã nhận hàng'
+        ]);
+
+        return back()->with('success', 'Xác nhận đã nhận hàng thành công.');
+    }
 }

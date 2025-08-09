@@ -264,7 +264,22 @@
                                                     {{ number_format($order->total_amount, 0, ',', '.') }}đ
                                                 </span>
                                             </li>
+
                                         </ul>
+                                        @if ($order->order_status === 'Giao hàng thành công')
+                                            <li>
+                                                <form action="{{ route('orders.confirmReceived', $order) }}" method="POST"
+                                                    onsubmit="return confirm('Xác nhận bạn đã nhận được hàng cho đơn này?')">
+                                                    @csrf
+                                                    <button type="submit"
+                                                        class="btn btn-success btn-sm w-100 d-flex align-items-center">
+                                                        <i class="ri-check-double-line me-1"></i>
+                                                        Xác nhận đã nhận hàng
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        @endif
+
                                     </div>
 
                                 </div>

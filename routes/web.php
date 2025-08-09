@@ -453,6 +453,8 @@ route::middleware('auth')->prefix('orders')->name('orders.')->group(function () 
     Route::post('/cancel/{sku}', [CheckoutController::class, 'cancel'])->name('cancel');
     Route::get('/{order}/pay-again', [PaymentController::class, 'payAgain'])
         ->name('payAgain');
+    Route::post('/{order}/confirm-received', [CheckoutController::class, 'confirmReceived'])
+        ->name('confirmReceived');
 });
 Route::post('/review/submit', [CheckoutController::class, 'submitReview'])->name('client.review.submit');
 
