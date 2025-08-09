@@ -249,9 +249,12 @@
                     if (currentOrderStatus === 'Hủy đơn') {
                         $(this).prop('disabled', true);
                     }
-                    // Nếu trạng thái hiện tại là 'Giao hàng thành công', không cho phép chọn trạng thái khác
-                    else if (currentOrderStatus === 'Giao hàng thành công') {
-                        $(this).prop('disabled', true);
+                    // Nếu trạng thái hiện tại là 'Giao hàng thành công', chỉ cho phép chọn 'Đã nhận hàng' và không cho chọn trạng thái khác
+                    else if (currentOrderStatus === 'Giao hàng thành công' || currentOrderStatus ===
+                        'Đã nhận hàng') {
+                        if (optionValue !== 'Đã nhận hàng') {
+                            $(this).prop('disabled', true);
+                        }
                     }
                     // Nếu trạng thái mới là lùi lại so với trạng thái hiện tại (trong chuỗi tiến triển)
                     else if (optionIndex < currentStatusIndex) {
