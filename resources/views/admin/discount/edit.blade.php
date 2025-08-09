@@ -80,11 +80,12 @@
             </div>
             <div class="mb-3">
     <label class="form-label">Mã</label>
-    <div class="input-group">
-        <input type="text" name="code" id="voucher-code" class="form-control"
-            value="{{ old('code', $discount->code) }}">
-        <button type="button" class="btn btn-outline-secondary" onclick="generateCode()">Tạo mã</button>
-    </div>
+   <div class="input-group">
+    <input type="text" name="code" id="voucher-code" class="form-control" 
+        value="{{ old('code', $discount->code) }}" readonly>
+    {{-- <button type="button" class="btn btn-outline-secondary" onclick="generateCode()">Tạo mã</button> --}}
+</div>
+
     <small id="code-status" class="text-muted"></small>
     @error('code')
         <div class="text-danger">{{ $message }}</div>
