@@ -103,14 +103,21 @@ class OrderController extends Controller
             $query->where('payment_method_id', $request->payment_method);
         }
 
+        // Đếm số lượng đơn hàng chưa xác nhận hôm nay
+        $unconfirmedTodayCount = Order::where('order_status', 'Chưa xác nhận')
+            ->whereDate('created_at', now())
+            ->count();
+
         // Lấy kết quả phân trang, bao gồm cả những đơn hàng đã xóa mềm (nếu cần hiển thị)
         $orders = $query->withTrashed()->paginate(20)->withQueryString();
+
+        // dd($orders);
 
         $orderStatuses = $this->getOrderEnumStatuses();
         $paymentMethods = PaymentMethod::all();
         $paymentStatuses = $this->getPaymentEnumStatuses();
 
-        return view('admin.orders.index', compact('orders', 'orderStatuses', 'paymentMethods', 'paymentStatuses'));
+        return view('admin.orders.index', compact('orders', 'orderStatuses', 'paymentMethods', 'paymentStatuses', 'unconfirmedTodayCount'));
     }
 
     public function show($id)
