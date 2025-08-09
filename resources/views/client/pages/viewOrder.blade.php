@@ -140,11 +140,15 @@
                                                         <i class="ri-eye-line me-1"></i> Xem chi tiết
                                                     </a>
                                                 </li>
-                                                <li>
-                                                    <a class="dropdown-item" href="{{ route('orders.show', $order) }}">
-                                                        <i class="ri-eye-line me-1"></i> Thanh toán đơn hàng
-                                                    </a>
-                                                </li>
+                                                @if ($order->canBePay())
+                                                    <li>
+                                                        <a class="dropdown-item"
+                                                            href="{{ route('orders.payAgain', $order) }}">
+                                                            <i class="ri-refresh-line me-1"></i> Thanh toán lại
+                                                        </a>
+                                                    </li>
+                                                @endif
+
                                                 @if ($order->canBeCancel())
                                                     <li>
                                                         <a class="dropdown-item text-danger" data-bs-toggle="collapse"

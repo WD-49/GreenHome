@@ -57,18 +57,25 @@ class Order extends Model
 
     public function canBeCancel(): bool
     {
-        $nonCancellableStatuses = ['Đang vận chuyển', 'Giao hàng thành công', 'Hủy đơn'];
+        $nonCancellableStatuses = ['Đang vận chuyển', 'Giao hàng thành công', 'Hủy đơn', 'Đã nhận hàng'];
 
         return !in_array($this->order_status, $nonCancellableStatuses)
             && $this->payment_status !== 'paid';
     }
 
+    public function canBePay(): bool
+    {
+        return $this->payment_method_name === 'VNPAY'
+            && $this->payment_status === 'pending'
+            && $this->order_status !== 'Hủy đơn'
+            && $this->order_status !== 'Chưa xác nhận';
+    }
+
     protected static function booted()
     {
         static::updated(function ($order) {
-            // Nếu trạng thái đơn hàng là "Giao hàng thành công" thì cập nhật trạng thái thanh toán
             if (
-                $order->order_status === 'Giao hàng thành công' &&
+                ($order->order_status === 'Giao hàng thành công' || $order->order_status === 'Đã nhận hàng')  &&
                 $order->payment_status !== 'paid'
             ) {
                 $order->payment_status = 'paid';
@@ -81,10 +88,8 @@ class Order extends Model
     public static function generateUniqueSku()
     {
         do {
-            // Sinh số ngẫu nhiên từ 100 đến 100000
             $randomNumber = mt_rand(100, 100000);
 
-            // Tạo mã SKU theo format DH + số ngẫu nhiên có 6 chữ số (bổ sung 0 nếu cần)
             $sku = 'DH' . str_pad($randomNumber, 6, '0', STR_PAD_LEFT);
 
             // Kiểm tra đã tồn tại SKU này chưa
@@ -92,26 +97,5 @@ class Order extends Model
         } while ($exists); // Nếu tồn tại thì sinh lại
 
         return $sku;
-    }
-
-    public function checkAndExpireVnpayOrder()
-    {
-        // Chỉ kiểm tra đơn thanh toán VNPAY đang pending
-        if (
-            $this->payment_method_name === 'VNPAY' &&
-            $this->payment_status === 'pending' &&
-            $this->created_at->diffInHours(now()) > 24
-        ) {
-            // Cập nhật trạng thái đơn hàng
-            $this->order_status = 'Hủy đơn';
-            $this->cancel_reason = 'Đơn hàng quá hạn thanh toán online';
-            $this->payment_status = 'failed';
-            $this->updated_at = now();
-            $this->save();
-
-            return false;
-        }
-
-        return true;
     }
 }

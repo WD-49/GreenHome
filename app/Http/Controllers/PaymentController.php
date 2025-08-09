@@ -116,4 +116,16 @@ class PaymentController extends Controller
             return "Chữ ký không hợp lệ!";
         }
     }
+    public function payAgain(Order $order)
+    {
+        // Chỉ cho thanh toán lại nếu đủ điều kiện
+        if (! $order->canBePay()) {
+            return redirect()->back()->with('error', 'Đơn hàng này không thể thanh toán lại.');
+        }
+
+        // Tạo lại URL thanh toán VNPAY
+        $redirectUrl = $this->createPaymentUrl($order);
+
+        return redirect()->away($redirectUrl);
+    }
 }

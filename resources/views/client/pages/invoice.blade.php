@@ -176,11 +176,11 @@
                                                         </td>
                                                         <td>{{ number_format($item->total_price, 0, ',', '.') }}đ </td>
                                                         <td>
-                                                            @if ($order->order_status === 'Giao hàng thành công' && $order->payment_status === 'paid' && !$item->review)
+                                                            @if ($order->order_status === 'Đã nhận hàng' && $order->payment_status === 'paid' && !$item->review)
                                                                 <button class="btn btn-outline-warning btn-sm p-2"
                                                                     onclick="showReviewModal({{ $item->id }}, '{{ $item->product_name }}', '{{ $item->product_attribute ?? '' }}')"
-                                                                    title="Đánh giá sản phẩm">
-                                                                    <i class="fas fa-star"></i> {{-- Font Awesome icon --}}
+                                                                    title="Đánh giá sản phẩm"> Đánh giá
+                                                                    <i class="fas fa-star"></i>
                                                                 </button>
                                                             @else
                                                                 <span class="text-success"></span>
