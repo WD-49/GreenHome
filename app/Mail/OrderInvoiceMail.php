@@ -50,6 +50,8 @@ class OrderInvoiceMail extends Mailable
         );
     }
 
+
+
     /**
      * Get the attachments for the message.
      *

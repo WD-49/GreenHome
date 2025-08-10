@@ -176,11 +176,11 @@
                                                         </td>
                                                         <td>{{ number_format($item->total_price, 0, ',', '.') }}đ </td>
                                                         <td>
-                                                            @if ($order->order_status === 'Giao hàng thành công' && $order->payment_status === 'paid' && !$item->review)
-                                                                <button class="btn btn-outline-warning btn-sm p-2"
+                                                            @if ($order->order_status === 'Đã nhận hàng' && $order->payment_status === 'paid' && !$item->review)
+                                                                <button class="btn btn-outline-info btn-sm p-1"
                                                                     onclick="showReviewModal({{ $item->id }}, '{{ $item->product_name }}', '{{ $item->product_attribute ?? '' }}')"
                                                                     title="Đánh giá sản phẩm">
-                                                                    <i class="fas fa-star"></i> {{-- Font Awesome icon --}}
+                                                                    đánh giá
                                                                 </button>
                                                             @else
                                                                 <span class="text-success"></span>
@@ -264,7 +264,22 @@
                                                     {{ number_format($order->total_amount, 0, ',', '.') }}đ
                                                 </span>
                                             </li>
+
                                         </ul>
+                                        @if ($order->order_status === 'Giao hàng thành công')
+                                            <li>
+                                                <form action="{{ route('orders.confirmReceived', $order) }}" method="POST"
+                                                    onsubmit="return confirm('Xác nhận bạn đã nhận được hàng cho đơn này?')">
+                                                    @csrf
+                                                    <button type="submit"
+                                                        class="btn btn-success btn-sm w-100 d-flex align-items-center">
+                                                        <i class="ri-check-double-line me-1"></i>
+                                                        Xác nhận đã nhận hàng
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        @endif
+
                                     </div>
 
                                 </div>
