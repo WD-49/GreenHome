@@ -116,9 +116,9 @@
                             {{-- <a href="{{ route('admin.orders.create') }}" class="btn btn-success shadow-sm">
                                 + Tạo đơn hàng
                             </a> --}}
-                            {{-- <a href="{{ route('admin.orders.trash') }}" class="btn btn-danger shadow-sm">
-                                <i class="fas fa-trash-restore fa-sm text-white-50"></i> Thùng rác
-                            </a> --}}
+                            <h3 class="btn btn-warning shadow-sm">
+                                <i class="fas fa-bell fa-lg text-warning"></i> Đơn hàng chưa xác nhận hôm nay: {{ $unconfirmedTodayCount }}
+                            </h3>
                         </div>
                     </div>
 
@@ -143,7 +143,7 @@
                             </thead>
                             <tbody>
                                 @forelse ($orders as $index => $order)
-                                    <tr>
+                                    <tr @if($order->order_status === 'Chưa xác nhận') class="table-danger" @endif>
                                         <td>{{ $orders->firstItem() + $index }}</td>
                                         <td>#{{ $order->sku ?? $order->id }}</td>
                                         <td>{{ $order->user->name ?? 'N/A' }}</td>
@@ -232,28 +232,6 @@
                                                     class="btn btn-action-sm btn-info" title="Xem chi tiết">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-
-                                                {{-- Nút Hủy đơn hàng (hiển thị dưới dạng một nút thông thường) --}}
-                                                {{-- @if (method_exists($order, 'canBeCancelled') && $order->canBeCancelled())
-                                                    <button type="button"
-                                                        class="btn btn-action-sm btn-warning cancel-order-btn"
-                                                        data-order-id="{{ $order->id }}" title="Hủy đơn hàng">
-                                                        <i class="fas fa-ban"></i>
-                                                    </button>
-                                                @endif --}}
-
-                                                {{-- Form Xóa (Thùng rác) --}}
-                                                {{-- <form action="{{ route('admin.orders.destroy', $order->id) }}"
-                                                    method="POST"
-                                                    onsubmit="return confirm('Bạn có chắc muốn xóa đơn hàng này (đưa vào thùng rác)?')"
-                                                    class="d-inline soft-delete-order-form">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-action-sm btn-danger"
-                                                        title="Xóa (Thùng rác)">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </form> --}}
                                             </div>
                                         </td>
                                     </tr>
