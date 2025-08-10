@@ -46,7 +46,7 @@ class AttributeValueController extends Controller
         $value->update([
             'value' => $data['value']
         ]);
-        return redirect()->route('admin.attribute.index')->with('success', 'Thêm giá trị thuộc tính thành công!');
+        return redirect()->route('admin.attribute.show', $value->attribute_id)->with('success', 'Sửa thành công!');
     }
     public function trash($id)
     {
