@@ -22,7 +22,7 @@ class UpdateAttributeValueRequest extends FormRequest
     public function rules(): array
 {
     return [
-        'value' => 'required|string|max:255|',
+        'value' => 'required|string|max:255|unique:attribute_values,value',
     ];
 }
 
@@ -32,6 +32,7 @@ class UpdateAttributeValueRequest extends FormRequest
             'value.required' => 'Vui lòng nhập giá trị.',
             'value.string' => 'Giá trị phải là chuỗi.',
             'value.max' => 'Giá trị tối đa 255 ký tự.',
+            'value.unique' => "Giá trị đã tồn tại"
         ];
     }
 }

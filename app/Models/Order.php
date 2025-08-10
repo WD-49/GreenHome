@@ -59,6 +59,7 @@ class Order extends Model
     {
         $nonCancellableStatuses = ['Đang vận chuyển', 'Giao hàng thành công', 'Hủy đơn', 'Đã nhận hàng'];
 
+
         return !in_array($this->order_status, $nonCancellableStatuses)
             && $this->payment_status !== 'paid';
     }
@@ -80,6 +81,13 @@ class Order extends Model
             ) {
                 $order->payment_status = 'paid';
                 $order->saveQuietly(); // dùng saveQuietly để tránh vòng lặp sự kiện
+            }
+
+            // Thêm trường hợp mới: nếu trạng thái là "Giao hàng thành công",
+            // tự động chuyển sang "Đã nhận hàng"
+            if ($order->order_status === 'Giao hàng thành công') {
+                $order->order_status = 'Đã nhận hàng';
+                $order->saveQuietly();
             }
         });
     }

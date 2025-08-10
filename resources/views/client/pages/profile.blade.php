@@ -671,7 +671,7 @@
                                     </div>
                                 @endif
                                 <div class="mt-3">
-                                    {{ $data['orders']->appends(['tab' => 'orders'])->links() }}
+                                    {{ $data['orders']->appends(request()->except('orders_page') + ['tab' => 'orders'])->links() }}
                                 </div>
                             </div>
 
