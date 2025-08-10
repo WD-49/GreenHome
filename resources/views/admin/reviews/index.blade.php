@@ -79,7 +79,8 @@
             <thead class="table-light">
                 <tr>
                     <th>#</th>
-                    <th>Biến thể</th>
+                    <th>Sản phẩm</th>
+                    <th>Biến thể</th>
                     <th>Người dùng</th>
                     <th>Đánh giá</th>
                     <th>Ảnh</th>
@@ -94,7 +95,9 @@
                 @forelse ($reviews as $index => $review)
                     <tr>
                         <td>{{ $reviews->firstItem() + $index }}</td>
-                        <td>{{ $review->productVariant->sku ?? 'N/A' }}</td>
+                        <td><a
+                                href="{{ route('admin.products.show', $review->productVariant->product->id) }}">{{ $review->productVariant->product->name ?? 'N/A' }}</a>
+                        <td>{{ $review->productVariant->sku ?? 'N/A' }}
                         <td>{{ $review->user->name ?? 'N/A' }}</td>
                         <td class="text-warning">
                             {!! str_repeat('★', $review->rating) !!}

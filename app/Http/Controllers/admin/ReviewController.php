@@ -12,22 +12,22 @@ class ReviewController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index( Request $request)
+    public function index(Request $request)
     {
         //
-     
 
-$reviews = Review::query();
 
-if ($request->filled('rating')) {
-    $reviews->where('rating', $request->rating);
-}
+        $reviews = Review::query();
 
-if ($request->filled('status')) {
-    $reviews->where('status', $request->status);
-}
+        if ($request->filled('rating')) {
+            $reviews->where('rating', $request->rating);
+        }
 
-$reviews = $reviews->with(['user', 'productVariant'])->paginate(10);
+        if ($request->filled('status')) {
+            $reviews->where('status', $request->status);
+        }
+
+        $reviews = $reviews->with(['user', 'productVariant.product'])->orderby('id', 'desc')->paginate(10);
 
 
         // Test: dd($reviews->pluck('rating'));
@@ -104,28 +104,28 @@ $reviews = $reviews->with(['user', 'productVariant'])->paginate(10);
 
 
 
-   public function trash(Request $request)
-{
-    $query = Review::onlyTrashed();
+    public function trash(Request $request)
+    {
+        $query = Review::onlyTrashed();
 
-    // Lọc theo số sao nếu có
-    if ($request->filled('rating')) {
-        $query->where('rating', $request->rating);
+        // Lọc theo số sao nếu có
+        if ($request->filled('rating')) {
+            $query->where('rating', $request->rating);
+        }
+
+        // Lọc theo trạng thái nếu có
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Lấy dữ liệu đã phân trang và kèm theo quan hệ
+        $reviews = $query->with(['productVariant', 'user'])->paginate(10);
+
+        // Giữ nguyên query string khi phân trang
+        $reviews->appends($request->only(['rating', 'status']));
+
+        return view('admin.reviews.trash', compact('reviews'));
     }
-
-    // Lọc theo trạng thái nếu có
-    if ($request->filled('status')) {
-        $query->where('status', $request->status);
-    }
-
-    // Lấy dữ liệu đã phân trang và kèm theo quan hệ
-    $reviews = $query->with(['productVariant', 'user'])->paginate(10);
-
-    // Giữ nguyên query string khi phân trang
-    $reviews->appends($request->only(['rating', 'status']));
-
-    return view('admin.reviews.trash', compact('reviews'));
-}
 
     public function restore($id)
     {
@@ -142,5 +142,4 @@ $reviews = $reviews->with(['user', 'productVariant'])->paginate(10);
 
         return redirect()->route('admin.reviews.trash')->with('success', 'Đánh giá đã bị xóa vĩnh viễn.');
     }
-
 }
