@@ -1,19 +1,19 @@
 <?php
 
-use Illuminate\Support\Facades\Log;
 use Dom\Comment;
 use App\Jobs\SendTestMailJob;
 use Doctrine\DBAL\Schema\Index;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
 use App\Http\Controllers\PaymentController;
 use Doctrine\DBAL\Schema\Index as DBALIndex;
 use App\Http\Controllers\admin\BlogController;
+
 use App\Http\Controllers\Auth\LoginController;
 
 use App\Http\Controllers\admin\BrandController;
-
 use App\Http\Controllers\admin\OrderController;
 use App\Http\Controllers\client\CartController;
 use App\Http\Controllers\client\HomeController;
@@ -24,13 +24,13 @@ use App\Http\Controllers\admin\CommentController;
 use App\Http\Controllers\Admin\WebInfoController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\admin\CategoryController;
-use App\Http\Controllers\admin\DiscountController;
 
+use App\Http\Controllers\admin\DiscountController;
 use App\Http\Controllers\Auth\AdminAuthController;
+
 use App\Http\Controllers\Auth\SocialiteController;
 
 use App\Http\Controllers\Client\ProfileController;
-
 use App\Http\Controllers\admin\AttributeController;
 use App\Http\Controllers\admin\DashboardController;
 use App\Http\Controllers\client\CheckoutController;
@@ -135,10 +135,9 @@ Route::get('/test-notify', function () {
 // route của trang admin
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard/data', [DashboardController::class, 'data']);
-    Route::get('/dashboard/repeat-customer-rate', [DashboardController::class, 'repeatCustomerRate']);
-    Route::get('/dashboard/top-selling-products', [DashboardController::class, 'topSellingProducts']);
-    Route::get('/dashboard/sales-report-income', [DashboardController::class, 'salesReportIncome']);
+
+    // routes/api.php
+    Route::get('/dashboard-data', [DashboardController::class, 'getDashboardData'])->name('dashboard.data');
 
     // Quản lý sản phẩm
     Route::prefix('/products')->name('products.')->group(function () {
