@@ -117,7 +117,8 @@
                                 + Tạo đơn hàng
                             </a> --}}
                             <h3 class="btn btn-warning shadow-sm">
-                                <i class="fas fa-bell fa-lg text-warning"></i> Đơn hàng chưa xác nhận hôm nay: {{ $unconfirmedTodayCount }}
+                                <i class="fas fa-bell fa-lg text-warning"></i> Đơn hàng chưa xác nhận hôm nay:
+                                {{ $unconfirmedTodayCount }}
                             </h3>
                         </div>
                     </div>
@@ -143,8 +144,8 @@
                             </thead>
                             <tbody>
                                 @forelse ($orders as $index => $order)
-                                    <tr @if($order->order_status === 'Chưa xác nhận') class="table-danger" @endif>
-                                        <td>{{ $orders->firstItem() + $index }}</td>
+                                    <tr @if ($order->order_status === 'Chưa xác nhận') class="table-danger" @endif>
+                                        <td>{{ $index + 1 }}</td>
                                         <td>#{{ $order->sku ?? $order->id }}</td>
                                         <td>{{ $order->user->name ?? 'N/A' }}</td>
                                         <td>{{ $order->shipping_name }}</td>
@@ -244,9 +245,9 @@
                             </tbody>
                         </table>
                         {{-- Laravel Pagination Links --}}
-                        <div class="d-flex justify-content-center mt-3">
+                        {{-- <div class="d-flex justify-content-center mt-3">
                             {{ $orders->links() }}
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
             </div>
@@ -287,7 +288,6 @@
 @push('scripts')
     {{-- Đảm bảo các đường dẫn này chính xác và không bị trùng lặp với layout chính --}}
     <script src="../../assets/libs/jquery/jquery.min.js"></script>
-    <script src="../../assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="../../assets/libs/simplebar/simplebar.min.js"></script>
     <script src="../../assets/libs/node-waves/waves.min.js"></script>
     <script src="../../assets/libs/waypoints/lib/jquery.waypoints.min.js"></script>
@@ -311,7 +311,7 @@
 
     {{-- <script src="../../assets/js/pages/datatable.init.js"></script> --}}
 
-    <script src="../../assets/js/app.js"></script>
+    {{-- <script src="../../assets/js/app.js"></script> --}}
 
     <script>
         $(document).ready(function() {

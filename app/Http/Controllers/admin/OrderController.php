@@ -109,7 +109,8 @@ class OrderController extends Controller
             ->count();
 
         // Lấy kết quả phân trang, bao gồm cả những đơn hàng đã xóa mềm (nếu cần hiển thị)
-        $orders = $query->withTrashed()->paginate(20)->withQueryString();
+        // $orders = $query->withTrashed()->paginate(20)->withQueryString();
+        $orders = $query->withTrashed()->get();
 
         // dd($orders);
 

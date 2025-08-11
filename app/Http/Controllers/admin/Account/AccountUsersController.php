@@ -50,7 +50,8 @@ class AccountUsersController extends Controller
             });
         }
 
-        $users = $query->paginate(10); // Phân trang 10 dòng mỗi trang
+        // $users = $query->paginate(10); // Phân trang 10 dòng mỗi trang
+        $users = $query->withTrashed()->get();
         // dd($Users);
         return view('admin.account.users.listUsers', compact('users'));
     }
@@ -79,7 +80,7 @@ class AccountUsersController extends Controller
 
     public function detailAccUser($id)
     {
-        $user = User::with([
+        $users = User::with([
             'profile',
             'comments.product' => function ($query) {
                 $query->withTrashed()->orderBy('created_at', 'desc');
@@ -95,7 +96,7 @@ class AccountUsersController extends Controller
             ->withCount(['orders', 'cartItems'])
             ->findOrFail($id);
         // dd($user);
-        return view('admin.account.users.detailAccUser', compact('user'));
+        return view('admin.account.users.detailAccUser', compact('users'));
     }
 
 

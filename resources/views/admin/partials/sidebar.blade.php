@@ -3,7 +3,7 @@
 
     {{-- logo --}}
     <div class="logo-box">
-        <a class='logo logo-light' href="{{ url('index.html') }}">
+        <a class='logo logo-light' href="{{ route('home') }}">
             <span class="logo-sm">
                 <img src="{{ asset('assets_client/assets/img/logo/GreenHome_logo.png') }}" alt="" height="22">
             </span>
@@ -11,7 +11,7 @@
                 <img src="{{ asset('assets_client/assets/img/logo/GreenHome_logo.png') }}" alt="" height="24">
             </span>
         </a>
-        <a class='logo logo-dark' href="{{ url('index.html') }}">
+        <a class='logo logo-dark' href="{{ route('home') }}">
             <span class="logo-sm">
                 <img src="{{ asset('assets_client/assets/img/logo/GreenHome_logo.png') }}" alt=""
                     height="22">

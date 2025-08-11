@@ -43,7 +43,7 @@ class ProfileController extends Controller
             ->paginate(5, ['*'], 'orders_page');
 
         $data['reviews'] = Review::where('user_id', $user->id)
-             // Tải trước biến thể sản phẩm và sản phẩm của nó
+            // Tải trước biến thể sản phẩm và sản phẩm của nó
             ->orderBy('created_at', 'desc')
             ->paginate(5, ['*'], 'reviews_page');
 
@@ -74,7 +74,7 @@ class ProfileController extends Controller
         // Trả về view chính của trang profile
         return view('client.pages.profile', compact('user', 'tab', 'data'));
     }
-    
+
     public function update(Request $request)
     {
         $user = Auth::user();
@@ -91,6 +91,32 @@ class ProfileController extends Controller
             'gender' => ['required', Rule::in(['nam', 'nu', 'khac'])],
             'birth_date' => 'nullable|date',
             'user_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Max 2MB
+        ], [
+            'name.required' => 'Vui lòng nhập họ tên.',
+            'name.string'   => 'Họ tên phải là dạng chuỗi ký tự.',
+            'name.max'      => 'Họ tên không được vượt quá :max ký tự.',
+
+            'email.required' => 'Vui lòng nhập email.',
+            'email.string'   => 'Email phải là dạng chuỗi ký tự.',
+            'email.email'    => 'Email không đúng định dạng.',
+            'email.max'      => 'Email không được vượt quá :max ký tự.',
+            'email.unique'   => 'Email này đã tồn tại.',
+
+            'phone.string'   => 'Số điện thoại phải là dạng chuỗi ký tự.',
+            'phone.max'      => 'Số điện thoại không được vượt quá :max ký tự.',
+            'phone.unique'   => 'Số điện thoại này đã tồn tại.',
+
+            'address.string' => 'Địa chỉ phải là dạng chuỗi ký tự.',
+            'address.max'    => 'Địa chỉ không được vượt quá :max ký tự.',
+
+            'gender.required' => 'Vui lòng chọn giới tính.',
+            'gender.in'       => 'Giới tính không hợp lệ.',
+
+            'birth_date.date' => 'Ngày sinh không đúng định dạng.',
+
+            'user_image.image' => 'Tệp tải lên phải là hình ảnh.',
+            'user_image.mimes' => 'Hình ảnh phải có định dạng: jpeg, png, jpg, gif.',
+            'user_image.max'   => 'Kích thước ảnh không được vượt quá 2MB.',
         ]);
 
         // KIỂM TRA LỖI VALIDATION VÀ CHUYỂN HƯỚNG VỚI LỖI
@@ -115,7 +141,7 @@ class ProfileController extends Controller
             $profile->address = $request->input('address');
             $profile->gender = $request->input('gender');
             $profile->birth_date = $request->input('birth_date');
-           
+
             if ($request->hasFile('user_image')) {
                 // Xóa ảnh cũ (nếu có và nếu nó được lưu theo cách CŨ hoặc theo cách MỚI)
                 // Nếu ảnh cũ lưu trong public_path:

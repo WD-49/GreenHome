@@ -81,6 +81,11 @@
                                             );
                                             $enumValueIndex = array_search($enumValue, array_keys($orderStatuses));
 
+                                            // ✅ Luôn disable 'Đã nhận hàng' cho mọi trạng thái
+                                            if ($enumValue === 'Đã nhận hàng') {
+                                                $isDisabled = true;
+                                            }
+
                                             // Không cho phép lùi trạng thái nếu không phải hủy đơn
                                             if ($enumValue !== 'Hủy đơn' && $enumValueIndex < $currentStatusIndex) {
                                                 $isDisabled = true;
