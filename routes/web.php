@@ -372,6 +372,8 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::delete('/force-delete/{id}', [DiscountController::class, 'forceDelete'])->name('forceDelete');
         Route::get('/history', [DiscountController::class, 'history'])->name('history');
         Route::get('/history/{id}', [DiscountController::class, 'historyDetail'])->name('historyDetail');
+        Route::get('/check-voucher-code', [DiscountController::class, 'checkCode'])->name('vouchers.checkCode');
+
     });
 
     //quản lí phương thức thanh toán
