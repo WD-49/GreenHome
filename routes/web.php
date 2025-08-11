@@ -464,4 +464,7 @@ Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('categ
 Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show'); // ? route gi day?
 
 
-Route::post('/comment/submit', [ProductClientController::class, 'submitComment'])->name('client.comment.submit');
+Route::middleware(['auth'])->group(function () {
+    Route::post('/comment/submit', [ProductClientController::class, 'submitComment'])->name('client.comment.submit');
+});
+

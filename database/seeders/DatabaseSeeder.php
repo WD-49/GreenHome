@@ -42,7 +42,7 @@ class DatabaseSeeder extends Seeder
     {
      $this->call(CategorySeeder::class);
      $this->call(AttributeSeeder::class);
-
+      $this->call(ReviewSeeder::class);
         // fake dữ liệu cho sản phẩm
 
         // $faker = Faker::create();
