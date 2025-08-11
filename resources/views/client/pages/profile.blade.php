@@ -596,7 +596,7 @@
                                                                                 <td>{{ number_format($item->unit_price, 0, ',', '.') }}
                                                                                     VNĐ</td>
                                                                                 <td>{{ number_format($subtotalBeforeDiscount, 0, ',', '.') }}
-                                                                                    VNĐ</td> {{-- total_price đã là giá sau giảm giá của item --}}
+                                                                                    VNĐ</td>
                                                                             </tr>
                                                                         @endforeach
                                                                     </tbody>
@@ -614,7 +614,7 @@
                                                                         <tr>
                                                                             <td class="text-start ps-0">Tổng giá trị sản
                                                                                 phẩm:</td>
-                                                                            {{-- SỬA DÒNG NÀY: Dùng biến mới tính tổng giá gốc --}}
+                                                                            
                                                                             <td class="text-end pe-0 fw-semibold">
                                                                                 {{ number_format($subtotalBeforeDiscount, 0, ',', '.') }}
                                                                                 VNĐ
