@@ -59,7 +59,7 @@
     <div class="container-xxl">
         <div class="py-3 d-flex align-items-sm-center flex-sm-row flex-column">
             <div class="flex-grow-1">
-                <h4 class="fs-18 fw-semibold m-0">Tài khoản <b>{{ $user->name }}</b></h4>
+                <h4 class="fs-18 fw-semibold m-0">Tài khoản <b>{{ $users->name }}</b></h4>
             </div>
 
 
@@ -76,23 +76,23 @@
                     <div class="card-body">
                         <div class="align-items-center">
                             <div class="d-flex align-items-center">
-                                <img src="{{ $user->profile && $user->profile->user_image ? asset('storage/' . $user->profile->user_image) : 'https://cdn2.iconfinder.com/data/icons/audio-16/96/user_avatar_profile_login_button_account_member-512.png' }}"
+                                <img src="{{ $users->profile && $users->profile->user_image ? asset('storage/' . $users->profile->user_image) : 'https://cdn2.iconfinder.com/data/icons/audio-16/96/user_avatar_profile_login_button_account_member-512.png' }}"
                                     class="rounded-circle avatar-xxl img-thumbnail float-start" alt="image profile">
 
                                 <div class="overflow-hidden ms-4">
-                                    <h4 class="m-0 text-dark fs-20">{{ $user->name }}</h4>
-                                    <p class="my-1 text-muted fs-16">{{ $user->email }}</p>
+                                    <h4 class="m-0 text-dark fs-20">{{ $users->name }}</h4>
+                                    <p class="my-1 text-muted fs-16">{{ $users->email }}</p>
 
                                     <span class="fs-15">
                                         <i class="mdi mdi-account-group me-2 align-middle"></i>Vai trò:
                                         <span>
-                                            @if ($user->role == 'admin' || $user->role == 'superadmin')
-                                                <span class="badge bg-success">{{ ucfirst($user->role) }}</span>
+                                            @if ($users->role == 'admin' || $users->role == 'superadmin')
+                                                <span class="badge bg-success">{{ ucfirst($users->role) }}</span>
                                             @else
-                                                <span class="badge bg-info text-dark">{{ ucfirst($user->role) }}</span>
+                                                <span class="badge bg-info text-dark">{{ ucfirst($users->role) }}</span>
                                             @endif
                                             <span class="badge bg-primary-subtle text-primary px-2 py-1 fs-13 fw-normal">
-                                                @if ($user->status == 1)
+                                                @if ($users->status == 1)
                                                     <span class="badge bg-success"><i
                                                             class="fas fa-check-circle me-1"></i>Hoạt động</span>
                                                 @else
@@ -102,23 +102,23 @@
                                             </span>
                                         </span>
                                     </span>
-                                    @if ($user->profile)
+                                    @if ($users->profile)
                                         <div class="mt-3 text-start">
                                             <p class="mb-1 small"><strong><i
                                                         class="fas fa-phone me-2 text-primary"></i>SĐT:</strong>
-                                                {{ $user->profile->phone ?: 'Chưa cập nhật' }}</p>
+                                                {{ $users->profile->phone ?: 'Chưa cập nhật' }}</p>
                                             <p class="mb-1 small"><strong><i
                                                         class="fas fa-map-marker-alt me-2 text-primary"></i>Địa
                                                     chỉ:</strong>
-                                                {{ $user->profile->address ?: 'Chưa cập nhật' }}</p>
+                                                {{ $users->profile->address ?: 'Chưa cập nhật' }}</p>
                                             <p class="mb-0 small"><strong><i
                                                         class="fas fa-venus-mars me-2 text-primary"></i>Giới tính:</strong>
-                                                @if ($user->profile->gender == 'male' || $user->profile->gender == 'nam')
+                                                @if ($users->profile->gender == 'male' || $users->profile->gender == 'nam')
                                                     Nam
-                                                @elseif($user->profile->gender == 'female' || $user->profile->gender == 'nu')
+                                                @elseif($users->profile->gender == 'female' || $users->profile->gender == 'nu')
                                                     Nữ
                                                 @else
-                                                    {{ ucfirst($user->profile->gender ?: 'Khác') }}
+                                                    {{ ucfirst($users->profile->gender ?: 'Khác') }}
                                                 @endif
                                             </p>
                                         </div>
@@ -147,8 +147,8 @@
                                     type="button" role="tab" aria-controls="pane-orders" aria-selected="false">
                                     <span class="d-block d-sm-none"><i class="fas fa-receipt"></i></span>
                                     <span class="d-none d-sm-block">Đơn hàng
-                                        @if (isset($user->orders_count) && $user->orders_count > 0)
-                                            <span class="badge rounded-pill bg-info ms-1">{{ $user->orders_count }}</span>
+                                        @if (isset($users->orders_count) && $users->orders_count > 0)
+                                            <span class="badge rounded-pill bg-info ms-1">{{ $users->orders_count }}</span>
                                         @endif
                                     </span>
                                 </a>
@@ -158,9 +158,9 @@
                                     type="button" role="tab" aria-controls="pane-cart" aria-selected="false">
                                     <span class="d-block d-sm-none"><i class="fas fa-shopping-cart"></i></span>
                                     <span class="d-none d-sm-block">Giỏ hàng Hiện tại
-                                        @if (isset($user->cart_items_count) && $user->cart_items_count > 0)
+                                        @if (isset($users->cart_items_count) && $users->cart_items_count > 0)
                                             <span
-                                                class="badge rounded-pill bg-warning text-dark ms-1">{{ $user->cart_items_count }}</span>
+                                                class="badge rounded-pill bg-warning text-dark ms-1">{{ $users->cart_items_count }}</span>
                                         @endif
                                     </span>
                                 </a>
@@ -171,7 +171,7 @@
                                     aria-controls="pane-comments" aria-selected="false">
                                     <span class="d-block d-sm-none"><i class="fas fa-comments"></i></span>
                                     <span class="d-none d-sm-block">Bình luận
-                                        @php $totalCommentsCount = $user->comments->count(); @endphp
+                                        @php $totalCommentsCount = $users->comments->count(); @endphp
                                         @if ($totalCommentsCount > 0)
                                             <span
                                                 class="badge rounded-pill bg-secondary ms-1">{{ $totalCommentsCount }}</span>
@@ -187,7 +187,7 @@
                             {{-- Tab Thông tin (profile_about) - Active mặc định --}}
                             <div class="tab-pane fade show active pt-4" id="pane-info" role="tabpanel"
                                 aria-labelledby="tab-info">
-                                @if ($user->profile)
+                                @if ($users->profile)
                                     <div class="row">
                                         <div class="col-md-12 mb-4">
                                             <h5 class="fs-16 text-dark fw-semibold mb-4 text-capitalize">Thông tin cá nhân
@@ -197,22 +197,22 @@
                                                 {{-- Cột Email --}}
                                                 <div class="col-md-6">
                                                     <h6 class="text-uppercase fs-13 text-muted mb-1">Email người dùng</h6>
-                                                    <p class="fs-14 mb-0"><a href="mailto:{{ $user->email }}"
-                                                            class="text-primary text-decoration-underline">{{ $user->email }}</a>
+                                                    <p class="fs-14 mb-0"><a href="mailto:{{ $users->email }}"
+                                                            class="text-primary text-decoration-underline">{{ $users->email }}</a>
                                                     </p>
                                                 </div>
 
                                                 {{-- Cột Số điện thoại --}}
                                                 <div class="col-md-6">
                                                     <h6 class="text-uppercase fs-13 text-muted mb-1">Số điện thoại</h6>
-                                                    <p class="fs-14 mb-0">{{ $user->profile->phone ?: 'Chưa cập nhật' }}
+                                                    <p class="fs-14 mb-0">{{ $users->profile->phone ?: 'Chưa cập nhật' }}
                                                     </p>
                                                 </div>
 
                                                 {{-- Cột Địa chỉ --}}
                                                 <div class="col-md-6">
                                                     <h6 class="text-uppercase fs-13 text-muted mb-1">Địa chỉ</h6>
-                                                    <p class="fs-14 mb-0">{{ $user->profile->address ?: 'Chưa cập nhật' }}
+                                                    <p class="fs-14 mb-0">{{ $users->profile->address ?: 'Chưa cập nhật' }}
                                                     </p>
                                                 </div>
 
@@ -220,12 +220,12 @@
                                                 <div class="col-md-6">
                                                     <h6 class="text-uppercase fs-13 text-muted mb-1">Giới tính</h6>
                                                     <p class="fs-14 mb-0">
-                                                        @if ($user->profile->gender == 'male' || $user->profile->gender == 'nam')
+                                                        @if ($users->profile->gender == 'male' || $users->profile->gender == 'nam')
                                                             Nam
-                                                        @elseif($user->profile->gender == 'female' || $user->profile->gender == 'nu')
+                                                        @elseif($users->profile->gender == 'female' || $users->profile->gender == 'nu')
                                                             Nữ
                                                         @else
-                                                            {{ ucfirst($user->profile->gender ?: 'Khác') }}
+                                                            {{ ucfirst($users->profile->gender ?: 'Khác') }}
                                                         @endif
                                                     </p>
                                                 </div>
@@ -234,7 +234,7 @@
                                                 <div class="col-md-6">
                                                     <h6 class="text-uppercase fs-13 text-muted mb-1">Ngày sinh</h6>
                                                     <p class="fs-14 mb-0">
-                                                        {{ $user->profile->birth_date ? \Carbon\Carbon::parse($user->profile->birth_date)->format('d/m/Y') : 'Chưa cập nhật' }}
+                                                        {{ $users->profile->birth_date ? \Carbon\Carbon::parse($users->profile->birth_date)->format('d/m/Y') : 'Chưa cập nhật' }}
                                                     </p>
                                                 </div>
 
@@ -254,8 +254,8 @@
                             <div class="tab-pane fade pt-4" id="pane-orders" role="tabpanel"
                                 aria-labelledby="tab-orders">
                                 <h5 class="mb-3">Danh sách Đơn hàng</h5>
-                                @if ($user->orders && $user->orders->count() > 0)
-                                    @foreach ($user->orders as $order)
+                                @if ($users->orders && $users->orders->count() > 0)
+                                    @foreach ($users->orders as $order)
                                         <div class="card mb-3 order-card-collapsible">
                                             <div class="card-body p-3 cursor-pointer d-flex justify-content-between align-items-center"
                                                 data-bs-toggle="collapse"
@@ -444,7 +444,7 @@
                             {{-- Tab Giỏ hàng (portfolio_education) --}}
                             <div class="tab-pane fade pt-4" id="pane-cart" role="tabpanel" aria-labelledby="tab-cart">
                                 <h5 class="mb-3">Sản phẩm trong Giỏ hàng</h5>
-                                @if ($user->cartItems && $user->cartItems->count() > 0)
+                                @if ($users->cartItems && $users->cartItems->count() > 0)
                                     <div class="table-responsive">
                                         <table class="table table-hover table-sm align-middle">
                                             <thead>
@@ -458,7 +458,7 @@
                                             </thead>
                                             <tbody>
                                                 @php $cartTotal = 0; @endphp
-                                                @foreach ($user->cartItems as $item)
+                                                @foreach ($users->cartItems as $item)
                                                     <tr>
                                                         <td>
                                                             <img src="{{ optional($item->productVariant->product)->image ? asset('storage/' . $item->productVariant->product->image) : 'https://spencil.vn/wp-content/uploads/2024/11/chup-anh-san-pham-SPencil-Agency-1.jpg' }}"
@@ -496,14 +496,14 @@
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <h5>Danh sách Bình luận</h5>
                                     {{-- <button id="toggleTrashedCommentsBtn" class="btn btn-sm btn-outline-danger"
-                                        data-user-id="{{ $user->id }}"
-                                        data-fetch-url="{{ route('admin.account.comment.account.trashedComments', ['user' => $user->id]) }}">
+                                        data-user-id="{{ $users->id }}"
+                                        data-fetch-url="{{ route('admin.account.comment.account.trashedComments', ['user' => $users->id]) }}">
                                         <i class="fas fa-trash"></i> Thùng rác bình luận
                                     </button> --}}
                                 </div>
                                 <div id="activeCommentsContainer">
                                     @php
-                                        $activeComments = $user->comments->filter(function ($comment) {
+                                        $activeComments = $users->comments->filter(function ($comment) {
                                             return is_null($comment->deleted_at);
                                         });
                                     @endphp

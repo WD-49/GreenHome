@@ -72,7 +72,7 @@
                             <tbody>
                                 @foreach ($admins as $item => $user)
                                     <tr>
-                                        <td>{{ $admins->firstItem() + $item }}</td>
+                                        <td>{{ $item + 1 }}</td>
                                         <td>{{ $user->name }}</td>
                                         <td>{{ $user->email }}</td>
                                         <td>{{-- Giả sử người dùng thông thường có role 'user' --}}

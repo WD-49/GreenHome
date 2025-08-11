@@ -38,7 +38,8 @@ class AccountAdminController extends Controller
             $query->whereHas('profile', fn($q) => $q->where('gender', $request->gender));
         }
 
-        $admins = $query->paginate(10);
+        // $admins = $query->paginate(100);
+        $admins = $query->withTrashed()->get();
         // dd($admins);
         return view('admin.account.admin.listAdmins', compact('admins'));
     }
