@@ -48,7 +48,9 @@
                     <h4 class="cr-sub-title">Danh mục <span class="cr-heading-res"></span></h4>
                     <ul class="cr-footer-links cr-footer-dropdown">
                         @foreach ($footerCategories as $category)
-                            <li><a href="{{ route('category.show', $category->slug) }}">{{ $category->name }}</a></li>
+                            <li><a
+                                    href="{{ route('shop.index', ['categories[]' => $category->id]) }}">{{ $category->name }}</a>
+                            </li>
                         @endforeach
                     </ul>
                 </div>

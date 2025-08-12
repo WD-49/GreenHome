@@ -33,7 +33,7 @@ class HomeController extends Controller
             $query->orderBy('view', 'desc')->take(8);
         }])->get();
 
-        $randomProducts = Product::orderByDesc('view')->take(8)->get();
+        $popularProducts = Product::orderByDesc('view')->take(8)->get();
         $categories2 = Category::with(['products' => function ($query) {
             $query->latest()->take(8);
         }])->get();
@@ -59,6 +59,6 @@ class HomeController extends Controller
             ->get();
         $categories = Category::all();
 
-        return view('client.pages.home', compact('categories', 'categories2', 'products1', 'blogs', 'products', 'topCategories', 'categoriesWithTopProducts', 'categories2', 'randomProducts', 'brands', 'categories3', 'banners'));
+        return view('client.pages.home', compact('categories', 'categories2', 'products1', 'blogs', 'products', 'topCategories', 'categoriesWithTopProducts', 'categories2', 'popularProducts', 'brands', 'categories3', 'banners'));
     }
 }

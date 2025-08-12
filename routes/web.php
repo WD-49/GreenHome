@@ -373,7 +373,6 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/history', [DiscountController::class, 'history'])->name('history');
         Route::get('/history/{id}', [DiscountController::class, 'historyDetail'])->name('historyDetail');
         Route::get('/check-voucher-code', [DiscountController::class, 'checkCode'])->name('vouchers.checkCode');
-
     });
 
     //quản lí phương thức thanh toán
@@ -458,6 +457,9 @@ route::middleware('auth')->prefix('orders')->name('orders.')->group(function () 
         ->name('confirmReceived');
 });
 Route::post('/review/submit', [CheckoutController::class, 'submitReview'])->name('client.review.submit');
+
+// modalProduct
+Route::get('/products/{id}', [ProductClientController::class, 'getProductDetails'])->name('product.details');
 
 
 

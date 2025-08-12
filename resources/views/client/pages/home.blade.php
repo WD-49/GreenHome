@@ -211,30 +211,29 @@
                     {{-- Tab All: 8 sản phẩm ngẫu nhiên --}}
                     <div id="tab-all" class="product-tab-content fade-tab show">
                         <div class="row mb-minus-24">
-                            @foreach ($randomProducts as $product)
+                            @foreach ($popularProducts as $product)
                                 <div class="col-xxl-3 col-xl-4 col-6 cr-product-box mb-24">
                                     <div class="cr-product-card">
+                                        {{-- Hiển thị ảnh sản phẩm --}}
                                         <div class="cr-product-image">
                                             <div class="cr-image-inner zoom-image-hover">
                                                 <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}">
                                             </div>
                                             <div class="cr-side-view">
                                                 <a href="javascript:void(0);" class="wishlist-button"
-                                                        data-product-id="{{ $product->id }}">
-                                                        @if (in_array($product->id, $wishlistProductIds ?? []))
-                                                            <i class="ri-heart-fill text-danger"></i>
-                                                        @else
-                                                            <i class="ri-heart-line"></i>
-                                                        @endif
-                                                    </a>
+                                                    data-product-id="{{ $product->id }}">
+                                                    @if (in_array($product->id, $wishlistProductIds ?? []))
+                                                        <i class="ri-heart-fill text-danger"></i>
+                                                    @else
+                                                        <i class="ri-heart-line"></i>
+                                                    @endif
+                                                </a>
                                                 <a class="model-oraganic-product" data-bs-toggle="modal" href="#quickview"
-                                                    role="button">
+                                                    role="button" data-product-id="{{ $product->id }}">
                                                     <i class="ri-eye-line"></i>
                                                 </a>
                                             </div>
-                                            <a class="cr-shopping-bag" href="javascript:void(0)">
-                                                <i class="ri-shopping-bag-line"></i>
-                                            </a>
+
                                         </div>
                                         <div class="cr-product-details">
                                             <div class="cr-brand">
@@ -280,23 +279,28 @@
                                                         alt="{{ $product->name }}">
                                                 </div>
                                                 <div class="cr-side-view">
-                                                    <a href="javascript:void(0)" class="wishlist">
-                                                        <i class="ri-heart-line"></i>
+                                                    <a href="javascript:void(0);" class="wishlist-button"
+                                                        data-product-id="{{ $product->id }}">
+                                                        @if (in_array($product->id, $wishlistProductIds ?? []))
+                                                            <i class="ri-heart-fill text-danger"></i>
+                                                        @else
+                                                            <i class="ri-heart-line"></i>
+                                                        @endif
                                                     </a>
                                                     <a class="model-oraganic-product" data-bs-toggle="modal"
-                                                        href="#quickview" role="button">
+                                                        href="#quickview" role="button"
+                                                        data-product-id="{{ $product->id }}">
                                                         <i class="ri-eye-line"></i>
                                                     </a>
                                                 </div>
-                                                <a class="cr-shopping-bag" href="javascript:void(0)">
-                                                    <i class="ri-shopping-bag-line"></i>
-                                                </a>
+
                                             </div>
                                             <div class="cr-product-details">
                                                 <div class="cr-brand">
                                                     <a href="#">{{ $category->name }}</a>
                                                 </div>
-                                                <a href="#" class="title">{{ $product->name }}</a>
+                                                <a href="{{ route('productDetail', $product->slug) }}"
+                                                    class="title">{{ $product->name }}</a>
 
                                                 <p class="cr-price">
                                                     @if ($variant = $product->productVariants->first())
@@ -462,16 +466,20 @@
                                                 alt="{{ $product->name }}">
                                         </div>
                                         <div class="cr-side-view">
-                                            <a href="javascript:void(0)" class="wishlist"><i
-                                                    class="ri-heart-line"></i></a>
+                                            <a href="javascript:void(0);" class="wishlist-button"
+                                                data-product-id="{{ $product->id }}">
+                                                @if (in_array($product->id, $wishlistProductIds ?? []))
+                                                    <i class="ri-heart-fill text-danger"></i>
+                                                @else
+                                                    <i class="ri-heart-line"></i>
+                                                @endif
+                                            </a>
                                             <a class="model-oraganic-product" data-bs-toggle="modal" href="#quickview"
-                                                role="button">
+                                                role="button" data-product-id="{{ $product->id }}">
                                                 <i class="ri-eye-line"></i>
                                             </a>
                                         </div>
-                                        <a class="cr-shopping-bag" href="javascript:void(0)">
-                                            <i class="ri-shopping-bag-line"></i>
-                                        </a>
+
                                     </div>
                                     <div class="cr-product-details">
                                         <div class="cr-brand">
@@ -486,7 +494,7 @@
                                                 <p>(4.0)</p>
                                             </div>
                                         </div>
-                                        <a href="product-left-sidebar.html" class="title">
+                                        <a href="{{ route('productDetail', $product->slug) }}" class="title">
                                             {{ $product->name }}
                                         </a>
                                         <p class="cr-price">
@@ -566,8 +574,8 @@
                                                 alt="{{ $blog->title }}">
                                             <div class="cr-blog-date">
                                                 <span>
-                                                    {{ optional($blog->created_at)->format('d') }}
-                                                    <code>{{ optional($blog->created_at)->format('M') }}</code>
+                                                    {{ \Carbon\Carbon::parse($blog->created_at)->locale('vi')->translatedFormat('d') }}
+                                                    <code>{{ \Carbon\Carbon::parse($blog->created_at)->locale('vi')->translatedFormat('F') }}</code>
                                                 </span>
                                             </div>
                                         </div>
@@ -583,38 +591,40 @@
     </section>
 @endsection
 @push('scripts')
-<script>
-    $(document).ready(function() {
-        // CSRF token setup
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            xhrFields: {
-                withCredentials: true
-            }
-        });
-
-        // Wishlist toggle
-        $(document).on('click', '.wishlist-button', function(e) {
-            e.preventDefault();
-            const $btn = $(this);
-            const productId = $btn.data('product-id');
-
-            $.post('{{ route('wishlist.toggle') }}', {
-                product_id: productId
-            }, function(res) {
-                if (res.added) {
-                    $btn.find('i').removeClass('ri-heart-line').addClass('ri-heart-fill text-danger');
-                } else {
-                    $btn.find('i').removeClass('ri-heart-fill text-danger').addClass('ri-heart-line');
+    <script>
+        $(document).ready(function() {
+            // CSRF token setup
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                xhrFields: {
+                    withCredentials: true
                 }
-                alert(res.message);
-            }).fail(function(xhr) {
-                alert(xhr.status === 401 ? 'Vui lòng đăng nhập để thêm vào wishlist' : 'Đã có lỗi xảy ra!');
+            });
+
+            // Wishlist toggle
+            $(document).on('click', '.wishlist-button', function(e) {
+                e.preventDefault();
+                const $btn = $(this);
+                const productId = $btn.data('product-id');
+
+                $.post('{{ route('wishlist.toggle') }}', {
+                    product_id: productId
+                }, function(res) {
+                    if (res.added) {
+                        $btn.find('i').removeClass('ri-heart-line').addClass(
+                            'ri-heart-fill text-danger');
+                    } else {
+                        $btn.find('i').removeClass('ri-heart-fill text-danger').addClass(
+                            'ri-heart-line');
+                    }
+                    alert(res.message);
+                }).fail(function(xhr) {
+                    alert(xhr.status === 401 ? 'Vui lòng đăng nhập để thêm vào wishlist' :
+                        'Đã có lỗi xảy ra!');
+                });
             });
         });
-    });
-</script>
+    </script>
 @endpush
-

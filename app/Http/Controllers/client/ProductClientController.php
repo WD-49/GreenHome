@@ -2,18 +2,19 @@
 
 namespace App\Http\Controllers\Client;
 
-use App\Http\Controllers\Controller;
-use App\Models\Product;
 use App\Models\Review;
+use App\Models\Comment;
+use App\Models\Product;
+use App\Models\Category;
+
+use App\Models\Discount;
+use Illuminate\Http\Request;
 use App\Models\AttributeValue;
 
-use App\Models\Category;
-use App\Models\Discount;
-use Illuminate\Http\Client\Request as ClientRequest;
-
-use Illuminate\Http\Request;
-use App\Models\Comment;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Client\Request as ClientRequest;
 
 class ProductClientController extends Controller
 {
@@ -57,9 +58,9 @@ class ProductClientController extends Controller
             ->unique()
             ->values();
 
-             $reviews = $product->reviews()->with('user')->get();
+        $reviews = $product->reviews()->with('user')->get();
 
-        return view('client.pages.productDetail', compact('product', 'relatedProducts', 'attributes','reviews'));
+        return view('client.pages.productDetail', compact('product', 'relatedProducts', 'attributes', 'reviews'));
     }
 
 
@@ -79,7 +80,46 @@ class ProductClientController extends Controller
 
         return redirect()->back()->with('success', 'Bình luận của bạn đã được gửi và đang chờ duyệt.');
     }
-    // app/Http/Controllers/VoucherController.php
+    public function getProductDetails($id)
+    {
+        try {
+            $product = Product::with(['productVariants', 'category', 'brand'])->findOrFail($id);
 
+            // Tính số sao trung bình từ reviews của tất cả biến thể
+            $averageRating = DB::table('reviews')
+                ->whereIn('product_variant_id', $product->productVariants->pluck('id'))
+                ->avg('rating') ?? 0;
 
+            return response()->json([
+                'success' => true,
+                'product' => [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'image' => $product->image,
+                    'sortDes' => $product->sort_des,
+                    'average_rating' => round($averageRating, 1), // Làm tròn đến 1 chữ số thập phân
+                    'review_count' => DB::table('reviews')
+                        ->whereIn('product_variant_id', $product->productVariants->pluck('id'))
+                        ->count(),
+                    'view' => $product->view ?? 0,
+                    'category' => $product->category ? ['name' => $product->category->name] : null,
+                    'brand' => $product->brand ? ['name' => $product->brand->name] : null,
+                    'product_variants' => $product->productVariants->map(function ($variant) {
+                        return [
+                            'id' => $variant->id,
+                            'price' => $variant->price,
+                            'old_price' => $variant->old_price,
+                            'attribute_name' => $variant->attribute_name ?? '',
+                            'quantity' => $variant->quantity,
+                        ];
+                    }),
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể tải thông tin sản phẩm.',
+            ], 500);
+        }
+    }
 }

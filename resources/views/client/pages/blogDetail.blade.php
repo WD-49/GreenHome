@@ -72,34 +72,8 @@
                                 </div>
                             </div>
                         </div> --}}
-                        <div class="blog-post">
-                            <div id="blog-content">
-                                <p class="post-content">
-                                    {{ Str::limit($blog->content, 300) }}
-                                </p>
-                                <h5 class="title">Admin</h5>
-                            </div>
-                        </div>
-                        <div class="cr-blog-details-paragrap">
-                            <p>Đây là nội dung phụ hoặc thêm của bài viết.</p>
 
-                        </div>
 
-                        {{-- Tags + Social --}}
-                        <div class="cr-blog-details-tags">
-                            <div class="cr-details-tags">
-                                <ul class="cr-tags blog">
-                                    <li><a href="javascript:void(0)">Tag 1</a></li>
-                                    <li><a href="javascript:void(0)">Tag 2</a></li>
-                                </ul>
-                                <div class="cr-logo">
-                                    <a href="#"><i class="ri-facebook-line"></i></a>
-                                    <a href="#"><i class="ri-twitter-x-line"></i></a>
-                                    <a href="#"><i class="ri-instagram-line"></i></a>
-                                    <a href="#"><i class="ri-linkedin-line"></i></a>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
                 <!-- Pagination nếu cần -->
