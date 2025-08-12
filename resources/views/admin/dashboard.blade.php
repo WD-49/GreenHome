@@ -6,15 +6,15 @@
 
 @section('content')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.css">
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.css">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
     <div class="container-xxl">
         <div class="py-3 d-flex align-items-sm-center flex-sm-row flex-column">
             <div class="flex-grow-1">
-                <h4 class="fs-18 fw-semibold m-0">Ecommerce</h4>
+                <h4 class="fs-18 fw-semibold m-0">Thống kê </h4>
             </div>
         </div>
 
@@ -227,323 +227,387 @@
     </div>
 
     <!-- JavaScript xử lý bộ lọc và biểu đồ -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Khởi tạo Flatpickr
-            flatpickr('#start_date, #end_date', {
-                dateFormat: 'Y-m-d',
-                maxDate: 'today',
-                onChange: (selectedDates, dateStr, instance) => {
-                    if (instance.element.id === 'start_date') {
-                        const endPicker = document.querySelector('#end_date')._flatpickr;
-                        const filter = document.querySelector('#filter').value;
-                        const maxDate = new Date(selectedDates[0]);
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                // Khởi tạo Flatpickr
+                flatpickr('#start_date, #end_date', {
+                    dateFormat: 'Y-m-d',
+                    maxDate: 'today',
+                    onChange: (selectedDates, dateStr, instance) => {
+                        if (instance.element.id === 'start_date') {
+                            const endPicker = document.querySelector('#end_date')._flatpickr;
+                            const filter = document.querySelector('#filter').value;
+                            const maxDate = new Date(selectedDates[0]);
 
-                        if (filter === 'day') {
-                            maxDate.setDate(maxDate.getDate() + 31);
-                        } else if (filter === 'month') {
-                            maxDate.setFullYear(maxDate.getFullYear() + 1);
-                        } else {
-                            maxDate.setFullYear(maxDate.getFullYear() + 10);
+                            if (filter === 'day') {
+                                maxDate.setDate(maxDate.getDate() + 31);
+                            } else if (filter === 'month') {
+                                maxDate.setFullYear(maxDate.getFullYear() + 1);
+                            } else {
+                                maxDate.setFullYear(maxDate.getFullYear() + 10);
+                            }
+                            endPicker.set('minDate', selectedDates[0]);
+                            endPicker.set('maxDate', maxDate);
                         }
-                        endPicker.set('minDate', selectedDates[0]);
-                        endPicker.set('maxDate', maxDate);
                     }
-                }
-            });
+                });
 
-            // Cập nhật hint khi thay đổi bộ lọc
-            const filterSelect = document.querySelector('#filter');
-            const filterHint = document.querySelector('#filter-hint');
-            filterSelect.addEventListener('change', () => {
-                if (filterSelect.value === 'day') filterHint.textContent = 'Tối đa 31 ngày';
-                else if (filterSelect.value === 'month') filterHint.textContent = 'Tối đa 12 tháng';
-                else filterHint.textContent = 'Tối đa 10 năm';
-                document.querySelector('#filter-form').submit();
-            });
+                // Cập nhật hint khi thay đổi bộ lọc
+                const filterSelect = document.querySelector('#filter');
+                const filterHint = document.querySelector('#filter-hint');
+                filterSelect.addEventListener('change', () => {
+                    if (filterSelect.value === 'day') filterHint.textContent = 'Tối đa 31 ngày';
+                    else if (filterSelect.value === 'month') filterHint.textContent = 'Tối đa 12 tháng';
+                    else filterHint.textContent = 'Tối đa 10 năm';
+                    document.querySelector('#filter-form').submit();
+                });
 
-            // Khởi tạo biểu đồ Sales Report
-            let salesChart = null;
-            const initSalesChart = (labels, data) => {
-                const filter = document.querySelector('#filter').value;
-                const options = {
-                    series: [{
-                        name: 'Doanh thu',
-                        data: data
-                    }],
-                    chart: {
-                        type: 'bar',
-                        height: 350,
-                        width: filter === 'day' ? '150%' : '100%',
-                        zoom: {
-                            enabled: true,
-                            type: 'x',
-                            autoScaleYaxis: true
-                        },
-                        toolbar: {
-                            show: true,
-                            tools: {
-                                zoom: true,
-                                zoomin: true,
-                                zoomout: true,
-                                pan: true,
-                                reset: true
-                            }
-                        }
-                    },
-                    plotOptions: {
-                        bar: {
-                            horizontal: false,
-                            columnWidth: filter === 'day' ? '15%' : '55%',
-                            endingShape: 'rounded'
-                        }
-                    },
-                    dataLabels: {
-                        enabled: false
-                    },
-                    xaxis: {
-                        categories: labels,
-                        labels: {
-                            rotate: 0,
-                            rotateAlways: false,
-                            trim: false,
-                            style: {
-                                fontSize: '12px'
+                // Khởi tạo biểu đồ Sales Report
+                let salesChart = null;
+                const initSalesChart = (labels, data) => {
+                    const filter = document.querySelector('#filter').value;
+                    // Kiểm tra dữ liệu để tránh lỗi
+                    if (!labels || !data || labels.length !== data.length) {
+                        console.warn('Dữ liệu biểu đồ không hợp lệ:', {
+                            labels,
+                            data
+                        });
+                        return;
+                    }
+
+                    // Tính toán chiều rộng biểu đồ dựa trên số lượng nhãn
+                    const chartWidth = filter === 'day' ? Math.max(100, labels.length * 10) + '%' : '100%';
+
+                    const options = {
+                        series: [{
+                            name: 'Doanh thu',
+                            data: data
+                        }],
+                        chart: {
+                            type: 'line',
+                            height: 350,
+                            width: chartWidth, // Động rộng dựa trên số nhãn
+                            zoom: {
+                                enabled: filter === 'day', // Chỉ bật zoom khi lọc theo ngày
+                                type: 'x',
+                                autoScaleYaxis: true
                             },
-                            formatter: function(val) {
-                                if (filter === 'year') return val;
-                                if (filter === 'month') return val;
-                                return new Date(val).toLocaleDateString('vi-VN', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    year: 'numeric'
-                                });
+                            toolbar: {
+                                show: filter === 'day', // Chỉ hiển thị toolbar khi lọc theo ngày
+                                tools: {
+                                    zoom: true,
+                                    zoomin: true,
+                                    zoomout: true,
+                                    pan: true,
+                                    reset: true
+                                }
                             },
-                            tickAmount: filter === 'day' ? Math.ceil(labels.length / 5) : undefined
-                        }
-                    },
-                    yaxis: {
-                        title: {
-                            text: 'Doanh thu (VNĐ)'
+                            animations: {
+                                enabled: filter === 'day', // Tắt animation cho tháng/năm để tránh flicker
+                                easing: 'easeinout',
+                                speed: 800,
+                                animateGradually: {
+                                    enabled: true,
+                                    delay: 150
+                                }
+                            },
+                            redrawOnParentResize: false,
+                            redrawOnWindowResize: false
                         },
-                        labels: {
-                            formatter: function(val) {
-                                return Number(val).toLocaleString('vi-VN') + ' ₫';
+                        stroke: {
+                            curve: 'smooth',
+                            width: 3
+                        },
+                        markers: {
+                            size: filter === 'day' ? 4 : 6,
+                            hover: {
+                                size: 8
                             }
-                        }
-                    },
-                    tooltip: {
-                        y: {
-                            formatter: function(val, {
-                                dataPointIndex
-                            }) {
-                                const date = labels[dataPointIndex];
-                                const formattedDate = filter === 'year' ? date :
-                                    filter === 'month' ? date :
-                                    new Date(date).toLocaleDateString('vi-VN', {
+                        },
+                        dataLabels: {
+                            enabled: false
+                        },
+                        xaxis: {
+                            type: 'category', // Explicitly set to category for string labels
+                            categories: labels,
+                            labels: {
+                                rotate: 0, // Không xoay nhãn cho mọi kiểu lọc
+                                rotateAlways: false,
+                                trim: false,
+                                style: {
+                                    fontSize: '12px'
+                                },
+                                formatter: function(val) {
+                                    if (filter === 'year') return val;
+                                    if (filter === 'month') return val;
+                                    return new Date(val).toLocaleDateString('vi-VN', {
                                         day: '2-digit',
                                         month: '2-digit',
                                         year: 'numeric'
                                     });
-                                return `${formattedDate}: ${Number(val).toLocaleString('vi-VN')} ₫`;
+                                },
+                                tickAmount: filter === 'day' ? Math.ceil(labels.length / 5) : undefined
+                            },
+                            scrollbar: {
+                                enabled: filter === 'day' // Thanh cuộn chỉ bật khi lọc theo ngày
                             }
+                        },
+                        yaxis: {
+                            title: {
+                                text: 'Doanh thu (VNĐ)'
+                            },
+                            labels: {
+                                formatter: function(val) {
+                                    return Number(val).toLocaleString('vi-VN') + ' ₫';
+                                }
+                            }
+                        },
+                        tooltip: {
+                            enabled: true,
+                            shared: false,
+                            intersect: false, // Tắt intersect để hover dễ dàng hơn
+                            followCursor: true, // Tooltip theo con trỏ để mượt mà
+                            fixed: {
+                                enabled: filter !== 'day', // Cố định tooltip cho tháng/năm
+                                position: 'topRight',
+                                offsetX: 0,
+                                offsetY: 0
+                            },
+                            onDatasetHover: {
+                                highlightDataSeries: false // Tắt highlight để giảm flicker
+                            },
+                            marker: {
+                                show: filter === 'day' // Tắt marker cho tháng/năm
+                            },
+                            x: {
+                                show: true,
+                                formatter: function(val, {
+                                    dataPointIndex
+                                }) {
+                                    const date = labels[dataPointIndex];
+                                    if (!date) return '';
+                                    return filter === 'year' ? date :
+                                        filter === 'month' ? date :
+                                        new Date(date).toLocaleDateString('vi-VN', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric'
+                                        });
+                                }
+                            },
+                            y: {
+                                formatter: function(val) {
+                                    return Number(val).toLocaleString('vi-VN') + ' ₫';
+                                }
+                            }
+                        },
+                        colors: ['#6366f1'],
+                        fill: {
+                            opacity: 1
                         }
-                    },
-                    colors: ['#6366f1'],
-                    fill: {
-                        opacity: 1
+                    };
+
+                    if (salesChart) salesChart.destroy();
+                    salesChart = new ApexCharts(document.querySelector('#chart-money'), options);
+                    salesChart.render();
+                };
+
+                // Hàm gọi API
+                const loadDashboardData = async () => {
+                    const filter = document.querySelector('#filter').value;
+                    const startDate = document.querySelector('#start_date').value;
+                    const endDate = document.querySelector('#end_date').value;
+
+                    // Hiển thị loading
+                    const cardBodies = document.querySelectorAll('.card-body');
+                    cardBodies.forEach(body => {
+                        body.insertAdjacentHTML('beforeend',
+                            '<div class="loading-spinner">Đang tải...</div>');
+                    });
+                    const errorAlert = document.querySelector('#error-alert');
+                    errorAlert.classList.add('d-none');
+
+                    try {
+                        const response = await fetch(
+                            `{{ route('admin.dashboard.data') }}?filter=${filter}&start_date=${startDate}&end_date=${endDate}`, {
+                                method: 'GET',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            });
+
+                        const result = await response.json();
+
+                        // Xóa loading
+                        document.querySelectorAll('.loading-spinner').forEach(spinner => spinner.remove());
+
+                        if (!result.success) {
+                            errorAlert.textContent = result.message;
+                            errorAlert.classList.remove('d-none');
+                            return;
+                        }
+
+                        const data = result.data;
+
+                        // Cập nhật tổng số
+                        document.querySelector('#new-orders-total').textContent = data.new_orders?.total ?? 0;
+                        document.querySelector('#sales-total').textContent = data.sales?.total ?? 0;
+                        document.querySelector('#revenue-total').textContent = Number(data.revenue?.total ?? 0)
+                            .toLocaleString('vi-VN') + ' ₫';
+                        document.querySelector('#new-users-total').textContent = data.new_users?.total ?? 0;
+
+                        // Cập nhật thông báo dữ liệu trống
+                        document.querySelector('#new-orders-empty').classList.toggle('d-none', !data.new_orders
+                            ?.empty);
+                        document.querySelector('#sales-empty').classList.toggle('d-none', !data.sales?.empty);
+                        document.querySelector('#revenue-empty').classList.toggle('d-none', !data.revenue
+                            ?.empty);
+                        document.querySelector('#new-users-empty').classList.toggle('d-none', !data.new_users
+                            ?.empty);
+
+                        // Chuyển dữ liệu doanh thu sang số
+                        const revenueData = data.revenue?.data.map(Number) ?? [];
+
+                        // Cập nhật biểu đồ Sales Report
+                        initSalesChart(data.labels ?? [], revenueData);
+
+                        // Cập nhật bảng Khách hàng tiềm năng
+                        const topCustomersTbody = document.querySelector('#top-customers');
+                        topCustomersTbody.innerHTML = '';
+                        if (!Array.isArray(data.top_customers) || data.top_customers.length === 0) {
+                            topCustomersTbody.innerHTML =
+                                '<tr><td colspan="3" class="text-center">Không có dữ liệu</td></tr>';
+                        } else {
+                            data.top_customers.forEach(customer => {
+                                topCustomersTbody.innerHTML += `
+    <tr>
+        <td>${customer.name || 'N/A'}</td>
+        <td class="text-center">${customer.order_count || 0}</td>
+        <td>${Number(customer.total_spent || 0).toLocaleString('vi-VN')} ₫</td>
+    </tr>`;
+                            });
+                        }
+
+                        // Cập nhật bảng Sản phẩm bán chạy
+                        const topSellingProducts = document.querySelector('#top-selling-products');
+                        topSellingProducts.innerHTML = '';
+                        if (!Array.isArray(data.top_selling_products) || data.top_selling_products.length ===
+                            0) {
+                            topSellingProducts.innerHTML =
+                                '<li class="list-group-item text-center">Không có dữ liệu</li>';
+                        } else {
+                            data.top_selling_products.forEach(product => {
+                                topSellingProducts.innerHTML += `
+    <li class="list-group-item align-items-center d-flex justify-content-between">
+        <div class="product-list d-flex align-items-center">
+            <img class="avatar-md p-1 rounded-circle bg-primary-subtle img-fluid me-3"
+                src="/storage/${product.image || 'default.png'}" alt="product-image">
+            <div class="product-body align-self-center">
+                <h6 class="m-0 fw-semibold">${product.product_name || 'N/A'}</h6>
+                <p class="mb-0 mt-1 text-muted">${product.product_attribute || ''}</p>
+            </div>
+        </div>
+        <div class="product-price">
+            <h6 class="m-0 fw-semibold">${Number(product.product_price || 0).toLocaleString('vi-VN')} ₫</h6>
+            <p class="mb-0 mt-1 text-muted">${product.sold || 0} sản phẩm đã bán</p>
+        </div>
+    </li>`;
+                            });
+                        }
+
+                        // Cập nhật bảng Sản phẩm đánh giá cao nhất
+                        const topRatedProducts = document.querySelector('#top-rated-products');
+                        topRatedProducts.innerHTML = '';
+                        if (!Array.isArray(data.top_rated_products) || data.top_rated_products.length === 0) {
+                            topRatedProducts.innerHTML =
+                                '<li class="list-group-item text-center">Không có dữ liệu</li>';
+                        } else {
+                            data.top_rated_products.forEach(product => {
+                                topRatedProducts.innerHTML += `
+    <li class="list-group-item align-items-center d-flex justify-content-between">
+        <div class="product-list d-flex align-items-center">
+            <img class="avatar-md p-1 rounded-circle bg-primary-subtle img-fluid me-3"
+                src="/storage/${product.image || 'storage/default.png'}" alt="product-image">
+            <div class="product-body align-self-center">
+                <h6 class="m-0 fw-semibold">${product.product_name || 'N/A'}</h6>
+                <p class="mb-0 mt-1 text-muted">${product.attribute_name || ''}</p>
+            </div>
+        </div>
+        <div class="product-price">
+            <h6 class="m-0 fw-semibold">${Number(product.rating || 0).toFixed(1)} ⭐</h6>
+            <p class="mb-0 mt-1 text-muted">${product.review_count || 0} đánh giá</p>
+        </div>
+    </li>`;
+                            });
+                        }
+
+                        // Cập nhật bảng Đơn hàng hiện tại
+                        const currentOrdersTbody = document.querySelector('#current-orders');
+                        currentOrdersTbody.innerHTML = '';
+                        if (!Array.isArray(data.current_orders) || data.current_orders.length === 0) {
+                            currentOrdersTbody.innerHTML =
+                                '<tr><td colspan="8" class="text-center">Không có dữ liệu</td></tr>';
+                        } else {
+                            data.current_orders.forEach(order => {
+                                const orderStatusClass = {
+                                    'Chưa xác nhận': 'text-warning',
+                                    'Xác nhận': 'text-info',
+                                    'Đang vận chuyển': 'text-primary',
+                                    'Giao hàng thành công': 'text-success',
+                                    'Hủy đơn': 'text-danger',
+                                    'Đã nhận hàng': 'text-success'
+                                } [order.order_status] || 'text-muted';
+                                const paymentStatusClass = {
+                                    'pending': 'text-warning',
+                                    'paid': 'text-success',
+                                    'failed': 'text-danger'
+                                } [order.payment_status] || 'text-muted';
+                                currentOrdersTbody.innerHTML += `
+    <tr>
+        <td><a href="javascript:void(0);" class="text-reset">${order.sku || 'N/A'}</a></td>
+        <td class="d-flex align-items-center">
+            <img src="/storage/${order.user_image || 'public/storage/default-avatar.jpg'}"
+                class="avatar avatar-sm rounded-2 me-3" />
+            <p class="mb-0 fw-medium">${order.user_name || 'N/A'}</p>
+        </td>
+        <td>${Number(order.total_amount || 0).toLocaleString('vi-VN')} ₫</td>
+        <td colspan="2">
+            <p class="mb-0 ${orderStatusClass}">${order.order_status || 'N/A'}</p>
+        </td>
+        <td colspan="2">
+            <p class="mb-0 ${paymentStatusClass}">${order.payment_status_translated || 'N/A'}</p>
+        </td>
+        <td>${order.created_at ? new Date(order.created_at).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit',
+            year: 'numeric' }) : 'N/A'}</td>
+        <td>
+            <a href="#"><i class="mdi mdi-pencil text-muted fs-18 rounded-2 border p-1 me-1"></i></a>
+            <a href="#"><i class="mdi mdi-delete text-muted fs-18 rounded-2 border p-1"></i></a>
+        </td>
+    </tr>`;
+                            });
+                        }
+                    } catch (error) {
+                        // Xóa loading
+                        document.querySelectorAll('.loading-spinner').forEach(spinner => spinner.remove());
+                        errorAlert.textContent = error.message || 'Không thể tải dữ liệu. Vui lòng thử lại.';
+                        errorAlert.classList.remove('d-none');
                     }
                 };
 
-                if (salesChart) salesChart.destroy();
-                salesChart = new ApexCharts(document.querySelector('#chart-money'), options);
-                salesChart.render();
-            };
-
-            // Hàm gọi API
-            const loadDashboardData = async () => {
-                const filter = document.querySelector('#filter').value;
-                const startDate = document.querySelector('#start_date').value;
-                const endDate = document.querySelector('#end_date').value;
-
-                // Hiển thị loading
-                const cardBodies = document.querySelectorAll('.card-body');
-                cardBodies.forEach(body => {
-                    body.insertAdjacentHTML('beforeend',
-                        '<div class="loading-spinner">Đang tải...</div>');
+                // Gọi API khi form submit
+                document.querySelector('#filter-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    loadDashboardData();
                 });
-                const errorAlert = document.querySelector('#error-alert');
-                errorAlert.classList.add('d-none');
 
-                try {
-                    const response = await fetch(
-                        `{{ route('admin.dashboard.data') }}?filter=${filter}&start_date=${startDate}&end_date=${endDate}`, {
-                            method: 'GET',
-                            headers: {
-                                'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest'
-                            }
-                        });
-
-                    const result = await response.json();
-
-                    // Xóa loading
-                    document.querySelectorAll('.loading-spinner').forEach(spinner => spinner.remove());
-
-                    if (!result.success) {
-                        errorAlert.textContent = result.message;
-                        errorAlert.classList.remove('d-none');
-                        return;
-                    }
-
-                    const data = result.data;
-
-                    // Cập nhật tổng số
-                    document.querySelector('#new-orders-total').textContent = data.new_orders?.total ?? 0;
-                    document.querySelector('#sales-total').textContent = data.sales?.total ?? 0;
-                    document.querySelector('#revenue-total').textContent = Number(data.revenue?.total ?? 0)
-                        .toLocaleString('vi-VN') + ' ₫';
-                    document.querySelector('#new-users-total').textContent = data.new_users?.total ?? 0;
-
-                    // Cập nhật thông báo dữ liệu trống
-                    document.querySelector('#new-orders-empty').classList.toggle('d-none', !data.new_orders
-                        ?.empty);
-                    document.querySelector('#sales-empty').classList.toggle('d-none', !data.sales?.empty);
-                    document.querySelector('#revenue-empty').classList.toggle('d-none', !data.revenue
-                        ?.empty);
-                    document.querySelector('#new-users-empty').classList.toggle('d-none', !data.new_users
-                        ?.empty);
-
-                    // Cập nhật biểu đồ Sales Report
-                    initSalesChart(data.labels ?? [], data.revenue?.data ?? []);
-
-                    // Cập nhật bảng Khách hàng tiềm năng
-                    const topCustomersTbody = document.querySelector('#top-customers');
-                    topCustomersTbody.innerHTML = '';
-                    if (!Array.isArray(data.top_customers) || data.top_customers.length === 0) {
-                        topCustomersTbody.innerHTML =
-                            '<tr><td colspan="3" class="text-center">Không có dữ liệu</td></tr>';
-                    } else {
-                        data.top_customers.forEach(customer => {
-                            topCustomersTbody.innerHTML += `
-                                <tr>
-                                    <td>${customer.name || 'N/A'}</td>
-                                    <td class="text-center">${customer.order_count || 0}</td>
-                                    <td>${Number(customer.total_spent || 0).toLocaleString('vi-VN')} ₫</td>
-                                </tr>`;
-                        });
-                    }
-
-                    // Cập nhật bảng Sản phẩm bán chạy
-                    const topSellingProducts = document.querySelector('#top-selling-products');
-                    topSellingProducts.innerHTML = '';
-                    if (!Array.isArray(data.top_selling_products) || data.top_selling_products.length ===
-                        0) {
-                        topSellingProducts.innerHTML =
-                            '<li class="list-group-item text-center">Không có dữ liệu</li>';
-                    } else {
-                        data.top_selling_products.forEach(product => {
-                            topSellingProducts.innerHTML += `
-                                <li class="list-group-item align-items-center d-flex justify-content-between">
-                                    <div class="product-list d-flex align-items-center">
-                                        <img class="avatar-md p-1 rounded-circle bg-primary-subtle img-fluid me-3"
-                                             src="/storage/${product.image || 'default.png'}" alt="product-image">
-                                        <div class="product-body align-self-center">
-                                            <h6 class="m-0 fw-semibold">${product.product_name || 'N/A'}</h6>
-                                            <p class="mb-0 mt-1 text-muted">${product.product_attribute || ''}</p>
-                                        </div>
-                                    </div>
-                                    <div class="product-price">
-                                        <h6 class="m-0 fw-semibold">${Number(product.product_price || 0).toLocaleString('vi-VN')} ₫</h6>
-                                        <p class="mb-0 mt-1 text-muted">${product.sold || 0} sản phẩm đã bán</p>
-                                    </div>
-                                </li>`;
-                        });
-                    }
-
-                    // Cập nhật bảng Sản phẩm đánh giá cao nhất
-                    const topRatedProducts = document.querySelector('#top-rated-products');
-                    topRatedProducts.innerHTML = '';
-                    if (!Array.isArray(data.top_rated_products) || data.top_rated_products.length === 0) {
-                        topRatedProducts.innerHTML =
-                            '<li class="list-group-item text-center">Không có dữ liệu</li>';
-                    } else {
-                        data.top_rated_products.forEach(product => {
-                            topRatedProducts.innerHTML += `
-                                <li class="list-group-item align-items-center d-flex justify-content-between">
-                                    <div class="product-list d-flex align-items-center">
-                                        <img class="avatar-md p-1 rounded-circle bg-primary-subtle img-fluid me-3"
-                                             src="/storage/${product.image || 'storage/default.png'}" alt="product-image">
-                                        <div class="product-body align-self-center">
-                                            <h6 class="m-0 fw-semibold">${product.product_name || 'N/A'}</h6>
-                                            <p class="mb-0 mt-1 text-muted">${product.attribute_name || ''}</p>
-                                        </div>
-                                    </div>
-                                    <div class="product-price">
-                                        <h6 class="m-0 fw-semibold">${Number(product.rating || 0).toFixed(1)} ⭐</h6>
-                                        <p class="mb-0 mt-1 text-muted">${product.review_count || 0} đánh giá</p>
-                                    </div>
-                                </li>`;
-                        });
-                    }
-
-                    // Cập nhật bảng Đơn hàng hiện tại
-                    const currentOrdersTbody = document.querySelector('#current-orders');
-                    currentOrdersTbody.innerHTML = '';
-                    if (!Array.isArray(data.current_orders) || data.current_orders.length === 0) {
-                        currentOrdersTbody.innerHTML =
-                            '<tr><td colspan="8" class="text-center">Không có dữ liệu</td></tr>';
-                    } else {
-                        data.current_orders.forEach(order => {
-                            const orderStatusClass = {
-                                'Chưa xác nhận': 'text-warning',
-                                'Xác nhận': 'text-info',
-                                'Đang vận chuyển': 'text-primary',
-                                'Giao hàng thành công': 'text-success',
-                                'Hủy đơn': 'text-danger',
-                                'Đã nhận hàng': 'text-success'
-                            } [order.order_status] || 'text-muted';
-                            const paymentStatusClass = {
-                                'pending': 'text-warning',
-                                'paid': 'text-success',
-                                'failed': 'text-danger'
-                            } [order.payment_status] || 'text-muted';
-                            currentOrdersTbody.innerHTML += `
-                                <tr>
-                                    <td><a href="javascript:void(0);" class="text-reset">${order.sku || 'N/A'}</a></td>
-                                    <td class="d-flex align-items-center">
-                                        <img src="/storage/${order.user_image || 'public/storage/default-avatar.jpg'}" class="avatar avatar-sm rounded-2 me-3" />
-                                        <p class="mb-0 fw-medium">${order.user_name || 'N/A'}</p>
-                                    </td>
-                                    <td>${Number(order.total_amount || 0).toLocaleString('vi-VN')} ₫</td>
-                                    <td colspan="2"><p class="mb-0 ${orderStatusClass}">${order.order_status || 'N/A'}</p></td>
-                                    <td colspan="2"><p class="mb-0 ${paymentStatusClass}">${order.payment_status_translated || 'N/A'}</p></td>
-                                    <td>${order.created_at ? new Date(order.created_at).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A'}</td>
-                                    <td>
-                                        <a href="#"><i class="mdi mdi-pencil text-muted fs-18 rounded-2 border p-1 me-1"></i></a>
-                                        <a href="#"><i class="mdi mdi-delete text-muted fs-18 rounded-2 border p-1"></i></a>
-                                    </td>
-                                </tr>`;
-                        });
-                    }
-                } catch (error) {
-                    // Xóa loading
-                    document.querySelectorAll('.loading-spinner').forEach(spinner => spinner.remove());
-                    errorAlert.textContent = error.message || 'Không thể tải dữ liệu. Vui lòng thử lại.';
-                    errorAlert.classList.remove('d-none');
-                }
-            };
-
-            // Gọi API khi form submit
-            document.querySelector('#filter-form').addEventListener('submit', (e) => {
-                e.preventDefault();
+                // Gọi API lần đầu
                 loadDashboardData();
             });
+        </script>
+    @endpush
 
-            // Gọi API lần đầu
-            loadDashboardData();
-        });
-    </script>
 
     <!-- CSS tùy chỉnh -->
     <style>
