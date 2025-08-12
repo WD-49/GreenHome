@@ -20,17 +20,11 @@ class ProductClientController extends Controller
 {
     public function show($slug)
     {
-        // Lấy sản phẩm kèm các quan hệ cần thiết
+        // Lấy sản phẩm kèm các quan hệ cần thiết (KHÔNG load comments ở đây nữa)
         $product = Product::with([
             'brand',
             'category',
             'productVariants.productVariantValues.attributeValue',
-
-            // Bình luận đã được duyệt
-            'comments' => function ($query) {
-                $query->where('status', 'hiển thị')->latest();
-            },
-            'comments.user',
         ])
             ->where('slug', $slug)
             ->firstOrFail();
@@ -58,10 +52,30 @@ class ProductClientController extends Controller
             ->unique()
             ->values();
 
-        $reviews = $product->reviews()->with('user')->get();
 
-        return view('client.pages.productDetail', compact('product', 'relatedProducts', 'attributes', 'reviews'));
+        // Review có phân trang (5 review mỗi trang)
+        $reviews = $product->reviews()
+            ->with('user')
+            ->where('reviews.status', 'approved')
+            ->latest()
+            ->paginate(5);
+
+        // Comment có phân trang (5 comment mỗi trang)
+        $comments = Comment::with('user')
+            ->where('product_id', $product->id)
+            ->where('status', 'hiển thị')
+            ->latest()
+            ->paginate(5);
+
+        return view('client.pages.productDetail', compact(
+            'product',
+            'relatedProducts',
+            'attributes',
+            'reviews',
+            'comments'
+        ));
     }
+
 
 
     public function submitComment(Request $request)
