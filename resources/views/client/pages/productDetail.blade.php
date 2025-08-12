@@ -220,6 +220,7 @@
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#review"
+
                                     type="button" role="tab">Đánh giá</button>
                             </li>
                             <li class="nav-item" role="presentation">
@@ -242,27 +243,38 @@
                                     <div class="post">
                                         @forelse ($reviews as $review)
                                             <div class="content {{ !$loop->first ? 'mt-30' : '' }}">
+                                                {{-- Avatar người dùng --}}
                                                 <img src="{{ asset('storage/' . ($review->user->avatar ?? 'default-avatar.jpg')) }}"
                                                     alt="review"
-                                                    onerror="if(!this.dataset.error) { this.dataset.error = true; this.src='{{ asset('images/default-avatar.jpg') }}'; }">
-                                                <div class="details">
-                                                    <span
-                                                        class="date">{{ \Carbon\Carbon::parse($review->created_at)->locale('vi')->isoFormat('D [tháng] M, YYYY') }}</span>
-                                                    <span class="name">{{ $review->user->name ?? 'Guest' }}</span>
-                                                    <span class="name">{{ $review->title ?? '' }}</span>
+                                                    onerror="if(!this.dataset.error) { this.dataset.error = true; this.src='{{ asset('images/default-avatar.jpg') }}'; }"
+                                                    style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
 
+                                                {{-- Thông tin đánh giá --}}
+                                                <div class="details">
+                                                    <span class="date">
+                                                        {{ \Carbon\Carbon::parse($review->created_at)->locale('vi')->isoFormat('D [tháng] M, YYYY') }}
+                                                    </span>
+                                                    <span class="name">{{ $review->user->name ?? 'Khách' }}</span>
+                                                    @if ($review->title)
+                                                        <div class="fw-bold mt-1">{{ $review->title }}</div>
+                                                    @endif
                                                 </div>
-                                                <div class="cr-t-review-rating">
+
+                                                {{-- Rating sao --}}
+                                                <div class="cr-t-review-rating mt-1">
                                                     @for ($i = 1; $i <= 5; $i++)
                                                         <i
                                                             class="ri-star-s-{{ $i <= $review->rating ? 'fill' : 'line' }}"></i>
                                                     @endfor
-
                                                 </div>
                                             </div>
-                                            <p>{{ $review->content }}</p>
+
+                                            {{-- Nội dung đánh giá --}}
+                                            <p class="mt-2">{{ $review->content }}</p>
+
+                                            {{-- Hình ảnh trong review --}}
                                             @if ($review->images && $review->images->count())
-                                                <div class="review-images mt-2">
+                                                <div class="review-images mt-2 d-flex flex-wrap">
                                                     @foreach ($review->images as $image)
                                                         <img src="{{ asset('storage/' . $image->image) }}"
                                                             alt="Review Image"
@@ -273,36 +285,56 @@
                                                 </div>
                                             @endif
                                         @empty
-                                            <div class="no-reviews">
+                                            <div class="no-reviews mt-4">
                                                 <p>Chưa có đánh giá nào cho sản phẩm này.</p>
                                             </div>
                                         @endforelse
 
+                                        {{-- Phân trang --}}
+                                        <div class="mt-4 d-flex justify-content-end">
+                                            {{ $reviews->appends(['tab' => 'review'])->links() }}
+
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
                             <!-- Comment -->
                             <div class="tab-pane fade" id="comment" role="tabpanel">
                                 <div class="cr-tab-content-from">
                                     <div class="post">
-                                        @php $comments = $product->comments->whereNull('rating'); @endphp
+
                                         @forelse ($comments as $comment)
                                             <div class="content {{ !$loop->first ? 'mt-30' : '' }}">
+                                                {{-- Avatar người dùng --}}
                                                 <img src="{{ asset('storage/' . ($comment->user->avatar ?? 'default-avatar.jpg')) }}"
-                                                    alt="comment">
+                                                    alt="comment"
+                                                    onerror="if(!this.dataset.error) { this.dataset.error = true; this.src='{{ asset('images/default-avatar.jpg') }}'; }"
+                                                    style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+
                                                 <div class="details">
-                                                    <span
-                                                        class="date">{{ \Carbon\Carbon::parse($comment->created_at)->locale('vi')->isoFormat('D [tháng] M, YYYY') }}</span>
-                                                    <span class="name">{{ $comment->user->name ?? 'Guest' }}</span>
+                                                    <span class="date">
+                                                        {{ \Carbon\Carbon::parse($comment->created_at)->locale('vi')->isoFormat('D [tháng] M, YYYY') }}
+                                                    </span>
+                                                    <span class="name">{{ $comment->user->name ?? 'Khách' }}</span>
                                                 </div>
                                             </div>
-                                            <p>{{ $comment->content }}</p>
+
+                                            <p class="mt-2">{{ $comment->content }}</p>
                                         @empty
                                             <p>Chưa có bình luận nào.</p>
                                         @endforelse
 
+                                        {{-- PHÂN TRANG --}}
+                                        <div class="mt-4 d-flex justify-content-end">
+                                            {{ $comments->appends(['tab' => 'comment'])->links() }}
+
+                                        </div>
                                     </div>
+
+                                    {{-- Form thêm bình luận --}}
                                     <h4 class="heading">Thêm bình luận</h4>
+
                                     @if (session('success'))
                                         <div class="alert alert-success">
                                             {{ session('success') }}
@@ -338,6 +370,7 @@
                                     </form>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -397,6 +430,28 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const tab = urlParams.get('tab');
+
+                if (tab) {
+                    // Tìm nút tab tương ứng
+                    const tabTrigger = document.querySelector(`#${tab}-tab`);
+                    if (tabTrigger) {
+                        new bootstrap.Tab(tabTrigger).show();
+                    }
+                }
+
+                // Khi người dùng đổi tab, cập nhật URL để giữ tab khi load lại
+                const tabButtons = document.querySelectorAll('[data-bs-toggle="tab"]');
+                tabButtons.forEach(button => {
+                    button.addEventListener('shown.bs.tab', function(event) {
+                        const newTab = event.target.id.replace('-tab', '');
+                        const url = new URL(window.location);
+                        url.searchParams.set('tab', newTab);
+                        window.history.replaceState(null, '', url);
+                    });
+                });
 
                 document.querySelectorAll('.variant-option').forEach(function(li) {
                     li.addEventListener('click', function() {
