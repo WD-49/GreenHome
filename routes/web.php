@@ -51,6 +51,7 @@ use App\Http\Controllers\admin\Product\ProductVariantController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\client\BlogController as ClientBlogController;
 use App\Http\Controllers\Client\DiscountController as ClientDiscountController;
+use App\Http\Controllers\client\ContactController;
 
 Route::get('/test-log', function () {
     Log::debug('Testing logging functionality');
@@ -76,6 +77,10 @@ Route::get('/auth/facebook/callback', [SocialiteController::class, 'handleFacebo
 Route::get('/category/{id}', [HomeController::class, 'category'])->name('shop.category');
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/category-id/{id}', [ProductController::class, 'getProductsByCategoryId']);
+
+
+Route::get('/contact', [ContactController::class, 'index'])->name('contact.index');
+Route::post('/contact', [ContactController::class, 'sendMail'])->name('contact.send');
 
 //wishlist 
 Route::middleware('auth')->prefix('wishlist')->group(function () {
