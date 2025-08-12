@@ -4,4 +4,4 @@
 <p><strong>Số điện thoại:</strong> {{ $phone }}</p>
 <p><strong>Nội dung:</strong></p>
 <p>{{ $body }}</p>
-<p><strong>Note:Trả lời email người dùng cung cấp</strong></p>
+<p><strong>Note:Trả lời email người dùng cung cấp : {{ $email }}</strong></p>

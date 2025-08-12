@@ -3,7 +3,7 @@
 @section('title', 'Liên hệ')
 
 @section('content')
-<section class="section-breadcrumb">
+    <section class="section-breadcrumb">
         <div class="cr-breadcrumb-image">
             <div class="container">
                 <div class="row">
@@ -95,26 +95,88 @@
 
                 </div>
                 <div class="col-md-6 col-12 mb-24" data-aos="fade-up" data-aos-duration="2000" data-aos-delay="800">
-                    <form class="cr-content-form" method="POST" action="{{ route('contact.send') }}">
+                    <form class="cr-content-form" id="contactForm" method="POST" action="{{ route('contact.send') }}">
                         @csrf
                         <div class="form-group">
-                            <input type="text" name="name" placeholder="Họ và Tên" class="cr-form-control" required>
+                            <input type="text" name="name" placeholder="Họ và Tên" class="cr-form-control">
+                            <small class="error text-danger" id="error-name"></small>
                         </div>
                         <div class="form-group">
-                            <input type="email" name="email" placeholder="Email" class="cr-form-control" required>
+                            <input type="email" name="email" placeholder="Email" class="cr-form-control">
+                            <small class="error text-danger" id="error-email"></small>
                         </div>
                         <div class="form-group">
                             <input type="text" name="phone" placeholder="Số Điện Thoại" class="cr-form-control">
+                            <small class="error text-danger" id="error-phone"></small>
                         </div>
                         <div class="form-group">
-                            <textarea name="message" class="cr-form-control" rows="4" placeholder="Nội dung" required></textarea>
+                            <textarea name="message" class="cr-form-control" rows="4" placeholder="Nội dung"></textarea>
+                            <small class="error text-danger" id="error-message"></small>
                         </div>
                         <button type="submit" class="cr-button">Gửi</button>
                     </form>
+
                     @if (session('success'))
                         <p style="color:green;">{{ session('success') }}</p>
                     @endif
 
+                    <script>
+                        document.getElementById('contactForm').addEventListener('submit', function(e) {
+                            e.preventDefault();
+
+                            // Xóa lỗi cũ
+                            document.querySelectorAll('.error').forEach(el => el.textContent = '');
+
+                            let isValid = true;
+
+                            // Lấy giá trị
+                            let name = document.querySelector('[name="name"]').value.trim();
+                            let email = document.querySelector('[name="email"]').value.trim();
+                            let phone = document.querySelector('[name="phone"]').value.trim();
+                            let message = document.querySelector('[name="message"]').value.trim();
+
+                            // Validate Họ và tên
+                            if (name === '') {
+                                document.getElementById('error-name').textContent = 'Vui lòng nhập họ và tên';
+                                isValid = false;
+                            } else if (name.length < 3) {
+                                document.getElementById('error-name').textContent = 'Họ và tên phải ít nhất 3 ký tự';
+                                isValid = false;
+                            }
+
+                            // Validate Email
+                            let emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                            if (email === '') {
+                                document.getElementById('error-email').textContent = 'Vui lòng nhập email';
+                                isValid = false;
+                            } else if (!emailPattern.test(email)) {
+                                document.getElementById('error-email').textContent = 'Email không hợp lệ';
+                                isValid = false;
+                            }
+
+                            // Validate Số điện thoại (bắt buộc nhập)
+                            if (phone === '') {
+                                document.getElementById('error-phone').textContent = 'Vui lòng nhập số điện thoại';
+                                isValid = false;
+                            } else {
+                                let phonePattern = /^(0|\+84)\d{9,10}$/;
+                                if (!phonePattern.test(phone)) {
+                                    document.getElementById('error-phone').textContent = 'Số điện thoại không hợp lệ';
+                                    isValid = false;
+                                }
+                            }
+                            // Validate Nội dung
+                            if (message === '') {
+                                document.getElementById('error-message').textContent = 'Vui lòng nhập nội dung';
+                                isValid = false;
+                            }
+
+                            // Nếu hợp lệ thì submit
+                            if (isValid) {
+                                this.submit();
+                            }
+                        });
+                    </script>
                 </div>
             </div>
         </div>
