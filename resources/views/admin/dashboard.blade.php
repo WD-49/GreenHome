@@ -14,7 +14,7 @@
     <div class="container-xxl">
         <div class="py-3 d-flex align-items-sm-center flex-sm-row flex-column">
             <div class="flex-grow-1">
-                <h4 class="fs-18 fw-semibold m-0">Thống kê </h4>
+                <h4 class="fs-18 fw-semibold m-0">Ecommerce</h4>
             </div>
         </div>
 
@@ -214,7 +214,7 @@
                                         <th colspan="2">Trạng thái đơn hàng</th>
                                         <th colspan="2">Trạng thái thanh toán</th>
                                         <th>Ngày đặt</th>
-                                        <th>Cập nhật</th>
+                                        <th>Chi tiết</th>
                                     </tr>
                                 </thead>
                                 <tbody id="current-orders"></tbody>
@@ -277,7 +277,7 @@
                     }
 
                     // Tính toán chiều rộng biểu đồ dựa trên số lượng nhãn
-                    const chartWidth = filter === 'day' ? Math.max(100, labels.length * 10) + '%' : '100%';
+                    const chartWidth = filter === 'day' ? Math.max(100, labels.length * 50) + '%' : '100%';
 
                     const options = {
                         series: [{
@@ -582,8 +582,9 @@
         <td>${order.created_at ? new Date(order.created_at).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit',
             year: 'numeric' }) : 'N/A'}</td>
         <td>
-            <a href="#"><i class="mdi mdi-pencil text-muted fs-18 rounded-2 border p-1 me-1"></i></a>
-            <a href="#"><i class="mdi mdi-delete text-muted fs-18 rounded-2 border p-1"></i></a>
+            <a href="/admin/orders/show/${order.id}" class="text-primary">
+                <i class="mdi mdi-eye fs-18 rounded-2 border p-1"></i>
+            </a>
         </td>
     </tr>`;
                             });
@@ -607,7 +608,6 @@
             });
         </script>
     @endpush
-
 
     <!-- CSS tùy chỉnh -->
     <style>
@@ -669,6 +669,15 @@
         .list-group-item {
             border: none;
             padding: 0.75rem 1.25rem;
+        }
+
+        .mdi-eye {
+            color: #6366f1;
+            transition: color 0.2s;
+        }
+
+        .mdi-eye:hover {
+            color: #3b3f99;
         }
     </style>
 @endsection

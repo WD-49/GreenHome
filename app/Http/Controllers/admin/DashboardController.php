@@ -150,6 +150,7 @@ class DashboardController extends Controller
 
                 // Current Orders
                 $currentOrders = Order::select(
+                    'orders.id',
                     'orders.sku',
                     'users.name as user_name',
                     DB::raw("COALESCE(user_profiles.user_image, '/images/default-avatar.png') as user_image"),
