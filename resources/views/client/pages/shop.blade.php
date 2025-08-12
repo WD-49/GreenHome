@@ -275,6 +275,11 @@
                                                             <i class="ri-heart-line"></i>
                                                         @endif
                                                     </a>
+                                                    <a class="model-oraganic-product" data-bs-toggle="modal"
+                                                        href="#quickview" role="button"
+                                                        data-product-id="{{ $product->id }}">
+                                                        <i class="ri-eye-line"></i>
+                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
