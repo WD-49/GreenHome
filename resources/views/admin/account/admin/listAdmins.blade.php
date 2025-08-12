@@ -72,7 +72,7 @@
                             <tbody>
                                 @foreach ($admins as $item => $user)
                                     <tr>
-                                        <td>{{ $admins->firstItem() + $item }}</td>
+                                        <td>{{ $item + 1 }}</td>
                                         <td>{{ $user->name }}</td>
                                         <td>{{ $user->email }}</td>
                                         <td>{{-- Giả sử người dùng thông thường có role 'user' --}}
@@ -133,7 +133,6 @@
 @push('scripts')
     <!-- Vendor -->
     <script src="../../assets/libs/jquery/jquery.min.js"></script>
-    <script src="../../assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="../../assets/libs/simplebar/simplebar.min.js"></script>
     <script src="../../assets/libs/node-waves/waves.min.js"></script>
     <script src="../../assets/libs/waypoints/lib/jquery.waypoints.min.js"></script>
@@ -171,8 +170,6 @@
     <!-- Datatable Demo App Js -->
     <script src="../../assets/js/pages/datatable.init.js"></script>
 
-    <!-- App js-->
-    <script src="../../assets/js/app.js"></script>
 
     <script>
         $(document).ready(function() {

@@ -78,9 +78,9 @@
                                 <th>Người nhận</th>
                                 <th>Tổng tiền</th>
                                 <th>Ngày đặt</th>
+                                <th>Phương thức thanh toán</th>
                                 <th>Trạng thái đơn</th>
                                 <th>Thanh toán</th>
-                                <th></th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -93,6 +93,7 @@
 
                                     <td>{{ number_format($order->total_amount, 0, ',', '.') }} đ</td>
                                     <td>{{ $order->created_at->format('H:i d/m/Y') }}</td>
+                                    <td>{{ $order->payment_method_name }}</td>
                                     <td>
                                         @php
                                             $statusClassMap = [
@@ -100,6 +101,7 @@
                                                 'Xác nhận' => 'primary',
                                                 'Đang vận chuyển' => 'info',
                                                 'Giao hàng thành công' => 'success',
+                                                'Đã nhận hàng' => 'success',
                                                 'Đã hủy' => 'danger',
                                             ];
 
@@ -139,6 +141,16 @@
                                                         <i class="ri-eye-line me-1"></i> Xem chi tiết
                                                     </a>
                                                 </li>
+
+                                                @if ($order->canBePay())
+                                                    <li>
+                                                        <a class="dropdown-item"
+                                                            href="{{ route('orders.payAgain', $order) }}">
+                                                            <i class="ri-refresh-line me-1"></i> Thanh toán lại
+                                                        </a>
+                                                    </li>
+                                                @endif
+
                                                 @if ($order->canBeCancel())
                                                     <li>
                                                         <a class="dropdown-item text-danger" data-bs-toggle="collapse"

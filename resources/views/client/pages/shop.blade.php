@@ -64,8 +64,8 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="cr-breadcrumb-title">
-                            <h2>Shop</h2>
-                            <span><a href="{{ route('home') }}">Home</a> - Shop</span>
+                            <h2>Cửa Hàng</h2>
+                            <span><a href="{{ route('home') }}">Trang Chủ</a> - Cửa Hàng</span>
                         </div>
                     </div>
                 </div>

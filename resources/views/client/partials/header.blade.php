@@ -275,13 +275,17 @@
                             <a class="nav-link" href="{{ route('shop.index') }}">
                                 Cửa Hàng
                             </a>
-
-
                         </li>
 
                         <li class="nav-item ">
                             <a class="nav-link" href="{{ route('blog.index') }}">
                                 Bài viết
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('contact.index') }}">
+                                Liên Hệ
                             </a>
                         </li>
 

@@ -10,39 +10,13 @@ use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 class DiscountController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    //    public function index(Request $request)
-    // {
-    //     // Lấy 20 bản ghi mỗi trang, sắp xếp theo 'id' giảm dần (có thể thay bằng trường khác nếu cần)
-    //     // $discounts = Discount::orderBy('id', 'desc')->paginate(20);
-    //         $query = Discount::query();
-
-    //     if ($request->filled('keyword')) {
-    //         $keyword = $request->keyword;
-    //         $query->where(function ($q) use ($keyword) {
-    //             $q->where('title', 'like', '%' . $keyword . '%')
-    //               ->orWhere('code', 'like', '%' . $keyword . '%');
-    //         });
-    //     }
-
-    //     $discounts = $query->orderBy('id', 'desc')->paginate(20);
-    // $notFound = $discounts->isEmpty(); 
-    //     return view('admin.discount', [
-
-
-
-    //         'title' => 'Discounts',
-    //         'discounts' => $discounts,
-    //         'notFound' => $notFound,
-    //     ]);
-    // }
+   
     public function index(Request $request)
     {
         $query = Discount::query();
@@ -103,24 +77,14 @@ class DiscountController extends Controller
         //     'title' => 'Create Discount',
         // ]);
         // $products = Product::whereNull('deleted_at')->get();
-$products = Product::with(['productVariants'])->get();
+        $products = Product::with(['productVariants'])->get();
 
 
         return view('admin.discount.create', compact('products'));
     }
 
     /**
-     * Store a newly created resource in storage.
-     */
-    //     public function store(Request $request )
-    // {
-    //     $data = $request->all();
-
-    //     $discount = Discount::query()->create($data);
-    //     session()->flash('test', 'This is a test message');
-    //     return redirect()->route('admin.discount.index')
-    //                      ->with('success', 'Mã giảm giá đã được tạo thành công');
-    // }
+   
 
 
 
@@ -137,12 +101,24 @@ $products = Product::with(['productVariants'])->get();
             'description' => 'required|string|max:1000',
             'code' => 'required|string|max:255|unique:discounts,code',
             'discount_type' => 'required|in:percentage,fixed',
-            'discount_value' => 'required|numeric|min:1',
+            'discount_value' => [
+                'required',
+                'numeric',
+                'min:1',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->discount_type === 'percentage' && $value > 100) {
+                        $fail('Giá trị giảm theo % không được vượt quá 100%.');
+                    }
+                },
+            ],
+
+            'discount_type' => ['required', 'in:fixed,percentage'],
+
             'max_discount' => 'required|numeric|min:0',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'min_order_value' => 'required|numeric|min:0',
-            'max_order_value' => 'required|numeric|min:0|gt:min_order_value',
+
             'quantity' => 'required|integer|min:1',
             'user_usage_limit' => 'required|integer|min:1',
             'applies_to_all_products' => 'required|boolean',
@@ -167,6 +143,11 @@ $products = Product::with(['productVariants'])->get();
             'discount_value.required' => 'Vui lòng nhập giá trị giảm.',
             'discount_value.numeric' => 'Giá trị giảm phải là số.',
             'discount_value.min' => 'Giá trị giảm phải lớn hơn hoặc bằng 1.',
+            'discount_value.required' => 'Vui lòng nhập giá trị giảm.',
+            'discount_value.numeric' => 'Giá trị giảm phải là một số.',
+            'discount_value.min' => 'Giá trị giảm tối thiểu là 1.',
+            'discount_type.required' => 'Vui lòng chọn loại giảm.',
+            'discount_type.in' => 'Loại giảm không hợp lệ.',
 
             'max_discount.required' => 'Vui lòng nhập giá trị giảm tối đa.',
             'max_discount.numeric' => 'Giá trị giảm tối đa phải là số.',
@@ -183,10 +164,7 @@ $products = Product::with(['productVariants'])->get();
             'min_order_value.numeric' => 'Giá trị đơn hàng tối thiểu phải là số.',
             'min_order_value.min' => 'Giá trị đơn hàng tối thiểu không được nhỏ hơn 0.',
 
-            'max_order_value.required' => 'Vui lòng nhập giá trị đơn hàng tối đa.',
-            'max_order_value.numeric' => 'Giá trị đơn hàng tối đa phải là số.',
-            'max_order_value.min' => 'Giá trị đơn hàng tối đa không được nhỏ hơn 0.',
-            'max_order_value.gt' => 'Giá trị đơn hàng tối đa phải lớn hơn giá trị đơn hàng tối thiểu.',
+
 
             'quantity.required' => 'Vui lòng nhập số lượng mã.',
             'quantity.integer' => 'Số lượng phải là số nguyên.',
@@ -277,12 +255,22 @@ $products = Product::with(['productVariants'])->get();
             'description' => 'required|string|max:1000',
             'code' => 'required|string|max:255|unique:discounts,code,' . $id,
             'discount_type' => 'required|in:percentage,fixed',
-            'discount_value' => 'required|numeric|min:1',
+            'discount_value' => [
+                'required',
+                'numeric',
+                'min:1',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->discount_type === 'percentage' && $value > 100) {
+                        $fail('Giá trị giảm theo % không được vượt quá 100%.');
+                    }
+                },
+            ],
+            'discount_type' => ['required', 'in:fixed,percentage'],
+
             'max_discount' => 'required|numeric|min:0',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'min_order_value' => 'required|numeric|min:0',
-            'max_order_value' => 'required|numeric|min:0|gt:min_order_value',
             'quantity' => 'required|integer|min:1',
             'user_usage_limit' => 'required|integer|min:1',
             'applies_to_all_products' => 'required|boolean',
@@ -305,6 +293,11 @@ $products = Product::with(['productVariants'])->get();
             'discount_value.required' => 'Vui lòng nhập giá trị giảm.',
             'discount_value.numeric' => 'Giá trị giảm phải là số.',
             'discount_value.min' => 'Giá trị giảm phải lớn hơn hoặc bằng 1.',
+            'discount_value.required' => 'Vui lòng nhập giá trị giảm.',
+            'discount_value.numeric' => 'Giá trị giảm phải là một số.',
+            'discount_value.min' => 'Giá trị giảm tối thiểu là 1.',
+            'discount_type.required' => 'Vui lòng chọn loại giảm.',
+            'discount_type.in' => 'Loại giảm không hợp lệ.',
 
             'max_discount.required' => 'Vui lòng nhập giá trị giảm tối đa.',
             'max_discount.numeric' => 'Giá trị giảm tối đa phải là số.',
@@ -317,9 +310,7 @@ $products = Product::with(['productVariants'])->get();
             'end_date.date' => 'Ngày kết thúc không hợp lệ.',
             'end_date.after' => 'Ngày kết thúc phải sau ngày bắt đầu.',
 
-            'max_order_value.required' => 'Vui lòng nhập giá trị đơn hàng tối đa.',
-            'max_order_value.numeric' => 'Giá trị đơn hàng tối đa phải là số.',
-            'max_order_value.min' => 'Giá trị đơn hàng tối đa không được nhỏ hơn 0.',
+         
 
             'min_order_value.required' => 'Vui lòng nhập giá trị đơn hàng tối thiểu.',
             'min_order_value.numeric' => 'Giá trị đơn hàng tối thiểu phải là số.',
@@ -446,29 +437,16 @@ $products = Product::with(['productVariants'])->get();
         $usage = DiscountUsage::with(['discount', 'user', 'product', 'order'])->findOrFail($id);
         return view('admin.discount.history_detail', compact('usage'));
     }
-public function ajaxFilter(Request $request, $code)
-{
-    $voucher = Discount::where('code', $code)->firstOrFail();
 
-    $products = Product::query()
-        ->when($voucher->applies_to_all_products, function ($query) {
-            $query->withoutTrashed();
-        }, function ($query) use ($voucher) {
-            $query->whereHas('discounts', function ($q) use ($voucher) {
-                $q->where('discounts.id', $voucher->id);
-            });
-        });
+    public function checkCode(Request $request)
+    {
+        $code = $request->query('code'); // Lấy mã từ query string
+        $exists = DB::table('discounts')->where('code', $code)->exists();
 
-    if ($request->filled('search')) {
-        $products->where('name', 'like', '%' . $request->search . '%');
+        return response()->json(['exists' => $exists]);
     }
 
-    $products = $products->with(['brand', 'productVariants'])->paginate(12);
-
-    // Trả về 1 partial view HTML (chỉ phần danh sách sản phẩm)
-    return view('client.pages.components.product_list', compact('products'))->render();
 }
 
 
-}
 

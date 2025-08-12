@@ -25,17 +25,17 @@ class OrderController extends Controller
      * Lấy danh sách các trạng thái đơn hàng ENUM (có thể dùng chung).
      * @return array
      */
-    protected function getOrderEnumStatuses(): array
+    protected function getOrderEnumStatuses()
     {
         // Các giá trị này PHẢI khớp với định nghĩa enum trong bảng cơ sở dữ liệu của bạn cho 'order_status'
-        return ['Chưa xác nhận', 'Xác nhận', 'Đang vận chuyển', 'Giao hàng thành công', 'Hủy đơn'];
+        return ['Chưa xác nhận', 'Xác nhận', 'Đang vận chuyển', 'Giao hàng thành công', 'Hủy đơn', 'Đã nhận hàng'];
     }
 
     /**
      * Lấy danh sách các trạng thái thanh toán ENUM (có thể dùng chung).
      * @return array
      */
-    protected function getPaymentEnumStatuses(): array
+    protected function getPaymentEnumStatuses()
     {
         // Các giá trị này PHẢI khớp với định nghĩa enum trong bảng cơ sở dữ liệu của bạn cho 'payment_status'
         return ['pending', 'paid', 'failed'];
@@ -46,7 +46,7 @@ class OrderController extends Controller
      * @param string|null $status
      * @return string
      */
-    protected function mapPaymentStatusToVietnamese(?string $status): string
+    protected function mapPaymentStatusToVietnamese(?string $status)
     {
         return [
             'pending' => 'Chờ thanh toán',
@@ -103,14 +103,22 @@ class OrderController extends Controller
             $query->where('payment_method_id', $request->payment_method);
         }
 
+        // Đếm số lượng đơn hàng chưa xác nhận hôm nay
+        $unconfirmedTodayCount = Order::where('order_status', 'Chưa xác nhận')
+            ->whereDate('created_at', now())
+            ->count();
+
         // Lấy kết quả phân trang, bao gồm cả những đơn hàng đã xóa mềm (nếu cần hiển thị)
-        $orders = $query->withTrashed()->paginate(20)->withQueryString();
+        // $orders = $query->withTrashed()->paginate(20)->withQueryString();
+        $orders = $query->withTrashed()->get();
+
+        // dd($orders);
 
         $orderStatuses = $this->getOrderEnumStatuses();
         $paymentMethods = PaymentMethod::all();
         $paymentStatuses = $this->getPaymentEnumStatuses();
 
-        return view('admin.orders.index', compact('orders', 'orderStatuses', 'paymentMethods', 'paymentStatuses'));
+        return view('admin.orders.index', compact('orders', 'orderStatuses', 'paymentMethods', 'paymentStatuses', 'unconfirmedTodayCount'));
     }
 
     public function show($id)
@@ -164,7 +172,7 @@ class OrderController extends Controller
         $currentStatusIndex = array_search($oldOrderStatus, $orderStatusesEnum);
         $newStatusIndex = array_search($newOrderStatus, $orderStatusesEnum);
 
-        $progressingStatuses = ['Chưa xác nhận', 'Xác nhận', 'Đang vận chuyển', 'Giao hàng thành công'];
+        $progressingStatuses = ['Chưa xác nhận', 'Xác nhận', 'Đang vận chuyển', 'Giao hàng thành công', 'Đã nhận hàng'];
 
         if (in_array($newOrderStatus, $progressingStatuses) && $newStatusIndex < $currentStatusIndex) {
             $validator->after(function ($validator) use ($oldOrderStatus, $newOrderStatus) {

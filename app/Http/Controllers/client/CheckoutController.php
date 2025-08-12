@@ -16,6 +16,7 @@ use App\Models\DiscountUsage;
 use App\Models\PaymentMethod;
 use App\Mail\OrderInvoiceMail;
 use App\Models\ProductVariant;
+use App\Jobs\CancelVnpayOrderJob;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
@@ -261,11 +262,14 @@ class CheckoutController extends Controller
                 $discountApplied->decrement('quantity');
             }
             $order->load(['items', 'user']);
+            log::info('user: ' . $user);
             Mail::to($user->email)->queue(new OrderInvoiceMail($order, $user));
+
 
             DB::commit();
             log::info('payment method: ' . $paymentMethod->name);
             if (strtoupper($paymentMethod->name) === 'VNPAY') {
+                CancelVnpayOrderJob::dispatch($order->id)->delay(now()->addHours(24));
                 $redirectUrl = app(PaymentController::class)->createPaymentUrl($order);
                 return response()->json([
                     'success' => true,
@@ -361,7 +365,6 @@ class CheckoutController extends Controller
 
     public function submitReview(Request $request)
     {
-        // 
         $data = $request->validate([
             'order_item_id' => 'required|exists:order_items,id',
             'title' => 'required|string|max:255',
@@ -371,24 +374,55 @@ class CheckoutController extends Controller
         ]);
 
         $orderItem = OrderItem::findOrFail($data['order_item_id']);
-        $productVariant = ProductVariant::where('sku', $orderItem->product_variant_sku)->firstOrFail();
 
-        $review = Review::create([
-            'order_item_id' => $data['order_item_id'],
-            'product_variant_id' => $productVariant->id,
-            'user_id' => auth()->id(),
-            'title' => $data['title'],
-            'rating' => $data['rating'],
-            'content' => $data['content'],
-        ]);
+        $productVariant = ProductVariant::where('sku', $orderItem->product_variant_sku)->first();
 
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $image = $image->store('reviews', 'public');
-                $review->images()->create(['image' => $image]);
-            }
+        if (!$productVariant) {
+            return redirect()->back()->with('error', 'Sản phẩm không tồn tại hoặc đã bị xóa khỏi hệ thống.');
         }
 
-        return redirect()->back()->with('success', 'Đánh giá đã được gửi thành công.');
+        DB::beginTransaction();
+
+        try {
+            $review = Review::create([
+                'order_item_id' => $data['order_item_id'],
+                'product_variant_id' => $productVariant->id,
+                'user_id' => auth()->id(),
+                'title' => $data['title'],
+                'rating' => $data['rating'],
+                'content' => $data['content'],
+            ]);
+
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $imagePath = $image->store('reviews', 'public');
+                    $review->images()->create(['image' => $imagePath]);
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Đánh giá đã được gửi thành công.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Log lỗi nếu cần thiết
+            Log::error('Error when submitting review: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại.');
+        }
+    }
+
+    public function confirmReceived(Order $order)
+    {
+        if ($order->order_status !== 'Giao hàng thành công') {
+            return back()->with('error', 'Đơn hàng này chưa thể xác nhận.');
+        }
+
+        $order->update([
+            'order_status' => 'Đã nhận hàng'
+        ]);
+
+        return back()->with('success', 'Xác nhận đã nhận hàng thành công.');
     }
 }
