@@ -7,8 +7,8 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="cr-breadcrumb-title">
-                            <h2>Checkout</h2>
-                            <span> <a href="index.html">Home</a> - Checkout</span>
+                            <h2>Thanh toán</h2>
+                            <span> <a href="index.html">Trang trủ</a> - Thanh toán</span>
                         </div>
                     </div>
                 </div>
@@ -58,12 +58,11 @@
                         <!-- Sidebar Payment Block -->
                         <div class="cr-sidebar-block">
                             <div class="cr-sb-title">
-                                <h3 class="cr-sidebar-title">Payment Method</h3>
+                                <h3 class="cr-sidebar-title">Phương thức thanh toán</h3>
                             </div>
                             <div class="cr-sb-block-content">
                                 <div class="cr-checkout-pay">
-                                    <div class="cr-pay-desc">Please select the preferred payment method to use on this
-                                        order.</div>
+                                    <div class="cr-pay-desc">Vui lòng chọn phương thức thanh toán</div>
                                     <form action="#" class="payment-options" id="payment-options">
 
                                     </form>
@@ -81,7 +80,7 @@
 
                             <div class="cr-checkout-wrap">
                                 <div class="cr-checkout-block cr-check-bill">
-                                    <h3 class="cr-checkout-title">Billing Details</h3>
+                                    <h3 class="cr-checkout-title">Thông tin đơn hàng</h3>
                                     <div class="cr-bl-block-content">
                                         <div class="cr-check-bill-form mb-minus-24">
                                             <form action="#" method="post">

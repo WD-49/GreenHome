@@ -18,7 +18,7 @@
             {{ session('warning') }}
         </div>
     @endif
-   
+
 
     <!-- Breadcrumb -->
     <section class="section-breadcrumb">
@@ -53,7 +53,8 @@
                 <div class="col-12">
                     <div class="cr-register" data-aos="fade-up" data-aos-duration="2000" data-aos-delay="400">
                         <div class="form-logo">
-                            <img src="{{ asset('assets_client/assets/img/logo/logo.png') }}" alt="">
+                            <img width="50%" src="{{ asset('assets_client/assets/img/logo/GreenHome_logo.png') }}"
+                                alt="">
                         </div>
                         <form class="cr-content-form" method="POST" action="{{ route('register') }}">
                             @csrf
@@ -63,7 +64,7 @@
                                         <label>Họ và tên*</label>
                                         <input id="name" type="text" placeholder="Enter Your First Name"
                                             class="cr-form-control @error('name') is-invalid @enderror" name="name"
-                                            value="{{ old('name') }}"  autocomplete="name" autofocus>
+                                            value="{{ old('name') }}" autocomplete="name" autofocus>
                                         @error('name')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -77,7 +78,7 @@
                                         <label>Email*</label>
                                         <input id="email" type="email" placeholder="Enter Your email"
                                             class="cr-form-control @error('email') is-invalid @enderror" name="email"
-                                            value="{{ old('email') }}"  autocomplete="email">
+                                            value="{{ old('email') }}" autocomplete="email">
                                         @error('email')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -88,20 +89,23 @@
                                 <div class="col-12 col-sm-12">
                                     <div class="form-group">
                                         <label>Mật khẩu*</label>
-                                        <input id="password" type="password" placeholder="Nhập nhập mật khẩu" class="cr-form-control @error('password') is-invalid @enderror" name="password"
-                                             autocomplete="new-password">
-                                            @error('password')
+                                        <input id="password" type="password" placeholder="Nhập nhập mật khẩu"
+                                            class="cr-form-control @error('password') is-invalid @enderror" name="password"
+                                            autocomplete="new-password">
+                                        @error('password')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
                                             </span>
                                         @enderror
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-12 col-sm-12">
                                     <div class="form-group">
                                         <label>Xác nhận mật khẩu*</label>
-                                        <input id="password-confirm" type="password" placeholder="Nhập lại mật khẩu" class="cr-form-control" name="password_confirmation"  autocomplete="new-password">
+                                        <input id="password-confirm" type="password" placeholder="Nhập lại mật khẩu"
+                                            class="cr-form-control" name="password_confirmation"
+                                            autocomplete="new-password">
                                     </div>
                                 </div>
                                 <div class="cr-register-buttons">

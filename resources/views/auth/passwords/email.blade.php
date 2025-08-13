@@ -37,7 +37,8 @@
                 <div class="col-12">
                     <div class="cr-login" data-aos="fade-up" data-aos-duration="2000" data-aos-delay="400">
                         <div class="form-logo">
-                            <img src="{{ asset('assets_client/assets/img/logo/logo.png') }}" alt="logo">
+                            <img width="50%" src="{{ asset('assets_client/assets/img/logo/GreenHome_logo.png') }}"
+                                alt="">
                         </div>
                         @if (session('status'))
                             <div class="alert alert-success" role="alert">
