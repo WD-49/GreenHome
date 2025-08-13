@@ -9,12 +9,12 @@ class Authenticate extends Middleware
     protected function redirectTo($request): ?string
     {
         if (!$request->expectsJson()) {
-            if ($request->is('admin') || $request->is('admin/*')) {
-                return route('login');
+            if ($request->is('admin') || $request->is('admin/*')) { // Cái này check xem có phải là admin không
+                return redirect()->route('login')->with('error', 'Vui lòng đăng nhập');
             }
-            return route('login');
+            return redirect()->route('login')->with('error', 'Vui lòng đăng nhập');
         }
 
-        return route('login');
+        return redirect()->route('login')->with('error', 'Vui lòng đăng nhập');
     }
 }
