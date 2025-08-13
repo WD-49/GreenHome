@@ -58,14 +58,14 @@ class ProductClientController extends Controller
             ->with('user')
             ->where('reviews.status', 'approved')
             ->latest()
-            ->paginate(5);
+            ->paginate(2);
 
-        // Comment có phân trang (5 comment mỗi trang)
+        // Comment có phân trang (2 comment mỗi trang)
         $comments = Comment::with('user')
             ->where('product_id', $product->id)
             ->where('status', 'hiển thị')
             ->latest()
-            ->paginate(5);
+            ->paginate(2);
 
         return view('client.pages.productDetail', compact(
             'product',

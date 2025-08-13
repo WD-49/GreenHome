@@ -137,7 +137,6 @@
                         ($discount->discount_type === 'percentage' ? '%' : ' VNĐ'),
                     'Ngày bắt đầu' => \Carbon\Carbon::parse($discount->start_date)->format('d/m/Y H:i'),
                     'Ngày kết thúc' => \Carbon\Carbon::parse($discount->end_date)->format('d/m/Y H:i'),
-                    <!-- 'Giá trị đơn hàng tối đa' => number_format($discount->max_order_value, 0) . ' VNĐ', -->
                     'Giá trị đơn hàng tối thiểu' => number_format($discount->min_order_value, 0) . ' VNĐ',
                     'Giá trị giảm tối đa' => number_format($discount->max_discount, 0) . ' VNĐ',
                     'Số lượng mã' => $discount->quantity,
@@ -158,7 +157,7 @@
                         </div>
                     @endforeach
 
-                 
+
 
 
 
@@ -184,39 +183,38 @@
                 </div>
             </div>
         </div>
-  @if (!$discount->applies_to_all_products && $products && count($products))
-    <div class="card discount-card p-4 mt-5">
-        <h5 class="fw-bold mb-4" style="font-size: 1.6rem; color: #0d6efd;">
-            <i class="bi bi-bag-check-fill me-2"></i> Sản phẩm áp dụng mã giảm giá
-        </h5>
+        @if (!$discount->applies_to_all_products && $products && count($products))
+            <div class="card discount-card p-4 mt-5">
+                <h5 class="fw-bold mb-4" style="font-size: 1.6rem; color: #0d6efd;">
+                    <i class="bi bi-bag-check-fill me-2"></i> Sản phẩm áp dụng mã giảm giá
+                </h5>
 
-        <div class="table-responsive rounded-4 overflow-hidden">
-            <table class="table table-striped align-middle mb-0 shadow-sm text-center"
-                   style="border-collapse: separate; border-spacing: 0;">
-                <thead class="text-white"
-                       style="background: linear-gradient(to right, #0d6efd, #0056b3);">
-                    <tr>
-                        <th class="py-3 px-4" style="border-top-left-radius: 12px; width: 60px;">#</th>
-                        <th class="py-3 px-4" style="border-top-right-radius: 12px;">Tên sản phẩm</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($products as $index => $product)
-                        <tr style="transition: background 0.3s ease;"
-                            class="{{ $index % 2 == 0 ? 'bg-white' : 'bg-light' }}">
-                            <td class="fw-bold text-secondary py-3 px-4 align-middle">
-                                {{ $index + 1 }}
-                            </td>
-                            <td class="fw-semibold text-dark py-3 px-4 align-middle">
-                                {{ $product->name }}
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
-@endif
+                <div class="table-responsive rounded-4 overflow-hidden">
+                    <table class="table table-striped align-middle mb-0 shadow-sm text-center"
+                        style="border-collapse: separate; border-spacing: 0;">
+                        <thead class="text-white" style="background: linear-gradient(to right, #0d6efd, #0056b3);">
+                            <tr>
+                                <th class="py-3 px-4" style="border-top-left-radius: 12px; width: 60px;">#</th>
+                                <th class="py-3 px-4" style="border-top-right-radius: 12px;">Tên sản phẩm</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($products as $index => $product)
+                                <tr style="transition: background 0.3s ease;"
+                                    class="{{ $index % 2 == 0 ? 'bg-white' : 'bg-light' }}">
+                                    <td class="fw-bold text-secondary py-3 px-4 align-middle">
+                                        {{ $index + 1 }}
+                                    </td>
+                                    <td class="fw-semibold text-dark py-3 px-4 align-middle">
+                                        {{ $product->name }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
 
 
 

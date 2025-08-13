@@ -30,12 +30,12 @@
 
         <div class="py-3 d-flex align-items-sm-center flex-sm-row flex-column">
             <div class="flex-grow-1">
-                <h4 class="fs-18 fw-semibold m-0">Quản lý tài khoản người dùng</h4>
+                <h4 class="fs-18 fw-semibold m-0">Quản lý tài khoản quản trị</h4>
             </div>
 
             <div class="text-end">
                 <ol class="breadcrumb m-0 py-0">
-                    <h6 class="breadcrumb-item active">Home / Tài khoản / Quản lý tài khoản người dùng</h6>
+                    <h6 class="breadcrumb-item active">Home / Tài khoản / Quản lý tài khoản quản trị</h6>
                 </ol>
             </div>
         </div>
@@ -53,7 +53,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">Danh sách người dùng</h5>
+                        <h5 class="card-title mb-0">Danh sách quản trị</h5>
                     </div>
 
                     <div class="card-body">
@@ -311,7 +311,7 @@
                                 $(this).remove();
                                 if ($.fn.DataTable.isDataTable('#datatable')) {
                                     $('#datatable').DataTable().row(this).remove()
-                                    .draw(); // 'this' trỏ đến row đã fadeOut
+                                        .draw(); // 'this' trỏ đến row đã fadeOut
                                 }
                             });
                         } else {
