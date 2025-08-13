@@ -10,6 +10,7 @@ use App\Models\BlogCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class BlogController extends Controller
 {
@@ -61,22 +62,36 @@ class BlogController extends Controller
         $categories = BlogCategory::all();
         return view('admin.blog.edit', compact('blog', 'categories'));
     }
-    public function update(UpdateBlogRequest $request, $id)
-    {
-        $data = $request->validated();
-        $blog = Blog::findOrFail($id);
-        if ($request->hasFile('thumbnail')) {
-            $file = $request->file('thumbnail');
-            // Lưu vào thư mục public/images/blogs/thumbnail
-            $path = $file->store('images/blogs/thumbnail', 'public');
-            $validatedData['thumbnail'] = $path;
-        } else {
-            // Giữ lại ảnh cũ nếu không upload mới
-            $validatedData['thumbnail'] = $blog->thumbnail ?? null;
+public function update(UpdateBlogRequest $request, $id)
+{
+    $blog = Blog::findOrFail($id);
+    $data = $request->validated(); // chứa title, content, ...
+
+    // Xử lý ảnh
+    if ($request->hasFile('thumbnail')) {
+        // Xóa ảnh cũ nếu có
+        if ($blog->thumbnail && Storage::disk('public')->exists($blog->thumbnail)) {
+            Storage::disk('public')->delete($blog->thumbnail);
         }
-        $blog->update($data);
-        return redirect()->route('admin.blogs.index')->with('success', 'Cập nhật bài viết thành công!');
+
+        // Upload ảnh mới
+        $file = $request->file('thumbnail');
+        $path = $file->store('images/blogs/thumbnail', 'public');
+        $data['thumbnail'] = $path; // gán đường dẫn mới vào $data
     }
+
+    // Nếu không upload ảnh mới -> giữ nguyên ảnh cũ
+    if (!isset($data['thumbnail'])) {
+        $data['thumbnail'] = $blog->thumbnail;
+    }
+
+    // Cập nhật dữ liệu
+    $blog->update($data);
+
+    return redirect()->route('admin.blogs.index')->with('success', 'Cập nhật bài viết thành công!');
+}
+
+
     public function destroy(Request $request)
     {
         $id = $request->input('id');
