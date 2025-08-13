@@ -31,14 +31,14 @@
 
             <div class="col-xl-2 col-lg-3 col-sm-12 col-12 cr-footer-border">
                 <div class="cr-footer">
-                    <h4 class="cr-sub-title">Doanh nghiệp <span class="cr-heading-res"></span></h4>
+                    <h4 class="cr-sub-title">Chúng tôi <span class="cr-heading-res"></span></h4>
                     <ul class="cr-footer-links cr-footer-dropdown">
-                        <li><a href="about.html">Giới thiệu</a></li>
-                        <li><a href="track-order.html">Thông tin giao hàng</a></li>
-                        <li><a href="policy.html">Chính sách bảo mật</a></li>
-                        <li><a href="terms.html">Điều khoản & điều kiện</a></li>
-                        <li><a href="contact-us.html">Liên hệ với chúng tôi</a></li>
-                        <li><a href="faq.html">Trung tâm hỗ trợ</a></li>
+                        <li><a href="#!">Giới thiệu</a></li>
+                        <li><a href="#!">Thông tin giao hàng</a></li>
+                        <li><a href="#!">Chính sách bảo mật</a></li>
+                        <li><a href="#!">Điều khoản & điều kiện</a></li>
+                        <li><a href="#!">Liên hệ với chúng tôi</a></li>
+                        <li><a href="#!">Trung tâm hỗ trợ</a></li>
                     </ul>
                 </div>
             </div>
@@ -58,20 +58,20 @@
 
             <div class="col-xl-4 col-lg-12 col-sm-12 col-12 cr-footer-border">
                 <div class="cr-footer cr-newsletter">
-                    <h4 class="cr-sub-title">Subscribe Our Newsletter <span class="cr-heading-res"></span></h4>
+                    <h4 class="cr-sub-title">Đăng ký nhận bản tin <span class="cr-heading-res"></span></h4>
                     <div class="cr-footer-links cr-footer-dropdown">
                         <form class="cr-search-footer">
-                            <input class="search-input" type="text" placeholder="Search here...">
+                            <input class="search-input" type="text" placeholder="Nhập email của bạn...">
                             <a href="javascript:void(0)" class="search-btn">
                                 <i class="ri-send-plane-fill"></i>
                             </a>
                         </form>
                     </div>
                     <div class="cr-social-media">
-                        <span><a href="#"><i class="ri-facebook-line"></i></a></span>
-                        <span><a href="#"><i class="ri-twitter-x-line"></i></a></span>
-                        <span><a href="#"><i class="ri-dribbble-line"></i></a></span>
-                        <span><a href="#"><i class="ri-instagram-line"></i></a></span>
+                        <span><a href="#!"><i class="ri-facebook-line"></i></a></span>
+                        <span><a href="#!"><i class="ri-twitter-x-line"></i></a></span>
+                        <span><a href="#!"><i class="ri-dribbble-line"></i></a></span>
+                        <span><a href="#!"><i class="ri-instagram-line"></i></a></span>
                     </div>
                     <div class="cr-payment">
                         <div class="cr-insta-slider swiper-container">
@@ -94,7 +94,7 @@
 
         <div class="cr-last-footer">
             <p>&copy; <span id="copyright_year"></span>
-                <a href="index.html">Carrot</a>, All rights reserved.
+                <a href="{{ route('home') }}">GreenHome</a>, Mọi quyền được bảo lưu.
             </p>
         </div>
     </div>
