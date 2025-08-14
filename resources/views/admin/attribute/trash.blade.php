@@ -43,8 +43,13 @@
                 @endforeach
             </tbody>
         </table>
+        
     </div>
     @endif
+    <a href="{{ route('admin.attribute.index') }}" class="btn btn-secondary btn-sm">
+        <i class="fas fa-arrow-left"></i> Quay lại
+    </a>
+
 </div>
 @endsection
 
