@@ -93,7 +93,7 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group" aria-label="User Actions">
-                                                <a href="{{ route('admin.account.detailAccUser', $user->id) }}"
+                                                <a href="{{ route('admin.account.detailAccAdmin', $user->id) }}"
                                                     class="btn btn-info btn-sm" title="Xem chi tiết">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
