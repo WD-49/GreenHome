@@ -223,10 +223,10 @@
                                             {{-- Các nút hành động trực tiếp --}}
                                             <div class="btn-group" role="group" aria-label="Order Actions">
                                                 {{-- Nút Sửa --}}
-                                                <a href="{{ route('admin.orders.edit', $order->id) }}"
+                                                {{-- <a href="{{ route('admin.orders.edit', $order->id) }}"
                                                     class="btn btn-action-sm btn-primary" title="Sửa">
                                                     <i class="fas fa-edit"></i>
-                                                </a>
+                                                </a> --}}
 
                                                 {{-- Nút Xem chi tiết --}}
                                                 <a href="{{ route('admin.orders.show', $order->id) }}"
