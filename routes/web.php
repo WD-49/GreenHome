@@ -7,12 +7,13 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
+use App\Http\Middleware\AdminMiddleware;
 use App\Http\Controllers\PaymentController;
 use Doctrine\DBAL\Schema\Index as DBALIndex;
+
 use App\Http\Controllers\admin\BlogController;
 
 use App\Http\Controllers\Auth\LoginController;
-
 use App\Http\Controllers\admin\BrandController;
 use App\Http\Controllers\admin\OrderController;
 use App\Http\Controllers\client\CartController;
@@ -23,13 +24,14 @@ use App\Http\Controllers\admin\ReviewController;
 use App\Http\Controllers\admin\CommentController;
 use App\Http\Controllers\Admin\WebInfoController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\admin\CategoryController;
 
+use App\Http\Controllers\admin\CategoryController;
 use App\Http\Controllers\admin\DiscountController;
+
 use App\Http\Controllers\Auth\AdminAuthController;
 
 use App\Http\Controllers\Auth\SocialiteController;
-
+use App\Http\Controllers\client\ContactController;
 use App\Http\Controllers\Client\ProfileController;
 use App\Http\Controllers\admin\AttributeController;
 use App\Http\Controllers\admin\DashboardController;
@@ -51,7 +53,6 @@ use App\Http\Controllers\admin\Product\ProductVariantController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\client\BlogController as ClientBlogController;
 use App\Http\Controllers\Client\DiscountController as ClientDiscountController;
-use App\Http\Controllers\client\ContactController;
 
 Route::get('/test-log', function () {
     Log::debug('Testing logging functionality');
@@ -135,10 +136,9 @@ Route::get('/test-notify', function () {
     $user->notify(new \App\Notifications\VerifyEmailReminder());
     return 'Notification sent';
 });
-// 
 
 // route của trang admin
-Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
+Route::prefix('admin')->middleware(AdminMiddleware::class)->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     // routes/api.php

@@ -328,7 +328,7 @@
                                     </div>
                                     <div class="form-group mb-3">
                                         <label for="phone">Số điện thoại:</label>
-                                        <input type="text" class="form-control" id="phone" name="phone"
+                                        <input type="number" class="form-control" id="phone" name="phone"
                                             value="{{ old('phone', $data['profile']->phone ?? '') }}">
                                         @error('phone')
                                             <div class="invalid-feedback">
