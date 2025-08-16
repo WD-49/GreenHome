@@ -32,13 +32,13 @@
     <link rel="stylesheet" href="{{ asset('assets_client/assets/css/vendor/swiper-bundle.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets_client/assets/css/vendor/jquery.slick.css') }}">
     <link rel="stylesheet" href="{{ asset('assets_client/assets/css/vendor/slick-theme.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets_client/assets/css/vendor/chat.bot.main.css') }}">
 
     <!-- Main CSS -->
     <link rel="stylesheet" href="{{ asset('assets_client/assets/css/style.css') }}">
     @stack('styles')
     <!-- CSRF Token cho AJAX -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
 </head>
 
 <body class="body-bg-6">
@@ -53,6 +53,8 @@
         @include('client.partials.header')
 
     </header>
+
+    @include('client.partials.chatBot')
 
     <!-- Mobile menu -->
     <div class="cr-sidebar-overlay"></div>
@@ -129,10 +131,6 @@
 
 
     @yield('content')
-
-
-
-
 
     <!-- Footer -->
     @include('client.partials.footer')
