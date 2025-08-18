@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
+use App\Notifications\CommentStatusNotification;
 
 class CommentController extends Controller
 {
@@ -61,6 +62,7 @@ class CommentController extends Controller
     {
         $comment = Comment::findOrFail($request->id);
         $comment->update(['status' => 'hiển thị']);
+        $comment->user->notify(new CommentStatusNotification($comment, 'approved'));
 
         return redirect()->back()->with('success', 'Đã duyệt bình luận.');
     }
@@ -69,6 +71,7 @@ class CommentController extends Controller
     {
         $comment = Comment::findOrFail($request->id);
         $comment->update(['status' => 'ẩn']);
+        $comment->user->notify(new CommentStatusNotification($comment, 'hidden'));
 
         return redirect()->back()->with('success', 'Đã ẩn bình luận.');
     }

@@ -21,15 +21,16 @@ use App\Http\Controllers\client\HomeController;
 use App\Http\Controllers\Client\ShopController;
 use App\Http\Controllers\admin\BannerController;
 use App\Http\Controllers\admin\ReviewController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\admin\CommentController;
 use App\Http\Controllers\Admin\WebInfoController;
-use App\Http\Controllers\Auth\RegisterController;
 
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\admin\CategoryController;
+
 use App\Http\Controllers\admin\DiscountController;
 
 use App\Http\Controllers\Auth\AdminAuthController;
-
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\client\ContactController;
 use App\Http\Controllers\Client\ProfileController;
@@ -120,15 +121,8 @@ Route::middleware(['auth'])->group(function () {
         ->middleware(['throttle:6,1']) // Middleware throttle vẫn được giữ nguyên
         ->name('verification.send'); //throttle:6,1 giới hạn người dùng gửi yêu cầu xác thực email 6 lần trong 1 phút
 
-    Route::post('/notifications/{id}/read', function ($id) {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        $notification = $user->notifications()->find($id);
-        if ($notification) {
-            $notification->markAsRead();
-        }
-        return response()->json(['status' => 'read']);
-    });
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::get('/notifications/{id}/read-and-redirect', [NotificationController::class, 'readAndRedirect'])->name('notifications.read-and-redirect');
 });
 
 Route::get('/test-notify', function () {
@@ -485,4 +479,3 @@ Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product
 Route::middleware(['auth'])->group(function () {
     Route::post('/comment/submit', [ProductClientController::class, 'submitComment'])->name('client.comment.submit');
 });
-
