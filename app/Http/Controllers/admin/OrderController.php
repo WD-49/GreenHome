@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
+use App\Notifications\OrderStatusNotification;
 use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
@@ -207,6 +208,22 @@ class OrderController extends Controller
                 $order->cancel_reason = null;
             }
             $order->save();
+            $user = $order->user; // Giả sử Order có quan hệ với User
+            if ($user) {
+                try {
+                    $user->notify(new OrderStatusNotification($order, $newOrderStatus));
+                    Log::info('Order status notification sent/updated', [
+                        'order_id' => $order->id,
+                        'status' => $newOrderStatus,
+                        'user_id' => $user->id,
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send/update order status notification', [
+                        'order_id' => $order->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
             Log::info('Order status updated successfully in DB.');
 
             // Trả về redirect thay vì JSON

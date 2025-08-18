@@ -150,7 +150,7 @@
                         }
 
                         .offcanvas-body {
-                            max-height: 70vh;
+                            max-height: 100%;
                             overflow-y: auto;
                             scrollbar-width: thin;
                             scrollbar-color: #888 #f1f1f1;

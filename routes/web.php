@@ -428,7 +428,8 @@ Route::get('/voucher/{code}/detail', [ClientDiscountController::class, 'showDeta
 Route::get('/blog/{slugCategory?}', [ClientBlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/detail/{slug}', [ClientBlogController::class, 'show'])->name('blog.show');
 
-Route::get('/san-pham/{slug}', [ProductClientController::class, 'show'])->name('productDetail');
+
+Route::get('/san-pham/{slug}', [ProductClientController::class, 'show'])->name('productDetail'); // route chi tiết sản phẩm
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 
 // giỏ hàng
