@@ -48,7 +48,7 @@ class ReviewStatusNotification extends Notification
         if ($this->status === 'approved') {
             return [
                 'title' => 'Đánh giá đã được duyệt',
-                'message' => 'Đánh giá của bạn trên sản phẩm "' . $this->review->productVariant->product->name . '" đã được duyệt.',
+                'message' => 'Đánh giá của bạn với nội dung "' . $this->review->title . '" trên sản phẩm "' . $this->review->productVariant->product->name . '" đã được duyệt.',
                 'url' => route('productDetail', $this->review->productVariant->product->slug),
                 'icon' => 'fa fa-check-circle',
                 'type' => 'review_approved',
@@ -56,7 +56,7 @@ class ReviewStatusNotification extends Notification
         } elseif ($this->status === 'rejected') {
             return [
                 'title' => 'Đánh giá đã bị ẩn',
-                'message' => 'Đánh giá của bạn trên sản phẩm "' . $this->review->productVariant->product->name . '" đã bị ẩn.',
+                'message' => 'Đánh giá của bạn với nội dung "' . $this->review->title . '" trên sản phẩm "' . $this->review->productVariant->product->name . '" đã bị ẩn.',
                 'url' => route('productDetail', $this->review->productVariant->product->slug),
                 'type' => 'review_hidden',
             ];

@@ -44,7 +44,7 @@ class CommentStatusNotification extends Notification
         if ($this->status === 'approved') {
             return [
                 'title' => 'Bình luận đã được duyệt',
-                'message' => 'Bình luận của bạn trên sản phẩm "' . $this->comment->product->name . '" đã được duyệt.',
+                'message' => 'Bình luận của bạn với nội dung "' . $this->comment->content . '" trên sản phẩm "' . $this->comment->product->name . '" đã được duyệt.',
                 'url' => route('productDetail', $this->comment->product->slug),
                 'icon' => 'fa fa-check-circle',
                 'type' => 'comment_approved',
@@ -52,7 +52,7 @@ class CommentStatusNotification extends Notification
         } elseif ($this->status === 'hidden') {
             return [
                 'title' => 'Bình luận đã bị ẩn',
-                'message' => 'Bình luận của bạn trên sản phẩm "' . $this->comment->product->name . '" đã bị ẩn.',
+                'message' => 'Bình luận của bạn với nội dung "' . $this->comment->content . '" trên sản phẩm "' . $this->comment->product->name . '" đã bị ẩn.',
                 'url' => route('productDetail', $this->comment->product->slug),
                 'type' => 'comment_hidden',
             ];

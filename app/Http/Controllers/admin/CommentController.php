@@ -149,6 +149,7 @@ class CommentController extends Controller
         $comment = Comment::findOrFail($request->id);
         if ($comment->status === 'ẩn') {
             $comment->update(['status' => 'hiển thị']);
+            $comment->user->notify(new CommentStatusNotification($comment, 'approved'));
             return redirect()->back()->with('success', 'Đã hiện lại bình luận.');
         }
         return redirect()->back()->with('error', 'Bình luận không ở trạng thái ẩn.');
