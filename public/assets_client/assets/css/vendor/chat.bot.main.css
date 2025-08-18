@@ -1,0 +1,160 @@
+        /* CSS cho chatbot */
+        #chatbot-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 350px;
+            height: 450px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        #chat-header {
+            background-color: #64b496;
+            color: #fff;
+            padding: 15px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #chat-header h4 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600; 
+        }
+
+        #chat-body {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #chat-footer {
+            padding: 15px;
+            background-color: #f7f7f8;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        #chat-form {
+            display: flex;
+        }
+
+        #user-input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            margin-right: 10px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+        }
+
+        #user-input:focus {
+            outline: none;
+            border-color: #64b496;
+        }
+
+        .send-btn {
+            background-color: #64b496;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .send-btn i {
+            font-size: 20px;
+        }
+
+        .send-btn:hover {
+            background-color: #000;
+        }
+
+        .message-container {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .message-container.user {
+            justify-content: flex-end;
+        }
+
+        .message-container.bot {
+            justify-content: flex-start;
+        }
+
+        .message-box {
+            padding: 10px 15px;
+            border-radius: 15px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .message-box.user {
+            background-color: #e9f5f0;
+            color: #2b2b2d;
+            border-bottom-right-radius: 0;
+        }
+
+        .message-box.bot {
+            background-color: #f7f7f8;
+            color: #7a7a7a;
+            border-bottom-left-radius: 0;
+        }
+
+        .chat-toggle-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background-color: #64b496;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1001;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .chat-toggle-btn i {
+            font-size: 30px;
+        }
+
+        .chat-toggle-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 300px;
+            height: 300px;
+            background-color: transparent;
+            box-shadow: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            transform: translate(90px, 90px);
+        }
