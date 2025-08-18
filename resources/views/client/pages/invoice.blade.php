@@ -266,6 +266,13 @@
                                             </li>
 
                                         </ul>
+                                        @if ($order->canBePay())
+                                            <li>
+                                                <a class="btn btn-info" href="{{ route('orders.payAgain', $order) }}">
+                                                    <i class="ri-refresh-line me-1"></i> Thanh toán lại
+                                                </a>
+                                            </li>
+                                        @endif
                                         @if ($order->order_status === 'Giao hàng thành công')
                                             <li>
                                                 <form action="{{ route('orders.confirmReceived', $order) }}" method="POST"

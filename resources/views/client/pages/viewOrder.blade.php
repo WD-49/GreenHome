@@ -142,14 +142,7 @@
                                                     </a>
                                                 </li>
 
-                                                @if ($order->canBePay())
-                                                    <li>
-                                                        <a class="dropdown-item"
-                                                            href="{{ route('orders.payAgain', $order) }}">
-                                                            <i class="ri-refresh-line me-1"></i> Thanh toán lại
-                                                        </a>
-                                                    </li>
-                                                @endif
+                                                
 
                                                 @if ($order->canBeCancel())
                                                     <li>
