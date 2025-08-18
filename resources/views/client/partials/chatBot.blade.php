@@ -129,7 +129,7 @@
                                         <p class="product-views" style="margin: 0 0 8px; font-size: 12px; color: #777;">
                                             👁 Lượt xem: ${product.view}
                                         </p>
-                                        <a href="/products/${product.slug}" 
+                                        <a href="/san-pham/${product.slug}" 
                                         class="btn btn-primary" 
                                         style="display: inline-block; font-size: 13px; border-radius: 5px; background-color: #007bff; color: #fff; text-decoration: none; transition: background-color 0.2s;">
                                             Xem

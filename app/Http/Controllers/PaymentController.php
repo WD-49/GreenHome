@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Notifications\OrderStatusNotification;
+use App\Notifications\OrderPaymentNotification;
 
 class PaymentController extends Controller
 {
@@ -88,6 +90,23 @@ class PaymentController extends Controller
                     $order->payment_status = 'paid';
                     $order->save();
 
+                    // Gửi thông báo thanh toán thành công
+                    try {
+                        $order->user->notify(new OrderPaymentNotification($order, 'paid'));
+                        Log::info('Order payment notification sent/updated', [
+                            'order_id' => $order->id,
+                            'sku' => $order->sku,
+                            'user_id' => $order->user->id,
+                            'status' => 'paid',
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('Failed to send/update order payment notification', [
+                            'order_id' => $order->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+
+
                     return view('client.payment.success', ['data' => $inputData]);
                 } else {
                     // Thanh toán thất bại
@@ -95,17 +114,21 @@ class PaymentController extends Controller
                     $order->order_status = 'Xác nhận';
                     $order->save();
 
-                    // // Hoàn lại tồn kho sản phẩm
-                    // foreach ($order->items as $item) {
-                    //     if ($item->product_variant_sku) {
-                    //         // Tìm sản phẩm theo SKU
-                    //         $variant = \App\Models\ProductVariant::where('sku', $item->product_variant_sku)->first();
-                    //         if ($variant) {
-                    //             $variant->quantity += $item->quantity;
-                    //             $variant->save();
-                    //         }
-                    //     }
-                    // }
+                    // Gửi thông báo nhắc nhở thanh toán
+                    try {
+                        $order->user->notify(new OrderPaymentNotification($order, 'fail'));
+                        Log::info('Order payment notification sent/updated', [
+                            'order_id' => $order->id,
+                            'sku' => $order->sku,
+                            'user_id' => $order->user->id,
+                            'status' => 'fail',
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('Failed to send/update order payment notification', [
+                            'order_id' => $order->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
 
                     return view('client.payment.failed', ['data' => $inputData]);
                 }

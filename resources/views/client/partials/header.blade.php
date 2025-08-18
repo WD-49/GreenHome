@@ -31,7 +31,6 @@
                                 </span>
                             </a>
 
-
                             <ul class="dropdown-menu">
                                 @guest
                                     <li>
@@ -59,27 +58,26 @@
                                     </li>
                                 @endguest
                             </ul>
-
                         </li>
                     </ul>
                     <a href="{{ route('wishlist.index') }}" class="cr-right-bar-item">
                         <i class="ri-heart-3-line"></i>
-
                     </a>
-
+                    <meta name="csrf-token" content="{{ csrf_token() }}"> <!-- Đảm bảo CSRF token có sẵn -->
 
                     @auth
                         @php
                             $unreadCount = Auth::user()->unreadNotifications->count();
+                            Log::info('Unread notifications count', ['count' => $unreadCount]);
                         @endphp
 
                         <!-- Nút chuông: kích hoạt offcanvas -->
                         <a href="javascript:void(0)" class="cr-right-bar-item" data-bs-toggle="offcanvas"
                             data-bs-target="#notificationPanel" aria-controls="notificationPanel"
-                            style="position: relative;">
+                            style="position: relative;" id="notificationBell">
                             <i class="ri-notification-3-line" style="font-size: 22px; position: relative;">
                                 @if ($unreadCount > 0)
-                                    <span class="notification-count">{{ $unreadCount }}</span>
+                                    <span class="notification-count" id="notificationCount">{{ $unreadCount }}</span>
                                 @endif
                             </i>
                         </a>
@@ -92,29 +90,42 @@
                                 <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
                                     aria-label="Close"></button>
                             </div>
-                            <div class="offcanvas-body">
-                                @if (!Auth::user()->hasVerifiedEmail())
-                                    <div class="alert alert-warning d-flex align-items-start gap-2 mb-3">
-                                        <i class="ri-alert-line fs-5 text-warning"></i>
-                                        <div>
-                                            <strong>Email của bạn chưa được xác minh</strong>
-                                            <p class="mb-1 small text-muted">Nhấn vào để xác minh và sử dụng đầy đủ tính
-                                                năng.</p>
-                                            <a href="{{ route('profile.index') }}"
-                                                class="btn btn-sm btn-outline-primary">Xác minh ngay</a>
+                            <div class="offcanvas-body p-3">
+                                @forelse (Auth::user()->notifications as $notification)
+                                    @php
+                                        Log::info('Notification ID in Blade', ['id' => $notification->id]);
+                                    @endphp
+                                    <div class="card mb-3 shadow-sm {{ !$notification->read_at ? 'border-primary' : '' }}"
+                                        style="border-left: 4px solid {{ !$notification->read_at ? '#0d6efd' : '#e9ecef' }};">
+                                        <div class="card-body p-3 d-flex align-items-start gap-3">
+                                            <i
+                                                class="{{ $notification->data['icon'] ?? 'ri-notification-line' }} fs-4 text-muted"></i>
+                                            <div class="flex-grow-1">
+                                                @if (!empty($notification->data['url']))
+                                                    <a href="javascript:void(0)"
+                                                        class="d-block text-{{ !$notification->read_at ? 'primary' : 'dark' }} text-decoration-none notification-link"
+                                                        style="font-weight: bold;"
+                                                        data-notification-id="{{ $notification->id }}"
+                                                        data-url="{{ $notification->data['url'] }}"
+                                                        onclick="markAsRead('{{ $notification->id }}', '{{ $notification->data['url'] }}', event)">
+                                                        {{ $notification->data['title'] ?? 'Thông báo mới' }}
+                                                    </a>
+                                                @else
+                                                    <strong
+                                                        class="d-block text-{{ !$notification->read_at ? 'primary' : 'dark' }}">
+                                                        {{ $notification->data['title'] ?? 'Thông báo mới' }}
+                                                    </strong>
+                                                @endif
+                                                <p class="mb-1 text-muted small">
+                                                    {{ $notification->data['message'] ?? '...' }}</p>
+                                                <span class="badge bg-light text-dark small">
+                                                    {{ $notification->created_at->diffForHumans() }}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                @endif
-
-                                @forelse (Auth::user()->notifications as $notification)
-                                    <div class="border-bottom pb-2 mb-3">
-                                        <strong>{{ $notification->data['title'] ?? 'Thông báo mới' }}</strong>
-                                        <p class="mb-1 small text-muted">{{ $notification->data['message'] ?? '...' }}</p>
-                                        <span
-                                            class="badge bg-light text-dark">{{ $notification->created_at->diffForHumans() }}</span>
-                                    </div>
                                 @empty
-                                    <p class="text-muted">Không có thông báo nào.</p>
+                                    <p class="text-muted text-center py-5">Không có thông báo nào.</p>
                                 @endforelse
                             </div>
                         </div>
@@ -137,9 +148,103 @@
                             text-align: center;
                             display: inline-block;
                         }
+
+                        .offcanvas-body {
+                            max-height: 100%;
+                            overflow-y: auto;
+                            scrollbar-width: thin;
+                            scrollbar-color: #888 #f1f1f1;
+                            padding-right: 10px;
+                        }
+
+                        .offcanvas-body::-webkit-scrollbar {
+                            width: 8px;
+                        }
+
+                        .offcanvas-body::-webkit-scrollbar-track {
+                            background: #f1f1f1;
+                            border-radius: 10px;
+                        }
+
+                        .offcanvas-body::-webkit-scrollbar-thumb {
+                            background: #888;
+                            border-radius: 10px;
+                        }
+
+                        .offcanvas-body::-webkit-scrollbar-thumb:hover {
+                            background: #555;
+                        }
+
+                        .card {
+                            transition: all 0.3s ease;
+                            border-radius: 0.5rem;
+                        }
+
+                        .card:hover {
+                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                            transform: translateY(-2px);
+                        }
+
+                        .card.border-primary {
+                            background-color: #f8f9fa;
+                        }
+
+                        .badge {
+                            border-radius: 0.25rem;
+                        }
+
+                        .alert-warning {
+                            background-color: #fff3cd;
+                            border: 1px solid #ffeeba;
+                        }
+
+                        a.text-decoration-none:hover {
+                            text-decoration: underline;
+                        }
                     </style>
 
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            function markAsRead(notificationId, url, event) {
+                                console.log('markAsRead called with ID:', notificationId, 'and URL:', url);
+                                event.preventDefault(); // Ngăn hành động mặc định
 
+                                // Cập nhật giao diện
+                                const titleElement = event.target;
+                                titleElement.classList.remove('text-primary');
+                                titleElement.classList.add('text-dark');
+                                titleElement.closest('.card').style.borderLeftColor = '#e9ecef';
+                                titleElement.closest('.card').classList.remove('border-primary');
+                                titleElement.closest('.card').classList.add('border-secondary');
+
+                                // Cập nhật số lượng thông báo chưa đọc
+                                const countElement = document.getElementById('notificationCount');
+                                if (countElement) {
+                                    let unreadCount = parseInt(countElement.textContent || '0');
+                                    if (unreadCount > 0) {
+                                        unreadCount--;
+                                        countElement.textContent = unreadCount;
+                                        if (unreadCount === 0) {
+                                            countElement.style.display = 'none';
+                                        }
+                                    }
+                                }
+
+                                // Redirect đến route để đánh dấu thông báo là đã đọc
+                                window.location.href = '/notifications/' + notificationId + '/read-and-redirect?url=' +
+                                    encodeURIComponent(url);
+                            }
+
+                            // Gắn hàm markAsRead vào window để sử dụng trong onclick
+                            window.markAsRead = markAsRead;
+
+                            // Khởi tạo tooltip
+                            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                            tooltipTriggerList.forEach(function(el) {
+                                new bootstrap.Tooltip(el);
+                            });
+                        });
+                    </script>
 
                     <a href="javascript:void(0)" class="cr-right-bar-item Shopping-toggle">
                         <i class="ri-shopping-cart-line"></i>
@@ -147,8 +252,6 @@
                     <a href="javascript:void(0)" class="cr-right-bar-item voucher-toggle">
                         <i class="ri-ticket-line"></i>
                     </a>
-
-
                 </div>
             </div>
         </div>
@@ -209,7 +312,6 @@
                         </div>
                     </div>
                 </div>
-
             </div>
             <nav class="navbar navbar-expand-lg">
                 <a href="javascript:void(0)" class="navbar-toggler shadow-none">
@@ -263,32 +365,26 @@
                                                 href="{{ route('shop.index', ['categories[]' => $category->id]) }}">
                                                 {{ $category->name }}
                                             </a>
-
                                         </li>
                                     @endforeach
                                 @endisset
                             </ul>
                         </li>
-
-
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('shop.index') }}">
                                 Cửa Hàng
                             </a>
                         </li>
-
                         <li class="nav-item ">
                             <a class="nav-link" href="{{ route('blog.index') }}">
                                 Bài viết
                             </a>
                         </li>
-
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('contact.index') }}">
                                 Liên Hệ
                             </a>
                         </li>
-
                     </ul>
                 </div>
             </nav>
@@ -298,25 +394,6 @@
                     {{ $footerWebInfo['phone'] ?? 'Đang cập nhật...' }}
                 </a>
             </div>
-
         </div>
     </div>
 </div>
-<script>
-    function markAsRead(id) {
-        fetch('/notifications/' + id + '/read', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            }
-        });
-    }
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function(el) {
-            return new bootstrap.Tooltip(el);
-        });
-    });
-</script>

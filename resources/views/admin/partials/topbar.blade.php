@@ -15,7 +15,7 @@
             </button>
         </li>
 
-        <li class="dropdown notification-list topbar-dropdown">
+        {{-- <li class="dropdown notification-list topbar-dropdown">
             <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button"
                 aria-haspopup="false" aria-expanded="false">
                 <i data-feather="bell" class="noti-icon"></i>
@@ -152,11 +152,11 @@
                 </a>
 
             </div>
-        </li>
+        </li> --}}
 
         <li class="dropdown notification-list topbar-dropdown">
-            <a class="nav-link dropdown-toggle nav-user me-0" data-bs-toggle="dropdown" href="#"
-                role="button" aria-haspopup="false" aria-expanded="false">
+            <a class="nav-link dropdown-toggle nav-user me-0" data-bs-toggle="dropdown" href="#" role="button"
+                aria-haspopup="false" aria-expanded="false">
                 <img src="{{ asset('storage/' . $user->profile?->user_image ?? 'https://static.vecteezy.com/system/resources/previews/020/429/953/non_2x/admin-icon-vector.jpg') }}"
                     alt="user-image" class="rounded-circle">
                 <span class="pro-user-name ms-1">
@@ -166,7 +166,7 @@
             <div class="dropdown-menu dropdown-menu-end profile-dropdown ">
                 <!-- item-->
                 <div class="dropdown-header noti-title">
-                    <h6 class="text-overflow m-0">Welcome <b>{{ $user->name }}</b> !</h6>
+                    <h6 class="text-overflow m-0"> <b>{{ $user->name }}</b> !</h6>
                 </div>
 
                 <!-- item-->

@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\ProductVariant;
 use App\Models\Review;
 use Illuminate\Http\Request;
+use App\Models\ProductVariant;
+use App\Http\Controllers\Controller;
+use App\Notifications\ReviewStatusNotification;
 
 class ReviewController extends Controller
 {
@@ -58,11 +59,12 @@ class ReviewController extends Controller
     }
     public function updateStatus(Request $request, string $id)
     {
-        $review = Review::findOrFail($id);
+        $review = Review::with('productVariant.product')->findOrFail($id);
         $review->status = $request->input('status');
         $review->save();
+        $review->user->notify(new ReviewStatusNotification($review, $request->input('status')));
 
-        return redirect()->route('admin.reviews.index')->with('success', 'Review status updated successfully.');
+        return redirect()->route('admin.reviews.index')->with('success', 'Cập nhật trạng thái đánh giá thành công.');
     }
 
     /**
