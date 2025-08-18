@@ -208,7 +208,7 @@
 
                 {{-- Cột phải: Sản phẩm --}}
                 <div class="col-xl-9 col-lg-8 col-12 mb-24">
-                    {{-- Tab All: 8 sản phẩm ngẫu nhiên --}}
+
                     <div id="tab-all" class="product-tab-content fade-tab show">
                         <div class="row mb-minus-24">
                             @foreach ($popularProducts as $product)
@@ -237,7 +237,8 @@
                                         </div>
                                         <div class="cr-product-details">
                                             <div class="cr-brand">
-                                                <a href="">{{ $product->category->name ?? '' }}</a>
+                                                <a
+                                                    href="{{ route('shop.index', ['categories[]' => $product->category->id]) }}">{{ $product->category->name ?? '' }}</a>
                                             </div>
                                             <a href="{{ route('productDetail', $product->slug) }}"
                                                 class="title">{{ $product->name }}</a>
@@ -297,7 +298,8 @@
                                             </div>
                                             <div class="cr-product-details">
                                                 <div class="cr-brand">
-                                                    <a href="#">{{ $category->name }}</a>
+                                                    <a
+                                                        href="{{ route('shop.index', ['categories[]' => $category->id]) }}">{{ $category->name }}</a>
                                                 </div>
                                                 <a href="{{ route('productDetail', $product->slug) }}"
                                                     class="title">{{ $product->name }}</a>
@@ -484,7 +486,7 @@
                                     <div class="cr-product-details">
                                         <div class="cr-brand">
                                             <a
-                                                href="shop-left-sidebar.html">{{ $product->category->name ?? 'Category' }}</a>
+                                                href="{{ route('shop.index', ['categories[]' => $product->category->id]) }}">{{ $product->category->name ?? 'Category' }}</a>
                                             <div class="cr-star">
                                                 <i class="ri-star-fill"></i>
                                                 <i class="ri-star-fill"></i>

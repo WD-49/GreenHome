@@ -102,8 +102,12 @@ class ProductVariant extends Model
             $productVariant->productVariantValues()->onlyTrashed()->each(function ($pvv) {
                 $pvv->restore();
             });
+
+            // Cập nhật lại số lượng sản phẩm
+            $productVariant->updateProductQuantity();
         });
     }
+
     public function updateProductQuantity()
     {
         $product = $this->product;
