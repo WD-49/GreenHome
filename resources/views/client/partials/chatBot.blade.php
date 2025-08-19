@@ -1,3 +1,21 @@
+{{-- Css Cho Icon Chat Bot không đè lên tổng tiền của giỏ hàng --}}
+<style>
+    .chat-toggle-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 999;
+        /* Giảm z-index xuống để nằm dưới các phần tử quan trọng khác */
+        width: 300px;
+        height: 300px;
+    }
+
+    /* Đảm bảo phần giỏ hàng có z-index cao hơn */
+    .cart-container {
+        position: relative;
+        z-index: 1000;
+    }
+</style>
 <div id="chatbot-container">
     <div id="chat-header">
         <h4>CSKH Green Home</h4>
