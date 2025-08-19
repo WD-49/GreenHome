@@ -45,17 +45,16 @@ class Order extends Model
 
 
     // Phương thức kiểm tra xem đơn hàng có thể bị hủy không
-    public function canBeCancelled(): bool
+    public function canBeCancelled()
     {
         // Các trạng thái mà đơn hàng KHÔNG THỂ bị hủy
-        // Ví dụ: Đơn hàng đã "Đang vận chuyển", "Giao hàng thành công", hoặc đã "Hủy đơn" thì không thể hủy nữa.
-        // Nếu bạn muốn cho phép hủy ở trạng thái "Xác nhận", hãy bỏ "Xác nhận" khỏi mảng này.
         $nonCancellableStatuses = ['Đang vận chuyển', 'Giao hàng thành công', 'Hủy đơn'];
 
         return !in_array($this->order_status, $nonCancellableStatuses);
     }
 
-    public function canBeCancel(): bool
+    // Phương thức kiểm tra xem đơn hàng có thể bị hủy không
+    public function canBeCancel()
     {
         $nonCancellableStatuses = ['Đang vận chuyển', 'Giao hàng thành công', 'Hủy đơn', 'Đã nhận hàng'];
 
@@ -64,7 +63,8 @@ class Order extends Model
             && $this->payment_status !== 'paid';
     }
 
-    public function canBePay(): bool
+    // Phương thức kiểm tra xem đơn hàng có thể được thanh toán không
+    public function canBePay()
     {
         return $this->payment_method_name === 'VNPAY'
             && $this->payment_status === 'pending'
@@ -72,6 +72,7 @@ class Order extends Model
             && $this->order_status !== 'Chưa xác nhận';
     }
 
+    // Phương thức khôi phục trạng thái thanh toán
     protected static function booted()
     {
         static::updated(function ($order) {
@@ -80,14 +81,7 @@ class Order extends Model
                 $order->payment_status !== 'paid'
             ) {
                 $order->payment_status = 'paid';
-                $order->saveQuietly(); // dùng saveQuietly để tránh vòng lặp sự kiện
-            }
-
-            // Thêm trường hợp mới: nếu trạng thái là "Giao hàng thành công",
-            // tự động chuyển sang "Đã nhận hàng"
-            if ($order->order_status === 'Giao hàng thành công') {
-                $order->order_status = 'Đã nhận hàng';
-                $order->saveQuietly();
+                $order->saveQuietly(); // dùng saveQuietly để tránh vòng lặp sự kiện(ko auto chuyển sang đã nhận hàng khi đơn là Giao hàng thành công)
             }
         });
     }

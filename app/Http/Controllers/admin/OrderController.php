@@ -28,7 +28,7 @@ class OrderController extends Controller
      */
     protected function getOrderEnumStatuses()
     {
-        // Các giá trị này PHẢI khớp với định nghĩa enum trong bảng cơ sở dữ liệu của bạn cho 'order_status'
+        // Các giá trị trạng thái đơn hàng
         return ['Chưa xác nhận', 'Xác nhận', 'Đang vận chuyển', 'Giao hàng thành công', 'Hủy đơn', 'Đã nhận hàng'];
     }
 
@@ -38,7 +38,7 @@ class OrderController extends Controller
      */
     protected function getPaymentEnumStatuses()
     {
-        // Các giá trị này PHẢI khớp với định nghĩa enum trong bảng cơ sở dữ liệu của bạn cho 'payment_status'
+        // Các giá trị trạng thái thanh toán
         return ['pending', 'paid', 'failed'];
     }
 
@@ -146,17 +146,17 @@ class OrderController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
-        Log::info('--- Order Update Status Attempt ---');
-        Log::info('Order ID: ' . $id);
-        Log::info('Request Data: ', $request->all());
+        // Log::info('--- Order Update Status Attempt ---');
+        // Log::info('Order ID: ' . $id);
+        // Log::info('Request Data: ', $request->all());
 
         $order = Order::findOrFail($id);
         $newOrderStatus = $request->input('order_status');
         $oldOrderStatus = $order->order_status;
 
-        Log::info("Old Order Status: '{$oldOrderStatus}'");
-        Log::info("New Order Status from Request: '{$newOrderStatus}'");
-        Log::info("Cancel Reason from Request: " . $request->input('cancel_reason'));
+        // Log::info("Old Order Status: '{$oldOrderStatus}'");
+        // Log::info("New Order Status from Request: '{$newOrderStatus}'");
+        // Log::info("Cancel Reason from Request: " . $request->input('cancel_reason'));
 
         $rules = [
             'order_status' => 'required|in:' . implode(',', $this->getOrderEnumStatuses()),
@@ -192,7 +192,7 @@ class OrderController extends Controller
             }
         }
         if ($oldOrderStatus === 'Hủy đơn' && $newOrderStatus !== 'Hủy đơn') {
-            // Logic to clear cancel_reason if needed, but no validation needed here
+            // Phần này để xử lý việc xóa lý do hủy nếu trạng thái không còn là 'Hủy đơn'
         }
 
         if ($validator->fails()) {
@@ -259,164 +259,6 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             Log::error("Lỗi khi cập nhật trạng thái thanh toán đơn hàng {$id}: " . $e->getMessage());
             return redirect()->back()->with('error', 'Đã xảy ra lỗi khi cập nhật trạng thái thanh toán.');
-        }
-    }
-
-
-    public function edit($id)
-    {
-        $order = Order::with([
-            'user.profile',
-        ])->findOrFail($id);
-
-        $allOrderStatuses = $this->getOrderEnumStatuses();
-        $paymentMethods = PaymentMethod::all();
-        $paymentStatuses = $this->getPaymentEnumStatuses(); // Thêm vào để sử dụng
-
-        $discountProductIds = $order->discount?->products->pluck('id')->toArray() ?? [];
-
-        return view('admin.orders.edit', compact('order', 'allOrderStatuses', 'paymentMethods', 'paymentStatuses', 'discountProductIds'));
-    }
-
-    /**
-     * Cập nhật thông tin đơn hàng trong database.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id ID của đơn hàng.
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function update(Request $request, $id)
-    {
-        $order = Order::findOrFail($id);
-
-        $validator = Validator::make($request->all(), [
-            'shipping_name' => 'required|string|max:255',
-            'shipping_phone' => 'required|string|max:15',
-            'shipping_address' => 'required|string|max:255',
-            'order_status' => 'required|in:' . implode(',', $this->getOrderEnumStatuses()), // Sửa
-            'payment_status' => 'required|in:' . implode(',', $this->getPaymentEnumStatuses()), // Thêm
-            'total_amount' => 'required|numeric|min:0|max:99999999.99',
-            'note' => 'nullable|string',
-            'cancel_reason' => 'nullable|string|min:10',
-            'discount_id' => 'nullable|exists:discounts,id',
-            'payment_method_name' => 'required',
-            'shipping_fee' => 'required|numeric|min:0',
-        ], [
-            'shipping_name.required' => 'Tên người nhận không được để trống.',
-            'shipping_phone.required' => 'Số điện thoại không được để trống.',
-            'shipping_address.required' => 'Địa chỉ không được để trống.',
-            'order_status.required' => 'Trạng thái đơn hàng không được để trống.',
-            'order_status.in' => 'Trạng thái đơn hàng không hợp lệ.',
-            'payment_status.required' => 'Trạng thái thanh toán không được để trống.',
-            'payment_status.in' => 'Trạng thái thanh toán không hợp lệ.',
-            'total_amount.required' => 'Tổng tiền không được để trống.',
-            'total_amount.numeric' => 'Tổng tiền phải là số.',
-            'cancel_reason.min' => 'Lý do hủy phải có ít nhất 10 ký tự.',
-            'payment_method_name.required' => 'Phương thức thanh toán không được để trống.',
-            'shipping_fee.required' => 'Phí vận chuyển không được để trống.',
-            'shipping_fee.numeric' => 'Phí vận chuyển phải là số.',
-        ]);
-
-        // Logic validation bổ sung cho order_status và cancel_reason
-        $oldOrderStatus = $order->order_status;
-        $newOrderStatus = $request->input('order_status');
-        $orderStatusesEnum = $this->getOrderEnumStatuses();
-        $currentStatusIndex = array_search($oldOrderStatus, $orderStatusesEnum);
-        $newStatusIndex = array_search($newOrderStatus, $orderStatusesEnum);
-        $progressingOrderStatuses = ['Chưa xác nhận', 'Xác nhận', 'Đang vận chuyển', 'Giao hàng thành công'];
-
-        if (in_array($newOrderStatus, $progressingOrderStatuses) && $newStatusIndex < $currentStatusIndex) {
-            $validator->after(function ($validator) use ($oldOrderStatus, $newOrderStatus) {
-                $validator->errors()->add('order_status', "Không thể chuyển từ '{$oldOrderStatus}' về trạng thái '{$newOrderStatus}' (trạng thái lùi).");
-            });
-        } elseif ($newOrderStatus === 'Hủy đơn' && !$order->canBeCancelled()) {
-            $validator->after(function ($validator) {
-                $validator->errors()->add('order_status', "Đơn hàng này không thể chuyển sang trạng thái 'Hủy đơn'.");
-            });
-        } elseif ($newOrderStatus === 'Hủy đơn' && empty($request->input('cancel_reason'))) {
-            $validator->after(function ($validator) {
-                $validator->errors()->add('cancel_reason', 'Vui lòng cung cấp lý do hủy nếu chọn trạng thái "Hủy đơn".');
-            });
-        }
-
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        try {
-            $order->shipping_name = $request->input('shipping_name');
-            $order->shipping_phone = $request->input('shipping_phone');
-            $order->shipping_address = $request->input('shipping_address');
-            $order->order_status = $request->input('order_status');
-            $order->payment_status = $request->input('payment_status');
-            $order->total_amount = $request->input('total_amount');
-            $order->note = $request->input('note');
-
-            if ($order->order_status === 'Hủy đơn') {
-                $order->cancel_reason = $request->input('cancel_reason');
-            } else {
-                $order->cancel_reason = null;
-            }
-
-            // $order->discount_id = $request->input('discount_id');
-            $order->payment_method_name = $request->input('payment_method_name');
-            $order->shipping_fee = $request->input('shipping_fee');
-
-            $order->save();
-
-            return redirect()->route('admin.orders.index')->with('success', 'Cập nhật đơn hàng thành công!');
-        } catch (\Exception $e) {
-            Log::error("Lỗi khi cập nhật đơn hàng {$id}: " . $e->getMessage());
-            return redirect()->back()->with('error', 'Đã xảy ra lỗi khi cập nhật đơn hàng.')->withInput();
-        }
-    }
-
-    public function trash()
-    {
-        // Eager load các mối quan hệ cần thiết để hiển thị thông tin
-        $orders = Order::onlyTrashed()->with([
-            'user', // Thông tin người dùng đặt hàng
-            'discount', // Thông tin mã giảm giá (nếu có)
-            'paymentMethod', // Thông tin phương thức thanh toán
-            'items.productVariant.product', // Chi tiết sản phẩm trong đơn hàng
-        ])->latest()->paginate(20); // Có thể phân trang cho trang thùng rác
-
-        return view('admin.orders.trash', compact('orders'));
-    }
-
-    public function destroy($id)
-    {
-        $order = Order::findOrFail($id);
-        try {
-            $order->delete(); // Thực hiện soft delete
-            return redirect()->back()->with('success', 'Đã xóa mềm đơn hàng!');
-        } catch (\Exception $e) {
-            Log::error("Lỗi khi xóa mềm đơn hàng {$id}: " . $e->getMessage());
-            return redirect()->back()->with('error', 'Có lỗi xảy ra khi xóa mềm đơn hàng.');
-        }
-    }
-
-    public function restore($id)
-    {
-        $order = Order::withTrashed()->findOrFail($id);
-        try {
-            $order->restore();
-            return redirect()->route('admin.orders.trash')->with('success', 'Khôi phục đơn hàng thành công!');
-        } catch (\Exception $e) {
-            Log::error("Lỗi khi khôi phục đơn hàng {$id}: " . $e->getMessage());
-            return redirect()->back()->with('error', 'Có lỗi xảy ra khi khôi phục đơn hàng.');
-        }
-    }
-
-    public function forceDelete($id)
-    {
-        $order = Order::withTrashed()->findOrFail($id);
-        try {
-            $order->forceDelete();
-            return redirect()->route('admin.orders.trash')->with('success', 'Đã xóa vĩnh viễn đơn hàng!');
-        } catch (\Exception $e) {
-            Log::error("Lỗi khi xóa vĩnh viễn đơn hàng {$id}: " . $e->getMessage());
-            return redirect()->back()->with('error', 'Có lỗi xảy ra khi xóa vĩnh viễn đơn hàng.');
         }
     }
 
