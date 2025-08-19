@@ -262,8 +262,8 @@ class CheckoutController extends Controller
                 $discountApplied->decrement('quantity');
             }
             $order->load(['items', 'user']);
-            log::info('user: ' . $user);
-            Mail::to($user->email)->queue(new OrderInvoiceMail($order, $user));
+
+
 
 
             DB::commit();

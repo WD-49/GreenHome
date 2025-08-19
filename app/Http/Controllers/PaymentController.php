@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
+use App\Mail\OrderInvoiceMail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use App\Notifications\OrderStatusNotification;
 use App\Notifications\OrderPaymentNotification;
 
@@ -52,14 +54,12 @@ class PaymentController extends Controller
         // Build URL thanh toán
         $vnp_Url .= '?' . http_build_query($inputData);
 
-        Log::info('VNPAY URL: ' . $vnp_Url);
-        Log::info('VNPAY Secure Hash: ' . $vnp_SecureHash);
-        Log::info('hash data: ' . $hashData);
+        Log::info('URL thanh toán VNPAY: ' . $vnp_Url);
+        Log::info('Chữ ký bảo mật VNPAY: ' . $vnp_SecureHash);
+        Log::info('Dữ liệu hash: ' . $hashData);
 
         return $vnp_Url;
     }
-
-
 
     public function vnpayReturn(Request $request)
     {
@@ -73,60 +73,82 @@ class PaymentController extends Controller
         $hashData = http_build_query($inputData);
         $secureHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);
 
-        Log::info('Returned hashData: ' . $hashData);
-        Log::info('Returned secureHash: ' . $secureHash);
-        Log::info('Returned vnp_SecureHash: ' . $vnp_SecureHash);
+        Log::info('Dữ liệu hash trả về: ' . $hashData);
+        Log::info('Chữ ký bảo mật trả về: ' . $secureHash);
+        Log::info('Chữ ký VNPAY nhận được: ' . $vnp_SecureHash);
 
         if ($secureHash === $vnp_SecureHash) {
             $orderId = $inputData['vnp_TxnRef'] ?? null; // Mã đơn hàng
             $responseCode = $inputData['vnp_ResponseCode'] ?? '';
 
-            $order = Order::with('items')->where('sku', $orderId)->first();
+            $order = Order::with(['items', 'user.profile'])->where('sku', $orderId)->first();
 
             if ($order) {
                 if ($responseCode == '00') {
                     // Thanh toán thành công
-                    $order->order_status = 'Xác nhận';
+                    $order->order_status = 'Xác nhận';
                     $order->payment_status = 'paid';
                     $order->save();
 
                     // Gửi thông báo thanh toán thành công
                     try {
                         $order->user->notify(new OrderPaymentNotification($order, 'paid'));
-                        Log::info('Order payment notification sent/updated', [
+                        Log::info('Gửi thông báo thanh toán thành công', [
                             'order_id' => $order->id,
                             'sku' => $order->sku,
                             'user_id' => $order->user->id,
-                            'status' => 'paid',
+                            'trạng_thái' => 'thành công',
                         ]);
                     } catch (\Exception $e) {
-                        Log::error('Failed to send/update order payment notification', [
+                        Log::error('Lỗi khi gửi thông báo thanh toán', [
                             'order_id' => $order->id,
-                            'error' => $e->getMessage(),
+                            'lỗi' => $e->getMessage(),
                         ]);
                     }
 
-
+                    // Gửi email hóa đơn
+                    try {
+                        if ($order->user) {
+                            Mail::to($order->user->email)->queue(new OrderInvoiceMail($order, $order->user));
+                            Log::info('Đã xếp hàng gửi email hóa đơn', [
+                                'order_id' => $order->id,
+                                'sku' => $order->sku,
+                                'user_id' => $order->user->id,
+                                'user_profile' => $order->user->profile,
+                            ]);
+                        } else {
+                            Log::error('Không tìm thấy người dùng cho đơn hàng', [
+                                'order_id' => $order->id,
+                                'sku' => $order->sku,
+                                'user_id' => $order->user_id ?? 'không có',
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        Log::error('Lỗi khi xếp hàng gửi email hóa đơn', [
+                            'order_id' => $order->id,
+                            'lỗi' => $e->getMessage(),
+                        ]);
+                    }
                     return view('client.payment.success', ['data' => $inputData]);
                 } else {
                     // Thanh toán thất bại
                     $order->payment_status = 'pending';
-                    $order->order_status = 'Xác nhận';
+                    $order->order_status = 'Xác nhận';
                     $order->save();
 
                     // Gửi thông báo nhắc nhở thanh toán
                     try {
                         $order->user->notify(new OrderPaymentNotification($order, 'fail'));
-                        Log::info('Order payment notification sent/updated', [
+                        Log::info('Gửi thông báo thanh toán thất bại', [
                             'order_id' => $order->id,
                             'sku' => $order->sku,
                             'user_id' => $order->user->id,
-                            'status' => 'fail',
+                            'trạng_thái' => 'thất bại',
                         ]);
                     } catch (\Exception $e) {
-                        Log::error('Failed to send/update order payment notification', [
+                        Log::error('Lỗi khi gửi thông báo thanh toán', [
                             'order_id' => $order->id,
-                            'error' => $e->getMessage(),
+                            'lỗi' => $e->getMessage(),
                         ]);
                     }
 
@@ -139,6 +161,7 @@ class PaymentController extends Controller
             return "Chữ ký không hợp lệ!";
         }
     }
+
     public function payAgain(Order $order)
     {
         // Chỉ cho thanh toán lại nếu đủ điều kiện

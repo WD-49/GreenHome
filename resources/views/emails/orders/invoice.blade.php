@@ -29,8 +29,9 @@
                             <h4 style="margin-bottom: 5px;">Người đặt</h4>
                             <p style="margin: 0;">{{ $user->name ?? '' }}</p>
                             <p style="margin: 0;">{{ $user->profile->address ?? '' }}</p>
-                            <p style="margin: 0;">{{ $user->email }}</p>
-                            <p style="margin: 0;">{{ $user->profile->phone ?? '' }}</p>
+                            <p style="margin: 0;">{{ $user->email ?? '' }}</p>
+                            <p style="margin: 0;">
+                                {{ $user->profile->phone ?? '' }}</p>
                         </td>
 
                         <!-- Người nhận -->
@@ -70,7 +71,6 @@
                 </table>
             </td>
         </tr>
-
 
         <tr>
             <td style="padding: 28px;">
