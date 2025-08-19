@@ -49,7 +49,11 @@ class SocialiteController extends Controller
                 Auth::login($newUser);
             }
 
-            return redirect()->intended('/')->with('success', 'Đăng nhập bằng Google thành công!');
+            if ($user->role === 'admin') {
+                return redirect()->route('admin.dashboard')->with('success', 'Chào mừng bạn trở lại, Admin!');
+            }
+
+            return redirect('/')->with('success', 'Đăng nhập thành công!');
         } catch (\Exception $e) {
             Log::error('Google login failed: ' . $e->getMessage());
             return redirect()->route('login')->with('error', 'Đăng nhập bằng Google thất bại. Vui lòng thử lại.');
