@@ -16,14 +16,26 @@ class LoginController extends Controller
      *
      * @return string
      */
-    protected function redirectTo()
+    // protected function redirectTo()
+    // {
+    //     if (Auth::user()->role === 'admin') {
+    //         // return redirect()->route('admin.dashboard')->with('success', 'Welcome back Admin!');
+    //         return redirect()->route('admin.dashboard');
+
+    //         // return redirect()->route('login')->with('error', 'Bạn không có quyền truy cập');
+    //     }
+
+    //     return '/';
+    // }
+    protected function authenticated($request, $user)
     {
-        if (Auth::user()->role === 'admin') {
-            return '/admin';
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard')->with('success', 'Chào mừng bạn trở lại, Admin!');
         }
 
-        return '/';
+        return redirect('/')->with('success', 'Đăng nhập thành công!');
     }
+
 
     /**
      * Create a new controller instance.
@@ -72,7 +84,11 @@ class LoginController extends Controller
             // Gửi email thông báo đăng nhập bằng queue
             // dispatch(new SendLoginNotificationMailJob($user->email, $user->name, $now));
 
-            return redirect()->intended($this->redirectTo());
+            if ($user->role === 'admin') {
+                return redirect()->route('admin.dashboard')->with('success', 'Chào mừng bạn trở lại, Admin!');
+            }
+
+            return redirect('/')->with('success', 'Đăng nhập thành công!');
         }
         // dd(Auth::check(), Auth::user());
 
@@ -96,6 +112,6 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login');
+        return redirect('/')->with('success', 'Đăng xuất thành công! Hẹn gặp lại bạn.');
     }
 }
