@@ -262,8 +262,8 @@ class CheckoutController extends Controller
                 $discountApplied->decrement('quantity');
             }
             $order->load(['items', 'user']);
-            log::info('user: ' . $user);
-            Mail::to($user->email)->queue(new OrderInvoiceMail($order, $user));
+
+
 
 
             DB::commit();
@@ -287,14 +287,69 @@ class CheckoutController extends Controller
         }
     }
 
-    public function list()
+    public function list(Request $request)
     {
         $user = Auth::user();
-        $orders = Order::where('user_id', $user->id)
-            ->with(['items.review'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-        return view('client.pages.viewOrder', compact('orders', 'user'));
+        $query = Order::where('user_id', $user->id)->with(['items.review']);
+
+        // Lấy danh sách trạng thái và thanh toán từ DB
+        $statuses = Order::select('order_status')->whereNotNull('order_status')->distinct()->pluck('order_status')->all();
+        $payments = Order::select('payment_status')->whereNotNull('payment_status')->distinct()->pluck('payment_status')->all();
+
+        // Áp dụng bộ lọc
+        $sku = $request->query('sku');
+        $status = $request->query('status');
+        $payment = $request->query('payment');
+        $startDate = $request->query('start_date');
+        $endDate = $request->query('end_date');
+        $sort = $request->query('sort', 'newest');
+
+        if ($sku) {
+            $query->where('sku', 'like', "%$sku%");
+        }
+        if ($status) {
+            $query->where('order_status', $status);
+        }
+        if ($payment) {
+            $query->where('payment_status', $payment);
+        }
+        if ($startDate && $endDate) {
+            $query->whereBetween('created_at', [$startDate, $endDate]);
+        } elseif ($startDate) {
+            $query->where('created_at', '>=', $startDate);
+        } elseif ($endDate) {
+            $query->where('created_at', '<=', $endDate);
+        }
+
+        // Áp dụng sắp xếp
+        switch ($sort) {
+            case 'oldest':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'high_to_low':
+                $query->orderBy('total_amount', 'desc');
+                break;
+            case 'low_to_high':
+                $query->orderBy('total_amount', 'asc');
+                break;
+            case 'newest':
+            default:
+                $query->orderBy('created_at', 'desc');
+                break;
+        }
+
+        $orders = $query->paginate(10)->appends(request()->except('page'));
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'html' => view('client.partials.order-list', compact('orders'))->render(),
+                'total' => $orders->total(),
+                'pagination' => $orders->appends(request()->except('page'))->links('pagination::bootstrap-4')->toHtml(),
+            ]);
+        }
+
+        return view('client.pages.viewOrder', compact('orders', 'user', 'statuses', 'payments'));
     }
 
     public function show(Order $order)
