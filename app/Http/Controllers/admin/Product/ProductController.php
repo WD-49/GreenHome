@@ -295,6 +295,9 @@ class ProductController extends Controller
                             $variantImage = $request->file("variants.$index.image");
                             $filename = Str::slug($product->name . '-' .  $index) . '-' . time() . '.' . $variantImage->getClientOriginalExtension();
                             $newVariant->image = $variantImage->storeAs('images/products/variants', $filename, 'public');
+                        } else {
+                            // Gán ảnh sản phẩm nếu biến thể không có ảnh riêng
+                            $newVariant->image = $product->image;
                         }
 
                         $newVariant->save();

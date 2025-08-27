@@ -20,12 +20,15 @@ class ProductVariantController extends Controller
         $title = 'Quản lý biến thể';
         $perPage = $request->input('per_page', 10);
         $variants = $product->productVariants()
+            ->withoutTrashed() // chỉ lấy những bản ghi chưa bị xóa mềm
             ->with(['product', 'productVariantValues.attributeValue.attribute'])
-            ->filter($request) // <-- sử dụng scopeFilter vừa tạo
+            ->filter($request)
             ->orderByDesc('id')
-            ->paginate(5)
+            ->paginate($perPage)
             ->appends($request->except('page'));
+
         $variantTrashed = $product->productVariants()->onlyTrashed()->get();
+        // dd($variants);
 
         if ($request->ajax()) {
             return view('admin.products.variants.partials.table', compact('variants', 'product'))->render();

@@ -214,7 +214,7 @@
                                         $half = ceil(count($images) / 2);
                                         $firstRow = array_slice($images, 0, $half);
                                         $secondRow = array_slice($images, $half);
-                                        $defaultImage = asset('images/default.png');
+                                        $defaultImage = asset('storage/default.png');
                                     @endphp
                                     @if (count($images) === 1)
                                         <img src="{{ $images[0] ? asset('storage/' . $images[0]) : $defaultImage }}"

@@ -37,10 +37,10 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class);
     }
-   public function discounts()
-{
-    return $this->belongsToMany(Discount::class, 'discount_products');
-}
+    public function discounts()
+    {
+        return $this->belongsToMany(Discount::class, 'discount_products');
+    }
 
 
 
@@ -103,6 +103,18 @@ class Product extends Model
                     $productVariants->delete();
                 });
             }
+        });
+
+        // Xử lý khi khôi phục Product
+        static::restored(function ($product) {
+            // Khôi phục tất cả product_variants liên quan
+            $product->productVariants()->onlyTrashed()->each(function ($productVariant) {
+                $productVariant->restore();
+            });
+
+            // Tính lại quantity dựa trên các product_variants chưa bị xóa mềm
+            $total = $product->productVariants()->withoutTrashed()->sum('quantity');
+            $product->update(['quantity' => $total]);
         });
     }
     public function scopeFilter($query, $request)

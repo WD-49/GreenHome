@@ -31,7 +31,7 @@ class HomeController extends Controller
         //Lấy tất cả danh mục, và mỗi danh mục chỉ lấy 8 sản phẩm có view cao nhất
         $categoriesWithTopProducts = Category::with(['products' => function ($query) {
             $query->orderBy('view', 'desc')->take(8);
-        }])->get();
+        }])->take(10)->get();
 
         $popularProducts = Product::orderByDesc('view')->take(8)->get();
         $categories2 = Category::with(['products' => function ($query) {

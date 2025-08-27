@@ -67,21 +67,26 @@ class ProductVariant extends Model
     {
         // Khi tạo mới
         static::created(function ($productVariant) {
-            $productVariant->updateProductQuantity();
-        });
-
-        // Khi cập nhật
-        static::updated(function ($productVariant) {
-            // Kiểm tra nếu field 'quantity' có thay đổi
-            if ($productVariant->isDirty('quantity')) {
+            if ($productVariant->product && !$productVariant->product->trashed()) {
                 $productVariant->updateProductQuantity();
             }
         });
 
-        // Khi xóa
-        static::deleted(function ($productVariant) {
-            $productVariant->updateProductQuantity();
+        // Khi cập nhật
+        static::updated(function ($productVariant) {
+            if ($productVariant->isDirty('quantity') && $productVariant->product && !$productVariant->product->trashed()) {
+                $productVariant->updateProductQuantity();
+            }
         });
+
+        // Khi xóa mềm
+        static::deleted(function ($productVariant) {
+            if ($productVariant->product && !$productVariant->product->trashed()) {
+                $productVariant->updateProductQuantity();
+            }
+        });
+
+        // Khi đang xóa
         static::deleting(function ($productVariant) {
             if (!$productVariant->isForceDeleting()) {
                 $productVariant->cartItems()->each(function ($cartItem) {
@@ -92,19 +97,23 @@ class ProductVariant extends Model
                 });
             }
         });
+
+        // Khi khôi phục
         static::restored(function ($productVariant) {
-            // Khôi phục cartItems đã bị xóa mềm
+            // Khôi phục cartItems
             $productVariant->cartItems()->onlyTrashed()->each(function ($cartItem) {
                 $cartItem->restore();
             });
 
-            // Khôi phục productVariantValues đã bị xóa mềm
+            // Khôi phục productVariantValues
             $productVariant->productVariantValues()->onlyTrashed()->each(function ($pvv) {
                 $pvv->restore();
             });
 
-            // Cập nhật lại số lượng sản phẩm
-            $productVariant->updateProductQuantity();
+            // Cập nhật quantity của product
+            if ($productVariant->product && !$productVariant->product->trashed()) {
+                $productVariant->updateProductQuantity();
+            }
         });
     }
 
@@ -112,7 +121,7 @@ class ProductVariant extends Model
     {
         $product = $this->product;
 
-        if ($product) {
+        if ($product && !$product->trashed()) {
             $total = $product->productVariants()->withoutTrashed()->sum('quantity');
             $product->update(['quantity' => $total]);
         }
