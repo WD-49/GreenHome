@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Controllers\PaymentController;
-use Doctrine\DBAL\Schema\Index as DBALIndex;
+// use Doctrine\DBAL\Schema\Index as DBALIndex;
 
 use App\Http\Controllers\admin\BlogController;
 
@@ -146,12 +146,12 @@ Route::prefix('admin')->middleware(AdminMiddleware::class)->name('admin.')->grou
     Route::get('/dashboard-data', [DashboardController::class, 'getDashboardData'])->name('dashboard.data');
 
     // Faq
-    Route::prefix('/faqs')->name('faqs.')->group(function() {
-        Route::get('/', [FaqController::class,"index"])->name('index');
-        Route::delete('/destroy', [FaqController::class,"destroy"])->name('destroy');
-        Route::get('/edit/{id}', [FaqController::class,"edit"])->name('edit');
-        Route::get('/create', [FaqController::class,"create"])->name('create');
-        Route::post('/store', [FaqController::class,"store"])->name('store');
+    Route::prefix('/faqs')->name('faqs.')->group(function () {
+        Route::get('/', [FaqController::class, "index"])->name('index');
+        Route::delete('/destroy', [FaqController::class, "destroy"])->name('destroy');
+        Route::get('/edit/{id}', [FaqController::class, "edit"])->name('edit');
+        Route::get('/create', [FaqController::class, "create"])->name('create');
+        Route::post('/store', [FaqController::class, "store"])->name('store');
     });
     // Quản lý sản phẩm
     Route::prefix('/products')->name('products.')->group(function () {

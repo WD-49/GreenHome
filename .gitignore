@@ -6,8 +6,8 @@
 /storage/*.key
 /storage/pail
 /vendor
-/storage/app/public/images
 /storage/logs/*
+!storage/app/public/images
 
 
 .env
