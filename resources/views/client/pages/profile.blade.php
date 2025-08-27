@@ -1,27 +1,6 @@
+{{-- resources/views/client/pages/profile.blade.php --}}
 @extends('layouts.app')
 @section('title', 'Thông tin cá nhân của ' . $user->name) {{-- Thay đổi tiêu đề cho phù hợp với trang cá nhân --}}
-
-{{-- Đặt ở đầu phần nội dung chính của trang --}}
-@if (session('success'))
-    <div class="alert alert-success">
-        {{ session('success') }}
-    </div>
-@endif
-@if (session('error'))
-    <div class="alert alert-danger">
-        {{ session('error') }}
-    </div>
-@endif
-{{-- Đây là khối chung để hiển thị tất cả lỗi validation nếu bạn có --}}
-@if ($errors->any())
-    <div class="alert alert-danger">
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
 
 <style>
     .avatar-xxl {
@@ -115,7 +94,45 @@
         {{-- Sử dụng CDN Font Awesome mới nhất để có nhiều icon hơn nếu cần --}}
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
             integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
-    </head>
+    </head><br>
+
+    <!-- Breadcrumb -->
+    <section class="section-breadcrumb">
+        <div class="cr-breadcrumb-image">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="cr-breadcrumb-title">
+                            <h2>Tài khoản</h2>
+                            <span><a href="{{ route('home') }}">Home</a> - Tài khoản</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section><br>
+
+    {{-- Đặt ở đầu phần nội dung chính của trang --}}
+    @if (session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
+    @if (session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
+    {{-- Đây là khối chung để hiển thị tất cả lỗi validation nếu bạn có --}}
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     <div class="container-xxl">
         <div class="py-3 d-flex align-items-sm-center flex-sm-row flex-column">
             <div class="flex-grow-1">
@@ -130,7 +147,8 @@
                         <div class="align-items-center">
                             <div class="d-flex align-items-center">
                                 <img src="{{ $user->profile && $user->profile->user_image ? asset('storage/' . $user->profile->user_image) : 'https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740' }}"
-                                    class="rounded-circle avatar-xxl img-thumbnail float-start" alt="Ảnh đại diện">
+                                    class="rounded-circle avatar-xxl img-thumbnail float-start" alt="Ảnh đại diện"
+                                    width="150px" height="150px">
 
                                 <div class="overflow-hidden ms-4">
                                     <h4 class="m-0 text-dark fs-20">{{ $user->name }}</h4>
@@ -216,9 +234,9 @@
                                 <a class="nav-link p-2" data-tab="orders" style="color: #000000;">
                                     <span class="d-block d-sm-none"><i class="fas fa-receipt"></i></span>
                                     <span class="d-none d-sm-block">Đơn hàng
-                                        @if (isset($data['orders']) && $data['orders']->count() > 0)
+                                        @if (isset($data['orders']) && $data['orders']->total() > 0)
                                             <span
-                                                class="badge rounded-pill bg-info ms-1">{{ $data['orders']->count() }}</span>
+                                                class="badge rounded-pill bg-info ms-1">{{ $data['orders']->total() }}</span>
                                         @endif
                                     </span>
                                 </a>
@@ -227,9 +245,9 @@
                                 <a class="nav-link p-2" data-tab="reviews" style="color: #000000;">
                                     <span class="d-block d-sm-none"><i class="fas fa-star"></i></span>
                                     <span class="d-none d-sm-block">Đánh giá
-                                        @if (isset($data['reviews']) && $data['reviews']->count() > 0)
+                                        @if (isset($data['reviews']) && $data['reviews']->total() > 0)
                                             <span
-                                                class="badge rounded-pill bg-primary ms-1">{{ $data['reviews']->count() }}</span>
+                                                class="badge rounded-pill bg-primary ms-1">{{ $data['reviews']->total() }}</span>
                                         @endif
                                     </span>
                                 </a>
@@ -250,7 +268,7 @@
                                 <a class="nav-link p-2" data-tab="comments" style="color: #000000;">
                                     <span class="d-block d-sm-none"><i class="fas fa-comments"></i></span>
                                     <span class="d-none d-sm-block">Bình luận
-                                        @php $totalCommentsCount = isset($data['comments']) ? $data['comments']->count() : 0; @endphp
+                                        @php $totalCommentsCount = isset($data['comments']) ? $data['comments']->total() : 0; @endphp
                                         @if ($totalCommentsCount > 0)
                                             <span
                                                 class="badge rounded-pill bg-secondary ms-1">{{ $totalCommentsCount }}</span>
@@ -262,11 +280,17 @@
                                 <a class="nav-link p-2" data-tab="wishlist" style="color: #000000;">
                                     <span class="d-block d-sm-none"><i class="fas fa-heart"></i></span>
                                     <span class="d-none d-sm-block">Yêu thích
-                                        @if (isset($data['wishlistItems']) && $data['wishlistItems']->count() > 0)
+                                        @if (isset($data['wishlistItems']) && $data['wishlistItems']->total() > 0)
                                             <span
-                                                class="badge rounded-pill bg-danger ms-1">{{ $data['wishlistItems']->count() }}</span>
+                                                class="badge rounded-pill bg-danger ms-1">{{ $data['wishlistItems']->total() }}</span>
                                         @endif
                                     </span>
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link p-2" data-tab="password" style="color: #000000;">
+                                    <span class="d-block d-sm-none"><i class="fas fa-lock"></i></span>
+                                    <span class="d-none d-sm-block">Đổi mật khẩu</span>
                                 </a>
                             </li>
                         </ul>
@@ -304,7 +328,7 @@
                                     </div>
                                     <div class="form-group mb-3">
                                         <label for="phone">Số điện thoại:</label>
-                                        <input type="text" class="form-control" id="phone" name="phone"
+                                        <input type="number" class="form-control" id="phone" name="phone"
                                             value="{{ old('phone', $data['profile']->phone ?? '') }}">
                                         @error('phone')
                                             <div class="invalid-feedback">
@@ -312,7 +336,7 @@
                                             </div>
                                         @enderror
                                     </div>
-                                    <div class="form-group mb-3">
+                                    {{-- <div class="form-group mb-3">
                                         <label for="address">Địa chỉ:</label>
                                         <input type="text" class="form-control" id="address" name="address"
                                             value="{{ old('address', $data['profile']->address ?? '') }}">
@@ -321,13 +345,73 @@
                                                 {{ $message }}
                                             </div>
                                         @enderror
+                                    </div> --}}
+                                    @php
+                                        $addressParts = explode(', ', $data['profile']->address ?? '');
+                                        $street = $addressParts[0] ?? '';
+                                        $ward = $addressParts[1] ?? '';
+                                        $district = $addressParts[2] ?? '';
+                                        $province = $addressParts[3] ?? '';
+                                    @endphp
+                                    <div class="form-group mt-3">
+                                        <label for="province">Tỉnh/Thành phố</label>
+                                        <select id="province" class="form-control">
+                                            <option value="">-- Chọn Tỉnh/TP --</option>
+                                        </select>
+                                        @error('address')
+                                            <div class="invalid-feedback">
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
                                     </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="district">Quận/Huyện</label>
+                                        <select id="district" class="form-control" disabled>
+                                            <option value="">-- Chọn Quận/Huyện --</option>
+                                        </select>
+                                        @error('address')
+                                            <div class="invalid-feedback">
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="ward">Phường/Xã</label>
+                                        <select id="ward" class="form-control" disabled>
+                                            <option value="">-- Chọn Phường/Xã --</option>
+                                        </select>
+                                        @error('address')
+                                            <div class="invalid-feedback">
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="street">Số nhà, tên đường</label>
+                                        <input type="text" id="street" class="form-control"
+                                            value="{{ old('street', $street) }}">
+                                        @error('address')
+                                            <div class="invalid-feedback">
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
+
+                                    {{-- Trường ẩn để lưu chuỗi đầy đủ --}}
+                                    {{-- <input type="hidden" name="address" id="full_address"> input ẩn không được xóa, lưu dl ẩn kho sửa địa chỉ --}}
+
+                                    {{-- Trường ẩn để lưu chuỗi đầy đủ --}}
+                                    <input type="hidden" name="address" id="full_address">
                                     <div class="form-group mb-3">
                                         <label for="gender">Giới tính:</label>
                                         <select class="form-control" id="gender" name="gender">
                                             <option value=""
                                                 {{ old('gender', $data['profile']->gender ?? '') == '' ? 'selected' : '' }}>
-                                                -- Chọn giới tính --</option>
+                                                -- Chọn giới tính --
+                                            </option>
                                             <option value="nam"
                                                 {{ old('gender', $data['profile']->gender ?? '') == 'nam' ? 'selected' : '' }}>
                                                 Nam</option>
@@ -512,7 +596,7 @@
                                                                                 <td>{{ number_format($item->unit_price, 0, ',', '.') }}
                                                                                     VNĐ</td>
                                                                                 <td>{{ number_format($subtotalBeforeDiscount, 0, ',', '.') }}
-                                                                                    VNĐ</td> {{-- total_price đã là giá sau giảm giá của item --}}
+                                                                                    VNĐ</td>
                                                                             </tr>
                                                                         @endforeach
                                                                     </tbody>
@@ -530,7 +614,7 @@
                                                                         <tr>
                                                                             <td class="text-start ps-0">Tổng giá trị sản
                                                                                 phẩm:</td>
-                                                                            {{-- SỬA DÒNG NÀY: Dùng biến mới tính tổng giá gốc --}}
+                                                                            
                                                                             <td class="text-end pe-0 fw-semibold">
                                                                                 {{ number_format($subtotalBeforeDiscount, 0, ',', '.') }}
                                                                                 VNĐ
@@ -586,6 +670,9 @@
                                         Người dùng này chưa có đơn hàng nào.
                                     </div>
                                 @endif
+                                <div class="mt-3">
+                                    {{ $data['orders']->appends(request()->except('orders_page') + ['tab' => 'orders'])->links() }}
+                                </div>
                             </div>
 
                             {{-- Tab Content - Đánh giá sản phẩm (Reviews) --}}
@@ -630,6 +717,9 @@
                                         Người dùng này chưa có đánh giá sản phẩm nào.
                                     </div>
                                 @endif
+                                <div class="mt-3">
+                                    {{ $data['reviews']->appends(['tab' => 'reviews'])->links() }}
+                                </div>
                             </div>
 
                             {{-- Tab Content - Giỏ hàng (Cart) --}}
@@ -805,6 +895,9 @@
                                             <div class="alert alert-light text-center">Không có bình luận nào đang hoạt động.
                                             </div>
                                         @endif
+                                        <div class="mt-3">
+                                            {{ $data['comments']->appends(['tab' => 'comments'])->links() }}
+                                        </div>
                                     </div>
                                     <hr>
                                     <div id="trashedCommentsSection" style="display: none;">
@@ -827,7 +920,7 @@
                                                             <img src="{{ optional($wishlistItem->product)->image ? asset('storage/' . $wishlistItem->product->image) : 'https://spencil.vn/wp-content/uploads/2024/11/chup-anh-san-pham-SPencil-Agency-1.jpg' }}"
                                                                 alt="" {{-- Alt text nên dựa trên variant hoặc product --}}
                                                                 class="img-fluid rounded"
-                                                                style="width: 50px; height: 50px; object-fit: cover;">
+                                                                style="width: 111px; height: 111px;">
                                                         </div>
                                                         <div class="col-md-7">
                                                             <h5 class="mb-1" style="color: #64B496;">
@@ -876,9 +969,69 @@
                                             Người dùng này chưa có sản phẩm nào trong danh sách yêu thích.
                                         </div>
                                     @endif
+                                    <div class="mt-3">
+                                        {{ $data['wishlistItems']->appends(['tab' => 'wishlistItems'])->links() }}
+                                    </div>
                                 </div>
 
                             </div> {{-- End tab-content --}}
+
+                            {{-- Tab Content - Đổi mật khẩu (Password) --}}
+                            <div id="password" class="tab-content-item {{ $tab == 'password' ? 'active' : '' }}">
+                                <h3 style="color: #64B496;">Đổi mật khẩu</h3>
+                                <form action="{{ route('profile.updatePassword') }}" method="POST">
+                                    @csrf
+                                    <div class="form-group mb-3">
+                                        <label for="current_password">Mật khẩu hiện tại:</label>
+                                        <div class="input-group">
+                                            <input type="password"
+                                                class="form-control @error('current_password') is-invalid @enderror"
+                                                id="current_password" name="current_password" required>
+                                            <button class="btn btn-outline-secondary" type="button"
+                                                id="toggleCurrentPassword" style="border-left: none;">
+                                                <i class="fa fa-eye"></i>
+                                            </button>
+                                            @error('current_password')
+                                                {{-- Validation feedback should still be outside the input-group if you want it to display below --}}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ $message }}
+                                                </div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="new_password">Mật khẩu mới:</label>
+                                        <div class="input-group">
+                                            <input type="password"
+                                                class="form-control @error('new_password') is-invalid @enderror"
+                                                id="new_password" name="new_password" required>
+                                            <button class="btn btn-outline-secondary" type="button" id="toggleNewPassword">
+                                                <i class="fa fa-eye"></i>
+                                            </button>
+                                            @error('new_password')
+                                                <div class="invalid-feedback">
+                                                    {{ $message }}
+                                                </div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="new_password_confirmation">Xác nhận mật khẩu mới:</label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control" id="new_password_confirmation"
+                                                name="new_password_confirmation" required>
+                                            <button class="btn btn-outline-secondary" type="button"
+                                                id="toggleConfirmPassword">
+                                                <i class="fa fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary">Cập nhật mật khẩu</button>
+                                </form>
+                            </div>
                         </div> {{-- End card-body --}}
                     </div> {{-- End card --}}
                 </div> {{-- End col-12 --}}
@@ -886,12 +1039,101 @@
         </div> {{-- End container-xxl --}}
     @endsection
 
+
+    {{-- Phần cho nút ẩn hiện password --}}
     {{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     @push('scripts')
         <script>
             $(document).ready(function() {
                 const csrfTokenGlobal = $('meta[name="csrf-token"]').attr('content');
+
+                // BẮT ĐẦU PHẦN LOAD ĐỊA CHỈ
+                const oldProvince = @json($province);
+                const oldDistrict = @json($district);
+                const oldWard = @json($ward);
+
+
+                // Load danh sách Tỉnh
+                $.get('https://provinces.open-api.vn/api/?depth=1', function(provinces) {
+                    $('#province').html('<option value="">-- Chọn Tỉnh/TP --</option>');
+                    provinces.forEach(p => {
+                        const selected = p.name === oldProvince ? 'selected' : '';
+                        $('#province').append(
+                            `<option value="${p.code}" ${selected}>${p.name}</option>`);
+                    });
+
+                    // Nếu có tỉnh cũ → load quận
+                    const selectedProvince = provinces.find(p => p.name === oldProvince);
+                    if (selectedProvince) {
+                        loadDistricts(selectedProvince.code, oldDistrict, oldWard);
+                    }
+                });
+
+                // Khi chọn tỉnh → load quận
+                $('#province').on('change', function() {
+                    const provinceCode = $(this).val();
+                    loadDistricts(provinceCode);
+                });
+
+                // Hàm load quận
+                function loadDistricts(provinceCode, selectedDistrictName = null, selectedWardName = null) {
+                    if (!provinceCode) return;
+                    $('#district').html('<option>Đang tải...</option>').prop('disabled', true);
+                    $('#ward').html('<option>-- Chọn Phường/Xã --</option>').prop('disabled', true);
+
+                    $.get(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`, function(provinceData) {
+                        $('#district').html('<option value="">-- Chọn Quận/Huyện --</option>');
+                        provinceData.districts.forEach(d => {
+                            const selected = d.name === selectedDistrictName ? 'selected' : '';
+                            $('#district').append(
+                                `<option value="${d.code}" ${selected}>${d.name}</option>`);
+                        });
+                        $('#district').prop('disabled', false);
+
+                        // Nếu có quận cũ → load phường
+                        const selectedDistrict = provinceData.districts.find(d => d.name ===
+                            selectedDistrictName);
+                        if (selectedDistrict && selectedWardName) {
+                            loadWards(selectedDistrict.code, selectedWardName);
+                        }
+                    });
+                }
+
+                // Khi chọn quận → load phường
+                $('#district').on('change', function() {
+                    const districtCode = $(this).val();
+                    loadWards(districtCode);
+                });
+
+                // Hàm load phường
+                function loadWards(districtCode, selectedWardName = null) {
+                    if (!districtCode) return;
+                    $('#ward').html('<option>Đang tải...</option>').prop('disabled', true);
+
+                    $.get(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`, function(districtData) {
+                        $('#ward').html('<option value="">-- Chọn Phường/Xã --</option>');
+                        districtData.wards.forEach(w => {
+                            const selected = w.name === selectedWardName ? 'selected' : '';
+                            $('#ward').append(
+                                `<option value="${w.code}" ${selected}>${w.name}</option>`);
+                        });
+                        $('#ward').prop('disabled', false);
+                    });
+                }
+
+                // Ghép địa chỉ khi submit
+                $('form').on('submit', function() {
+                    const province = $('#province option:selected').text();
+                    const district = $('#district option:selected').text();
+                    const ward = $('#ward option:selected').text();
+                    const street = $('#street').val();
+
+                    const fullAddress = `${street}, ${ward}, ${district}, ${province}`;
+                    $('#full_address').val(fullAddress);
+                });
+
+                // HẾT PHẦN LOAD ĐỊA CHỈ API
 
                 // Khởi tạo tất cả tooltips khi trang tải
                 if ($.fn.tooltip) { // Kiểm tra nếu Bootstrap tooltip đã được tải
@@ -1381,6 +1623,48 @@
                         }
                     });
                 });
+            });
+        </script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const toggleCurrentPassword = document.getElementById('toggleCurrentPassword');
+                const currentPasswordInput = document.getElementById('current_password');
+
+                if (toggleCurrentPassword && currentPasswordInput) {
+                    toggleCurrentPassword.addEventListener('click', function() {
+                        const type = currentPasswordInput.getAttribute('type') === 'password' ? 'text' :
+                            'password';
+                        currentPasswordInput.setAttribute('type', type);
+                        this.querySelector('i').classList.toggle('fa-eye');
+                        this.querySelector('i').classList.toggle('fa-eye-slash');
+                    });
+                }
+
+                const toggleNewPassword = document.getElementById('toggleNewPassword');
+                const newPasswordInput = document.getElementById('new_password');
+
+                if (toggleNewPassword && newPasswordInput) {
+                    toggleNewPassword.addEventListener('click', function() {
+                        const type = newPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                        newPasswordInput.setAttribute('type', type);
+                        this.querySelector('i').classList.toggle('fa-eye');
+                        this.querySelector('i').classList.toggle('fa-eye-slash');
+                    });
+                }
+
+                const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+                const confirmPasswordInput = document.getElementById('new_password_confirmation');
+
+                if (toggleConfirmPassword && confirmPasswordInput) {
+                    toggleConfirmPassword.addEventListener('click', function() {
+                        const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' :
+                            'password';
+                        confirmPasswordInput.setAttribute('type', type);
+                        this.querySelector('i').classList.toggle('fa-eye');
+                        this.querySelector('i').classList.toggle('fa-eye-slash');
+                    });
+                }
             });
         </script>
     @endpush

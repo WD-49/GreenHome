@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
+use App\Notifications\OrderStatusNotification;
 use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
@@ -25,19 +26,19 @@ class OrderController extends Controller
      * Lấy danh sách các trạng thái đơn hàng ENUM (có thể dùng chung).
      * @return array
      */
-    protected function getOrderEnumStatuses(): array
+    protected function getOrderEnumStatuses()
     {
-        // Các giá trị này PHẢI khớp với định nghĩa enum trong bảng cơ sở dữ liệu của bạn cho 'order_status'
-        return ['Chưa xác nhận', 'Xác nhận', 'Đang vận chuyển', 'Giao hàng thành công', 'Hủy đơn'];
+        // Các giá trị trạng thái đơn hàng
+        return ['Chưa xác nhận', 'Xác nhận', 'Đang vận chuyển', 'Giao hàng thành công', 'Hủy đơn', 'Đã nhận hàng'];
     }
 
     /**
      * Lấy danh sách các trạng thái thanh toán ENUM (có thể dùng chung).
      * @return array
      */
-    protected function getPaymentEnumStatuses(): array
+    protected function getPaymentEnumStatuses()
     {
-        // Các giá trị này PHẢI khớp với định nghĩa enum trong bảng cơ sở dữ liệu của bạn cho 'payment_status'
+        // Các giá trị trạng thái thanh toán
         return ['pending', 'paid', 'failed'];
     }
 
@@ -46,7 +47,7 @@ class OrderController extends Controller
      * @param string|null $status
      * @return string
      */
-    protected function mapPaymentStatusToVietnamese(?string $status): string
+    protected function mapPaymentStatusToVietnamese(?string $status)
     {
         return [
             'pending' => 'Chờ thanh toán',
@@ -61,7 +62,6 @@ class OrderController extends Controller
         $query = Order::with([
             'user',
             'items',
-            'items', // Đã sửa tên quan hệ ở model ProductVariant
         ])->latest();
 
         // Lọc theo mã đơn hàng (sku hoặc id)
@@ -104,369 +104,22 @@ class OrderController extends Controller
             $query->where('payment_method_id', $request->payment_method);
         }
 
+        // Đếm số lượng đơn hàng chưa xác nhận hôm nay
+        $unconfirmedTodayCount = Order::where('order_status', 'Chưa xác nhận')
+            ->whereDate('created_at', now())
+            ->count();
+
         // Lấy kết quả phân trang, bao gồm cả những đơn hàng đã xóa mềm (nếu cần hiển thị)
-        $orders = $query->withTrashed()->paginate(20)->withQueryString();
+        // $orders = $query->withTrashed()->paginate(20)->withQueryString();
+        $orders = $query->withTrashed()->get();
+
+        // dd($orders);
 
         $orderStatuses = $this->getOrderEnumStatuses();
         $paymentMethods = PaymentMethod::all();
         $paymentStatuses = $this->getPaymentEnumStatuses();
 
-        return view('admin.orders.index', compact('orders', 'orderStatuses', 'paymentMethods', 'paymentStatuses'));
-    }
-
-    public function create()
-    {
-        $users = User::all();
-        $productVariants = ProductVariant::with('product')->get();
-        $discounts = Discount::all();
-        $payMethods = PaymentMethod::all();
-        $productVariants = ProductVariant::with('product:id,name')->where('status', 1)->get();
-        $discounts = Discount::where('status', 'active')->get();
-
-        $productVariants = ProductVariant::with('product:id,name', 'productVariantValues.attributeValue')->where('status', 1)->get(); // Cần eager load productVariantValues và attributeValue cho logic attributeName
-        $discounts = Discount::with('products')->where('status', 'active')->get(); // Cần eager load 'products' cho discountProductsMap nếu dùng applies_to_all_products=0
-
-        $productVariantsForJs = $productVariants->mapWithKeys(function ($variant) {
-            $attributeNames = $variant->attribute_name;
-            if (empty($attributeNames) && $variant->productVariantValues->isNotEmpty()) {
-                $attributeNames = $variant->productVariantValues->map(function ($pvv) {
-                    return optional($pvv->attributeValue)->value;
-                })->filter()->implode(' - ');
-            }
-            return [
-                $variant->id => [
-                    'price' => (float) $variant->price,
-                    'name' => optional($variant->product)->name . ($attributeNames ? ' (' . $attributeNames . ')' : ''),
-                    'sku' => $variant->sku,
-                    'product_id' => $variant->product_id
-                ]
-            ];
-        });
-
-        $discountsForJs = $discounts->mapWithKeys(function ($discount) {
-            return [
-                $discount->id => [
-                    'discount_type' => $discount->discount_type,        // <-- Đổi tên key để khớp với DB
-                    'discount_value' => (float) $discount->discount_value, // <-- Đổi tên key để khớp với DB
-                    'max_discount' => (float) ($discount->max_discount ?? 0), // <-- Đổi tên key để khớp với DB
-                    'min_order_value' => (float) ($discount->min_order_value ?? 0), // <-- Đổi tên key để khớp với DB
-                    'max_order_value' => (float) ($discount->max_order_value ?? 0), // Thêm max_order_value
-                    'applies_to_all_products' => (int) $discount->applies_to_all_products,
-                    'code' => $discount->code
-                ]
-            ];
-        });
-
-        $discountProductsMap = DiscountProduct::select('discount_id', 'product_id')->get()->groupBy('discount_id')->map(function ($items) {
-            return $items->pluck('product_id')->toArray();
-        });
-
-
-
-        return view('admin.orders.create', compact(
-            'users',
-            'productVariants', // Vẫn truyền productVariants cho vòng lặp select HTML
-            'discounts',       // Vẫn truyền discounts cho vòng lặp select HTML
-            'payMethods',
-            'productVariantsForJs', // Dữ liệu cho JS
-            'discountsForJs',
-            'discountProductsMap'     // Dữ liệu cho JS
-        ));
-    }
-
-    public function store(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,id',
-            'shipping_name' => 'required|string|max:255',
-            'shipping_phone' => 'required|string|regex:/^[0-9]{10,15}$/',
-            'shipping_address' => 'required|string|max:255',
-            'products' => 'required|array|min:1',
-            'products.*' => 'required|exists:product_variants,id',
-            'quantities' => 'required|array|min:1',
-            'quantities.*' => 'required|integer|min:1',
-            'payment_method_id' => 'required|exists:payment_methods,id',
-            'shipping_fee' => 'required|numeric|min:0',
-            'discount_id' => 'nullable|exists:discounts,id',
-            'note' => 'nullable|string|max:1000',
-        ], [
-            'user_id.required' => 'Vui lòng chọn khách hàng.',
-            'shipping_name.required' => 'Tên người nhận không được để trống.',
-            'shipping_phone.required' => 'Số điện thoại không được để trống.',
-            'shipping_phone.regex' => 'Số điện thoại không hợp lệ.',
-            'shipping_address.required' => 'Địa chỉ không được để trống.',
-            'products.required' => 'Vui lòng chọn ít nhất một sản phẩm.',
-            'products.*.required' => 'Có lỗi trong việc chọn sản phẩm.',
-            'products.*.exists' => 'Sản phẩm được chọn không hợp lệ.',
-            'quantities.required' => 'Vui lòng nhập số lượng cho sản phẩm.',
-            'quantities.*.required' => 'Vui lòng nhập số lượng cho mỗi sản phẩm.',
-            'quantities.*.min' => 'Số lượng sản phẩm phải lớn hơn 0.',
-            'payment_method_id.required' => 'Vui lòng chọn phương thức thanh toán.',
-            'shipping_fee.required' => 'Vui lòng nhập phí vận chuyển.',
-            'discount_id.exists' => 'Mã giảm giá không hợp lệ.',
-            'note.max' => 'Ghi chú không được vượt quá 1000 ký tự.'
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        if (count($request->input('products')) !== count($request->input('quantities'))) {
-            return redirect()->back()->withErrors(['products' => 'Dữ liệu sản phẩm và số lượng không khớp.'])->withInput();
-        }
-
-        return DB::transaction(function () use ($request) {
-            $productVariantInputIds = $request->input('products');
-            $requestedQuantities = $request->input('quantities');
-            $subTotalCalculatedFromItems = 0; // Tổng tiền hàng ban đầu (trước giảm giá tổng đơn)
-            $cartItemsDetails = []; // Mảng để lưu thông tin chi tiết các item sẽ tạo và biến thể để cập nhật
-
-            // Lấy chi tiết các ProductVariant và Product liên quan cho tất cả các ID đã chọn
-            $selectedVariants = ProductVariant::with('product:id,name,slug,image', 'productVariantValues.attributeValue')
-                ->findMany($productVariantInputIds);
-            $selectedVariants = $selectedVariants->keyBy('id'); // Index by ID for easy lookup
-
-            foreach ($productVariantInputIds as $index => $variantId) {
-                $variant = $selectedVariants->get($variantId);
-
-                if (!$variant) {
-                    return redirect()->back()->withErrors(['products.' . $index => "Sản phẩm không tồn tại (ID: {$variantId})."])->withInput();
-                }
-
-                $quantityToOrder = (int) $requestedQuantities[$index];
-
-                if ($variant->quantity < $quantityToOrder) {
-                    return redirect()->back()
-                        ->withErrors(['products.' . $index => 'Sản phẩm "' . optional($variant->product)->name . ' (SKU: ' . $variant->sku . ')" không đủ số lượng tồn kho (còn ' . $variant->quantity . ').'])
-                        ->withInput();
-                }
-
-                $itemTotalBeforeItemDiscount = $variant->price * $quantityToOrder;
-                $subTotalCalculatedFromItems += $itemTotalBeforeItemDiscount;
-
-                $cartItemsDetails[] = [
-                    'product_variant_id' => $variantId,
-                    'product_id' => $variant->product_id,
-                    'quantity' => $quantityToOrder,
-                    'unit_price' => $variant->price,
-                    'total_price_before_item_discount' => $itemTotalBeforeItemDiscount, // Lưu tạm để tính discount item
-                    'variant_instance' => $variant,
-                ];
-            }
-
-            $discountAmountAppliedToOrder = 0; // Tổng số tiền giảm giá cho toàn bộ đơn hàng
-            $appliedDiscountId = null;
-            $discountModelInstance = null;
-
-            // Tính toán giảm giá tổng đơn hàng
-            if ($request->filled('discount_id')) {
-                $discountModelInstance = Discount::with('products') // Eager load products for discount
-                    ->where('id', $request->discount_id)
-                    ->where('status', 'active')
-                    ->where('start_date', '<=', now())
-                    ->where('end_date', '>=', now())
-                    ->first();
-
-                if (!$discountModelInstance) {
-                    return redirect()->back()->withErrors(['discount_id' => 'Mã giảm giá không hợp lệ, đã hết hạn hoặc không tồn tại.'])->withInput();
-                }
-
-                // Kiểm tra số lượng lượt sử dụng tổng của mã
-                if ($discountModelInstance->quantity <= 0) {
-                    return redirect()->back()->withErrors(['discount_id' => 'Mã giảm giá đã hết lượt sử dụng.'])->withInput();
-                }
-
-                if ($discountModelInstance->max_order_value && $subTotalCalculatedFromItems > $discountModelInstance->max_order_value) {
-                    return redirect()->back()->withErrors(['discount_id' => 'Tổng giá trị đơn hàng vượt quá giới hạn tối đa cho phép của mã giảm giá.'])->withInput();
-                }
-
-                // Kiểm tra giới hạn sử dụng của người dùng (user_usage_limit)
-                if ($discountModelInstance->user_usage_limit > 0) {
-                    $userUsesCount = DiscountUsage::where('user_id', $request->user_id) // Sử dụng DiscountUsage thay vì Order
-                        ->where('discount_id', $discountModelInstance->id)
-                        ->count();
-                    if ($userUsesCount >= $discountModelInstance->user_usage_limit) {
-                        return redirect()->back()->withErrors(['discount_id' => 'Bạn đã sử dụng hết số lần cho phép của mã giảm giá này.'])->withInput();
-                    }
-                }
-
-                $amountEligibleForDiscount = 0; // Số tiền từ các sản phẩm đủ điều kiện giảm giá
-                $totalQuantityForFixedDiscountPerItem = 0; // Tổng số lượng sản phẩm đủ điều kiện cho fixed discount (nếu fixed là per-item)
-
-                if ((int) $discountModelInstance->applies_to_all_products === 1) {
-                    $amountEligibleForDiscount = $subTotalCalculatedFromItems;
-                    $totalQuantityForFixedDiscountPerItem = array_sum($requestedQuantities);
-                } else {
-                    $applicableProductIds = $discountModelInstance->products->pluck('id')->toArray();
-
-                    foreach ($cartItemsDetails as $itemDetail) {
-                        if (in_array($itemDetail['product_id'], $applicableProductIds)) {
-                            $amountEligibleForDiscount += $itemDetail['total_price_before_item_discount'];
-                            $totalQuantityForFixedDiscountPerItem += $itemDetail['quantity'];
-                        }
-                    }
-
-                    if ($amountEligibleForDiscount === 0) {
-                        return redirect()->back()->withErrors(['discount_id' => 'Mã giảm giá không áp dụng cho bất kỳ sản phẩm nào trong giỏ hàng hiện tại.'])->withInput();
-                    }
-                }
-
-                if ($amountEligibleForDiscount < $discountModelInstance->min_order_value) {
-                    $formattedMinOrderValue = number_format($discountModelInstance->min_order_value, 0, ',', '.') . 'đ';
-                    $errorMessage = $discountModelInstance->applies_to_all_products ?
-                        "Đơn hàng chưa đủ giá trị tối thiểu ({$formattedMinOrderValue}) để áp dụng mã giảm giá." :
-                        "Tổng giá trị các sản phẩm hợp lệ cho mã giảm giá chưa đủ giá trị tối thiểu ({$formattedMinOrderValue}).";
-                    return redirect()->back()->withErrors(['discount_id' => $errorMessage])->withInput();
-                }
-
-                if ($discountModelInstance->discount_type === 'percentage') {
-                    $rawDiscount = $amountEligibleForDiscount * ($discountModelInstance->discount_value / 100);
-                    $discountAmountAppliedToOrder = min($rawDiscount, $discountModelInstance->max_discount);
-                } elseif ($discountModelInstance->discount_type === 'fixed') {
-                    // Tính toán tổng số tiền giảm giá cơ bản bằng cách nhân discount_value với tổng số lượng sản phẩm đủ điều kiện
-                    $calculatedBaseFixedDiscount = $discountModelInstance->discount_value * $totalQuantityForFixedDiscountPerItem;
-
-                    // Áp dụng max_discount lên tổng số tiền giảm giá này
-                    $discountAmountAppliedToOrder = min($calculatedBaseFixedDiscount, $discountModelInstance->max_discount);
-                }
-
-                $discountAmountAppliedToOrder = min($discountAmountAppliedToOrder, $amountEligibleForDiscount);
-                $appliedDiscountId = $discountModelInstance->id;
-            }
-
-            $totalAfterDiscount = max(0, $subTotalCalculatedFromItems - $discountAmountAppliedToOrder);
-            $grandTotal = $totalAfterDiscount + $request->input('shipping_fee', 0);
-
-            do {
-                $orderSku = 'DH-' . rand(1000, 9999);
-            } while (Order::where('sku', $orderSku)->exists());
-
-            $user = User::find($request->user_id);
-            $paymentMethod = PaymentMethod::findOrFail($request->payment_method_id);
-
-            $order = Order::create([
-                'user_id' => $request->user_id,
-                'user_name' => optional($user)->name ?? 'Khách hàng ẩn danh',
-                'sku' => $orderSku,
-                'shipping_name' => $request->shipping_name,
-                'shipping_phone' => $request->shipping_phone,
-                'shipping_address' => $request->shipping_address,
-                'order_status' => 'Chưa xác nhận',
-                'discount_id' => $appliedDiscountId,
-                'payment_method_id' => $request->payment_method_id,
-                'discount_code' => optional($discountModelInstance)->code,
-                'discount_value' => optional($discountModelInstance)->discount_value ?? '0', // discount_value của mã giảm giá (VD: 10, 50000)
-                'payment_method_name' => $paymentMethod->name,
-                'payment_status' => 'pending',
-                'discount_amount' => $discountAmountAppliedToOrder, // Đây là tổng discount thực tế được áp dụng cho toàn đơn hàng
-                'shipping_fee' => $request->shipping_fee,
-                'total_amount' => $grandTotal,
-                'note' => $request->note,
-            ]);
-
-            $orderItemsToSave = [];
-            $totalItemDiscountDistributed = 0;
-
-            foreach ($cartItemsDetails as $itemDetail) {
-                $variant = $itemDetail['variant_instance'];
-
-                $productAttributeNames = optional($variant->productVariantValues)->map(function ($pvv) {
-                    return optional($pvv->attributeValue)->value;
-                })->filter()->implode(' - ');
-
-                $itemDiscountAmount = 0;
-
-
-                if ($discountModelInstance && $discountAmountAppliedToOrder > 0) { // Chỉ tính discount cho item nếu có discount được áp dụng tổng thể
-                    if ((int)$discountModelInstance->applies_to_all_products === 1) {
-
-                        // Phân bổ discount theo tỷ lệ giá trị của item so với tổng subTotal ban đầu (trước giảm giá)
-                        if ($subTotalCalculatedFromItems > 0) {
-                            $itemDiscountAmount = ($itemDetail['total_price_before_item_discount'] / $subTotalCalculatedFromItems) * $discountAmountAppliedToOrder;
-                        }
-                    } else { // Áp dụng cho sản phẩm cụ thể
-                        $applicableProductIds = $discountModelInstance->products->pluck('id')->toArray();
-                        if (in_array($itemDetail['product_id'], $applicableProductIds)) {
-                            if ($discountModelInstance->discount_type === 'percentage') {
-                                $itemDiscountAmount = $itemDetail['total_price_before_item_discount'] * ($discountModelInstance->discount_value / 100);
-                            } elseif ($discountModelInstance->discount_type === 'fixed') {
-                                $itemDiscountAmount = $discountModelInstance->discount_value * $itemDetail['quantity'];
-                                $itemDiscountAmount = min($itemDiscountAmount, $itemDetail['total_price_before_item_discount']);
-                            }
-                        }
-                    }
-                }
-
-                // Đảm bảo itemDiscountAmount không lớn hơn total_price_before_item_discount
-                $itemDiscountAmount = min($itemDiscountAmount, $itemDetail['total_price_before_item_discount']);
-
-                $totalItemDiscountDistributed += $itemDiscountAmount;
-
-                $orderItemsToSave[] = new OrderItem([
-                    'order_id' => $order->id, // Gán order_id ngay khi tạo OrderItem
-                    'product_variant_id' => $itemDetail['product_variant_id'],
-                    'product_name' => optional($variant->product)->name . ($productAttributeNames ? ' (' . $productAttributeNames . ')' : ''),
-                    'product_variant_sku' => $variant->sku,
-                    'product_attribute' => $productAttributeNames,
-                    'quantity' => $itemDetail['quantity'],
-                    'unit_price' => $itemDetail['unit_price'],
-                    'discount_amount' => $itemDiscountAmount,
-                    'total_price' => $itemDetail['total_price_before_item_discount'] - $itemDiscountAmount,
-                ]);
-
-                // Giảm tồn kho cho biến thể sản phẩm
-                $variant->decrement('quantity', $itemDetail['quantity']);
-            }
-
-            // Xử lý lệch tổng giảm giá do làm tròn hoặc phân bổ (nếu có)
-            $remainingDiscount = $discountAmountAppliedToOrder - $totalItemDiscountDistributed;
-            if (abs($remainingDiscount) > 0.01 && count($orderItemsToSave) > 0) {
-                $orderItemsToSave[0]['total_price'] += $remainingDiscount;
-                $orderItemsToSave[0]['discount_amount'] -= $remainingDiscount;
-                $orderItemsToSave[0]['total_price'] = round(max(0, $orderItemsToSave[0]['total_price']), 2);
-                $orderItemsToSave[0]['discount_amount'] = round(max(0, $orderItemsToSave[0]['discount_amount']), 2);
-            } else if ($totalItemDiscountDistributed > $discountAmountAppliedToOrder && count($orderItemsToSave) > 0) {
-                $factor = $discountAmountAppliedToOrder / $totalItemDiscountDistributed;
-                foreach ($orderItemsToSave as &$item) {
-                    $originalItemDiscount = $item['discount_amount'];
-                    $item['discount_amount'] = round($originalItemDiscount * $factor, 2);
-                    $item['total_price'] = $item['unit_price'] * $item['quantity'] - $item['discount_amount'];
-                    $item['total_price'] = round(max(0, $item['total_price']), 2);
-                }
-                unset($item);
-            }
-
-            $order->items()->saveMany($orderItemsToSave);
-
-            if ($discountModelInstance && $discountAmountAppliedToOrder > 0) {
-                // 1. Giảm số lượng tổng thể của mã giảm giá
-                $discountModelInstance->decrement('quantity'); // Giảm số lượng tổng lượt dùng của mã giảm giá
-
-                // 2. Lưu lịch sử sử dụng vào bảng discount_usages
-                // Lấy thông tin cần thiết một cách an toàn
-                $discountCode = optional($discountModelInstance)->code;
-                $userName = optional($user)->name ?? 'Khách hàng ẩn danh';
-
-                // Đảm bảo rằng discount_code và user_name không bao giờ là NULL
-                // Dù Laravel có thể tự động chuyển rỗng thành NULL, nhưng NOT NULL yêu cầu giá trị cụ thể.
-                // Nếu bạn muốn lưu rỗng thay vì NULL, hãy đảm bảo cột cho phép rỗng trong DB.
-                // Ở đây, chúng ta sẽ đảm bảo nó là một chuỗi rỗng nếu không có giá trị nào.
-                $discountCode = $discountCode ?? '';
-                $userName = $userName ?? 'Khách hàng ẩn danh';
-
-                DiscountUsage::create([
-                    'discount_id' => $discountModelInstance->id,
-                    'user_id' => $request->user_id,
-                    // 'product_id' => null, // Để null nếu không áp dụng cho sản phẩm cụ thể
-                    'discount_code' => $discountCode, // Đảm bảo luôn có giá trị string
-                    'user_name' => $userName,         // Đảm bảo luôn có giá trị string
-                    'used_at' => now(),
-                    'order_id' => $order->id,
-                ]);
-            }
-
-            return redirect()->route('admin.orders.index')->with('success', 'Tạo đơn hàng thành công với mã: ' . $order->sku);
-        });
+        return view('admin.orders.index', compact('orders', 'orderStatuses', 'paymentMethods', 'paymentStatuses', 'unconfirmedTodayCount'));
     }
 
     public function show($id)
@@ -476,8 +129,7 @@ class OrderController extends Controller
             'items' => function ($query) {
                 $query->withTrashed();
             },
-            
-            
+
         ])
             ->withTrashed()
             ->findOrFail($id);
@@ -494,17 +146,17 @@ class OrderController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
-        Log::info('--- Order Update Status Attempt ---');
-        Log::info('Order ID: ' . $id);
-        Log::info('Request Data: ', $request->all());
+        // Log::info('--- Order Update Status Attempt ---');
+        // Log::info('Order ID: ' . $id);
+        // Log::info('Request Data: ', $request->all());
 
         $order = Order::findOrFail($id);
         $newOrderStatus = $request->input('order_status');
         $oldOrderStatus = $order->order_status;
 
-        Log::info("Old Order Status: '{$oldOrderStatus}'");
-        Log::info("New Order Status from Request: '{$newOrderStatus}'");
-        Log::info("Cancel Reason from Request: " . $request->input('cancel_reason'));
+        // Log::info("Old Order Status: '{$oldOrderStatus}'");
+        // Log::info("New Order Status from Request: '{$newOrderStatus}'");
+        // Log::info("Cancel Reason from Request: " . $request->input('cancel_reason'));
 
         $rules = [
             'order_status' => 'required|in:' . implode(',', $this->getOrderEnumStatuses()),
@@ -521,7 +173,7 @@ class OrderController extends Controller
         $currentStatusIndex = array_search($oldOrderStatus, $orderStatusesEnum);
         $newStatusIndex = array_search($newOrderStatus, $orderStatusesEnum);
 
-        $progressingStatuses = ['Chưa xác nhận', 'Xác nhận', 'Đang vận chuyển', 'Giao hàng thành công'];
+        $progressingStatuses = ['Chưa xác nhận', 'Xác nhận', 'Đang vận chuyển', 'Giao hàng thành công', 'Đã nhận hàng'];
 
         if (in_array($newOrderStatus, $progressingStatuses) && $newStatusIndex < $currentStatusIndex) {
             $validator->after(function ($validator) use ($oldOrderStatus, $newOrderStatus) {
@@ -540,7 +192,7 @@ class OrderController extends Controller
             }
         }
         if ($oldOrderStatus === 'Hủy đơn' && $newOrderStatus !== 'Hủy đơn') {
-            // Logic to clear cancel_reason if needed, but no validation needed here
+            // Phần này để xử lý việc xóa lý do hủy nếu trạng thái không còn là 'Hủy đơn'
         }
 
         if ($validator->fails()) {
@@ -556,6 +208,22 @@ class OrderController extends Controller
                 $order->cancel_reason = null;
             }
             $order->save();
+            $user = $order->user; // Giả sử Order có quan hệ với User
+            if ($user) {
+                try {
+                    $user->notify(new OrderStatusNotification($order, $newOrderStatus));
+                    Log::info('Order status notification sent/updated', [
+                        'order_id' => $order->id,
+                        'status' => $newOrderStatus,
+                        'user_id' => $user->id,
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send/update order status notification', [
+                        'order_id' => $order->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
             Log::info('Order status updated successfully in DB.');
 
             // Trả về redirect thay vì JSON
@@ -591,164 +259,6 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             Log::error("Lỗi khi cập nhật trạng thái thanh toán đơn hàng {$id}: " . $e->getMessage());
             return redirect()->back()->with('error', 'Đã xảy ra lỗi khi cập nhật trạng thái thanh toán.');
-        }
-    }
-
-
-    public function edit($id)
-    {
-        $order = Order::with([
-            'user.profile',
-        ])->findOrFail($id);
-
-        $allOrderStatuses = $this->getOrderEnumStatuses();
-        $paymentMethods = PaymentMethod::all();
-        $paymentStatuses = $this->getPaymentEnumStatuses(); // Thêm vào để sử dụng
-
-        $discountProductIds = $order->discount?->products->pluck('id')->toArray() ?? [];
-
-        return view('admin.orders.edit', compact('order', 'allOrderStatuses', 'paymentMethods', 'paymentStatuses', 'discountProductIds'));
-    }
-
-    /**
-     * Cập nhật thông tin đơn hàng trong database.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id ID của đơn hàng.
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function update(Request $request, $id)
-    {
-        $order = Order::findOrFail($id);
-
-        $validator = Validator::make($request->all(), [
-            'shipping_name' => 'required|string|max:255',
-            'shipping_phone' => 'required|string|max:15',
-            'shipping_address' => 'required|string|max:255',
-            'order_status' => 'required|in:' . implode(',', $this->getOrderEnumStatuses()), // Sửa
-            'payment_status' => 'required|in:' . implode(',', $this->getPaymentEnumStatuses()), // Thêm
-            'total_amount' => 'required|numeric|min:0|max:99999999.99',
-            'note' => 'nullable|string',
-            'cancel_reason' => 'nullable|string|min:10',
-            'discount_id' => 'nullable|exists:discounts,id',
-            'payment_method_name' => 'required',
-            'shipping_fee' => 'required|numeric|min:0',
-        ], [
-            'shipping_name.required' => 'Tên người nhận không được để trống.',
-            'shipping_phone.required' => 'Số điện thoại không được để trống.',
-            'shipping_address.required' => 'Địa chỉ không được để trống.',
-            'order_status.required' => 'Trạng thái đơn hàng không được để trống.',
-            'order_status.in' => 'Trạng thái đơn hàng không hợp lệ.',
-            'payment_status.required' => 'Trạng thái thanh toán không được để trống.',
-            'payment_status.in' => 'Trạng thái thanh toán không hợp lệ.',
-            'total_amount.required' => 'Tổng tiền không được để trống.',
-            'total_amount.numeric' => 'Tổng tiền phải là số.',
-            'cancel_reason.min' => 'Lý do hủy phải có ít nhất 10 ký tự.',
-            'payment_method_name.required' => 'Phương thức thanh toán không được để trống.',
-            'shipping_fee.required' => 'Phí vận chuyển không được để trống.',
-            'shipping_fee.numeric' => 'Phí vận chuyển phải là số.',
-        ]);
-
-        // Logic validation bổ sung cho order_status và cancel_reason
-        $oldOrderStatus = $order->order_status;
-        $newOrderStatus = $request->input('order_status');
-        $orderStatusesEnum = $this->getOrderEnumStatuses();
-        $currentStatusIndex = array_search($oldOrderStatus, $orderStatusesEnum);
-        $newStatusIndex = array_search($newOrderStatus, $orderStatusesEnum);
-        $progressingOrderStatuses = ['Chưa xác nhận', 'Xác nhận', 'Đang vận chuyển', 'Giao hàng thành công'];
-
-        if (in_array($newOrderStatus, $progressingOrderStatuses) && $newStatusIndex < $currentStatusIndex) {
-            $validator->after(function ($validator) use ($oldOrderStatus, $newOrderStatus) {
-                $validator->errors()->add('order_status', "Không thể chuyển từ '{$oldOrderStatus}' về trạng thái '{$newOrderStatus}' (trạng thái lùi).");
-            });
-        } elseif ($newOrderStatus === 'Hủy đơn' && !$order->canBeCancelled()) {
-            $validator->after(function ($validator) {
-                $validator->errors()->add('order_status', "Đơn hàng này không thể chuyển sang trạng thái 'Hủy đơn'.");
-            });
-        } elseif ($newOrderStatus === 'Hủy đơn' && empty($request->input('cancel_reason'))) {
-            $validator->after(function ($validator) {
-                $validator->errors()->add('cancel_reason', 'Vui lòng cung cấp lý do hủy nếu chọn trạng thái "Hủy đơn".');
-            });
-        }
-
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        try {
-            $order->shipping_name = $request->input('shipping_name');
-            $order->shipping_phone = $request->input('shipping_phone');
-            $order->shipping_address = $request->input('shipping_address');
-            $order->order_status = $request->input('order_status');
-            $order->payment_status = $request->input('payment_status');
-            $order->total_amount = $request->input('total_amount');
-            $order->note = $request->input('note');
-
-            if ($order->order_status === 'Hủy đơn') {
-                $order->cancel_reason = $request->input('cancel_reason');
-            } else {
-                $order->cancel_reason = null;
-            }
-
-            // $order->discount_id = $request->input('discount_id');
-            $order->payment_method_name = $request->input('payment_method_name');
-            $order->shipping_fee = $request->input('shipping_fee');
-
-            $order->save();
-
-            return redirect()->route('admin.orders.index')->with('success', 'Cập nhật đơn hàng thành công!');
-        } catch (\Exception $e) {
-            Log::error("Lỗi khi cập nhật đơn hàng {$id}: " . $e->getMessage());
-            return redirect()->back()->with('error', 'Đã xảy ra lỗi khi cập nhật đơn hàng.')->withInput();
-        }
-    }
-
-    public function trash()
-    {
-        // Eager load các mối quan hệ cần thiết để hiển thị thông tin
-        $orders = Order::onlyTrashed()->with([
-            'user', // Thông tin người dùng đặt hàng
-            'discount', // Thông tin mã giảm giá (nếu có)
-            'paymentMethod', // Thông tin phương thức thanh toán
-            'items.productVariant.product', // Chi tiết sản phẩm trong đơn hàng
-        ])->latest()->paginate(20); // Có thể phân trang cho trang thùng rác
-
-        return view('admin.orders.trash', compact('orders'));
-    }
-
-    public function destroy($id)
-    {
-        $order = Order::findOrFail($id);
-        try {
-            $order->delete(); // Thực hiện soft delete
-            return redirect()->back()->with('success', 'Đã xóa mềm đơn hàng!');
-        } catch (\Exception $e) {
-            Log::error("Lỗi khi xóa mềm đơn hàng {$id}: " . $e->getMessage());
-            return redirect()->back()->with('error', 'Có lỗi xảy ra khi xóa mềm đơn hàng.');
-        }
-    }
-
-    public function restore($id)
-    {
-        $order = Order::withTrashed()->findOrFail($id);
-        try {
-            $order->restore();
-            return redirect()->route('admin.orders.trash')->with('success', 'Khôi phục đơn hàng thành công!');
-        } catch (\Exception $e) {
-            Log::error("Lỗi khi khôi phục đơn hàng {$id}: " . $e->getMessage());
-            return redirect()->back()->with('error', 'Có lỗi xảy ra khi khôi phục đơn hàng.');
-        }
-    }
-
-    public function forceDelete($id)
-    {
-        $order = Order::withTrashed()->findOrFail($id);
-        try {
-            $order->forceDelete();
-            return redirect()->route('admin.orders.trash')->with('success', 'Đã xóa vĩnh viễn đơn hàng!');
-        } catch (\Exception $e) {
-            Log::error("Lỗi khi xóa vĩnh viễn đơn hàng {$id}: " . $e->getMessage());
-            return redirect()->back()->with('error', 'Có lỗi xảy ra khi xóa vĩnh viễn đơn hàng.');
         }
     }
 

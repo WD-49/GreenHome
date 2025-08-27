@@ -19,26 +19,18 @@ class CategoryController extends Controller
 
         $query = Category::query();
 
-        // Filter theo search (tên hoặc slug)
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
-                    ->orWhere('slug', 'like', '%' . $search . '%');
+        // Filter theo tên (name)
+        if ($request->filled('name')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->name . '%')
+                    ->orWhere('slug', 'like', '%' . $request->name . '%');
             });
         }
 
-        // Filter trạng thái
+        // Filter trạng thái (1/0)
         if ($request->filled('status')) {
-            if ($request->status == 'active') {
-                $query->where('status', 1)->whereNull('deleted_at');
-            }
-            if ($request->status == 'inactive') {
-                $query->where('status', 0)->whereNull('deleted_at');
-            }
-            if ($request->status == 'deleted') {
-                $query->onlyTrashed();
-            }
+            $query->where('status', $request->status)
+                ->whereNull('deleted_at');
         }
 
         // Filter ngày tạo
@@ -49,7 +41,13 @@ class CategoryController extends Controller
             $query->whereDate('created_at', '<=', $request->max_date);
         }
 
-        $categories = $query->orderBy('created_at', 'DESC')->paginate(10);
+        // Số bản ghi mỗi trang
+        $perPage = $request->get('per_page', 10);
+
+        // Lấy danh sách danh mục + giữ tham số filter khi phân trang
+        $categories = $query->orderBy('created_at', 'DESC')
+            ->paginate($perPage)
+            ->appends($request->all());
 
         return view('admin.categories.index', [
             'categories' => $categories,
@@ -59,6 +57,7 @@ class CategoryController extends Controller
             'title' => 'Danh sách danh mục',
         ]);
     }
+
 
     public function create()
     {
@@ -82,20 +81,29 @@ class CategoryController extends Controller
         ]);
 
         if ($request->has('name') && is_array($request->name)) {
+            $slugs = [];
+
             foreach ($request->name as $index => $name) {
                 $slug = Str::slug($name);
 
-                // Kiểm tra slug có bị trùng hay không
-                $existingSlug = Category::where('slug', $slug)->first();
-                if ($existingSlug) {
-                    $slug = $slug . '-' . uniqid();
+                // Kiểm tra slug đã tồn tại trong database hoặc trùng trong mảng gửi lên
+                if (Category::where('slug', $slug)->exists() || in_array($slug, $slugs)) {
+                    return back()->withErrors(['name.' . $index => 'Danh mục "' . $name . '" đã tồn tại.'])->withInput();
                 }
+
+                // Lưu lại slug để kiểm tra các mục tiếp theo không trùng
+                $slugs[] = $slug;
+            }
+
+            // Nếu không có slug nào bị trùng thì tiến hành lưu
+            foreach ($request->name as $index => $name) {
+                $slug = $slugs[$index];
 
                 $category = new Category();
                 $category->name = $name;
                 $category->slug = $slug;
-                $category->description = isset($request->description[$index]) ? $request->description[$index] : null;
-                $category->status = isset($request->status[$index]) ? $request->status[$index] : 1;
+                $category->description = $request->description[$index] ?? null;
+                $category->status = $request->status[$index] ?? 1;
                 $category->save();
             }
 
@@ -104,6 +112,7 @@ class CategoryController extends Controller
             return back()->withErrors(['name' => 'Danh mục không hợp lệ.']);
         }
     }
+
 
     public function edit($slug)
     {

@@ -41,4 +41,8 @@ class OrderItem extends Model
             'product_id' // Khóa cục bộ trên ProductVariant
         );
     }
+    public function review()
+    {
+        return $this->hasOne(Review::class);
+    }
 }

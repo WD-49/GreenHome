@@ -61,6 +61,7 @@
                                             'Đang vận chuyển' => 'Đang vận chuyển',
                                             'Giao hàng thành công' => 'Giao hàng thành công',
                                             'Hủy đơn' => 'Hủy đơn',
+                                            'Đã nhận hàng' => 'Đã nhận hàng',
                                         ];
                                         // Lấy trạng thái hiện tại của đơn hàng từ đối tượng $order
                                         $currentOrderStatus = $order->order_status;
@@ -80,20 +81,29 @@
                                             );
                                             $enumValueIndex = array_search($enumValue, array_keys($orderStatuses));
 
+                                            // ✅ Luôn disable 'Đã nhận hàng' cho mọi trạng thái
+                                            if ($enumValue === 'Đã nhận hàng') {
+                                                $isDisabled = true;
+                                            }
+
                                             // Không cho phép lùi trạng thái nếu không phải hủy đơn
                                             if ($enumValue !== 'Hủy đơn' && $enumValueIndex < $currentStatusIndex) {
                                                 $isDisabled = true;
                                             }
 
-                                            // Nếu trạng thái hiện tại là 'Giao hàng thành công' hoặc 'Hủy đơn', không cho thay đổi
-                                            // (Trừ khi bạn muốn cho phép chuyển từ 'Hủy đơn' về trạng thái khác, điều này cần logic riêng)
+                                            // Nếu trạng thái hiện tại là 'Giao hàng thành công' => chỉ cho chọn 'Đã nhận hàng'
                                             if (
                                                 $currentOrderStatus === 'Giao hàng thành công' &&
-                                                $enumValue !== 'Giao hàng thành công'
+                                                $enumValue !== 'Đã nhận hàng'
                                             ) {
                                                 $isDisabled = true;
                                             }
-                                            if ($currentOrderStatus === 'Hủy đơn' && $enumValue !== 'Hủy đơn') {
+
+                                            // Nếu trạng thái hiện tại là 'Đã nhận hàng' => disable tất cả trừ chính nó
+                                            if (
+                                                $currentOrderStatus === 'Đã nhận hàng' &&
+                                                $enumValue !== 'Đã nhận hàng'
+                                            ) {
                                                 $isDisabled = true;
                                             }
 
@@ -177,6 +187,7 @@
                                 <th>Số lượng</th>
                                 <th>Tổng giá</th>
                                 <th>Giảm giá (sp)</th>
+                                <th>Note</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -200,6 +211,13 @@
                                     @php
                                         $totalOrderAmount += $item->total_price;
                                     @endphp
+                                    <td>
+                                        @if ($order->note)
+                                            {{ $order->note }}
+                                        @else
+                                            Không có
+                                        @endif
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>

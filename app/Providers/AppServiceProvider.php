@@ -43,5 +43,9 @@ class AppServiceProvider extends ServiceProvider
         View::composer('client.partials.header', HeaderComposer::class);
 
         View::composer('*', FooterComposer::class);
+
+        View::composer('*', function ($view) { // Truyền người dùng hiện tại vào tất cả view
+            $view->with('user', Auth::user());
+        });
     }
 }

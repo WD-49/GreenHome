@@ -2,24 +2,26 @@
 <div id="sidebar-menu">
 
     {{-- logo --}}
-    {{-- <div class="logo-box">
-        <a class='logo logo-light' href="{{ url('index.html') }}">
+    <div class="logo-box">
+        <a class='logo logo-light' href="{{ route('home') }}">
             <span class="logo-sm">
-                <img src="{{ asset('public/assets/images/logo-sm.png') }}" alt="" height="22">
+                <img src="{{ asset('assets_client/assets/img/logo/GreenHome_logo.png') }}" alt="" height="22">
             </span>
             <span class="logo-lg">
-                <img src="{{ asset('public/assets/images/logo-light.png') }}" alt="" height="24">
+                <img src="{{ asset('assets_client/assets/img/logo/GreenHome_logo.png') }}" alt="" height="24">
             </span>
         </a>
-        <a class='logo logo-dark' href="{{ url('index.html') }}">
+        <a class='logo logo-dark' href="{{ route('home') }}">
             <span class="logo-sm">
-                <img src="{{ asset('public/assets/images/logo-sm.png') }}" alt="" height="22">
+                <img src="{{ asset('assets_client/assets/img/logo/GreenHome_logo.png') }}" alt=""
+                    height="22">
             </span>
             <span class="logo-lg">
-                <img src="{{ asset('public/assets/images/logo-dark.png') }}" alt="" height="24">
+                <img src="{{ asset('assets_client/assets/img/logo/GreenHome_logo.png') }}" alt=""
+                    height="24">
             </span>
         </a>
-    </div> --}}
+    </div>
     {{-- end logo --}}
 
     <ul id="side-menu">
@@ -156,12 +158,12 @@
                 <span> bài viết </span>
             </a>
         </li>
-            <li>
-                <a class='tp-link' href='{{ route('admin.web_info.show') }}'>
-                    <i data-feather="settings"></i>
-                    <span> Webinfos </span>
-                </a>
-            </li>
+        <li>
+            <a class='tp-link' href='{{ route('admin.web_info.show') }}'>
+                <i data-feather="settings"></i>
+                <span> Webinfos </span>
+            </a>
+        </li>
 
 
 

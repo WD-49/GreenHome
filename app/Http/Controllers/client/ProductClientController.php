@@ -2,34 +2,29 @@
 
 namespace App\Http\Controllers\Client;
 
-use App\Http\Controllers\Controller;
-use App\Models\Product;
 use App\Models\Review;
+use App\Models\Comment;
+use App\Models\Product;
+use App\Models\Category;
+
+use App\Models\Discount;
+use Illuminate\Http\Request;
 use App\Models\AttributeValue;
 
-use App\Models\Category;
-use App\Models\Discount;
-use Illuminate\Http\Client\Request as ClientRequest;
-
-use Illuminate\Http\Request;
-use App\Models\Comment;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Client\Request as ClientRequest;
 
 class ProductClientController extends Controller
 {
     public function show($slug)
     {
-        // Lấy sản phẩm kèm các quan hệ cần thiết
+        // Lấy sản phẩm kèm các quan hệ cần thiết (KHÔNG load comments ở đây nữa)
         $product = Product::with([
             'brand',
             'category',
             'productVariants.productVariantValues.attributeValue',
-
-            // Bình luận đã được duyệt
-            'comments' => function ($query) {
-                $query->where('status', 'hiển thị')->latest();
-            },
-            'comments.user',
         ])
             ->where('slug', $slug)
             ->firstOrFail();
@@ -57,48 +52,31 @@ class ProductClientController extends Controller
             ->unique()
             ->values();
 
-        // Lấy danh sách đánh giá đã duyệt kèm ảnh và user
+
+        // Review có phân trang (5 review mỗi trang)
         $reviews = $product->reviews()
+            ->with('user')
             ->where('reviews.status', 'approved')
             ->latest()
-            ->with('user')
-            ->get();
+            ->paginate(2);
 
-        return view('client.pages.productDetail', compact('product', 'relatedProducts', 'attributes', 'reviews'));
+        // Comment có phân trang (2 comment mỗi trang)
+        $comments = Comment::with('user')
+            ->where('product_id', $product->id)
+            ->where('status', 'hiển thị')
+            ->latest()
+            ->paginate(2);
+
+        return view('client.pages.productDetail', compact(
+            'product',
+            'relatedProducts',
+            'attributes',
+            'reviews',
+            'comments'
+        ));
     }
 
-    public function submitReview(Request $request)
-    {
-        $request->validate([
-            'product_variant_id' => 'required|exists:product_variants,id',
-            'rating'             => 'required|integer|min:1|max:5',
-            'title'              => 'required|string|max:150',
-            'content'            => 'required|string|max:1000',
-            'images.*'           => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:2048',
-        ]);
 
-        $review = Review::create([
-            'user_id'            => Auth::id(),
-            'product_variant_id' => $request->product_variant_id,
-            'rating'             => $request->rating,
-            'title'              => $request->title,
-            'content'            => $request->content,
-            'status'             => 'pending',
-        ]);
-
-        // Lưu ảnh nếu có
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $file) {
-                $path = $file->store('reviews', 'public');
-
-                $review->images()->create([
-                    'image' => $path,
-                ]);
-            }
-        }
-
-        return redirect()->back()->with('success', 'Đánh giá của bạn đã được gửi và đang chờ duyệt.');
-    }
 
     public function submitComment(Request $request)
     {
@@ -111,12 +89,51 @@ class ProductClientController extends Controller
             'user_id'    => Auth::id(),
             'product_id' => $request->product_id,
             'content'    => $request->content,
-            'status'     => 'hiển thị',
+            'status'     => 'chưa duyệt',
         ]);
 
         return redirect()->back()->with('success', 'Bình luận của bạn đã được gửi và đang chờ duyệt.');
     }
-    // app/Http/Controllers/VoucherController.php
+    public function getProductDetails($id)
+    {
+        try {
+            $product = Product::with(['productVariants', 'category', 'brand'])->findOrFail($id);
 
+            // Tính số sao trung bình từ reviews của tất cả biến thể
+            $averageRating = DB::table('reviews')
+                ->whereIn('product_variant_id', $product->productVariants->pluck('id'))
+                ->avg('rating') ?? 0;
 
+            return response()->json([
+                'success' => true,
+                'product' => [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'image' => $product->image,
+                    'sortDes' => $product->sort_des,
+                    'average_rating' => round($averageRating, 1), // Làm tròn đến 1 chữ số thập phân
+                    'review_count' => DB::table('reviews')
+                        ->whereIn('product_variant_id', $product->productVariants->pluck('id'))
+                        ->count(),
+                    'view' => $product->view ?? 0,
+                    'category' => $product->category ? ['name' => $product->category->name] : null,
+                    'brand' => $product->brand ? ['name' => $product->brand->name] : null,
+                    'product_variants' => $product->productVariants->map(function ($variant) {
+                        return [
+                            'id' => $variant->id,
+                            'price' => $variant->price,
+                            'old_price' => $variant->old_price,
+                            'attribute_name' => $variant->attribute_name ?? '',
+                            'quantity' => $variant->quantity,
+                        ];
+                    }),
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể tải thông tin sản phẩm.',
+            ], 500);
+        }
+    }
 }

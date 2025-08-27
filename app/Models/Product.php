@@ -43,6 +43,7 @@ class Product extends Model
     }
 
 
+
     // Quan hệ với brand (nhiều-1)
     public function brand()
     {
@@ -102,6 +103,18 @@ class Product extends Model
                     $productVariants->delete();
                 });
             }
+        });
+
+        // Xử lý khi khôi phục Product
+        static::restored(function ($product) {
+            // Khôi phục tất cả product_variants liên quan
+            $product->productVariants()->onlyTrashed()->each(function ($productVariant) {
+                $productVariant->restore();
+            });
+
+            // Tính lại quantity dựa trên các product_variants chưa bị xóa mềm
+            $total = $product->productVariants()->withoutTrashed()->sum('quantity');
+            $product->update(['quantity' => $total]);
         });
     }
     public function scopeFilter($query, $request)

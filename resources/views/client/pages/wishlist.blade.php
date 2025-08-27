@@ -10,7 +10,20 @@
             display: block;
         }
     </style>
-
+<section class="section-breadcrumb">
+        <div class="cr-breadcrumb-image">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="cr-breadcrumb-title">
+                            <h2>Sản Phẩm Yêu Thích</h2>
+                            <span><a href="{{ route('home') }}">Trang Chủ</a> - Sản Phẩm Yêu Thích</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
     <div class="container py-5">
         <h2 class="mb-4">Danh sách yêu thích</h2>
 

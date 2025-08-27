@@ -7,8 +7,8 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="cr-breadcrumb-title">
-                            <h2>Checkout</h2>
-                            <span> <a href="index.html">Home</a> - Checkout</span>
+                            <h2>Thanh toán</h2>
+                            <span> <a href="index.html">Trang trủ</a> - Thanh toán</span>
                         </div>
                     </div>
                 </div>
@@ -58,12 +58,11 @@
                         <!-- Sidebar Payment Block -->
                         <div class="cr-sidebar-block">
                             <div class="cr-sb-title">
-                                <h3 class="cr-sidebar-title">Payment Method</h3>
+                                <h3 class="cr-sidebar-title">Phương thức thanh toán</h3>
                             </div>
                             <div class="cr-sb-block-content">
                                 <div class="cr-checkout-pay">
-                                    <div class="cr-pay-desc">Please select the preferred payment method to use on this
-                                        order.</div>
+                                    <div class="cr-pay-desc">Vui lòng chọn phương thức thanh toán</div>
                                     <form action="#" class="payment-options" id="payment-options">
 
                                     </form>
@@ -81,20 +80,21 @@
 
                             <div class="cr-checkout-wrap">
                                 <div class="cr-checkout-block cr-check-bill">
-                                    <h3 class="cr-checkout-title">Billing Details</h3>
+                                    <h3 class="cr-checkout-title">Thông tin đơn hàng</h3>
                                     <div class="cr-bl-block-content">
                                         <div class="cr-check-bill-form mb-minus-24">
                                             <form action="#" method="post">
                                                 <span class="cr-bill-wrap cr-bill-half">
                                                     <label>Họ và tên</label>
                                                     <input type="text" name="fullname" placeholder="Nhập họ và tên"
-                                                        required>
+                                                        value="{{ old('fullname', $user->name ?? '') }}" required>
+
                                                 </span>
 
                                                 <span class="cr-bill-wrap cr-bill-half">
                                                     <label>Số điện thoại</label>
                                                     <input type="text" name="phone" placeholder="Số điện thoại"
-                                                        required>
+                                                        value="{{ old('phone', $user->profile->phone ?? '') }}" required>
                                                 </span>
 
 
@@ -145,7 +145,7 @@
                                 </div>
                             </div>
                             <span class="cr-check-order-btn">
-                                <a class="cr-button mt-30" href="#" id="place-order-btn">Place Order</a>
+                                <a class="cr-button mt-30" href="#" id="place-order-btn">Đặt hàng</a>
                             </span>
                         </div>
                     </div>
@@ -297,9 +297,8 @@
 
                 discounts.forEach(discount => {
                     const min = parseFloat(discount.min_order_value || 0);
-                    const max = parseFloat(discount.max_order_value || Infinity);
 
-                    if (orderTotal >= min && orderTotal <= max) {
+                    if (orderTotal >= min) {
                         const option = document.createElement('option');
                         option.value = discount.id;
                         option.textContent = discount.title;
@@ -337,7 +336,7 @@
                 <div><strong>Mã:</strong> ${discount.code}</div>
                 <div><strong>Giá trị:</strong> ${discount.discount_type === 'percentage' ? discount.discount_value + '%' : formatVND(discount.discount_value)}</div>
                 <div><strong>Giảm tối đa:</strong> ${formatVND(discount.max_discount)}</div>
-                <div><strong>Áp dụng cho đơn từ:</strong> ${formatVND(discount.min_order_value)} - ${formatVND(discount.max_order_value)}</div>
+                <div><strong>Áp dụng cho đơn từ:</strong> ${formatVND(discount.min_order_value)} Trở lên</div>
             `;
 
                 const result = applyDiscount(items, discount, shippingFee);
@@ -512,13 +511,22 @@
                 .then(res => res.json())
                 .then(res => {
                     if (res.success) {
-                        alert('Đặt hàng thành công! Cảm ơn bạn đã mua sắm tại GreenHome.');
-
-                        window.location.href = '/'; // hoặc trang cảm ơn
+                        if (res.redirect_url) {
+                            // Nếu backend trả về link thanh toán, redirect sang đó
+                            window.location.href = res.redirect_url;
+                        } else {
+                            alert('Đặt hàng thành công! Cảm ơn bạn đã mua sắm tại GreenHome.');
+                            window.location.href = '/'; // hoặc trang cảm ơn
+                        }
                     } else {
                         alert(res.message || 'Đặt hàng thất bại. Vui lòng thử lại.');
+                        if (res.redirect_url) {
+                            // Redirect đến trang xác minh email hoặc profile
+                            window.location.href = res.redirect_url;
+                        }
                     }
                 })
+
                 .catch(err => {
                     console.error(err);
                     alert('Có lỗi xảy ra khi đặt hàng.');

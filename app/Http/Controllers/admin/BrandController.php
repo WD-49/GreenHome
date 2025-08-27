@@ -57,7 +57,7 @@ class BrandController extends Controller
         Brand::insert($insertData);
 
         return redirect()->route('admin.brands.index')
-                         ->with('success', '✅ Đã thêm ' . count($insertData) . ' thương hiệu thành công!');
+            ->with('success', '✅ Đã thêm ' . count($insertData) . ' thương hiệu thành công!');
     }
 
     public function edit($slug)
@@ -78,7 +78,7 @@ class BrandController extends Controller
         ]);
 
         return redirect()->route('admin.brands.index')
-                         ->with('success', '✏️ Cập nhật thương hiệu thành công!');
+            ->with('success', '✏️ Cập nhật thương hiệu thành công!');
     }
 
     public function destroy($slug)
@@ -87,7 +87,7 @@ class BrandController extends Controller
         $brand->delete();
 
         return redirect()->route('admin.brands.index')
-                         ->with('success', '🗑️ Đã chuyển thương hiệu vào thùng rác!');
+            ->with('success', '🗑️ Đã chuyển thương hiệu vào thùng rác!');
     }
 
     public function trash()
@@ -102,7 +102,7 @@ class BrandController extends Controller
         $brand->restore();
 
         return redirect()->route('admin.brands.trash')
-                         ->with('success', '♻️ Khôi phục thương hiệu thành công!');
+            ->with('success', '♻️ Khôi phục thương hiệu thành công!');
     }
 
     public function forceDelete($slug)
@@ -115,7 +115,7 @@ class BrandController extends Controller
         $brand->forceDelete();
 
         return redirect()->route('admin.brands.trash')
-                         ->with('success', '❌ Đã xóa thương hiệu vĩnh viễn! Các sản phẩm liên quan sẽ không còn thương hiệu.');
+            ->with('success', '❌ Đã xóa thương hiệu vĩnh viễn! Các sản phẩm liên quan sẽ không còn thương hiệu.');
     }
 
     public function show(Request $request, $slug)

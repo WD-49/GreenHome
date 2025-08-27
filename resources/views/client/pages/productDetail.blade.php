@@ -1,6 +1,64 @@
 @extends('layouts.app')
 
 @section('content')
+    @push('styles')
+        <style>
+            .rating-wrapper {
+                display: flex;
+                flex-direction: row-reverse;
+                justify-content: flex-end;
+                /* ← CHỈNH LẠI Ở ĐÂY */
+                gap: 8px;
+            }
+
+            .rating-wrapper input[type="radio"] {
+                display: none;
+            }
+
+            .rating-wrapper label {
+                font-size: 24px;
+                color: #ccc;
+                cursor: pointer;
+                transition: color 0.2s;
+            }
+
+            .rating-wrapper input:checked~label,
+            .rating-wrapper label:hover,
+            .rating-wrapper label:hover~label {
+                color: #ffc107;
+            }
+
+            /* Ảnh mặc định cho Grid View */
+            .product-img {
+                width: 100%;
+                height: 225px;
+                object-fit: cover;
+                border-radius: 6px;
+                display: block;
+            }
+
+            /* Cha chứa ảnh - Grid View */
+            .cr-left,
+            .cr-product-image {
+                width: 100%;
+                height: 225px;
+            }
+
+            /* List View - Kích thước cố định */
+            .grid-row-active .cr-left,
+            .grid-row-active .cr-product-image {
+                width: 350px;
+                height: 280px;
+                flex-shrink: 0;
+            }
+
+            .grid-row-active .product-img {
+                width: 350px;
+                height: 280px;
+                object-fit: cover;
+            }
+        </style>
+    @endpush
     <!-- Breadcrumb -->
     <section class="section-breadcrumb">
         <div class="cr-breadcrumb-image">
@@ -67,7 +125,7 @@
                     @endphp
 
                     <div class="cr-size-and-weight">
-                        <div class="cr-review-star">
+                        {{-- <div class="cr-review-star">
                             <div class="cr-star">
                                 @for ($i = 1; $i <= 5; $i++)
                                     <i class="ri-star-{{ $i <= $avgRating ? 'fill' : 'line' }}"></i>
@@ -75,7 +133,7 @@
                             </div>
                             <p>({{ $totalReviews }} lượt đánh giá | {{ $avgRating }}★ | {{ $totalStar }} sao tổng)
                             </p>
-                        </div>
+                        </div> --}}
                         <div class="list">
                             <ul>
                                 <li><label>Thương Hiệu <span>:</span></label>{{ $product->brand->name ?? '' }}</li>
@@ -131,13 +189,19 @@
                                 <button type="button" class="minus">-</button>
                             </div>
                             <div class="cr-add-button">
-                                <button type="button" class="cr-button add-to-cart">Add to cart</button>
+                                <button type="button" class="cr-button add-to-cart">Thêm vào giỏ</button>
                             </div>
                             <div class="cr-card-icon">
-                                <a href="javascript:void(0)" class="wishlist">
-                                    <i class="ri-heart-line"></i>
+                                <a href="javascript:void(0);" class="wishlist-button"
+                                    data-product-id="{{ $product->id }}">
+                                    @if (in_array($product->id, $wishlistProductIds ?? []))
+                                        <i class="ri-heart-fill text-danger"></i>
+                                    @else
+                                        <i class="ri-heart-line"></i>
+                                    @endif
                                 </a>
-                                <a class="model-oraganic-product" data-bs-toggle="modal" href="#quickview" role="button">
+                                <a class="model-oraganic-product" data-bs-toggle="modal" href="#quickview" role="button"
+                                    data-product-id="{{ $product->id }}">
                                     <i class="ri-eye-line"></i>
                                 </a>
                             </div>
@@ -153,15 +217,16 @@
                         <ul class="nav nav-tabs" id="myTab" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="description-tab" data-bs-toggle="tab"
-                                    data-bs-target="#description" type="button" role="tab">Description</button>
+                                    data-bs-target="#description" type="button" role="tab">Mô tả</button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#review"
-                                    type="button" role="tab">Review</button>
+
+                                    type="button" role="tab">Đánh giá</button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="comment-tab" data-bs-toggle="tab" data-bs-target="#comment"
-                                    type="button" role="tab">Comment</button>
+                                    type="button" role="tab">Bình luận</button>
                             </li>
                         </ul>
 
@@ -174,34 +239,43 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Review -->
                             <div class="tab-pane fade" id="review" role="tabpanel">
                                 <div class="cr-tab-content-from">
                                     <div class="post">
                                         @forelse ($reviews as $review)
                                             <div class="content {{ !$loop->first ? 'mt-30' : '' }}">
+                                                {{-- Avatar người dùng --}}
                                                 <img src="{{ asset('storage/' . ($review->user->avatar ?? 'default-avatar.jpg')) }}"
                                                     alt="review"
-                                                    onerror="if(!this.dataset.error) { this.dataset.error = true; this.src='{{ asset('images/default-avatar.jpg') }}'; }">
-                                                <div class="details">
-                                                    <span
-                                                        class="date">{{ \Carbon\Carbon::parse($review->created_at)->locale('vi')->isoFormat('D [tháng] M, YYYY') }}</span>
-                                                    <span class="name">{{ $review->user->name ?? 'Guest' }}</span>
-                                                    <span class="name">{{ $review->title ?? '' }}</span>
+                                                    onerror="if(!this.dataset.error) { this.dataset.error = true; this.src='{{ asset('images/default-avatar.jpg') }}'; }"
+                                                    style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
 
+                                                {{-- Thông tin đánh giá --}}
+                                                <div class="details">
+                                                    <span class="date">
+                                                        {{ \Carbon\Carbon::parse($review->created_at)->locale('vi')->isoFormat('D [tháng] M, YYYY') }}
+                                                    </span>
+                                                    <span class="name">{{ $review->user->name ?? 'Khách' }}</span>
+                                                    @if ($review->title)
+                                                        <div class="fw-bold mt-1">{{ $review->title }}</div>
+                                                    @endif
                                                 </div>
-                                                <div class="cr-t-review-rating">
+
+                                                {{-- Rating sao --}}
+                                                <div class="cr-t-review-rating mt-1">
                                                     @for ($i = 1; $i <= 5; $i++)
                                                         <i
                                                             class="ri-star-s-{{ $i <= $review->rating ? 'fill' : 'line' }}"></i>
                                                     @endfor
-
                                                 </div>
                                             </div>
-                                            <p>{{ $review->content }}</p>
+
+                                            {{-- Nội dung đánh giá --}}
+                                            <p class="mt-2">{{ $review->content }}</p>
+
+                                            {{-- Hình ảnh trong review --}}
                                             @if ($review->images && $review->images->count())
-                                                <div class="review-images mt-2">
+                                                <div class="review-images mt-2 d-flex flex-wrap">
                                                     @foreach ($review->images as $image)
                                                         <img src="{{ asset('storage/' . $image->image) }}"
                                                             alt="Review Image"
@@ -212,74 +286,17 @@
                                                 </div>
                                             @endif
                                         @empty
-                                            <div class="no-reviews">
+                                            <div class="no-reviews mt-4">
                                                 <p>Chưa có đánh giá nào cho sản phẩm này.</p>
                                             </div>
                                         @endforelse
 
+                                        {{-- Phân trang --}}
+                                        <div class="mt-4 d-flex justify-content-end">
+                                            {{ $reviews->appends(['tab' => 'review'])->links() }}
+
+                                        </div>
                                     </div>
-
-                                    <!-- Debug info (xóa sau khi test) -->
-
-
-                                    <h4 class="heading">Thêm đánh giá </h4>
-                                    @if (session('success'))
-                                        <div class="alert alert-success">{{ session('success') }}</div>
-                                    @endif
-
-                                    @php
-                                        $variant = $product->productVariants->first();
-                                    @endphp
-
-                                    <form action="{{ route('client.review.submit') }}" method="POST"
-                                        enctype="multipart/form-data">
-                                        @csrf
-                                        <input type="hidden" name="product_variant_id" value="{{ $variant->id }}">
-
-                                        <div class="cr-ratting-star mb-2">
-                                            <span>Đánh giá:</span>
-                                            <div class="cr-t-review-rating d-flex">
-                                                @for ($i = 1; $i <= 5; $i++)
-                                                    <label class="rating-label"
-                                                        style="cursor: pointer; margin-right: 4px;">
-                                                        <input type="radio" name="rating" value="{{ $i }}"
-                                                            style="display: none;" required>
-                                                        <i class="ri-star-s-line fs-5 text-warning"></i>
-                                                    </label>
-                                                @endfor
-                                            </div>
-                                        </div>
-
-                                        <div class="cr-ratting-input">
-                                            <input type="text" value="{{ Auth::user()->name ?? '' }}" disabled
-                                                placeholder="Tên của bạn">
-                                        </div>
-
-                                        <div class="cr-ratting-input">
-                                            <input type="email" value="{{ Auth::user()->email ?? '' }}" disabled
-                                                placeholder="Email của bạn">
-                                        </div>
-
-                                        <div class="cr-ratting-input">
-                                            <input name="title" placeholder="Tiêu đề (ví dụ: Rất hài lòng)"
-                                                type="text" maxlength="150" required>
-                                        </div>
-                                        <div class="cr-ratting-input mb-3">
-                                            <label for="images">Ảnh đính kèm :</label>
-                                            <input type="file" name="images[]" id="imageInput" multiple
-                                                accept="image/*" class="form-control">
-                                            <div id="preview" class="mt-2 d-flex flex-wrap gap-2"></div>
-                                        </div>
-
-                                        <div class="cr-ratting-input form-submit">
-                                            <textarea name="content" placeholder="Nhận xét chi tiết của bạn về sản phẩm" required></textarea>
-                                            <button class="cr-button" type="submit">Gửi đánh giá</button>
-                                        </div>
-                                    </form>
-
-
-
-
                                 </div>
                             </div>
 
@@ -287,24 +304,38 @@
                             <div class="tab-pane fade" id="comment" role="tabpanel">
                                 <div class="cr-tab-content-from">
                                     <div class="post">
-                                        @php $comments = $product->comments->whereNull('rating'); @endphp
+
                                         @forelse ($comments as $comment)
                                             <div class="content {{ !$loop->first ? 'mt-30' : '' }}">
+                                                {{-- Avatar người dùng --}}
                                                 <img src="{{ asset('storage/' . ($comment->user->avatar ?? 'default-avatar.jpg')) }}"
-                                                    alt="comment">
+                                                    alt="comment"
+                                                    onerror="if(!this.dataset.error) { this.dataset.error = true; this.src='{{ asset('images/default-avatar.jpg') }}'; }"
+                                                    style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+
                                                 <div class="details">
-                                                    <span
-                                                        class="date">{{ \Carbon\Carbon::parse($comment->created_at)->locale('vi')->isoFormat('D [tháng] M, YYYY') }}</span>
-                                                    <span class="name">{{ $comment->user->name ?? 'Guest' }}</span>
+                                                    <span class="date">
+                                                        {{ \Carbon\Carbon::parse($comment->created_at)->locale('vi')->isoFormat('D [tháng] M, YYYY') }}
+                                                    </span>
+                                                    <span class="name">{{ $comment->user->name ?? 'Khách' }}</span>
                                                 </div>
                                             </div>
-                                            <p>{{ $comment->content }}</p>
+
+                                            <p class="mt-2">{{ $comment->content }}</p>
                                         @empty
                                             <p>Chưa có bình luận nào.</p>
                                         @endforelse
 
+                                        {{-- PHÂN TRANG --}}
+                                        <div class="mt-4 d-flex justify-content-end">
+                                            {{ $comments->appends(['tab' => 'comment'])->links() }}
+
+                                        </div>
                                     </div>
+
+                                    {{-- Form thêm bình luận --}}
                                     <h4 class="heading">Thêm bình luận</h4>
+
                                     @if (session('success'))
                                         <div class="alert alert-success">
                                             {{ session('success') }}
@@ -338,11 +369,9 @@
 
                                         <button type="submit" class="cr-button">Gửi bình luận</button>
                                     </form>
-
-
-
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -402,6 +431,28 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const tab = urlParams.get('tab');
+
+                if (tab) {
+                    // Tìm nút tab tương ứng
+                    const tabTrigger = document.querySelector(`#${tab}-tab`);
+                    if (tabTrigger) {
+                        new bootstrap.Tab(tabTrigger).show();
+                    }
+                }
+
+                // Khi người dùng đổi tab, cập nhật URL để giữ tab khi load lại
+                const tabButtons = document.querySelectorAll('[data-bs-toggle="tab"]');
+                tabButtons.forEach(button => {
+                    button.addEventListener('shown.bs.tab', function(event) {
+                        const newTab = event.target.id.replace('-tab', '');
+                        const url = new URL(window.location);
+                        url.searchParams.set('tab', newTab);
+                        window.history.replaceState(null, '', url);
+                    });
+                });
 
                 document.querySelectorAll('.variant-option').forEach(function(li) {
                     li.addEventListener('click', function() {
@@ -526,6 +577,40 @@
                         };
                         reader.readAsDataURL(file);
                     }
+                });
+            });
+            $(document).ready(function() {
+                // CSRF token setup
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    }
+                });
+
+                // Wishlist toggle
+                $(document).on('click', '.wishlist-button', function(e) {
+                    e.preventDefault();
+                    const $btn = $(this);
+                    const productId = $btn.data('product-id');
+
+                    $.post('{{ route('wishlist.toggle') }}', {
+                        product_id: productId
+                    }, function(res) {
+                        if (res.added) {
+                            $btn.find('i').removeClass('ri-heart-line').addClass(
+                                'ri-heart-fill text-danger');
+                        } else {
+                            $btn.find('i').removeClass('ri-heart-fill text-danger').addClass(
+                                'ri-heart-line');
+                        }
+                        alert(res.message);
+                    }).fail(function(xhr) {
+                        alert(xhr.status === 401 ? 'Vui lòng đăng nhập để thêm vào wishlist' :
+                            'Đã có lỗi xảy ra!');
+                    });
                 });
             });
         </script>

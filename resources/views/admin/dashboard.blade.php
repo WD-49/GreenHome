@@ -1,517 +1,737 @@
 @extends('layouts.admin')
 
 @section('title')
-    {{ $title }}
+    {{ $title ?? 'Dashboard' }}
 @endsection
-
 
 @section('content')
-    <div class="py-3 d-flex align-items-sm-center flex-sm-row flex-column">
-        <div class="flex-grow-1">
-            <h4 class="fs-18 fw-semibold m-0">Ecommerce</h4>
-        </div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.css">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    {{-- Thông báo cho Login Google, Fb --}}
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        @if (session('success'))
+            <div class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive"
+                aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        {{ session('success') }}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+                </div>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive"
+                aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        {{ session('error') }}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+                </div>
+            </div>
+        @endif
+
+        @if (session('warning'))
+            <div class="toast align-items-center text-bg-warning border-0" role="alert" aria-live="assertive"
+                aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        {{ session('warning') }}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+                </div>
+            </div>
+        @endif
     </div>
-
-    <!-- start row -->
-    <div class="row">
-        <div class="col-md-12 col-xl-12">
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <label for="filter-from">Từ ngày</label>
-                    <input type="date" id="filter-from" class="form-control">
-                </div>
-                <div class="col-md-4">
-                    <label for="filter-to">Đến ngày</label>
-                    <input type="date" id="filter-to" class="form-control">
-                </div>
-                <div class="col-md-4 d-flex align-items-end">
-                    <button class="btn btn-primary" id="apply-filter">Áp dụng</button>
-                </div>
-            </div>
-
-            <div class="row g-3">
-                <div class="col-md-3 col-xl-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="d-flex align-items-center">
-                                        <div class="fs-14 mb-1 text-muted">Đơn hàng hôm nay</div>
-                                    </div>
-
-                                    <div class="d-flex align-items-baseline mb-0">
-                                        <div class="fs-20 mb-0 me-2 fw-semibold text-dark" id="orders-today"></div>
-                                    </div>
-                                </div>
-
-                                <div class="col-6 d-flex justify-content-center align-items-center">
-                                    <div id="orders-report-per-week" style="min-height:200px"></div>
-                                </div>
-                            </div>
-
-                            <p class="d-flex align-content-center border-top mb-0 pt-3 mt-3">
-
-                                <span class="fw-medium me-1 d-flex" id="orders-status"></span>
-                                <span class="me-2 d-flex align-content-center fw-medium text-success">
-                                    <span id="orders-percent">+0%</span>
-                                    {{-- <i data-feather="trending-up" class="ms-2" style="height: 22px; width: 22px;"></i> --}}
-                                </span>
-                                <span class="fw-medium me-1 d-flex">so với hôm qua</span>
-                                <span class="fw-medium me-1 d-flex" id="orders-yesterday">
-                                </span>
-
-                            </p>
-
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-3 col-xl-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="d-flex align-items-center">
-                                        <div class="fs-14 mb-1 text-muted">Doanh thu hôm nay</div>
-                                    </div>
-
-                                    <div class="d-flex align-items-baseline mb-0">
-                                        <div class="fs-20 mb-0 me-2 fw-semibold text-dark" id="sales-today"></div>
-                                    </div>
-                                </div>
-
-                                <div class="col-6 d-flex justify-content-center align-items-center">
-                                    <div id="sales-report-per-week" class="apex-charts"></div>
-                                </div>
-                            </div>
-
-                            <p class="d-flex align-content-center border-top mb-0 pt-3 mt-3">
-                                <span class="fw-medium me-1 d-flex" id="sales-status"></span>
-                                <span class="me-2 d-flex align-content-center fw-medium text-danger" id="sales-percent">
-                                    %
-                                </span>
-                                <span class="fw-medium me-1 d-flex">so với hôm qua</span>
-                                <span class="fw-medium me-1 d-flex" id="sales-yesterday"></span>
-                                {{-- Doanh thu hôm qua --}}
-                            </p>
-
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-3 col-xl-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="d-flex align-items-center">
-                                        <div class="fs-14 mb-1 text-muted">Khách hàng mới hôm nay</div>
-                                    </div>
-                                    <div class="d-flex align-items-baseline mb-0">
-                                        <div class="fs-20 mb-0 me-2 fw-semibold text-dark" id="new-customers-today"></div>
-                                    </div>
-                                </div>
-                                <div class="col-6 d-flex justify-content-center align-items-center">
-                                    <div id="new-customers-report-per-week" style="min-height:80px"></div>
-                                </div>
-                            </div>
-                            <p class="d-flex align-content-center border-top mb-0 pt-3 mt-3">
-                                <span class="fw-medium me-1 d-flex" id="new-customers-status"></span>
-                                <span class="me-2 d-flex align-content-center fw-medium text-success"
-                                    id="new-customers-percent">+0%</span>
-                                <span class="fw-medium me-1 d-flex">so với hôm qua</span>
-                                <span class="fw-medium me-1 d-flex" id="new-customers-yesterday"></span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-3 col-xl-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="d-flex align-items-center">
-                                        <div class="fs-14 mb-1 text-muted">Sản phẩm đã bán hôm nay</div>
-                                    </div>
-                                    <div class="d-flex align-items-baseline mb-0">
-                                        <div class="fs-20 mb-0 me-2 fw-semibold text-dark" id="products-sold-today"></div>
-                                    </div>
-                                </div>
-                                <div class="col-6 d-flex justify-content-center align-items-center">
-                                    <div id="products-sold-report-per-week" style="min-height:80px"></div>
-                                </div>
-                            </div>
-                            <p class="d-flex align-content-center border-top mb-0 pt-3 mt-3">
-                                <span class="fw-medium me-1 d-flex" id="products-sold-status"></span>
-                                <span class="me-2 d-flex align-content-center fw-medium text-success"
-                                    id="products-sold-percent">+0%</span>
-                                <span class="fw-medium me-1 d-flex">so với hôm qua</span>
-                                <span class="fw-medium me-1 d-flex" id="products-sold-yesterday"></span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div> <!-- end sales -->
-    </div> <!-- end row -->
-
-
-    <!-- Sales Chart -->
-    <div class="row">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center">
-                    <div class="border border-dark rounded-2 me-2 widget-icons-sections">
-                        <i data-feather="bar-chart" class="widgets-icons"></i>
-                    </div>
-                    <h5 class="card-title mb-0">Báo cáo doanh thu</h5>
-                </div>
-            </div>
-
-            <div style="overflow-x:auto; white-space: nowrap;">
-                <div id="sales-report-chart" class="apex-charts" style="min-width: 900px;"></div>
-            </div>
-        </div>
-
-
-
-    </div>
-
-
-    <div class="row">
-        <!-- Top Selling Products -->
-        <div class="col-md-6 col-xl-4">
-            <div class="card">
-                <div class="card-header">
-                    <div class="d-flex align-items-center">
-                        <div class="border border-dark rounded-2 me-2 widget-icons-sections">
-                            <i data-feather="cpu" class="widgets-icons"></i>
-                        </div>
-                        <h5 class="card-title mb-0">Sản phẩm bán chạy</h5>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group custom-group" id="top-selling-products">
-                        <!-- Sẽ render động ở JS -->
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- Top Selling Products -->
-        <div class="col-md-6 col-xl-8">
-            <div class="card">
-
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
-                        <div class="border border-dark rounded-2 me-2 widget-icons-sections">
-                            <i data-feather="bar-chart" class="widgets-icons"></i>
-                        </div>
-                        <h5 class="card-title mb-0">Repeat Customer Rate</h5>
-                    </div>
-
-                </div>
-
-                <div style="overflow-x:auto; white-space: nowrap;">
-                    <div id="repeat-customer-per-week" class="apex-charts" style="min-width: 900px;"></div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-@endsection
-
-@push('scripts')
-    <script src="{{ asset('assets/libs/apexcharts/apexcharts.min.js') }}"></script>
-    <script src="{{ asset('assets/js/pages/ecommerce-dashboard.init.js') }}"></script>
     <script>
-        const endpoint = '/admin/dashboard';
-        let salesChart = null;
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const today = new Date();
-            const todayStr = today.toISOString().slice(0, 10);
-
-            // Tính ngày 10 ngày trước
-            const priorDate = new Date();
-            priorDate.setDate(today.getDate() - 10);
-            const priorDateStr = priorDate.toISOString().slice(0, 10);
-
-            document.getElementById('filter-from').value = priorDateStr;
-            document.getElementById('filter-to').value = todayStr;
-
-            // Load mặc định khi mở dashboard
-            loadDashboard(priorDateStr, todayStr);
-            fetchTopSellingProducts(priorDateStr, todayStr);
-
-            // Gắn sự kiện
-            document.getElementById('apply-filter').addEventListener('click', () => {
-                const from = document.getElementById('filter-from').value;
-                const to = document.getElementById('filter-to').value;
-
-                if (!from || !to) {
-                    return alert('Vui lòng chọn đầy đủ Từ ngày và Đến ngày');
-                }
-                if (from > to) {
-                    return alert('Từ ngày không được lớn hơn Đến ngày');
-                }
-
-                loadDashboard(from, to);
-                fetchTopSellingProducts(from, to);
-            });
-
-            // Top selling products luôn không theo ngày
-            fetch(`${endpoint}/top-selling-products?from=${priorDateStr}&to=${todayStr}`)
-                .then(res => res.json())
-                .then(renderTopSellingProducts);
+        // JS cho phần thông báo Login Google FB
+        document.addEventListener('DOMContentLoaded', function() {
+            var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+            var toastList = toastElList.map(function(toastEl) {
+                return new bootstrap.Toast(toastEl, {
+                    autohide: true,
+                    delay: 5000 // 5 giây
+                })
+            })
+            toastList.forEach(toast => toast.show())
         });
+    </script>
+    <div class="container-xxl">
+        <div class="py-3 d-flex align-items-sm-center flex-sm-row flex-column">
+            <div class="flex-grow-1">
+                <h4 class="fs-18 fw-semibold m-0">Thống kê bán hàng</h4>
+            </div>
+        </div>
 
-        function loadDashboard(from, to) {
-            loadDashboardData(from, to);
-            fetchRepeatCustomerRate('day', from, to);
-            const year = new Date(to).getFullYear();
-            renderSalesReport(year, from, to);
-        }
+        <!-- Bộ lọc -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <form id="filter-form" method="GET" action="{{ route('admin.dashboard') }}">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="filter">Loại bộ lọc</label>
+                            <select name="filter" id="filter" class="form-control">
+                                <option value="day" {{ $filter == 'day' ? 'selected' : '' }}>Ngày</option>
+                                <option value="month" {{ $filter == 'month' ? 'selected' : '' }}>Tháng</option>
+                                <option value="year" {{ $filter == 'year' ? 'selected' : '' }}>Năm</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="start_date">Từ ngày</label>
+                            <input type="date" name="start_date" id="start_date" class="form-control"
+                                value="{{ $startDate->format('Y-m-d') }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="end_date">Đến ngày</label>
+                            <input type="date" name="end_date" id="end_date" class="form-control"
+                                value="{{ $endDate->format('Y-m-d') }}">
+                        </div>
+                        <div class="col-md-3 align-self-end">
+                            <button type="submit" class="btn btn-primary">Lọc</button>
+                        </div>
+                    </div>
+                    <p class="text-muted mt-2">
+                        Chọn loại bộ lọc:
+                        <span id="filter-hint">
+                            @if ($filter == 'day')
+                                Tối đa 31 ngày
+                            @elseif ($filter == 'month')
+                                Tối đa 12 tháng
+                            @else
+                                Tối đa 10 năm
+                            @endif
+                        </span>
+                    </p>
+                </form>
+            </div>
+        </div>
 
-        function loadDashboardData(from, to) {
-            let url = `${endpoint}/data?from=${from}&to=${to}`;
-            fetch(url)
-                .then(res => res.json())
-                .then(data => {
-                    updateStatCard('orders', data.orders_today, data.orders_yesterday, data.orders_percent_change, data
-                        .orders_last_7_days, data.orders_last_7_days_labels, '#556ee6', 'đơn');
-                    updateStatCard('sales', data.sales_today, data.sales_yesterday, data.sales_percent_change, data
-                        .sales_last_7_days, data.sales_last_7_days_labels, '#f46a6a', 'đ');
-                    updateStatCard('new-customers', data.new_customers_today, data.new_customers_yesterday, data
-                        .new_customers_percent, data.new_customers_last_7_days, data
-                        .new_customers_last_7_days_labels, '#34c38f', 'KH');
-                    updateStatCard('products-sold', data.total_products_sold_today, data.total_products_sold_yesterday,
-                        data.total_products_sold_percent, data.total_products_sold_last_7_days, data
-                        .total_products_sold_last_7_days_labels, '#556ee6', 'SP');
+        <!-- Thông báo lỗi -->
+        <div id="error-alert" class="alert alert-danger d-none" role="alert"></div>
+
+        <!-- 4 Card Thống kê -->
+        <div class="row g-3 mb-3">
+            <div class="col-md-3 col-xl-3">
+                <div class="card border-primary shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-cart fs-3 text-primary mb-2"></i>
+                        <div class="fs-14 mb-2 text-muted">Đơn hàng</div>
+                        <div class="fs-24 fw-semibold text-primary" id="new-orders-total">0</div>
+                        <div id="new-orders-empty" class="text-muted mt-2 d-none">Không có dữ liệu</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-xl-3">
+                <div class="card border-primary shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-check-circle fs-3 text-primary mb-2"></i>
+                        <div class="fs-14 mb-2 text-muted">Đơn hàng đã hoàn thành</div>
+                        <div class="fs-24 fw-semibold text-primary" id="sales-total">0</div>
+                        <div id="sales-empty" class="text-muted mt-2 d-none">Không có dữ liệu</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-xl-3">
+                <div class="card border-primary shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-currency-exchange fs-3 text-primary mb-2"></i>
+                        <div class="fs-14 mb-2 text-muted">Doanh thu</div>
+                        <div class="fs-24 fw-semibold text-primary" id="revenue-total">0 ₫</div>
+                        <div id="revenue-empty" class="text-muted mt-2 d-none">Không có dữ liệu</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-xl-3">
+                <div class="card border-primary shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-people fs-3 text-primary mb-2"></i>
+                        <div class="fs-14 mb-2 text-muted">Khách hàng mới</div>
+                        <div class="fs-24 fw-semibold text-primary" id="new-users-total">0</div>
+                        <div id="new-users-empty" class="text-muted mt-2 d-none">Không có dữ liệu</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Biểu đồ -->
+        <div class="row">
+            <div class="col-md-12 col-xl-8">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center">
+                            <div class="border border-primary rounded-2 me-2 widget-icons-sections">
+                                <i data-feather="git-commit" class="widgets-icons"></i>
+                            </div>
+                            <h5 class="card-title mb-0">Doanh thu theo thời gian</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="chart-money" class="apex-charts"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 col-xl-4">
+                <div class="card overflow-hidden">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center">
+                            <div class="border border-dark rounded-2 me-2 widget-icons-sections">
+                                <i data-feather="crosshair" class="widgets-icons"></i>
+                            </div>
+                            <h5 class="card-title mb-0">Khách hàng tiềm năng</h5>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-traffic mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Khách hàng</th>
+                                        <th>Đơn hàng</th>
+                                        <th>Tổng chi tiêu</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="top-customers"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Top Selling Products -->
+            <div class="col-md-6 col-xl-6">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center">
+                            <div class="border border-dark rounded-2 me-2 widget-icons-sections">
+                                <i data-feather="cpu" class="widgets-icons"></i>
+                            </div>
+                            <h5 class="card-title mb-0">Sản phẩm bán chạy</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group custom-group" id="top-selling-products"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Rated Products -->
+            <div class="col-md-6 col-xl-6">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center">
+                            <div class="border border-dark rounded-2 me-2 widget-icons-sections">
+                                <i data-feather="cpu" class="widgets-icons"></i>
+                            </div>
+                            <h5 class="card-title mb-0">Sản phẩm đánh giá cao nhất</h5>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group custom-group" id="top-rated-products"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card overflow-hidden">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center">
+                            <div class="border border-dark rounded-2 me-2 widget-icons-sections">
+                                <i data-feather="crosshair" class="widgets-icons"></i>
+                            </div>
+                            <h5 class="card-title mb-0">Đơn hàng hiện tại</h5>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-traffic mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Khách hàng</th>
+                                        <th>Tổng tiền</th>
+                                        <th colspan="2">Trạng thái đơn hàng</th>
+                                        <th colspan="2">Trạng thái thanh toán</th>
+                                        <th>Ngày đặt</th>
+                                        <th>Chi tiết</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="current-orders"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript xử lý bộ lọc và biểu đồ -->
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                // Khởi tạo Flatpickr
+                flatpickr('#start_date, #end_date', {
+                    dateFormat: 'Y-m-d',
+                    maxDate: 'today',
+                    onChange: (selectedDates, dateStr, instance) => {
+                        if (instance.element.id === 'start_date') {
+                            const endPicker = document.querySelector('#end_date')._flatpickr;
+                            const filter = document.querySelector('#filter').value;
+                            const maxDate = new Date(selectedDates[0]);
+
+                            if (filter === 'day') {
+                                maxDate.setDate(maxDate.getDate() + 31);
+                            } else if (filter === 'month') {
+                                maxDate.setFullYear(maxDate.getFullYear() + 1);
+                            } else {
+                                maxDate.setFullYear(maxDate.getFullYear() + 10);
+                            }
+                            endPicker.set('minDate', selectedDates[0]);
+                            endPicker.set('maxDate', maxDate);
+                        }
+                    }
                 });
-        }
 
-        function fetchRepeatCustomerRate(range = 'day', from = '', to = '') {
-            let url = `${endpoint}/repeat-customer-rate?range=${range}`;
-            if (from && to) {
-                url += `&from=${from}&to=${to}`;
-            }
+                // Cập nhật hint khi thay đổi bộ lọc
+                const filterSelect = document.querySelector('#filter');
+                const filterHint = document.querySelector('#filter-hint');
+                filterSelect.addEventListener('change', () => {
+                    if (filterSelect.value === 'day') filterHint.textContent = 'Tối đa 31 ngày';
+                    else if (filterSelect.value === 'month') filterHint.textContent = 'Tối đa 12 tháng';
+                    else filterHint.textContent = 'Tối đa 10 năm';
+                    document.querySelector('#filter-form').submit();
+                });
 
-            fetch(url)
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById('repeat-customer-per-week').innerHTML = '';
-                    new ApexCharts(document.querySelector("#repeat-customer-per-week"), {
+                // Khởi tạo biểu đồ Sales Report
+                let salesChart = null;
+                const initSalesChart = (labels, data) => {
+                    const filter = document.querySelector('#filter').value;
+                    // Kiểm tra dữ liệu để tránh lỗi
+                    if (!labels || !data || labels.length !== data.length) {
+                        console.warn('Dữ liệu biểu đồ không hợp lệ:', {
+                            labels,
+                            data
+                        });
+                        return;
+                    }
+
+                    // Tính toán chiều rộng biểu đồ dựa trên số lượng nhãn
+                    const chartWidth = filter === 'day' ? Math.max(100, labels.length * 50) + '%' : '100%';
+
+                    const options = {
+                        series: [{
+                            name: 'Doanh thu',
+                            data: data
+                        }],
                         chart: {
                             type: 'line',
-                            height: 300,
-                            width: Math.max(900, data.repeat_customer_labels.length * 100),
-                            toolbar: {
-                                show: false
-                            }
-                        },
-                        series: [{
-                                name: 'New Customer',
-                                data: data.repeat_customer_new
+                            height: 350,
+                            width: chartWidth, // Động rộng dựa trên số nhãn
+                            zoom: {
+                                enabled: filter === 'day', // Chỉ bật zoom khi lọc theo ngày
+                                type: 'x',
+                                autoScaleYaxis: true
                             },
-                            {
-                                name: 'Old Customer',
-                                data: data.repeat_customer_old
-                            }
-                        ],
-                        xaxis: {
-                            categories: data.repeat_customer_labels
+                            toolbar: {
+                                show: filter === 'day', // Chỉ hiển thị toolbar khi lọc theo ngày
+                                tools: {
+                                    zoom: true,
+                                    zoomin: true,
+                                    zoomout: true,
+                                    pan: true,
+                                    reset: true
+                                }
+                            },
+                            animations: {
+                                enabled: filter === 'day', // Tắt animation cho tháng/năm để tránh flicker
+                                easing: 'easeinout',
+                                speed: 800,
+                                animateGradually: {
+                                    enabled: true,
+                                    delay: 150
+                                }
+                            },
+                            redrawOnParentResize: false,
+                            redrawOnWindowResize: false
                         },
-                        colors: ['#3b82f6', '#34d399'],
                         stroke: {
+                            curve: 'smooth',
                             width: 3
                         },
                         markers: {
-                            size: 4
-                        },
-                        tooltip: {
-                            y: {
-                                formatter: val => `${val} đơn`
-                            }
-                        }
-                    }).render();
-
-                });
-        }
-
-        function renderSalesReport(year, from = '', to = '', filterIncome = false) {
-            let url = `${endpoint}/sales-report-income?year=${year}`;
-            if (from && to) {
-                url += `&from=${from}&to=${to}`;
-            }
-            if (filterIncome) {
-                url += '&filter_income=1';
-            }
-
-            fetch(url)
-                .then(res => res.json())
-                .then(data => {
-                    if (salesChart) salesChart.destroy();
-
-                    salesChart = new ApexCharts(document.querySelector("#sales-report-chart"), {
-                        chart: {
-                            type: 'bar',
-                            height: 350,
-                            width: Math.max(900, data.labels.length *
-                                150), // chiều rộng tùy theo số ngày, mỗi ngày 50px
-                            toolbar: {
-                                show: false
-                            },
-                            zoom: {
-                                enabled: true,
-                                type: 'x',
-                                autoScaleYaxis: true,
-                            },
-                            animations: {
-                                enabled: true
-                            },
-                        },
-                        series: [{
-                            name: 'Doanh thu',
-                            data: data.income
-                        }],
-                        xaxis: {
-                            categories: data.labels,
-                            title: {
-                                text: 'Ngày',
-                                style: {
-                                    fontWeight: 600
-                                }
-                            },
-                            labels: {
-                                rotate: -45
-                            }
-                        },
-                        yaxis: {
-                            title: {
-                                text: 'VNĐ',
-                                style: {
-                                    fontWeight: 600
-                                }
-                            },
-                            labels: {
-                                formatter: val => `${val.toLocaleString()} đ`
-                            }
-                        },
-                        colors: ['#3b82f6'],
-                        tooltip: {
-                            y: {
-                                formatter: val => `${val.toLocaleString()} đ`
-                            }
-                        },
-                        plotOptions: {
-                            bar: {
-                                columnWidth: '40%',
-                                distributed: false,
-                                borderRadius: 4
+                            size: filter === 'day' ? 4 : 6,
+                            hover: {
+                                size: 8
                             }
                         },
                         dataLabels: {
                             enabled: false
+                        },
+                        xaxis: {
+                            type: 'category', // Explicitly set to category for string labels
+                            categories: labels,
+                            labels: {
+                                rotate: 0, // Không xoay nhãn cho mọi kiểu lọc
+                                rotateAlways: false,
+                                trim: false,
+                                style: {
+                                    fontSize: '12px'
+                                },
+                                formatter: function(val) {
+                                    if (filter === 'year') return val;
+                                    if (filter === 'month') return val;
+                                    return new Date(val).toLocaleDateString('vi-VN', {
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: 'numeric'
+                                    });
+                                },
+                                tickAmount: filter === 'day' ? Math.ceil(labels.length / 5) : undefined
+                            },
+                            scrollbar: {
+                                enabled: filter === 'day' // Thanh cuộn chỉ bật khi lọc theo ngày
+                            }
+                        },
+                        yaxis: {
+                            title: {
+                                text: 'Doanh thu (VNĐ)'
+                            },
+                            labels: {
+                                formatter: function(val) {
+                                    return Number(val).toLocaleString('vi-VN') + ' ₫';
+                                }
+                            }
+                        },
+                        tooltip: {
+                            enabled: true,
+                            shared: false,
+                            intersect: false, // Tắt intersect để hover dễ dàng hơn
+                            followCursor: true, // Tooltip theo con trỏ để mượt mà
+                            fixed: {
+                                enabled: filter !== 'day', // Cố định tooltip cho tháng/năm
+                                position: 'topRight',
+                                offsetX: 0,
+                                offsetY: 0
+                            },
+                            onDatasetHover: {
+                                highlightDataSeries: false // Tắt highlight để giảm flicker
+                            },
+                            marker: {
+                                show: filter === 'day' // Tắt marker cho tháng/năm
+                            },
+                            x: {
+                                show: true,
+                                formatter: function(val, {
+                                    dataPointIndex
+                                }) {
+                                    const date = labels[dataPointIndex];
+                                    if (!date) return '';
+                                    return filter === 'year' ? date :
+                                        filter === 'month' ? date :
+                                        new Date(date).toLocaleDateString('vi-VN', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric'
+                                        });
+                                }
+                            },
+                            y: {
+                                formatter: function(val) {
+                                    return Number(val).toLocaleString('vi-VN') + ' ₫';
+                                }
+                            }
+                        },
+                        colors: ['#6366f1'],
+                        fill: {
+                            opacity: 1
                         }
-                    });
+                    };
 
-
+                    if (salesChart) salesChart.destroy();
+                    salesChart = new ApexCharts(document.querySelector('#chart-money'), options);
                     salesChart.render();
+                };
+
+                // Hàm gọi API
+                const loadDashboardData = async () => {
+                    const filter = document.querySelector('#filter').value;
+                    const startDate = document.querySelector('#start_date').value;
+                    const endDate = document.querySelector('#end_date').value;
+
+                    // Hiển thị loading
+                    const cardBodies = document.querySelectorAll('.card-body');
+                    cardBodies.forEach(body => {
+                        body.insertAdjacentHTML('beforeend',
+                            '<div class="loading-spinner">Đang tải...</div>');
+                    });
+                    const errorAlert = document.querySelector('#error-alert');
+                    errorAlert.classList.add('d-none');
+
+                    try {
+                        const response = await fetch(
+                            `{{ route('admin.dashboard.data') }}?filter=${filter}&start_date=${startDate}&end_date=${endDate}`, {
+                                method: 'GET',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            });
+
+                        const result = await response.json();
+
+                        // Xóa loading
+                        document.querySelectorAll('.loading-spinner').forEach(spinner => spinner.remove());
+
+                        if (!result.success) {
+                            errorAlert.textContent = result.message;
+                            errorAlert.classList.remove('d-none');
+                            return;
+                        }
+
+                        const data = result.data;
+
+                        // Cập nhật tổng số
+                        document.querySelector('#new-orders-total').textContent = data.new_orders?.total ?? 0;
+                        document.querySelector('#sales-total').textContent = data.sales?.total ?? 0;
+                        document.querySelector('#revenue-total').textContent = Number(data.revenue?.total ?? 0)
+                            .toLocaleString('vi-VN') + ' ₫';
+                        document.querySelector('#new-users-total').textContent = data.new_users?.total ?? 0;
+
+                        // Cập nhật thông báo dữ liệu trống
+                        document.querySelector('#new-orders-empty').classList.toggle('d-none', !data.new_orders
+                            ?.empty);
+                        document.querySelector('#sales-empty').classList.toggle('d-none', !data.sales?.empty);
+                        document.querySelector('#revenue-empty').classList.toggle('d-none', !data.revenue
+                            ?.empty);
+                        document.querySelector('#new-users-empty').classList.toggle('d-none', !data.new_users
+                            ?.empty);
+
+                        // Chuyển dữ liệu doanh thu sang số
+                        const revenueData = data.revenue?.data.map(Number) ?? [];
+
+                        // Cập nhật biểu đồ Sales Report
+                        initSalesChart(data.labels ?? [], revenueData);
+
+                        // Cập nhật bảng Khách hàng tiềm năng
+                        const topCustomersTbody = document.querySelector('#top-customers');
+                        topCustomersTbody.innerHTML = '';
+                        if (!Array.isArray(data.top_customers) || data.top_customers.length === 0) {
+                            topCustomersTbody.innerHTML =
+                                '<tr><td colspan="3" class="text-center">Không có dữ liệu</td></tr>';
+                        } else {
+                            data.top_customers.forEach(customer => {
+                                topCustomersTbody.innerHTML += `
+    <tr>
+        <td>${customer.name || 'N/A'}</td>
+        <td class="text-center">${customer.order_count || 0}</td>
+        <td>${Number(customer.total_spent || 0).toLocaleString('vi-VN')} ₫</td>
+    </tr>`;
+                            });
+                        }
+
+                        // Cập nhật bảng Sản phẩm bán chạy
+                        const topSellingProducts = document.querySelector('#top-selling-products');
+                        topSellingProducts.innerHTML = '';
+                        if (!Array.isArray(data.top_selling_products) || data.top_selling_products.length ===
+                            0) {
+                            topSellingProducts.innerHTML =
+                                '<li class="list-group-item text-center">Không có dữ liệu</li>';
+                        } else {
+                            data.top_selling_products.forEach(product => {
+                                topSellingProducts.innerHTML += `
+    <li class="list-group-item align-items-center d-flex justify-content-between">
+        <div class="product-list d-flex align-items-center">
+            <img class="avatar-md p-1 rounded-circle bg-primary-subtle img-fluid me-3"
+                src="/storage/${product.image || 'default.png'}" alt="product-image">
+            <div class="product-body align-self-center">
+                <h6 class="m-0 fw-semibold">${product.product_name || 'N/A'}</h6>
+                <p class="mb-0 mt-1 text-muted">${product.product_attribute || ''}</p>
+            </div>
+        </div>
+        <div class="product-price">
+            <h6 class="m-0 fw-semibold">${Number(product.product_price || 0).toLocaleString('vi-VN')} ₫</h6>
+            <p class="mb-0 mt-1 text-muted">${product.sold || 0} sản phẩm đã bán</p>
+        </div>
+    </li>`;
+                            });
+                        }
+
+                        // Cập nhật bảng Sản phẩm đánh giá cao nhất
+                        const topRatedProducts = document.querySelector('#top-rated-products');
+                        topRatedProducts.innerHTML = '';
+                        if (!Array.isArray(data.top_rated_products) || data.top_rated_products.length === 0) {
+                            topRatedProducts.innerHTML =
+                                '<li class="list-group-item text-center">Không có dữ liệu</li>';
+                        } else {
+                            data.top_rated_products.forEach(product => {
+                                topRatedProducts.innerHTML += `
+    <li class="list-group-item align-items-center d-flex justify-content-between">
+        <div class="product-list d-flex align-items-center">
+            <img class="avatar-md p-1 rounded-circle bg-primary-subtle img-fluid me-3"
+                src="/storage/${product.image || 'storage/default.png'}" alt="product-image">
+            <div class="product-body align-self-center">
+                <h6 class="m-0 fw-semibold">${product.product_name || 'N/A'}</h6>
+                <p class="mb-0 mt-1 text-muted">${product.attribute_name || ''}</p>
+            </div>
+        </div>
+        <div class="product-price">
+            <h6 class="m-0 fw-semibold">${Number(product.rating || 0).toFixed(1)} ⭐</h6>
+            <p class="mb-0 mt-1 text-muted">${product.review_count || 0} đánh giá</p>
+        </div>
+    </li>`;
+                            });
+                        }
+
+                        // Cập nhật bảng Đơn hàng hiện tại
+                        const currentOrdersTbody = document.querySelector('#current-orders');
+                        currentOrdersTbody.innerHTML = '';
+                        if (!Array.isArray(data.current_orders) || data.current_orders.length === 0) {
+                            currentOrdersTbody.innerHTML =
+                                '<tr><td colspan="8" class="text-center">Không có dữ liệu</td></tr>';
+                        } else {
+                            data.current_orders.forEach(order => {
+                                const orderStatusClass = {
+                                    'Chưa xác nhận': 'text-warning',
+                                    'Xác nhận': 'text-info',
+                                    'Đang vận chuyển': 'text-primary',
+                                    'Giao hàng thành công': 'text-success',
+                                    'Hủy đơn': 'text-danger',
+                                    'Đã nhận hàng': 'text-success'
+                                } [order.order_status] || 'text-muted';
+                                const paymentStatusClass = {
+                                    'pending': 'text-warning',
+                                    'paid': 'text-success',
+                                    'failed': 'text-danger'
+                                } [order.payment_status] || 'text-muted';
+                                currentOrdersTbody.innerHTML += `
+    <tr>
+        <td><a href="javascript:void(0);" class="text-reset">${order.sku || 'N/A'}</a></td>
+        <td class="d-flex align-items-center">
+            <img src="/storage/${order.user_image || 'public/storage/default-avatar.jpg'}"
+                class="avatar avatar-sm rounded-2 me-3" />
+            <p class="mb-0 fw-medium">${order.user_name || 'N/A'}</p>
+        </td>
+        <td>${Number(order.total_amount || 0).toLocaleString('vi-VN')} ₫</td>
+        <td colspan="2">
+            <p class="mb-0 ${orderStatusClass}">${order.order_status || 'N/A'}</p>
+        </td>
+        <td colspan="2">
+            <p class="mb-0 ${paymentStatusClass}">${order.payment_status_translated || 'N/A'}</p>
+        </td>
+        <td>${order.created_at ? new Date(order.created_at).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit',
+            year: 'numeric' }) : 'N/A'}</td>
+        <td>
+            <a href="/admin/orders/show/${order.id}" class="text-primary">
+                <i class="mdi mdi-eye fs-18 rounded-2 border p-1"></i>
+            </a>
+        </td>
+    </tr>`;
+                            });
+                        }
+                    } catch (error) {
+                        // Xóa loading
+                        document.querySelectorAll('.loading-spinner').forEach(spinner => spinner.remove());
+                        errorAlert.textContent = error.message || 'Không thể tải dữ liệu. Vui lòng thử lại.';
+                        errorAlert.classList.remove('d-none');
+                    }
+                };
+
+                // Gọi API khi form submit
+                document.querySelector('#filter-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    loadDashboardData();
                 });
-        }
 
-
-
-
-        function updateStatCard(idPrefix, today, yesterday, percent, series, labels, color, suffix) {
-            const todayEl = document.getElementById(`${idPrefix}-today`);
-            const yesterdayEl = document.getElementById(`${idPrefix}-yesterday`);
-            const percentEl = document.getElementById(`${idPrefix}-percent`);
-            const statusEl = document.getElementById(`${idPrefix}-status`);
-
-            todayEl.textContent = Number(today).toLocaleString();
-            yesterdayEl.textContent = Number(yesterday).toLocaleString();
-
-            let statusText = 'Không đổi';
-            percentEl.classList.remove('text-success', 'text-danger');
-
-            if (percent > 0) {
-                statusText = 'Tăng';
-                percentEl.classList.add('text-success');
-                percentEl.textContent = `+${percent}%`;
-            } else if (percent < 0) {
-                statusText = 'Giảm';
-                percentEl.classList.add('text-danger');
-                percentEl.textContent = `${percent}%`;
-            } else {
-                percentEl.textContent = '0%';
-            }
-
-            statusEl.textContent = statusText;
-
-            const chartEl = document.getElementById(`${idPrefix}-report-per-week`);
-            chartEl.innerHTML = '';
-            new ApexCharts(chartEl, {
-                chart: {
-                    type: 'bar',
-                    height: 80,
-                    sparkline: {
-                        enabled: true
-                    }
-                },
-                series: [{
-                    name: idPrefix,
-                    data: series
-                }],
-                xaxis: {
-                    categories: labels
-                },
-                colors: [color],
-                tooltip: {
-                    enabled: true,
-                    y: {
-                        formatter: val => `${Number(val).toLocaleString()} ${suffix}`
-                    }
-                }
-            }).render();
-        }
-
-        function fetchTopSellingProducts(from = '', to = '') {
-            let url = `${endpoint}/top-selling-products`;
-            if (from && to) {
-                url += `?from=${from}&to=${to}`;
-            }
-
-            fetch(url)
-                .then(res => res.json())
-                .then(renderTopSellingProducts);
-        }
-
-        function renderTopSellingProducts(products) {
-            const list = document.getElementById('top-selling-products');
-            list.innerHTML = '';
-            products.forEach(product => {
-                const imgSrc = product.image ? `${window.location.origin}/storage/${product.image}` :
-                    '/storage/default.png';
-                list.innerHTML += `
-            <li class="list-group-item align-items-center d-flex justify-content-between">
-                <div class="product-list">
-                    <img class="avatar-md p-1 rounded-circle bg-primary-subtle img-fluid me-3" src="${imgSrc}">
-                    <div class="product-body align-self-center">
-                        <h6 class="m-0 fw-semibold">${product.product_name}</h6>
-                        <p class="mb-0 mt-1 text-muted">SKU: ${product.product_sku ?? ''}</p>
-                        <p class="mb-0 mt-1 text-muted">${product.product_attribute ?? ''}</p>
-                    </div>
-                </div>
-                <div class="product-price text-end">
-                    <h6 class="m-0 fw-semibold">${Number(product.product_price).toLocaleString()} đ</h6>
-                    <p class="mb-0 mt-1 text-muted">${product.sold ?? 0} Sold</p>
-                </div>
-            </li>`;
+                // Gọi API lần đầu
+                loadDashboardData();
             });
+        </script>
+    @endpush
+
+    <!-- CSS tùy chỉnh -->
+    <style>
+        .loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            color: #6366f1;
         }
-    </script>
-@endpush
+
+        .card-body {
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .fs-24 {
+            font-size: 1.5rem;
+        }
+
+        .card {
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .widget-icons-sections {
+            padding: 8px;
+        }
+
+        .widgets-icons {
+            width: 20px;
+            height: 20px;
+        }
+
+        #chart-money {
+            overflow-x: auto;
+            min-width: 100%;
+        }
+
+        .table-responsive {
+            min-height: 100px;
+        }
+
+        .avatar-md {
+            width: 50px;
+            height: 50px;
+        }
+
+        .avatar-sm {
+            width: 32px;
+            height: 32px;
+        }
+
+        .list-group-item {
+            border: none;
+            padding: 0.75rem 1.25rem;
+        }
+
+        .mdi-eye {
+            color: #6366f1;
+            transition: color 0.2s;
+        }
+
+        .mdi-eye:hover {
+            color: #3b3f99;
+        }
+    </style>
+@endsection

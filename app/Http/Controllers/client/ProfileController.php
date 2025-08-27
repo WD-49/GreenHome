@@ -15,19 +15,23 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class ProfileController extends Controller
 {
-    public function index($tab = 'info') // $tab vẫn được dùng để xác định tab nào active ban đầu
+    public function index(Request $request) // $tab vẫn được dùng để xác định tab nào active ban đầu
     {
         $user = Auth::user();
         // dd($user);
         if (!$user) {
             return redirect()->route('login')->with('error', 'Bạn cần đăng nhập để xem trang cá nhân.');
         }
+
+        $tab = $request->input('tab', 'info');
 
         $data = [];
         // Lấy tất cả dữ liệu cho TẤT CẢ CÁC TAB
@@ -36,17 +40,17 @@ class ProfileController extends Controller
         $data['orders'] = Order::where('user_id', $user->id)
             ->with('items') // Tải trước các mục đơn hàng và biến thể sản phẩm
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(5, ['*'], 'orders_page');
 
         $data['reviews'] = Review::where('user_id', $user->id)
-             // Tải trước biến thể sản phẩm và sản phẩm của nó
+            // Tải trước biến thể sản phẩm và sản phẩm của nó
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(5, ['*'], 'reviews_page');
 
         $data['comments'] = Comment::where('user_id', $user->id)
             ->with('product') // Tải trước sản phẩm liên quan đến bình luận
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(5, ['*'], 'comments_page');
 
         $cart = Cart::where('user_id', $user->id)
             ->with('items.productVariant.product') // Tải quan hệ
@@ -64,13 +68,13 @@ class ProfileController extends Controller
 
         $data['wishlistItems'] = Wishlist::where('user_id', $user->id)
             ->with('product') // Tải trước sản phẩm
-            ->orderBy('add_at', 'desc')
-            ->get();
+            ->orderBy('priority', 'desc')
+            ->paginate(5, ['*'], 'wishlist_page');
         // dd($data['orders']);
         // Trả về view chính của trang profile
         return view('client.pages.profile', compact('user', 'tab', 'data'));
     }
-    
+
     public function update(Request $request)
     {
         $user = Auth::user();
@@ -87,6 +91,32 @@ class ProfileController extends Controller
             'gender' => ['required', Rule::in(['nam', 'nu', 'khac'])],
             'birth_date' => 'nullable|date',
             'user_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Max 2MB
+        ], [
+            'name.required' => 'Vui lòng nhập họ tên.',
+            'name.string'   => 'Họ tên phải là dạng chuỗi ký tự.',
+            'name.max'      => 'Họ tên không được vượt quá :max ký tự.',
+
+            'email.required' => 'Vui lòng nhập email.',
+            'email.string'   => 'Email phải là dạng chuỗi ký tự.',
+            'email.email'    => 'Email không đúng định dạng.',
+            'email.max'      => 'Email không được vượt quá :max ký tự.',
+            'email.unique'   => 'Email này đã tồn tại.',
+
+            'phone.string'   => 'Số điện thoại phải là dạng chuỗi ký tự.',
+            'phone.max'      => 'Số điện thoại không được vượt quá :max ký tự.',
+            'phone.unique'   => 'Số điện thoại này đã tồn tại.',
+
+            'address.string' => 'Địa chỉ phải là dạng chuỗi ký tự.',
+            'address.max'    => 'Địa chỉ không được vượt quá :max ký tự.',
+
+            'gender.required' => 'Vui lòng chọn giới tính.',
+            'gender.in'       => 'Giới tính không hợp lệ.',
+
+            'birth_date.date' => 'Ngày sinh không đúng định dạng.',
+
+            'user_image.image' => 'Tệp tải lên phải là hình ảnh.',
+            'user_image.mimes' => 'Hình ảnh phải có định dạng: jpeg, png, jpg, gif.',
+            'user_image.max'   => 'Kích thước ảnh không được vượt quá 2MB.',
         ]);
 
         // KIỂM TRA LỖI VALIDATION VÀ CHUYỂN HƯỚNG VỚI LỖI
@@ -111,7 +141,7 @@ class ProfileController extends Controller
             $profile->address = $request->input('address');
             $profile->gender = $request->input('gender');
             $profile->birth_date = $request->input('birth_date');
-           
+
             if ($request->hasFile('user_image')) {
                 // Xóa ảnh cũ (nếu có và nếu nó được lưu theo cách CŨ hoặc theo cách MỚI)
                 // Nếu ảnh cũ lưu trong public_path:
@@ -134,6 +164,45 @@ class ProfileController extends Controller
             // Log lỗi hoặc hiển thị thông báo lỗi chung
             Log::error('Update Profile Error: ' . $e->getMessage(), ['user_id' => $user->id, 'request' => $request->all()]);
             return redirect()->back()->withInput()->with('error', 'Có lỗi xảy ra khi cập nhật thông tin: ' . $e->getMessage());
+        }
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $user = Auth::user();
+
+        // 1. Xác thực dữ liệu đầu vào
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:8|confirmed', // 'confirmed' sẽ tự động so khớp với new_password_confirmation
+        ], [
+            'current_password.required' => 'Mật khẩu hiện tại không được để trống.',
+            'new_password.required' => 'Mật khẩu mới không được để trống.',
+            'new_password.min' => 'Mật khẩu mới phải có ít nhất 8 ký tự.',
+            'new_password.confirmed' => 'Xác nhận mật khẩu mới không khớp.',
+        ]);
+
+        // 2. Kiểm tra mật khẩu hiện tại
+        if (!Hash::check($request->current_password, $user->password)) {
+            // Log lỗi để debug nếu cần
+            Log::warning('Lỗi đổi mật khẩu: Mật khẩu hiện tại không đúng.', [
+                'user_id' => $user->id,
+                'input_current_password' => $request->current_password, // Không nên log mật khẩu thật trong môi trường production
+            ]);
+            throw ValidationException::withMessages([
+                'current_password' => ['Mật khẩu hiện tại không đúng.'],
+            ]);
+        }
+
+        // 3. Cập nhật mật khẩu mới
+        try {
+            $user->password = Hash::make($request->new_password);
+            $user->save();
+
+            return redirect()->route('profile.index', ['tab' => 'password'])->with('success', 'Mật khẩu của bạn đã được cập nhật thành công!');
+        } catch (\Exception $e) {
+            Log::error('Lỗi khi cập nhật mật khẩu: ' . $e->getMessage(), ['user_id' => $user->id]);
+            return redirect()->back()->withInput()->with('error', 'Có lỗi xảy ra khi cập nhật mật khẩu: ' . $e->getMessage());
         }
     }
 }

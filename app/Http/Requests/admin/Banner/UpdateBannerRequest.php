@@ -11,33 +11,47 @@ class UpdateBannerRequest extends FormRequest
         return true;
     }
 
-public function rules()
-{
-    return [
-        'name' => 'required|string|max:255',
-        'description' => 'nullable|string',
-        'link' => 'nullable|url',
-        'priority' => 'nullable|integer',
-        'status' => 'required|boolean',
-        'img' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-           'type' => 'required|string|in:slider,category_banner,discount_banner',
-        'category_id' => 'nullable|exists:categories,id',
-    ];
-}
+    public function rules()
+    {
+        return [
+            'name' => 'nullable|string|max:255', // Không bắt buộc
+            'description' => 'nullable|string',
+            'link' => 'nullable|url',
+            'priority' => 'required|integer',
+            'status' => 'required|boolean',
+            'img' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048', // Bắt buộc
+            'type' => 'required|string|in:slider,category_banner,discount_banner',
+            'category_id' => 'nullable|exists:categories,id',
+        ];
+    }
 
 
 
     public function messages(): array
     {
         return [
-            'name.required' => 'Vui lòng nhập tên banner.',
             'name.string' => 'Tên banner phải là chuỗi.',
             'name.max' => 'Tên banner tối đa 255 ký tự.',
+
+            'description.string' => 'Mô tả phải là chuỗi.',
+
+            'link.url' => 'Liên kết không hợp lệ.',
+
+            'priority.required' => 'Vui lòng nhập thứ tự ưu tiên.',
+            'priority.integer' => 'Thứ tự ưu tiên phải là số nguyên.',
+
             'status.required' => 'Vui lòng chọn trạng thái.',
             'status.boolean' => 'Trạng thái không hợp lệ.',
+
             'img.image' => 'Tệp tải lên phải là hình ảnh.',
-            'img.mimes' => 'Hình ảnh phải có định dạng jpg, jpeg, png hoặc gif.',
+            'img.mimes' => 'Hình ảnh phải có định dạng jpeg, png, jpg, gif hoặc webp.',
             'img.max' => 'Kích thước hình ảnh không được vượt quá 2MB.',
+
+            'type.required' => 'Vui lòng chọn loại banner.',
+            'type.string' => 'Loại banner phải là chuỗi.',
+            'type.in' => 'Loại banner không hợp lệ.',
+
+            'category_id.exists' => 'Danh mục đã chọn không tồn tại.',
         ];
     }
 }

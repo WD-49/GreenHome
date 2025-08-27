@@ -37,8 +37,8 @@ class Discount extends Model
     public function products()
     {
         return $this->belongsToMany(Product::class, 'discount_products')
-            ->withTimestamps()
-            ->withTrashed();
+            ->withTimestamps();
+            // ->withTrashed();
     }
 
     public function usages()
@@ -48,6 +48,6 @@ class Discount extends Model
 
     public function applicableProductVariants()
     {
-        return $this->belongsToMany(ProductVariant::class, 'discount_product_variants', 'discount_id', 'product_variant_id');
+        return $this->belongsToMany(ProductVariant::class);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\client;
 use App\Models\Cart;
 use App\Models\User;
 use App\Models\Order;
+use App\Models\Review;
 use App\Models\WebInfo;
 use App\Models\CartItem;
 use App\Models\Discount;
@@ -13,18 +14,22 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\DiscountUsage;
 use App\Models\PaymentMethod;
+use App\Mail\OrderInvoiceMail;
 use App\Models\ProductVariant;
+use App\Jobs\CancelVnpayOrderJob;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Mail;
+use App\Http\Controllers\PaymentController;
 
 class CheckoutController extends Controller
 {
     public function index(Request $request)
     {
-        $user = Auth::user();
+        $user = Auth::user()->load('profile');
 
         return view('client.pages.checkout', [
             'user' => $user,
@@ -155,11 +160,25 @@ class CheckoutController extends Controller
             DB::beginTransaction();
 
             $user = auth()->user();
+            if (is_null($user->email_verified_at)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vui lòng xác minh email trước khi đặt hàng.',
+                    'redirect_url' => route('profile.index'),
+                ], 403);
+            }
 
             $paymentMethod = PaymentMethod::findOrFail($data['payment_method_id']);
             $discountApplied = !empty($data['discount_id'])
                 ? Discount::findOrFail($data['discount_id'])
                 : null;
+
+            if ($discountApplied && $discountApplied->quantity <= 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Mã giảm giá đã hết lượt sử dụng.',
+                ], 400);
+            }
             Log::info($discountApplied);
 
             $order = Order::create([
@@ -189,7 +208,7 @@ class CheckoutController extends Controller
                 $sourcePath = storage_path('app/public/' . $item['product_variant']['image']);
                 $destinationPath = storage_path('app/public/images/orderItem/' . $filename);
                 // Kiểm tra và sao chép hình ảnh sản phẩm
-                if (File::exists($sourcePath) && !File::exists($destinationPath)) {
+                if (File::exists($sourcePath) && File::isFile($sourcePath) && !File::exists($destinationPath)) {
                     File::ensureDirectoryExists(dirname($destinationPath));
                     File::copy($sourcePath, $destinationPath);
                 }
@@ -240,9 +259,24 @@ class CheckoutController extends Controller
                     'discount_code' => $discountApplied->code,
                     'used_at' => now(),
                 ]);
+                $discountApplied->decrement('quantity');
             }
+            $order->load(['items', 'user']);
+
+
+
 
             DB::commit();
+            log::info('payment method: ' . $paymentMethod->name);
+            if (strtoupper($paymentMethod->name) === 'VNPAY') {
+                CancelVnpayOrderJob::dispatch($order->id)->delay(now()->addHours(24));
+                $redirectUrl = app(PaymentController::class)->createPaymentUrl($order);
+                return response()->json([
+                    'success' => true,
+                    'redirect_url' => $redirectUrl,
+                ]);
+            }
+
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -253,13 +287,69 @@ class CheckoutController extends Controller
         }
     }
 
-    public function list()
+    public function list(Request $request)
     {
         $user = Auth::user();
-        $orders = Order::where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-        return view('client.pages.viewOrder', compact('orders', 'user'));
+        $query = Order::where('user_id', $user->id)->with(['items.review']);
+
+        // Lấy danh sách trạng thái và thanh toán từ DB
+        $statuses = Order::select('order_status')->whereNotNull('order_status')->distinct()->pluck('order_status')->all();
+        $payments = Order::select('payment_status')->whereNotNull('payment_status')->distinct()->pluck('payment_status')->all();
+
+        // Áp dụng bộ lọc
+        $sku = $request->query('sku');
+        $status = $request->query('status');
+        $payment = $request->query('payment');
+        $startDate = $request->query('start_date');
+        $endDate = $request->query('end_date');
+        $sort = $request->query('sort', 'newest');
+
+        if ($sku) {
+            $query->where('sku', 'like', "%$sku%");
+        }
+        if ($status) {
+            $query->where('order_status', $status);
+        }
+        if ($payment) {
+            $query->where('payment_status', $payment);
+        }
+        if ($startDate && $endDate) {
+            $query->whereBetween('created_at', [$startDate, $endDate]);
+        } elseif ($startDate) {
+            $query->where('created_at', '>=', $startDate);
+        } elseif ($endDate) {
+            $query->where('created_at', '<=', $endDate);
+        }
+
+        // Áp dụng sắp xếp
+        switch ($sort) {
+            case 'oldest':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'high_to_low':
+                $query->orderBy('total_amount', 'desc');
+                break;
+            case 'low_to_high':
+                $query->orderBy('total_amount', 'asc');
+                break;
+            case 'newest':
+            default:
+                $query->orderBy('created_at', 'desc');
+                break;
+        }
+
+        $orders = $query->paginate(10)->appends(request()->except('page'));
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'html' => view('client.partials.order-list', compact('orders'))->render(),
+                'total' => $orders->total(),
+                'pagination' => $orders->appends(request()->except('page'))->links('pagination::bootstrap-4')->toHtml(),
+            ]);
+        }
+
+        return view('client.pages.viewOrder', compact('orders', 'user', 'statuses', 'payments'));
     }
 
     public function show(Order $order)
@@ -272,7 +362,7 @@ class CheckoutController extends Controller
             return redirect()->route('orders.list')->with('error', 'Bạn không có quyền xem đơn hàng này.');
         }
 
-        $order->load('items');
+        $order->load('items.review');
 
         return view('client.pages.invoice', compact('order', 'user'));
     }
@@ -295,25 +385,99 @@ class CheckoutController extends Controller
             // Cập nhật kho
             foreach ($order->items as $item) {
                 if ($item->product_variant_sku) {
-                    $variant = \App\Models\ProductVariant::where('sku', $item->product_variant_sku)->lockForUpdate()->first();
+                    $variant = ProductVariant::where('sku', $item->product_variant_sku)->lockForUpdate()->first();
                     if ($variant) {
                         $variant->increment('quantity', $item->quantity);
                     }
                 }
             }
 
+
             // Cập nhật trạng thái và lý do hủy
             $order->order_status = 'Hủy đơn';
             $order->cancel_reason = request('cancel_reason');
             $order->save();
 
+            // xử lý mã giảm giá sau khi hủy đơn
+            if ($order->discount_code) {
+                $discount = Discount::where('code', $order->discount_code)->first();
+                if ($discount) {
+                    $discount->increment('quantity');
+
+                    DiscountUsage::where('order_id', $order->id)->delete();
+                }
+            }
+
             DB::commit();
 
-            return redirect()->route('orders.list')->with('success', 'Đã hủy đơn hàng và hoàn tồn kho.');
+            return redirect()->route('orders.list')->with('success', 'Đơn hàng đã được hủy thành công.');
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Hủy đơn thất bại: ' . $e->getMessage());
             return redirect()->route('orders.list')->with('error', 'Có lỗi xảy ra khi hủy đơn hàng. Vui lòng thử lại.');
         }
+    }
+
+    public function submitReview(Request $request)
+    {
+        $data = $request->validate([
+            'order_item_id' => 'required|exists:order_items,id',
+            'title' => 'required|string|max:255',
+            'rating' => 'required|integer|min:1|max:5',
+            'content' => 'required|string',
+            'images.*' => 'nullable|image|max:2048',
+        ]);
+
+        $orderItem = OrderItem::findOrFail($data['order_item_id']);
+
+        $productVariant = ProductVariant::where('sku', $orderItem->product_variant_sku)->first();
+
+        if (!$productVariant) {
+            return redirect()->back()->with('error', 'Sản phẩm không tồn tại hoặc đã bị xóa khỏi hệ thống.');
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $review = Review::create([
+                'order_item_id' => $data['order_item_id'],
+                'product_variant_id' => $productVariant->id,
+                'user_id' => auth()->id(),
+                'title' => $data['title'],
+                'rating' => $data['rating'],
+                'content' => $data['content'],
+            ]);
+
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $imagePath = $image->store('reviews', 'public');
+                    $review->images()->create(['image' => $imagePath]);
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Đánh giá đã được gửi thành công.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Log lỗi nếu cần thiết
+            Log::error('Error when submitting review: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại.');
+        }
+    }
+
+    public function confirmReceived(Order $order)
+    {
+        if ($order->order_status !== 'Giao hàng thành công') {
+            return back()->with('error', 'Đơn hàng này chưa thể xác nhận.');
+        }
+
+        $order->update([
+            'order_status' => 'Đã nhận hàng'
+        ]);
+
+        return back()->with('success', 'Xác nhận đã nhận hàng thành công.');
     }
 }

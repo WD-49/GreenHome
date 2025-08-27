@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Order extends Model
 {
@@ -45,32 +45,53 @@ class Order extends Model
 
 
     // Phương thức kiểm tra xem đơn hàng có thể bị hủy không
-    public function canBeCancelled(): bool
+    public function canBeCancelled()
     {
         // Các trạng thái mà đơn hàng KHÔNG THỂ bị hủy
-        // Ví dụ: Đơn hàng đã "Đang vận chuyển", "Giao hàng thành công", hoặc đã "Hủy đơn" thì không thể hủy nữa.
-        // Nếu bạn muốn cho phép hủy ở trạng thái "Xác nhận", hãy bỏ "Xác nhận" khỏi mảng này.
         $nonCancellableStatuses = ['Đang vận chuyển', 'Giao hàng thành công', 'Hủy đơn'];
 
         return !in_array($this->order_status, $nonCancellableStatuses);
     }
 
-    public function canBeCancel(): bool
+    // Phương thức kiểm tra xem đơn hàng có thể bị hủy không
+    public function canBeCancel()
     {
-        $nonCancellableStatuses = ['Đang vận chuyển', 'Giao hàng thành công', 'Hủy đơn'];
+        $nonCancellableStatuses = ['Đang vận chuyển', 'Giao hàng thành công', 'Hủy đơn', 'Đã nhận hàng'];
+
 
         return !in_array($this->order_status, $nonCancellableStatuses)
             && $this->payment_status !== 'paid';
+    }
+
+    // Phương thức kiểm tra xem đơn hàng có thể được thanh toán không
+    public function canBePay()
+    {
+        return $this->payment_method_name === 'VNPAY'
+            && $this->payment_status === 'pending'
+            && $this->order_status !== 'Hủy đơn'
+            && $this->order_status !== 'Chưa xác nhận';
+    }
+
+    // Phương thức khôi phục trạng thái thanh toán
+    protected static function booted()
+    {
+        static::updated(function ($order) {
+            if (
+                ($order->order_status === 'Giao hàng thành công' || $order->order_status === 'Đã nhận hàng')  &&
+                $order->payment_status !== 'paid'
+            ) {
+                $order->payment_status = 'paid';
+                $order->saveQuietly(); // dùng saveQuietly để tránh vòng lặp sự kiện(ko auto chuyển sang đã nhận hàng khi đơn là Giao hàng thành công)
+            }
+        });
     }
 
 
     public static function generateUniqueSku()
     {
         do {
-            // Sinh số ngẫu nhiên từ 100 đến 100000
             $randomNumber = mt_rand(100, 100000);
 
-            // Tạo mã SKU theo format DH + số ngẫu nhiên có 6 chữ số (bổ sung 0 nếu cần)
             $sku = 'DH' . str_pad($randomNumber, 6, '0', STR_PAD_LEFT);
 
             // Kiểm tra đã tồn tại SKU này chưa

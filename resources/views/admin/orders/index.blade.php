@@ -116,9 +116,10 @@
                             {{-- <a href="{{ route('admin.orders.create') }}" class="btn btn-success shadow-sm">
                                 + Tạo đơn hàng
                             </a> --}}
-                            {{-- <a href="{{ route('admin.orders.trash') }}" class="btn btn-danger shadow-sm">
-                                <i class="fas fa-trash-restore fa-sm text-white-50"></i> Thùng rác
-                            </a> --}}
+                            <h3 class="btn btn-warning shadow-sm">
+                                <i class="fas fa-bell fa-lg text-warning"></i> Đơn hàng chưa xác nhận hôm nay:
+                                {{ $unconfirmedTodayCount }}
+                            </h3>
                         </div>
                     </div>
 
@@ -143,8 +144,8 @@
                             </thead>
                             <tbody>
                                 @forelse ($orders as $index => $order)
-                                    <tr>
-                                        <td>{{ $orders->firstItem() + $index }}</td>
+                                    <tr @if ($order->order_status === 'Chưa xác nhận') class="table-danger" @endif>
+                                        <td>{{ $index + 1 }}</td>
                                         <td>#{{ $order->sku ?? $order->id }}</td>
                                         <td>{{ $order->user->name ?? 'N/A' }}</td>
                                         <td>{{ $order->shipping_name }}</td>
@@ -222,38 +223,16 @@
                                             {{-- Các nút hành động trực tiếp --}}
                                             <div class="btn-group" role="group" aria-label="Order Actions">
                                                 {{-- Nút Sửa --}}
-                                                <a href="{{ route('admin.orders.edit', $order->id) }}"
+                                                {{-- <a href="{{ route('admin.orders.edit', $order->id) }}"
                                                     class="btn btn-action-sm btn-primary" title="Sửa">
                                                     <i class="fas fa-edit"></i>
-                                                </a>
+                                                </a> --}}
 
                                                 {{-- Nút Xem chi tiết --}}
                                                 <a href="{{ route('admin.orders.show', $order->id) }}"
                                                     class="btn btn-action-sm btn-info" title="Xem chi tiết">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-
-                                                {{-- Nút Hủy đơn hàng (hiển thị dưới dạng một nút thông thường) --}}
-                                                {{-- @if (method_exists($order, 'canBeCancelled') && $order->canBeCancelled())
-                                                    <button type="button"
-                                                        class="btn btn-action-sm btn-warning cancel-order-btn"
-                                                        data-order-id="{{ $order->id }}" title="Hủy đơn hàng">
-                                                        <i class="fas fa-ban"></i>
-                                                    </button>
-                                                @endif --}}
-
-                                                {{-- Form Xóa (Thùng rác) --}}
-                                                {{-- <form action="{{ route('admin.orders.destroy', $order->id) }}"
-                                                    method="POST"
-                                                    onsubmit="return confirm('Bạn có chắc muốn xóa đơn hàng này (đưa vào thùng rác)?')"
-                                                    class="d-inline soft-delete-order-form">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-action-sm btn-danger"
-                                                        title="Xóa (Thùng rác)">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </form> --}}
                                             </div>
                                         </td>
                                     </tr>
@@ -266,9 +245,9 @@
                             </tbody>
                         </table>
                         {{-- Laravel Pagination Links --}}
-                        <div class="d-flex justify-content-center mt-3">
+                        {{-- <div class="d-flex justify-content-center mt-3">
                             {{ $orders->links() }}
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
             </div>
@@ -309,7 +288,6 @@
 @push('scripts')
     {{-- Đảm bảo các đường dẫn này chính xác và không bị trùng lặp với layout chính --}}
     <script src="../../assets/libs/jquery/jquery.min.js"></script>
-    <script src="../../assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="../../assets/libs/simplebar/simplebar.min.js"></script>
     <script src="../../assets/libs/node-waves/waves.min.js"></script>
     <script src="../../assets/libs/waypoints/lib/jquery.waypoints.min.js"></script>
@@ -333,7 +311,7 @@
 
     {{-- <script src="../../assets/js/pages/datatable.init.js"></script> --}}
 
-    <script src="../../assets/js/app.js"></script>
+    {{-- <script src="../../assets/js/app.js"></script> --}}
 
     <script>
         $(document).ready(function() {

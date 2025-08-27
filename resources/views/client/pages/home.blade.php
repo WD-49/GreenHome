@@ -36,8 +36,75 @@
                 height: 280px;
                 object-fit: cover;
             }
+
+            .cr-blog-image img {
+                width: 100%;
+                height: 300px;
+                /* hoặc chiều cao bạn muốn */
+                object-fit: cover;
+                display: block;
+            }
         </style>
     @endpush
+
+    @php
+        $defaultBanner = $banners->where('type', 'slider')->first();
+    @endphp
+
+    {{-- Thông báo cho Login Google, Fb --}}
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        @if (session('success'))
+            <div class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive"
+                aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        {{ session('success') }}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+                </div>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive"
+                aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        {{ session('error') }}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+                </div>
+            </div>
+        @endif
+
+        @if (session('warning'))
+            <div class="toast align-items-center text-bg-warning border-0" role="alert" aria-live="assertive"
+                aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        {{ session('warning') }}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+                </div>
+            </div>
+        @endif
+    </div>
+    <script>
+        // JS cho phần thông báo Login Google FB
+        document.addEventListener('DOMContentLoaded', function() {
+            var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+            var toastList = toastElList.map(function(toastEl) {
+                return new bootstrap.Toast(toastEl, {
+                    autohide: true,
+                    delay: 5000 // 5 giây
+                })
+            })
+            toastList.forEach(toast => toast.show())
+        });
+    </script>
 
     <!-- Hero slider -->
     <section class="section-hero padding-b-100 next">
@@ -45,57 +112,34 @@
             <div class="swiper-wrapper">
 
                 {{-- Banner có priority 1 --}}
-                @foreach ($banner1 as $item)
-                    <div class="swiper-slide">
-                        <div class="cr-hero-banner"
-                            style="background-image: url('{{ Storage::url(Str::replaceFirst('storage/', '', $item->img)) }}');
+                @foreach ($banners as $banner)
+                    @if ($banner->type == 'slider')
+                        <div class="swiper-slide">
+                            <a href="{{ $banner->link ?? '#' }}">
+                                <div class="cr-hero-banner"
+                                    style="background-image: url('{{ Storage::url(Str::replaceFirst('storage/', '', $banner->img)) }}');
             background-size: cover;
             background-position: center;">
 
-                            <div class="container">
-                                <div class="row">
-                                    <div class="col-lg-12">
-                                        <div class="cr-left-side-contain slider-animation text-white">
-                                            <h1>{{ $item->name }}</h1>
-                                            <p>{!! $item->description !!}</p>
-                                            <div class="cr-last-buttons">
-                                                <a href="{{ $item->link }}" class="cr-button">Xem Cửa Hàng</a>
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="cr-left-side-contain slider-animation text-white">
+                                                    <h1>{{ $banner->name ?? '' }}</h1>
+                                                    <p>{!! $banner->description ?? '' !!}</p>
+                                                    {{-- <div class="cr-last-buttons">
+                                                    <a href="{{ $banner->link }}" class="cr-button">Xem Cửa Hàng</a>
+                                                </div> --}}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </a>
                         </div>
-                    </div>
+                    @endif
                 @endforeach
-
-                {{-- Banner có priority 2 --}}
-                @foreach ($banner2 as $item)
-                    <div class="swiper-slide">
-                        <div class="cr-hero-banner"
-                            style="background-image: url('{{ Storage::url(Str::replaceFirst('storage/', '', $item->img)) }}');
-            background-size: cover;
-            background-position: center;">
-
-                            <div class="container">
-                                <div class="row">
-                                    <div class="col-lg-12">
-                                        <div class="cr-left-side-contain slider-animation text-white">
-                                            <h1>{{ $item->name }}</h1>
-                                            <p>{!! $item->description !!}</p>
-                                            <div class="cr-last-buttons">
-                                                <a href="{{ $item->link }}" class="cr-button">Xem Cửa Hàng</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-
             </div>
-
             {{-- Swiper pagination --}}
             <div class="swiper-pagination"></div>
         </div>
@@ -133,52 +177,39 @@
                 {{-- filepath: c:\laragon\www\GreenHome-main\resources\views\client\pages\home.blade.php --}}
                 <div class="col-lg-8 col-12 mb-24 d-flex align-items-stretch">
                     <div class="tab-content w-100" id="myTabContent">
-                        @foreach ($categories as $index => $category)
-                            @php
-                                $start = $index * 2;
-                                $categoryBanners = $banners->slice($start, 2);
-                            @endphp
-
+                        @foreach ($topCategories as $index => $category)
                             <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}"
                                 id="content-{{ $category->id }}" role="tabpanel"
                                 aria-labelledby="tab-{{ $category->id }}">
                                 <div class="row mb-minus-24 h-100">
-                                    @foreach ($categoryBanners as $banner)
-                                        <div class="col-6 cr-categories-box mb-4 d-flex align-items-stretch">
-                                            <div class="cr-side-categories w-100" style="height:100%;">
-                                                <div
-                                                    style="position:relative; height:100%; width:100%; border-radius:8px; overflow:hidden;">
-                                                    <img src="{{ asset($banner->img) }}" alt="{{ $banner->name }}"
-                                                        style="width:100%;height:100%;object-fit:cover;display:block;position:absolute;top:0;left:0;">
-                                                    <div
-                                                        style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.25);z-index:1;">
-                                                    </div>
-                                                    <div class="categories-inner"
-                                                        style="position:absolute;top:10px;left:10px;z-index:2;">
-                                                        <h4>{{ $category->discount ?? '0' }}
-                                                            <span>
-                                                                <small>%</small>
-                                                                <small>Off</small>
-                                                            </span>
-                                                        </h4>
-                                                    </div>
-                                                    <div class="categories-contain"
-                                                        style="position:absolute;bottom:20px;left:0;width:100%;z-index:2;text-align:center;">
-                                                        <div class="categories-text">
-                                                            <h5 style="color:#fff;text-shadow:0 1px 4px #000;">
-                                                                {{ $category->name }}</h5>
+                                    @foreach ($banners as $banner)
+                                        @if ($banner->category_id == $category->id)
+                                            {{-- Hiển thị banner nếu có --}}
+                                            @php
+                                                $imgPath = Str::replaceFirst('storage/', '', $banner->img);
+                                            @endphp
+                                            <div class="col-6 cr-categories-box mb-4 d-flex align-items-stretch">
+                                                <div class="cr-side-categories w-100" style="height:100%;">
+                                                    <a href="{{ $banner->link ?? '#' }}"
+                                                        style="display:block;height:100%;width:100%;">
+                                                        <div
+                                                            style="position:relative; height:100%; width:100%; border-radius:8px; overflow:hidden;">
+                                                            <img src="{{ asset($banner->img) }}" alt="{{ $banner->name }}"
+                                                                style="width:100%;height:100%;object-fit:cover;display:block;position:absolute;top:0;left:0;">
+                                                            <div
+                                                                style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.25);z-index:1;">
+                                                            </div>
+                                                            <div class="categories-inner"
+                                                                style="position:absolute;top:10px;left:10px;z-index:2;">
+                                                            </div>
+                                                            <div
+                                                                style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.25);border-radius:8px;z-index:1;">
+                                                            </div>
                                                         </div>
-                                                        <div class="categories-button">
-                                                            <a href="{{ route('shop.category', $category->slug ?? $category->id) }}"
-                                                                class="cr-button">Xem Cửa Hàng</a>
-                                                        </div>
-                                                    </div>
-                                                    <div
-                                                        style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.25);border-radius:8px;z-index:1;">
-                                                    </div>
+                                                    </a>
                                                 </div>
                                             </div>
-                                        </div>
+                                        @endif
                                     @endforeach
                                 </div>
                             </div>
@@ -227,56 +258,45 @@
                             @endforeach
                         </ul>
                     </div>
-                    @foreach ($banner11 as $item)
-                        <div class="cr-ice-cubes mt-4">
-
-                            <img src="{{ Storage::url(Str::replaceFirst('storage/', '', $item->img)) }}"
-                                alt="{{ $item->name }}" style="width: 100%;">
-
-                            <div class="cr-ice-cubes-contain">
-
-                                <h4 class="title">{{ $item->name }}</h4>
-                                <h5 class="sub-title">{{ $item->sub_title ?? 'Subtitle' }}</h5>
-                                <span>{{ $item->description }}</span>
-                                <a href="{{ $item->link }}" class="cr-button">Xem Cửa Hàng</a>
-
-                            </div>
-                        </div>
-                    @endforeach
 
                 </div>
 
                 {{-- Cột phải: Sản phẩm --}}
                 <div class="col-xl-9 col-lg-8 col-12 mb-24">
-                    {{-- Tab All: 8 sản phẩm ngẫu nhiên --}}
+
                     <div id="tab-all" class="product-tab-content fade-tab show">
                         <div class="row mb-minus-24">
-                            @foreach ($randomProducts as $product)
+                            @foreach ($popularProducts as $product)
                                 <div class="col-xxl-3 col-xl-4 col-6 cr-product-box mb-24">
                                     <div class="cr-product-card">
+                                        {{-- Hiển thị ảnh sản phẩm --}}
                                         <div class="cr-product-image">
                                             <div class="cr-image-inner zoom-image-hover">
-                                                <img src="{{ Storage::url($product->image) }}"
-                                                    alt="{{ $product->name }}">
+                                                <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}">
                                             </div>
                                             <div class="cr-side-view">
-                                                <a href="javascript:void(0)" class="wishlist">
-                                                    <i class="ri-heart-line"></i>
+                                                <a href="javascript:void(0);" class="wishlist-button"
+                                                    data-product-id="{{ $product->id }}">
+                                                    @if (in_array($product->id, $wishlistProductIds ?? []))
+                                                        <i class="ri-heart-fill text-danger"></i>
+                                                    @else
+                                                        <i class="ri-heart-line"></i>
+                                                    @endif
                                                 </a>
-                                                <a class="model-oraganic-product" data-bs-toggle="modal"
-                                                    href="#quickview" role="button">
+                                                <a class="model-oraganic-product" data-bs-toggle="modal" href="#quickview"
+                                                    role="button" data-product-id="{{ $product->id }}">
                                                     <i class="ri-eye-line"></i>
                                                 </a>
                                             </div>
-                                            <a class="cr-shopping-bag" href="javascript:void(0)">
-                                                <i class="ri-shopping-bag-line"></i>
-                                            </a>
+
                                         </div>
                                         <div class="cr-product-details">
                                             <div class="cr-brand">
-                                                <a href="#">{{ $product->category->name ?? '' }}</a>
+                                                <a
+                                                    href="{{ route('shop.index', ['categories[]' => $product->category->id]) }}">{{ $product->category->name ?? '' }}</a>
                                             </div>
-                                            <a href="#" class="title">{{ $product->name }}</a>
+                                            <a href="{{ route('productDetail', $product->slug) }}"
+                                                class="title">{{ $product->name }}</a>
 
                                             {{-- ✅ Hiển thị đúng giá biến thể đầu tiên --}}
                                             <p class="cr-price">
@@ -304,6 +324,8 @@
                     @foreach ($categories2 as $category)
                         <div id="tab-cat-{{ $category->id }}" class="product-tab-content" style="display:none;">
                             <div class="row mb-minus-24">
+
+                                {{-- 👉 Sản phẩm trong danh mục --}}
                                 @foreach ($category->products as $product)
                                     <div class="col-xxl-3 col-xl-4 col-6 cr-product-box mb-24">
                                         <div class="cr-product-card">
@@ -313,23 +335,29 @@
                                                         alt="{{ $product->name }}">
                                                 </div>
                                                 <div class="cr-side-view">
-                                                    <a href="javascript:void(0)" class="wishlist">
-                                                        <i class="ri-heart-line"></i>
+                                                    <a href="javascript:void(0);" class="wishlist-button"
+                                                        data-product-id="{{ $product->id }}">
+                                                        @if (in_array($product->id, $wishlistProductIds ?? []))
+                                                            <i class="ri-heart-fill text-danger"></i>
+                                                        @else
+                                                            <i class="ri-heart-line"></i>
+                                                        @endif
                                                     </a>
                                                     <a class="model-oraganic-product" data-bs-toggle="modal"
-                                                        href="#quickview" role="button">
+                                                        href="#quickview" role="button"
+                                                        data-product-id="{{ $product->id }}">
                                                         <i class="ri-eye-line"></i>
                                                     </a>
                                                 </div>
-                                                <a class="cr-shopping-bag" href="javascript:void(0)">
-                                                    <i class="ri-shopping-bag-line"></i>
-                                                </a>
+
                                             </div>
                                             <div class="cr-product-details">
                                                 <div class="cr-brand">
-                                                    <a href="#">{{ $category->name }}</a>
+                                                    <a
+                                                        href="{{ route('shop.index', ['categories[]' => $category->id]) }}">{{ $category->name }}</a>
                                                 </div>
-                                                <a href="#" class="title">{{ $product->name }}</a>
+                                                <a href="{{ route('productDetail', $product->slug) }}"
+                                                    class="title">{{ $product->name }}</a>
 
                                                 <p class="cr-price">
                                                     @if ($variant = $product->productVariants->first())
@@ -380,27 +408,33 @@
                 <div class="col-lg-12">
                     <div class="cr-banner-slider swiper-container">
                         <div class="swiper-wrapper">
-                            @foreach ($banners_mix as $banner)
-                                @php
-                                    $imgPath = Str::replaceFirst('storage/', '', $banner->img);
-                                @endphp
-                                <div class="swiper-slide" data-aos="fade-up" data-aos-duration="1000">
-                                    <div class="position-relative rounded overflow-hidden shadow" style="height: 300px;">
+                            @foreach ($banners as $banner)
+                                @if ($banner->type == 'slider' && $banner->status == 1)
+                                    @php
+                                        $imgPath = Str::replaceFirst('storage/', '', $banner->img);
+                                    @endphp
+                                    <div class="swiper-slide" data-aos="fade-up" data-aos-duration="1000">
+                                        <a href="{{ $banner->link ?? '#' }}">
+                                            <div class="position-relative rounded overflow-hidden shadow"
+                                                style="height: 300px;">
 
-                                        {{-- Ảnh banner --}}
-                                        <img src="{{ Storage::url($imgPath) }}" alt="{{ $banner->name }}"
-                                            class="w-100 h-100 object-cover">
+                                                {{-- Ảnh banner --}}
+                                                <img src="{{ Storage::url($imgPath) }}" alt="{{ $banner->name }}"
+                                                    class="w-100 h-100 object-cover">
 
-                                        {{-- Chữ và nút chồng lên ảnh --}}
-                                        <div class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center text-center text-white p-3"
-                                            style="background: rgba(0, 0, 0, 0.3);">
-                                            <h5 class="fw-bold" style="font-size: 24px;">{!! $banner->name !!}</h5>
-                                            <p>{{ $banner->sub_title ?? '' }}</p>
-                                            <a href="{{ $banner->link ?? '#' }}" class="cr-button mt-2">Xem Cửa Hàng</a>
-                                        </div>
+                                                {{-- Chữ và nút chồng lên ảnh --}}
+                                                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center text-center text-white p-3"
+                                                    style="background: rgba(0, 0, 0, 0.3);">
+                                                    <h5 class="fw-bold" style="font-size: 24px;">{!! $banner->name ?? '' !!}
+                                                    </h5>
+                                                    <p>{{ $banner->sub_title ?? '' }}</p>
 
+                                                </div>
+
+                                            </div>
+                                        </a>
                                     </div>
-                                </div>
+                                @endif
                             @endforeach
                         </div>
                     </div>
@@ -408,6 +442,7 @@
             </div>
         </div>
     </section>
+
     <!-- Services -->
     <section class="section-services padding-b-100">
         <div class="container">
@@ -488,21 +523,25 @@
                                                 alt="{{ $product->name }}">
                                         </div>
                                         <div class="cr-side-view">
-                                            <a href="javascript:void(0)" class="wishlist"><i
-                                                    class="ri-heart-line"></i></a>
+                                            <a href="javascript:void(0);" class="wishlist-button"
+                                                data-product-id="{{ $product->id }}">
+                                                @if (in_array($product->id, $wishlistProductIds ?? []))
+                                                    <i class="ri-heart-fill text-danger"></i>
+                                                @else
+                                                    <i class="ri-heart-line"></i>
+                                                @endif
+                                            </a>
                                             <a class="model-oraganic-product" data-bs-toggle="modal" href="#quickview"
-                                                role="button">
+                                                role="button" data-product-id="{{ $product->id }}">
                                                 <i class="ri-eye-line"></i>
                                             </a>
                                         </div>
-                                        <a class="cr-shopping-bag" href="javascript:void(0)">
-                                            <i class="ri-shopping-bag-line"></i>
-                                        </a>
+
                                     </div>
                                     <div class="cr-product-details">
                                         <div class="cr-brand">
                                             <a
-                                                href="shop-left-sidebar.html">{{ $product->category->name ?? 'Category' }}</a>
+                                                href="{{ route('shop.index', ['categories[]' => $product->category->id]) }}">{{ $product->category->name ?? 'Category' }}</a>
                                             <div class="cr-star">
                                                 <i class="ri-star-fill"></i>
                                                 <i class="ri-star-fill"></i>
@@ -512,7 +551,7 @@
                                                 <p>(4.0)</p>
                                             </div>
                                         </div>
-                                        <a href="product-left-sidebar.html" class="title">
+                                        <a href="{{ route('productDetail', $product->slug) }}" class="title">
                                             {{ $product->name }}
                                         </a>
                                         <p class="cr-price">
@@ -533,18 +572,14 @@
 
                 <div class="col-xxl-5 col-xl-6 col-lg-6 col-md-12" data-aos="fade-up" data-aos-duration="2000">
                     <div class="cr-products-rightbar position-relative overflow-hidden rounded shadow">
-                        @if ($banner12)
-                            {{-- Ảnh banner từ DB --}}
-                            <img src="{{ asset('storage/' . str_replace('storage/', '', $imgPath)) }}"
-                                alt="{{ $banner12->name }}">
+                        @if ($defaultBanner)
+                            <a href="{{ $defaultBanner->link ?? '#' }}"></a><img
+                                src="{{ asset('storage/' . str_replace('storage/', '', $defaultBanner->img)) }}"
+                                alt="{{ $defaultBanner->name }}"></a>
 
-                            {{-- Nội dung chèn lên ảnh --}}
                             <div class="cr-products-rightbar-content position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-start text-white p-4"
                                 style="background: rgba(0, 0, 0, 0.3);">
-                                {{-- {{-- <h4>{!! $banner12->name !!}</h4> --}}
                                 <div class="rightbar-buttons mt-2">
-
-                                    <a href="{{ $banner12->link ?? '#' }}" class="cr-button">Xem Cửa Hàng</a>
                                 </div>
 
                             </div>
@@ -588,7 +623,7 @@
                                                 <a href="#">{{ $blog->category->name ?? 'Uncategorized' }}</a>
                                             </span>
                                             <h5>{{ $blog->title }}</h5>
-                                            <a class="read" href="">Đọc thêm</a>
+                                            <a class="read" href="{{ route('blog.show', $blog->slug) }}">Đọc thêm</a>
                                         </div>
 
                                         <div class="cr-blog-image">
@@ -596,8 +631,8 @@
                                                 alt="{{ $blog->title }}">
                                             <div class="cr-blog-date">
                                                 <span>
-                                                    {{ optional($blog->created_at)->format('d') }}
-                                                    <code>{{ optional($blog->created_at)->format('M') }}</code>
+                                                    {{ \Carbon\Carbon::parse($blog->created_at)->locale('vi')->translatedFormat('d') }}
+                                                    <code>{{ \Carbon\Carbon::parse($blog->created_at)->locale('vi')->translatedFormat('F') }}</code>
                                                 </span>
                                             </div>
                                         </div>
@@ -612,3 +647,41 @@
         </div>
     </section>
 @endsection
+@push('scripts')
+    <script>
+        $(document).ready(function() {
+            // CSRF token setup
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                xhrFields: {
+                    withCredentials: true
+                }
+            });
+
+            // Wishlist toggle
+            $(document).on('click', '.wishlist-button', function(e) {
+                e.preventDefault();
+                const $btn = $(this);
+                const productId = $btn.data('product-id');
+
+                $.post('{{ route('wishlist.toggle') }}', {
+                    product_id: productId
+                }, function(res) {
+                    if (res.added) {
+                        $btn.find('i').removeClass('ri-heart-line').addClass(
+                            'ri-heart-fill text-danger');
+                    } else {
+                        $btn.find('i').removeClass('ri-heart-fill text-danger').addClass(
+                            'ri-heart-line');
+                    }
+                    alert(res.message);
+                }).fail(function(xhr) {
+                    alert(xhr.status === 401 ? 'Vui lòng đăng nhập để thêm vào wishlist' :
+                        'Đã có lỗi xảy ra!');
+                });
+            });
+        });
+    </script>
+@endpush

@@ -19,15 +19,15 @@ class WishlistController extends Controller
 
 
     public function index()
-{
-    $wishlists = WishList::with('product')
-        ->where('user_id', Auth::id())
-        ->orderByRaw("FIELD(priority, 'High', 'Medium', 'Low')") // ← sắp theo priority
-        ->orderByDesc('id') // ← ưu tiên mới nhất nếu trùng priority
-        ->paginate(12);
+    {
+        $wishlists = WishList::with('product')
+            ->where('user_id', Auth::id())
+            ->orderByRaw("FIELD(priority, 'High', 'Medium', 'Low')") // ← sắp theo priority
+            ->orderByDesc('id') // ← ưu tiên mới nhất nếu trùng priority
+            ->paginate(12);
 
-    return view('client.pages.wishlist', compact('wishlists'));
-}
+        return view('client.pages.wishlist', compact('wishlists'));
+    }
 
 
     public function add(Request $request)
@@ -51,12 +51,17 @@ class WishlistController extends Controller
 
     public function remove(Request $request)
     {
-        WishList::where('user_id', Auth::id())
+        $wishlist = WishList::where('user_id', Auth::id())
             ->where('product_id', $request->product_id)
-            ->delete();
+            ->first();
+
+        if ($wishlist) {
+            $wishlist->forceDelete(); // ← Xóa vĩnh viễn
+        }
 
         return response()->json(['success' => true, 'message' => 'Đã xóa khỏi wishlist']);
     }
+
 
     public function toggle(Request $request)
     {
@@ -94,22 +99,21 @@ class WishlistController extends Controller
     }
 
     public function updateOptions(Request $request)
-{
-    $request->validate([
-        'product_id' => 'required|exists:products,id',
-        'field' => 'required|in:notify_on_sale,priority',
-        'value' => 'required'
-    ]);
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'field' => 'required|in:notify_on_sale,priority',
+            'value' => 'required'
+        ]);
 
-    $wishlist = WishList::where('user_id', Auth::id())
-        ->where('product_id', $request->product_id)
-        ->firstOrFail();
+        $wishlist = WishList::where('user_id', Auth::id())
+            ->where('product_id', $request->product_id)
+            ->firstOrFail();
 
-    // Cập nhật field phù hợp
-    $wishlist->{$request->field} = $request->value;
-    $wishlist->save();
+        // Cập nhật field phù hợp
+        $wishlist->{$request->field} = $request->value;
+        $wishlist->save();
 
-    return response()->json(['message' => 'Đã cập nhật thành công!']);
-}
-
+        return response()->json(['message' => 'Đã cập nhật thành công!']);
+    }
 }

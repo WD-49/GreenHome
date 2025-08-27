@@ -50,7 +50,8 @@ class AccountUsersController extends Controller
             });
         }
 
-        $users = $query->paginate(10); // Phân trang 10 dòng mỗi trang
+        // $users = $query->paginate(10); // Phân trang 10 dòng mỗi trang
+        $users = $query->withTrashed()->get();
         // dd($Users);
         return view('admin.account.users.listUsers', compact('users'));
     }
@@ -58,10 +59,6 @@ class AccountUsersController extends Controller
     // Phương thức mới để thay đổi vai trò người dùng
     public function toggleUserRole(Request $request, User $user)
     {
-        // Kiểm tra quyền hạn của người thực hiện hành động (ví dụ: chỉ admin mới được làm)
-        // Đây là ví dụ cơ bản, bạn nên dùng Laravel Gates/Policies cho việc này
-        
-
         $newRole = $request->input('new_role');
 
         // Xác thực vai trò mới hợp lệ
@@ -83,7 +80,7 @@ class AccountUsersController extends Controller
 
     public function detailAccUser($id)
     {
-        $user = User::with([
+        $users = User::with([
             'profile',
             'comments.product' => function ($query) {
                 $query->withTrashed()->orderBy('created_at', 'desc');
@@ -99,7 +96,7 @@ class AccountUsersController extends Controller
             ->withCount(['orders', 'cartItems'])
             ->findOrFail($id);
         // dd($user);
-        return view('admin.account.users.detailAccUser', compact('user'));
+        return view('admin.account.users.detailAccUser', compact('users'));
     }
 
 
@@ -177,9 +174,7 @@ class AccountUsersController extends Controller
         if (!$request->ajax()) {
             return abort(403, 'Truy cập không hợp lệ.');
         }
-
-        // Eager load các thông tin cần thiết
-        // Bỏ 'shippingAddress...' vì nó không phải là relationship
+        
         $order->load([
             'user:id,name,email',       // Thông tin người đặt hàng (nếu order có user_id)
             'status',                   // Trạng thái đơn hàng (từ model OrderStatus)
@@ -241,16 +236,6 @@ class AccountUsersController extends Controller
             'district' => null,
             'city' => null,
         ];
-
-        // Nếu bạn muốn thử lấy thông tin phường/xã/thành phố từ user_profile của người đặt hàng (nếu có)
-        // bạn cần đảm bảo $order->user và $order->user->profile được load
-        // Ví dụ:
-        // if ($order->user && $order->user->profile) {
-        //     $shippingAddressData['ward'] = $order->user->profile->ward;
-        //     $shippingAddressData['district'] = $order->user->profile->district;
-        //     $shippingAddressData['city'] = $order->user->profile->city;
-        // }
-
 
         // CHUYỂN ĐỔI TRẠNG THÁI THANH TOÁN
         $paymentStatusDisplay = $order->payment_status; // Giữ giá trị gốc

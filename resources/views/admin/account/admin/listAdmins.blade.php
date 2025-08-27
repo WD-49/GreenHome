@@ -30,12 +30,12 @@
 
         <div class="py-3 d-flex align-items-sm-center flex-sm-row flex-column">
             <div class="flex-grow-1">
-                <h4 class="fs-18 fw-semibold m-0">Quản lý tài khoản người dùng</h4>
+                <h4 class="fs-18 fw-semibold m-0">Quản lý tài khoản quản trị</h4>
             </div>
 
             <div class="text-end">
                 <ol class="breadcrumb m-0 py-0">
-                    <h6 class="breadcrumb-item active">Home / Tài khoản / Quản lý tài khoản người dùng</h6>
+                    <h6 class="breadcrumb-item active">Home / Tài khoản / Quản lý tài khoản quản trị</h6>
                 </ol>
             </div>
         </div>
@@ -53,12 +53,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">Danh sách người dùng</h5>
-                        <div>
-                            <a href="{{ route('admin.account.trashedUsers') }}" class="btn btn-danger shadow-sm">
-                                <i class="fas fa-trash-restore fa-sm text-white-50"></i> Thùng rác
-                            </a>
-                        </div>
+                        <h5 class="card-title mb-0">Danh sách quản trị</h5>
                     </div>
 
                     <div class="card-body">
@@ -77,7 +72,7 @@
                             <tbody>
                                 @foreach ($admins as $item => $user)
                                     <tr>
-                                        <td>{{ $admins->firstItem() + $item }}</td>
+                                        <td>{{ $item + 1 }}</td>
                                         <td>{{ $user->name }}</td>
                                         <td>{{ $user->email }}</td>
                                         <td>{{-- Giả sử người dùng thông thường có role 'user' --}}
@@ -98,13 +93,10 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group" aria-label="User Actions">
-                                                <a href="{{ route('admin.account.detailAccUser', $user->id) }}"
+                                                <a href="{{ route('admin.account.detailAccAdmin', $user->id) }}"
                                                     class="btn btn-info btn-sm" title="Xem chi tiết">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-
-                                                {{-- NÚT PHÂN QUYỀN --}}
-                                                {{-- Điều kiện để nút phân quyền hiển thị (ví dụ: không cho phép phân quyền chính mình nếu bạn là admin) --}}
 
                                                 <button type="button"
                                                     class="btn btn-{{ $user->role == 'client' ? 'warning' : 'primary' }} btn-sm toggle-role-btn"
@@ -114,15 +106,6 @@
                                                     <i class="fas fa-user-shield"></i> {{-- Icon cho phân quyền --}}
                                                 </button>
 
-                                                {{-- <form action="{{ route('admin.account.softDeleteUser', $user->id) }}"
-                                                    method="POST" class="d-inline"
-                                                    onsubmit="return confirm('Bạn có chắc chắn muốn xóa tạm thời người dùng này không?')">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-danger btn-sm"
-                                                        title="Xóa tạm thời">
-                                                        <i class="fas fa-trash-alt"></i>
-                                                    </button>
-                                                </form> --}}
                                                 <form action="{{ route('admin.account.resetPassUser', $user->id) }}"
                                                     method="POST" class="d-inline"
                                                     onsubmit="return confirm('Bạn có chắc muốn đặt lại mật khẩu cho người dùng này không?')">
@@ -150,7 +133,6 @@
 @push('scripts')
     <!-- Vendor -->
     <script src="../../assets/libs/jquery/jquery.min.js"></script>
-    <script src="../../assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="../../assets/libs/simplebar/simplebar.min.js"></script>
     <script src="../../assets/libs/node-waves/waves.min.js"></script>
     <script src="../../assets/libs/waypoints/lib/jquery.waypoints.min.js"></script>
@@ -188,8 +170,6 @@
     <!-- Datatable Demo App Js -->
     <script src="../../assets/js/pages/datatable.init.js"></script>
 
-    <!-- App js-->
-    <script src="../../assets/js/app.js"></script>
 
     <script>
         $(document).ready(function() {
@@ -331,7 +311,7 @@
                                 $(this).remove();
                                 if ($.fn.DataTable.isDataTable('#datatable')) {
                                     $('#datatable').DataTable().row(this).remove()
-                                    .draw(); // 'this' trỏ đến row đã fadeOut
+                                        .draw(); // 'this' trỏ đến row đã fadeOut
                                 }
                             });
                         } else {

@@ -18,8 +18,6 @@ use App\Jobs\SendResetPasswordMailJob; // Import Job của bạn (nếu bạn v�
 
 class ResetPasswordController extends Controller
 {
-    // KHÔNG SỬ DỤNG trait ResetsPasswords nữa
-
     /**
      * Where to redirect users after resetting their password.
      *

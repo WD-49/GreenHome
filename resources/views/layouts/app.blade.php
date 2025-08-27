@@ -12,13 +12,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="keywords" content="ecommerce, market, shop, mart, cart, deal, multipurpose, marketplace">
-    <meta name="description" content="Carrot - Multipurpose eCommerce HTML Template.">
+    <meta name="description" content="GreenHome.">
     <meta name="author" content="ashishmaraviya">
 
-    <title>Carrot - Multipurpose eCommerce HTML Template</title>
+
+    <title>GreenHome</title>
 
     <!-- App favicon -->
-    <link rel="shortcut icon" href="{{ asset('assets_client/assets/img/logo/favicon.png') }}">
+    <link rel="shortcut icon" href="{{ asset('assets_client/assets/img/logo/GreenHome_logo.png') }}">
 
     <!-- Icon CSS -->
     <link rel="stylesheet" href="{{ asset('assets_client/assets/css/vendor/materialdesignicons.min.css') }}">
@@ -32,9 +33,12 @@
     <link rel="stylesheet" href="{{ asset('assets_client/assets/css/vendor/swiper-bundle.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets_client/assets/css/vendor/jquery.slick.css') }}">
     <link rel="stylesheet" href="{{ asset('assets_client/assets/css/vendor/slick-theme.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets_client/assets/css/vendor/chat.bot.main.css') }}">
 
     <!-- Main CSS -->
     <link rel="stylesheet" href="{{ asset('assets_client/assets/css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
     @stack('styles')
     <!-- CSRF Token cho AJAX -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -50,18 +54,10 @@
     <!-- Header -->
     <header>
         @include('client.partials.header')
-        {{-- @auth
-    @if (!Auth::user()->hasVerifiedEmail())
-        <div class="email-verify-reminder">
-            <a href="{{ route('profile.index') }}" title="Xác minh email để sử dụng đầy đủ tính năng!">
-                <i class="ri-error-warning-line"></i>
-                <span>Chưa xác minh email</span>
-            </a>
-        </div>
-    @endif
-@endauth --}}
 
     </header>
+
+    @include('client.partials.chatBot')
 
     <!-- Mobile menu -->
     <div class="cr-sidebar-overlay"></div>
@@ -139,10 +135,6 @@
 
     @yield('content')
 
-
-
-
-
     <!-- Footer -->
     @include('client.partials.footer')
 
@@ -160,6 +152,9 @@
     @include('client.partials.sideTool')
     <!-- Voucher Modal -->
     @include('client.partials.voucherModal')
+
+
+
 
     <!-- Global Notify -->
     <div id="global-notify" style="display:none;position:fixed;z-index:9999;bottom:40px;right:40px;min-width:220px;">
@@ -187,7 +182,7 @@
 
     {{-- js cho thông báo --}}
     {{-- do dòng này --}}
-    @Vite(['resources/js/app.js']); 
+    @Vite(['resources/js/app.js']);
     @stack('scripts')
 </body>
 

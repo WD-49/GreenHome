@@ -20,12 +20,15 @@ class ProductVariantController extends Controller
         $title = 'Quản lý biến thể';
         $perPage = $request->input('per_page', 10);
         $variants = $product->productVariants()
+            ->withoutTrashed() // chỉ lấy những bản ghi chưa bị xóa mềm
             ->with(['product', 'productVariantValues.attributeValue.attribute'])
-            ->filter($request) // <-- sử dụng scopeFilter vừa tạo
+            ->filter($request)
             ->orderByDesc('id')
-            ->paginate(5)
+            ->paginate($perPage)
             ->appends($request->except('page'));
+
         $variantTrashed = $product->productVariants()->onlyTrashed()->get();
+        // dd($variants);
 
         if ($request->ajax()) {
             return view('admin.products.variants.partials.table', compact('variants', 'product'))->render();
@@ -141,16 +144,41 @@ class ProductVariantController extends Controller
     }
     public function update(Request $request, Product $product, ProductVariant $productVariant)
     {
-        $request->validate([
-            'price' => 'required|numeric|min:0',
-            'quantity' => 'required|integer|min:0',
-            'image' => 'nullable|image|mimes:jpg,png,jpeg,gif,webp|max:2048',
-            'status' => 'required|boolean',
-            'attributes' => 'nullable|array',
-            'attributes.*' => 'exists:attributes,id',
-            'attribute_values' => 'nullable|array',
-            'attribute_values.*' => 'nullable|integer|max:255',
-        ]);
+        $request->validate(
+            [
+                'price' => 'required|numeric|min:0',
+                'quantity' => 'required|integer|min:0',
+                'image' => 'nullable|image|mimes:jpg,png,jpeg,gif,webp|max:2048',
+                'status' => 'required|boolean',
+                'attributes' => 'nullable|array',
+                'attributes.*' => 'exists:attributes,id',
+                'attribute_values' => 'nullable|array',
+                'attribute_values.*' => 'nullable|integer|max:255',
+            ],
+            [
+                'price.required' => 'Vui lòng nhập giá sản phẩm.',
+                'price.numeric' => 'Giá sản phẩm phải là số.',
+                'price.min' => 'Giá sản phẩm không được nhỏ hơn 0.',
+
+                'quantity.required' => 'Vui lòng nhập số lượng.',
+                'quantity.integer' => 'Số lượng phải là số nguyên.',
+                'quantity.min' => 'Số lượng không được nhỏ hơn 0.',
+
+                'image.image' => 'Tệp tải lên phải là hình ảnh.',
+                'image.mimes' => 'Hình ảnh phải có định dạng jpg, png, jpeg, gif hoặc webp.',
+                'image.max' => 'Kích thước hình ảnh không được vượt quá 2MB.',
+
+                'status.required' => 'Vui lòng chọn trạng thái.',
+                'status.boolean' => 'Trạng thái không hợp lệ.',
+
+                'attributes.array' => 'Thuộc tính không hợp lệ.',
+                'attributes.*.exists' => 'Thuộc tính không tồn tại.',
+
+                'attribute_values.array' => 'Giá trị thuộc tính không hợp lệ.',
+                'attribute_values.*.integer' => 'Giá trị thuộc tính phải là số nguyên.',
+                'attribute_values.*.max' => 'Giá trị thuộc tính không được vượt quá 255.',
+            ]
+        );
 
         // Xử lý hình ảnh nếu có upload mới
         $imagePath = $productVariant->image;

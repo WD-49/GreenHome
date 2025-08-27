@@ -1,300 +1,235 @@
 <?php
 
-namespace App\Http\Controllers\admin;
+namespace App\Http\Controllers\Admin;
 
-use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Order;
+use App\Models\Review;
 use App\Models\OrderItem;
+use App\Traits\Filterable;
 use Illuminate\Http\Request;
+use App\Models\ProductReview;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
-    public function index()
+    use Filterable;
+
+    public function index(Request $request)
     {
-        $title = 'dashboard';
-        return view('admin.dashboard', compact('title'));
+        $filterData = $this->applyFilter($request);
+        $filter = $filterData['filter'];
+        $startDate = $filterData['start_date'];
+        $endDate = $filterData['end_date'];
+
+        return view('admin.dashboard', compact('filter', 'startDate', 'endDate'));
     }
 
-    public function data()
+    public function getDashboardData(Request $request)
     {
-        $to = request('to') ? Carbon::parse(request('to')) : Carbon::today();
-        $from = request('from') ? Carbon::parse(request('from')) : $to->copy()->subDays(10);
+        try {
+            $filterData = $this->applyFilter($request);
+            $filter = $filterData['filter'];
+            $startDate = $filterData['start_date'];
+            $endDate = $filterData['end_date'];
+            $groupBy = $filterData['group_by'];
+            $interval = $filterData['interval'];
 
-        $dates = collect();
-        $diff = $from->diffInDays($to);
-        for ($i = 0; $i <= $diff; $i++) {
-            $dates->push($from->copy()->addDays($i)->format('Y-m-d'));
+            // Cache key
+            $cacheKey = "dashboard_data_{$filter}_{$startDate->format('Ymd')}_{$endDate->format('Ymd')}";
+
+            // Lấy dữ liệu từ cache hoặc database
+            $data = Cache::remember($cacheKey, 3600, function () use ($startDate, $endDate, $groupBy, $filter, $interval) {
+                // New Orders
+                $newOrders = Order::selectRaw("{$groupBy} as date, COUNT(*) as count")
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->groupByRaw($groupBy)
+                    ->orderByRaw($groupBy)
+                    ->get();
+
+                // Sales
+                $sales = Order::selectRaw("{$groupBy} as date, COUNT(*) as count")
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->where('order_status', 'Đã nhận hàng')
+                    ->where('payment_status', 'paid')
+                    ->groupByRaw($groupBy)
+                    ->orderByRaw($groupBy)
+                    ->get();
+
+                // Revenue
+                $revenue = Order::selectRaw("{$groupBy} as date, SUM(total_amount) as total")
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->where('order_status', 'Đã nhận hàng')
+                    ->where('payment_status', 'paid')
+                    ->groupByRaw($groupBy)
+                    ->orderByRaw($groupBy)
+                    ->get();
+
+                // New Users
+                $newUsers = User::selectRaw("{$groupBy} as date, COUNT(*) as count")
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->where('status', true)
+                    ->whereNull('deleted_at')
+                    ->groupByRaw($groupBy)
+                    ->orderByRaw($groupBy)
+                    ->get();
+
+                // Top Customers
+                $topCustomers = Order::select(
+                    'users.name',
+                    DB::raw('COUNT(orders.id) as order_count'),
+                    DB::raw('SUM(orders.total_amount) as total_spent')
+                )
+                    ->join('users', 'orders.user_id', '=', 'users.id')
+                    ->whereBetween('orders.created_at', [$startDate, $endDate])
+                    ->where('orders.order_status', 'Đã nhận hàng')
+                    ->where('orders.payment_status', 'paid')
+                    ->groupBy('users.id', 'users.name')
+                    ->orderByDesc('order_count')
+                    ->take(10)
+                    ->get();
+
+                // Top Selling Products
+                $validOrderIds = Order::where('order_status', 'Đã nhận hàng')
+                    ->where('payment_status', 'paid')
+                    ->whereBetween('created_at', [$startDate->startOfDay(), $endDate->endOfDay()])
+                    ->pluck('id');
+
+                $topSellingProducts = OrderItem::whereIn('order_id', $validOrderIds)
+                    ->leftJoin('product_variants', 'order_items.product_variant_sku', '=', 'product_variants.sku')
+                    ->select(
+                        'order_items.product_name',
+                        'order_items.product_variant_sku as product_sku',
+                        'order_items.product_attribute',
+                        DB::raw('MAX(order_items.unit_price) as product_price'),
+                        DB::raw('SUM(order_items.quantity) as sold'),
+                        'product_variants.image'
+                    )
+                    ->groupBy(
+                        'order_items.product_name',
+                        'order_items.product_variant_sku',
+                        'order_items.product_attribute',
+                        'product_variants.image'
+                    )
+                    ->orderByDesc('sold')
+                    ->limit(4)
+                    ->get();
+
+                // Top Rated Products
+                $validOrderIdsRated = Order::where('order_status', 'Đã nhận hàng')
+                    ->where('payment_status', 'paid')
+                    ->whereBetween('created_at', [$startDate->startOfDay(), $endDate->endOfDay()])
+                    ->pluck('id');
+
+                $topRatedProducts = Review::query()
+                    ->join('product_variants', 'reviews.product_variant_id', '=', 'product_variants.id')
+                    ->join('products', 'product_variants.product_id', '=', 'products.id')
+                    ->select(
+                        'products.name as product_name',
+                        'product_variants.sku as product_sku',
+                        'product_variants.attribute_name as product_attribute',
+                        'product_variants.image',
+                        DB::raw('COALESCE(AVG(reviews.rating), 0) as rating'),
+                        DB::raw('COUNT(reviews.id) as review_count')
+                    )
+                    ->where('reviews.status', 'approved')
+                    ->whereNotNull('reviews.order_item_id')
+                    ->groupBy(
+                        'products.name',
+                        'product_variants.sku',
+                        'product_variants.attribute_name',
+                        'product_variants.image'
+                    )
+                    ->orderByDesc('rating')
+                    ->take(5)
+                    ->get();
+
+
+                // Current Orders
+                $currentOrders = Order::select(
+                    'orders.id',
+                    'orders.sku',
+                    'users.name as user_name',
+                    DB::raw("COALESCE(user_profiles.user_image, '/images/default-avatar.png') as user_image"),
+                    'orders.total_amount',
+                    'orders.order_status',
+                    'orders.payment_status',
+                    'orders.created_at'
+                )
+                    ->join('users', 'orders.user_id', '=', 'users.id')
+                    ->leftJoin('user_profiles', 'users.id', '=', 'user_profiles.user_id')
+                    ->whereBetween('orders.created_at', [$startDate, $endDate])
+                    ->orderByDesc('orders.created_at')
+                    ->take(10)
+                    ->get()
+                    ->map(function ($order) {
+                        $order->payment_status_translated = [
+                            'pending' => 'Chờ thanh toán',
+                            'paid' => 'Đã thanh toán',
+                            'failed' => 'Thanh toán thất bại'
+                        ][$order->payment_status] ?? $order->payment_status;
+                        return $order;
+                    });
+
+
+                // Đồng bộ dữ liệu cho biểu đồ
+                $labels = $this->generateLabels($startDate, $endDate, $filter, $interval);
+                $newOrdersData = [];
+                $salesData = [];
+                $revenueData = [];
+                $newUsersData = [];
+
+                foreach ($labels as $label) {
+                    $newOrderRecord = $newOrders->where('date', $label['key'])->first();
+                    $salesRecord = $sales->where('date', $label['key'])->first();
+                    $revenueRecord = $revenue->where('date', $label['key'])->first();
+                    $newUsersRecord = $newUsers->where('date', $label['key'])->first();
+
+                    $newOrdersData[] = $newOrderRecord ? $newOrderRecord->count : 0;
+                    $salesData[] = $salesRecord ? $salesRecord->count : 0;
+                    $revenueData[] = $revenueRecord ? $revenueRecord->total : 0;
+                    $newUsersData[] = $newUsersRecord ? $newUsersRecord->count : 0;
+                }
+
+                return [
+                    'labels' => array_column($labels, 'label'),
+                    'new_orders' => [
+                        'total' => $newOrders->sum('count') ?? 0,
+                        'data' => $newOrdersData,
+                        'empty' => $newOrders->isEmpty(),
+                    ],
+                    'sales' => [
+                        'total' => $sales->sum('count') ?? 0,
+                        'data' => $salesData,
+                        'empty' => $sales->isEmpty(),
+                    ],
+                    'revenue' => [
+                        'total' => $revenue->sum('total') ?? 0,
+                        'data' => $revenueData,
+                        'empty' => $revenue->isEmpty(),
+                    ],
+                    'new_users' => [
+                        'total' => $newUsers->sum('count') ?? 0,
+                        'data' => $newUsersData,
+                        'empty' => $newUsers->isEmpty(),
+                    ],
+                    'top_customers' => $topCustomers->toArray(),
+                    'top_selling_products' => $topSellingProducts->toArray(),
+                    'top_rated_products' => $topRatedProducts->toArray(),
+                    'current_orders' => $currentOrders->toArray(),
+                ];
+            });
+
+            return response()->json(['success' => true, 'data' => $data]);
+        } catch (\Exception $e) {
+            Log::error('Dashboard data error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi server: ' . $e->getMessage(),
+            ], 500);
         }
-
-        // Đơn hàng hôm nay và hôm qua
-        $ordersToday = Order::whereDate('created_at', $to)->count();
-        $ordersYesterday = Order::whereDate('created_at', $to->copy()->subDay())->count();
-
-        $ordersPerDay = Order::whereBetween('created_at', [$from->startOfDay(), $to->endOfDay()])
-            ->selectRaw('DATE(created_at) as date, COUNT(*) as total')
-            ->groupBy('date')
-            ->pluck('total', 'date');
-        $ordersLastDays = $dates->map(fn($date) => (int)($ordersPerDay[$date] ?? 0));
-        $ordersLabels = $dates->map(fn($d) => Carbon::parse($d)->format('d/m'));
-
-        // Doanh thu hôm nay và hôm qua
-        $salesToday = Order::whereDate('created_at', $to)->where('payment_status', 'paid')->sum('total_amount');
-        $salesYesterday = Order::whereDate('created_at', $to->copy()->subDay())->where('payment_status', 'paid')->sum('total_amount');
-
-        $salesPerDay = Order::whereBetween('created_at', [$from->startOfDay(), $to->endOfDay()])
-            ->where('payment_status', 'paid')
-            ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total')
-            ->groupBy('date')
-            ->pluck('total', 'date');
-        $salesLastDays = $dates->map(fn($date) => (float)($salesPerDay[$date] ?? 0));
-
-        // Khách hàng mới hôm nay và hôm qua
-        $newCustomersToday = User::whereDate('created_at', $to)->count();
-        $newCustomersYesterday = User::whereDate('created_at', $to->copy()->subDay())->count();
-        $newCustomersPercent = $newCustomersYesterday == 0
-            ? ($newCustomersToday > 0 ? 100 : 0)
-            : round((($newCustomersToday - $newCustomersYesterday) / $newCustomersYesterday) * 100, 2);
-
-        $customersPerDay = User::whereBetween('created_at', [$from->startOfDay(), $to->endOfDay()])
-            ->selectRaw('DATE(created_at) as date, COUNT(*) as total')
-            ->groupBy('date')
-            ->pluck('total', 'date');
-        $newCustomersLastDays = $dates->map(fn($date) => (int)($customersPerDay[$date] ?? 0));
-        $newCustomersLabels = $dates->map(fn($d) => Carbon::parse($d)->format('d/m'));
-
-        // Tổng số sản phẩm đã bán hôm nay và hôm qua
-        $validOrderIdsToday = Order::whereDate('created_at', $to)
-            ->where('order_status', '!=', 'Hủy đơn')
-            ->pluck('id');
-        $validOrderIdsYesterday = Order::whereDate('created_at', $to->copy()->subDay())
-            ->where('order_status', '!=', 'Hủy đơn')
-            ->pluck('id');
-        $totalProductsSoldToday = OrderItem::whereIn('order_id', $validOrderIdsToday)->sum('quantity');
-        $totalProductsSoldYesterday = OrderItem::whereIn('order_id', $validOrderIdsYesterday)->sum('quantity');
-        $totalProductsSoldPercent = $totalProductsSoldYesterday == 0
-            ? ($totalProductsSoldToday > 0 ? 100 : 0)
-            : round((($totalProductsSoldToday - $totalProductsSoldYesterday) / $totalProductsSoldYesterday) * 100, 2);
-
-        $validOrderIds = Order::whereBetween('created_at', [$from->startOfDay(), $to->endOfDay()])
-            ->where('order_status', '!=', 'Hủy đơn')
-            ->pluck('id');
-        $productsSoldPerDay = OrderItem::whereIn('order_id', $validOrderIds)
-            ->selectRaw('DATE(created_at) as date, SUM(quantity) as total')
-            ->groupBy('date')
-            ->pluck('total', 'date');
-        $totalProductsSoldLastDays = $dates->map(fn($date) => (int)($productsSoldPerDay[$date] ?? 0));
-        $totalProductsSoldLabels = $dates->map(fn($d) => Carbon::parse($d)->format('d/m'));
-
-        return response()->json([
-            'orders_today' => $ordersToday,
-            'orders_yesterday' => $ordersYesterday,
-            'orders_percent_change' => $ordersYesterday == 0 ? ($ordersToday > 0 ? 100 : 0) : round((($ordersToday - $ordersYesterday) / $ordersYesterday) * 100, 2),
-            'orders_last_7_days' => $ordersLastDays,
-            'orders_last_7_days_labels' => $ordersLabels,
-
-            'sales_today' => $salesToday,
-            'sales_yesterday' => $salesYesterday,
-            'sales_percent_change' => $salesYesterday == 0 ? ($salesToday > 0 ? 100 : 0) : round((($salesToday - $salesYesterday) / $salesYesterday) * 100, 2),
-            'sales_last_7_days' => $salesLastDays,
-            'sales_last_7_days_labels' => $ordersLabels,
-
-            'new_customers_today' => $newCustomersToday,
-            'new_customers_yesterday' => $newCustomersYesterday,
-            'new_customers_percent' => $newCustomersPercent,
-            'new_customers_last_7_days' => $newCustomersLastDays,
-            'new_customers_last_7_days_labels' => $newCustomersLabels,
-
-            'total_products_sold_today' => $totalProductsSoldToday,
-            'total_products_sold_yesterday' => $totalProductsSoldYesterday,
-            'total_products_sold_percent' => $totalProductsSoldPercent,
-            'total_products_sold_last_7_days' => $totalProductsSoldLastDays,
-            'total_products_sold_last_7_days_labels' => $totalProductsSoldLabels,
-        ]);
-    }
-
-    public function repeatCustomerRate()
-    {
-        $type = request('range', 'day'); // day, week, month
-        $to = request('to') ? Carbon::parse(request('to')) : Carbon::today();
-        $from = request('from') ? Carbon::parse(request('from')) : $to->copy()->subDays(9); // 10 ngày tính cả today
-
-        if ($type === 'week') {
-            $labels = collect();
-            $weeks = [];
-            for ($i = 7; $i > 0; $i--) {
-                $start = Carbon::now()->startOfWeek()->subWeeks($i);
-                $end = $start->copy()->endOfWeek();
-                $weeks[] = [$start->copy(), $end->copy()];
-                $labels->push($start->format('d/m') . ' - ' . $end->format('d/m'));
-            }
-            $newCustomerPer = [];
-            $oldCustomerPer = [];
-            $firstOrderDates = Order::select('user_id', DB::raw('MIN(DATE(created_at)) as first_order_date'))
-                ->groupBy('user_id')
-                ->pluck('first_order_date', 'user_id');
-            foreach ($weeks as [$start, $end]) {
-                $newCustomerIds = $firstOrderDates->filter(fn($d) => $d >= $start->format('Y-m-d') && $d <= $end->format('Y-m-d'))->keys();
-                $newCount = Order::whereIn('user_id', $newCustomerIds)
-                    ->whereBetween('created_at', [$start, $end])
-                    ->count();
-                $newCustomerPer[] = $newCount;
-
-                $oldCustomerIds = $firstOrderDates->filter(fn($d) => $d < $start->format('Y-m-d'))->keys();
-                $oldCount = Order::whereIn('user_id', $oldCustomerIds)
-                    ->whereBetween('created_at', [$start, $end])
-                    ->count();
-                $oldCustomerPer[] = $oldCount;
-            }
-        } elseif ($type === 'month') {
-            $labels = collect();
-            $months = [];
-            for ($i = 11; $i >= 0; $i--) {
-                $start = Carbon::now()->startOfMonth()->subMonths($i);
-                $end = $start->copy()->endOfMonth();
-                $months[] = [$start->copy(), $end->copy()];
-                $labels->push($start->format('m/Y'));
-            }
-            $newCustomerPer = [];
-            $oldCustomerPer = [];
-            $firstOrderDates = Order::select('user_id', DB::raw('MIN(DATE(created_at)) as first_order_date'))
-                ->groupBy('user_id')
-                ->pluck('first_order_date', 'user_id');
-            foreach ($months as [$start, $end]) {
-                $newCustomerIds = $firstOrderDates->filter(fn($d) => $d >= $start->format('Y-m-d') && $d <= $end->format('Y-m-d'))->keys();
-                $newCount = Order::whereIn('user_id', $newCustomerIds)
-                    ->whereBetween('created_at', [$start, $end])
-                    ->count();
-                $newCustomerPer[] = $newCount;
-
-                $oldCustomerIds = $firstOrderDates->filter(fn($d) => $d < $start->format('Y-m-d'))->keys();
-                $oldCount = Order::whereIn('user_id', $oldCustomerIds)
-                    ->whereBetween('created_at', [$start, $end])
-                    ->count();
-                $oldCustomerPer[] = $oldCount;
-            }
-        } else { // day
-            $labels = collect();
-            $days = [];
-
-            $rangeStart = $from ?? Carbon::today()->subDays(9);
-            $rangeEnd = $to ?? Carbon::today();
-
-            for ($date = $rangeStart->copy(); $date <= $rangeEnd; $date->addDay()) {
-                $days[] = $date->copy();
-                $labels->push($date->format('d/m'));
-            }
-
-            $newCustomerPer = [];
-            $oldCustomerPer = [];
-            $firstOrderDates = Order::select('user_id', DB::raw('MIN(DATE(created_at)) as first_order_date'))
-                ->groupBy('user_id')
-                ->pluck('first_order_date', 'user_id');
-            foreach ($days as $date) {
-                $newCustomerIds = $firstOrderDates->filter(fn($d) => $d == $date->format('Y-m-d'))->keys();
-                $newCount = Order::whereIn('user_id', $newCustomerIds)
-                    ->whereDate('created_at', $date->format('Y-m-d'))
-                    ->count();
-                $newCustomerPer[] = $newCount;
-
-                $oldCustomerIds = $firstOrderDates->filter(fn($d) => $d < $date->format('Y-m-d'))->keys();
-                $oldCount = Order::whereIn('user_id', $oldCustomerIds)
-                    ->whereDate('created_at', $date->format('Y-m-d'))
-                    ->count();
-                $oldCustomerPer[] = $oldCount;
-            }
-        }
-
-        return response()->json([
-            'repeat_customer_labels' => $labels,
-            'repeat_customer_new' => $newCustomerPer,
-            'repeat_customer_old' => $oldCustomerPer,
-        ]);
-    }
-
-
-
-    public function topSellingProducts(Request $request)
-    {
-        $from = $request->query('from');
-        $to = $request->query('to');
-
-        $validOrderIds = Order::whereNotIn('order_status', ['Hủy đơn', 'Chưa xác nhận']);
-
-        if ($from && $to) {
-            $validOrderIds = $validOrderIds->whereBetween('created_at', [$from . ' 00:00:00', $to . ' 23:59:59']);
-        } else {
-            $toDate = Carbon::today();
-            $fromDate = $toDate->copy()->subDays(10);
-            $validOrderIds = $validOrderIds->whereBetween('created_at', [$fromDate->startOfDay(), $toDate->endOfDay()]);
-        }
-
-        $validOrderIds = $validOrderIds->pluck('id');
-
-        $products = OrderItem::whereIn('order_id', $validOrderIds)
-            ->leftJoin('product_variants', 'order_items.product_variant_sku', '=', 'product_variants.sku')
-            ->select(
-                'order_items.product_name',
-                'order_items.product_variant_sku as product_sku',
-                'order_items.product_attribute',
-                DB::raw('MAX(order_items.unit_price) as product_price'),
-                DB::raw('SUM(order_items.quantity) as sold'),
-                'product_variants.image'
-            )
-            ->groupBy(
-                'order_items.product_name',
-                'order_items.product_variant_sku',
-                'order_items.product_attribute',
-                'product_variants.image'
-            )
-            ->orderByDesc('sold')
-            ->limit(4)
-            ->get();
-
-        return response()->json($products);
-    }
-
-
-
-    public function salesReportIncome(Request $request)
-    {
-        // Lấy from và to từ query string
-        $to = $request->query('to') ?? Carbon::today()->format('Y-m-d');
-        $from = $request->query('from');
-
-        $toDate = Carbon::parse($to)->endOfDay();
-
-        if ($from) {
-            $fromDate = Carbon::parse($from)->startOfDay();
-        } else {
-            // Nếu không có from thì lấy 10 ngày trước toDate
-            $fromDate = $toDate->copy()->subDays(9)->startOfDay();
-        }
-
-        // Lấy doanh thu theo ngày trong khoảng fromDate -> toDate
-        $salesPerDay = Order::where('payment_status', 'paid')
-            ->whereBetween('created_at', [$fromDate, $toDate])
-            ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total')
-            ->groupBy('date')
-            ->orderBy('date')
-            ->pluck('total', 'date');
-
-        // Chuẩn bị labels và dữ liệu
-        $labels = collect();
-        $incomeData = collect();
-
-        $period = \Carbon\CarbonPeriod::create($fromDate, $toDate);
-        foreach ($period as $date) {
-            $dateStr = $date->format('Y-m-d');
-            $labels->push($date->format('d-m'));
-            $incomeData->push((float) ($salesPerDay[$dateStr] ?? 0));
-        }
-
-        return response()->json([
-            'labels' => $labels,
-            'income' => $incomeData,
-        ]);
     }
 }

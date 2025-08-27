@@ -295,6 +295,9 @@ class ProductController extends Controller
                             $variantImage = $request->file("variants.$index.image");
                             $filename = Str::slug($product->name . '-' .  $index) . '-' . time() . '.' . $variantImage->getClientOriginalExtension();
                             $newVariant->image = $variantImage->storeAs('images/products/variants', $filename, 'public');
+                        } else {
+                            // Gán ảnh sản phẩm nếu biến thể không có ảnh riêng
+                            $newVariant->image = $product->image;
                         }
 
                         $newVariant->save();
@@ -376,7 +379,29 @@ class ProductController extends Controller
             'sort_des' => 'nullable|string',
             'description' => 'nullable|string',
             'status' => 'required|in:0,1',
+        ], [
+            'name.required' => 'Vui lòng nhập tên sản phẩm.',
+            'name.max' => 'Tên sản phẩm không được vượt quá 255 ký tự.',
+            'category_id.required' => 'Vui lòng chọn danh mục.',
+            'category_id.exists' => 'Danh mục không hợp lệ.',
+            'brand_id.required' => 'Vui lòng chọn thương hiệu.',
+            'brand_id.exists' => 'Thương hiệu không hợp lệ.',
+            'image.image' => 'Ảnh sản phẩm phải là tệp hình ảnh.',
+            'image.mimes' => 'Ảnh sản phẩm phải có định dạng jpg, jpeg, png, gif, hoặc webp.',
+            'image.max' => 'Ảnh sản phẩm không được vượt quá 2MB.',
+            'date_of_entry.required' => 'Vui lòng nhập ngày nhập kho.',
+            'date_of_entry.date' => 'Ngày nhập kho không hợp lệ.',
+            'status.required' => 'Vui lòng chọn trạng thái.',
+            'status.in' => 'Trạng thái không hợp lệ.',
         ]);
+        // Tạo slug từ tên sản phẩm
+        $slug = Str::slug($request->input('name'));
+
+        // Kiểm tra slug có bị trùng không (ngoại trừ sản phẩm hiện tại)
+        $slugExists = Product::where('slug', $slug)->where('id', '!=', $id)->exists();
+        if ($slugExists) {
+            return redirect()->back()->withErrors(['name' => 'Tên sản phẩm đã tồn tại. Vui lòng chọn tên khác.'])->withInput();
+        }
 
         // Xử lý hình ảnh nếu có upload mới
         if ($request->hasFile('image')) {
@@ -394,7 +419,7 @@ class ProductController extends Controller
             }
         }
 
-        $product->slug = Str::slug($request->input('name'));
+        $product->slug = $slug; // Cập nhật slug
         $product->update($dataValidate);
 
         return redirect()->route('admin.products.index')->with('success', 'Cập nhật sản phẩm thành công!');

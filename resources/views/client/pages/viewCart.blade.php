@@ -49,16 +49,20 @@
                                     <div class="col-lg-12">
                                         <div class="cr-cart-update-bottom">
                                             <a href="{{ route('shop.index') }}" class="cr-links">Tiếp tục mua sắm</a>
-                                            <a href="javascript:void(0)" id="checkout-selected" class="cr-button">Thanh
-                                                toán</a>
+
                                             <div class="cr-btn-ds" data-aos="fade-up" data-aos-duration="2000"
                                                 data-aos-delay="400">
-                                                <button type="button" id="delete-selected" class="btn btn-danger">Xoá mục
-                                                    đã
-                                                    chọn</button>
+                                                {{-- <a href="javascript:void(0)" id="checkout-selected" class="cr-button">Thanh
+                                                    toán</a> --}}
+                                                <button type="button" id="checkout-selected" class="btn btn-success">Thanh
+                                                    toán
+                                                </button>
+                                                <button type="button" id="delete-selected" class="btn btn-danger">Xoá
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
+                                </div>
                             </form>
                         </div>
                         <div id="cart-empty" style="display: none;" class="text-center">
