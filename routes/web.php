@@ -50,10 +50,14 @@ use App\Http\Controllers\client\ProductClientController;
 use App\Http\Controllers\admin\Product\ProductController;
 use App\Http\Controllers\admin\Account\AccountAdminController;
 use App\Http\Controllers\admin\Account\AccountUsersController;
+use App\Http\Controllers\admin\FaqController;
 use App\Http\Controllers\admin\Product\ProductVariantController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\client\BlogController as ClientBlogController;
 use App\Http\Controllers\Client\DiscountController as ClientDiscountController;
+use App\Http\Controllers\client\SupportController;
+use Doctrine\DBAL\Schema\Index as DBALIndex;
+
 
 Route::get('/test-log', function () {
     Log::debug('Testing logging functionality');
@@ -80,6 +84,8 @@ Route::get('/category/{id}', [HomeController::class, 'category'])->name('shop.ca
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/category-id/{id}', [ProductController::class, 'getProductsByCategoryId']);
 
+// support
+Route::get('/support', [SupportController::class, 'index'])->name('support.index');
 
 Route::get('/contact', [ContactController::class, 'index'])->name('contact.index');
 Route::post('/contact', [ContactController::class, 'sendMail'])->name('contact.send');
@@ -132,12 +138,21 @@ Route::get('/test-notify', function () {
 });
 
 // route của trang admin
+
 Route::prefix('admin')->middleware(AdminMiddleware::class)->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     // routes/api.php
     Route::get('/dashboard-data', [DashboardController::class, 'getDashboardData'])->name('dashboard.data');
 
+    // Faq
+    Route::prefix('/faqs')->name('faqs.')->group(function() {
+        Route::get('/', [FaqController::class,"index"])->name('index');
+        Route::delete('/destroy', [FaqController::class,"destroy"])->name('destroy');
+        Route::get('/edit/{id}', [FaqController::class,"edit"])->name('edit');
+        Route::get('/create', [FaqController::class,"create"])->name('create');
+        Route::post('/store', [FaqController::class,"store"])->name('store');
+    });
     // Quản lý sản phẩm
     Route::prefix('/products')->name('products.')->group(function () {
 

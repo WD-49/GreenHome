@@ -68,7 +68,8 @@
                                 </ul>
                             </div>
                         </div>
-                        <div class="cr-blog-recent">
+                        @if (count($blogs) > 0)
+                            <div class="cr-blog-recent">
                             <div class="blog-heading">
                                 <h4>Bài viết mới</h4>
                             </div>
@@ -85,6 +86,7 @@
                             </div>
                            </a>
                         </div>
+                        @endif
 
                         {{-- <div class="cr-blog-tags">
                             <div class="blog-heading">
@@ -103,7 +105,8 @@
                         </div> --}}
                     </div>
                 </div>
-                <div class="col-lg-9 col-12 md-30">
+                @if (count($blogs) > 0)
+                    <div class="col-lg-9 col-12 md-30">
                     @foreach ($blogs as $blog)
     <div class="cr-blog-classic" data-aos="fade-up" data-aos-duration="2000" data-aos-delay="400">
         <div class="cr-blog-classic-content">
@@ -121,12 +124,6 @@
         </div>
     </div>
 @endforeach
-
-
-
-
-
-
 {{-- <!-- Phân trang -->
 <div class="mt-4">
     {{ $blogs->links() }}
@@ -157,6 +154,10 @@
 @endif
 
                 </div>
+                @endif
+                @if (count($blogs) == 0)
+                    <p class="text-center">Hiện không có bài viết nào</p>
+                @endif
             </div>
         </div>
     </section>
