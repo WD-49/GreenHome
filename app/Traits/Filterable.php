@@ -3,28 +3,27 @@
 namespace App\Traits;
 
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Cache;
 
 trait Filterable
 {
-    protected function applyFilter($request, $defaultFilter = 'month')
+    protected function applyFilter($request, $defaultFilter = 'day')
     {
         $filter = $request->input('filter', $defaultFilter);
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
 
-        // Đặt end_date mặc định là ngày hiện tại
+        // Đặt end_date mặc định là cuối ngày hiện tại
         if (!$endDate) {
             $endDate = now()->endOfDay();
         } else {
-            $endDate = Carbon::parse($endDate);
+            $endDate = Carbon::parse($endDate)->endOfDay();
         }
 
-        // Đặt start_date mặc định dựa trên filter
+        // Đặt start_date mặc định
         if (!$startDate) {
             switch ($filter) {
                 case 'day':
-                    $startDate = $endDate->copy()->subDays(30)->startOfDay();
+                    $startDate = now()->subDays(6)->startOfDay(); // 7 ngày trước ngày hiện tại
                     break;
                 case 'month':
                     $startDate = $endDate->copy()->subMonths(11)->startOfMonth();
@@ -33,17 +32,22 @@ trait Filterable
                     $startDate = $endDate->copy()->subYears(9)->startOfYear();
                     break;
                 default:
-                    $startDate = $endDate->copy()->subDays(30)->startOfDay();
+                    $startDate = now()->subDays(6)->startOfDay(); // 7 ngày trước ngày hiện tại
                     break;
             }
         } else {
-            $startDate = Carbon::parse($startDate);
+            $startDate = Carbon::parse($startDate)->startOfDay();
         }
 
-        // Validation
+        // Validation với thông báo lỗi tiếng Việt
         $request->validate([
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date|before_or_equal:' . now()->format('Y-m-d'),
+        ], [
+            'start_date.date' => 'Ngày bắt đầu phải là một ngày hợp lệ.',
+            'end_date.date' => 'Ngày kết thúc phải là một ngày hợp lệ.',
+            'end_date.after_or_equal' => 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.',
+            'end_date.before_or_equal' => 'Ngày kết thúc không được sau ngày hiện tại (' . now()->format('d/m/Y') . ').',
         ]);
 
         // Giới hạn phạm vi
@@ -51,7 +55,7 @@ trait Filterable
             case 'day':
                 $maxDays = 31;
                 if ($startDate->diffInDays($endDate) > $maxDays) {
-                    $endDate = $startDate->copy()->addDays($maxDays);
+                    $endDate = $startDate->copy()->addDays($maxDays)->endOfDay();
                 }
                 $groupBy = 'DATE(created_at)';
                 $interval = '1 day';
@@ -59,7 +63,7 @@ trait Filterable
             case 'month':
                 $maxMonths = 12;
                 if ($startDate->diffInMonths($endDate) > $maxMonths) {
-                    $endDate = $startDate->copy()->addMonths($maxMonths);
+                    $endDate = $startDate->copy()->addMonths($maxMonths)->endOfMonth();
                 }
                 $groupBy = 'DATE_FORMAT(created_at, "%Y-%m")';
                 $interval = '1 month';
@@ -67,7 +71,7 @@ trait Filterable
             case 'year':
                 $maxYears = 10;
                 if ($startDate->diffInYears($endDate) > $maxYears) {
-                    $endDate = $startDate->copy()->addYears($maxYears);
+                    $endDate = $startDate->copy()->addYears($maxYears)->endOfYear();
                 }
                 $groupBy = 'YEAR(created_at)';
                 $interval = '1 year';

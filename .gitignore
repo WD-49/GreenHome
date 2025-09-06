@@ -7,7 +7,7 @@
 /storage/pail
 /vendor
 /storage/logs/*
-!storage/app/public/images
+/storage/app/public/images
 
 
 .env
