@@ -103,7 +103,7 @@
                         Chọn loại bộ lọc:
                         <span id="filter-hint">
                             @if ($filter == 'day')
-                                Tối đa 31 ngày
+                                7 ngày gần nhất (tối đa 31 ngày)
                             @elseif ($filter == 'month')
                                 Tối đa 12 tháng
                             @else
@@ -311,7 +311,8 @@
                 const filterSelect = document.querySelector('#filter');
                 const filterHint = document.querySelector('#filter-hint');
                 filterSelect.addEventListener('change', () => {
-                    if (filterSelect.value === 'day') filterHint.textContent = 'Tối đa 31 ngày';
+                    if (filterSelect.value === 'day') filterHint.textContent =
+                        '7 ngày gần nhất (tối đa 31 ngày)';
                     else if (filterSelect.value === 'month') filterHint.textContent = 'Tối đa 12 tháng';
                     else filterHint.textContent = 'Tối đa 10 năm';
                     document.querySelector('#filter-form').submit();
@@ -341,14 +342,14 @@
                         chart: {
                             type: 'line',
                             height: 350,
-                            width: chartWidth, // Động rộng dựa trên số nhãn
+                            width: chartWidth,
                             zoom: {
-                                enabled: filter === 'day', // Chỉ bật zoom khi lọc theo ngày
+                                enabled: filter === 'day',
                                 type: 'x',
                                 autoScaleYaxis: true
                             },
                             toolbar: {
-                                show: filter === 'day', // Chỉ hiển thị toolbar khi lọc theo ngày
+                                show: filter === 'day',
                                 tools: {
                                     zoom: true,
                                     zoomin: true,
@@ -358,7 +359,7 @@
                                 }
                             },
                             animations: {
-                                enabled: filter === 'day', // Tắt animation cho tháng/năm để tránh flicker
+                                enabled: filter === 'day',
                                 easing: 'easeinout',
                                 speed: 800,
                                 animateGradually: {
@@ -383,10 +384,10 @@
                             enabled: false
                         },
                         xaxis: {
-                            type: 'category', // Explicitly set to category for string labels
+                            type: 'category',
                             categories: labels,
                             labels: {
-                                rotate: 0, // Không xoay nhãn cho mọi kiểu lọc
+                                rotate: 0,
                                 rotateAlways: false,
                                 trim: false,
                                 style: {
@@ -404,7 +405,7 @@
                                 tickAmount: filter === 'day' ? Math.ceil(labels.length / 5) : undefined
                             },
                             scrollbar: {
-                                enabled: filter === 'day' // Thanh cuộn chỉ bật khi lọc theo ngày
+                                enabled: filter === 'day'
                             }
                         },
                         yaxis: {
@@ -420,19 +421,19 @@
                         tooltip: {
                             enabled: true,
                             shared: false,
-                            intersect: false, // Tắt intersect để hover dễ dàng hơn
-                            followCursor: true, // Tooltip theo con trỏ để mượt mà
+                            intersect: false,
+                            followCursor: true,
                             fixed: {
-                                enabled: filter !== 'day', // Cố định tooltip cho tháng/năm
+                                enabled: filter !== 'day',
                                 position: 'topRight',
                                 offsetX: 0,
                                 offsetY: 0
                             },
                             onDatasetHover: {
-                                highlightDataSeries: false // Tắt highlight để giảm flicker
+                                highlightDataSeries: false
                             },
                             marker: {
-                                show: filter === 'day' // Tắt marker cho tháng/năm
+                                show: filter === 'day'
                             },
                             x: {
                                 show: true,
@@ -654,6 +655,10 @@
                 // Gọi API khi form submit
                 document.querySelector('#filter-form').addEventListener('submit', (e) => {
                     e.preventDefault();
+                    const filter = document.querySelector('#filter').value;
+                    const startDate = document.querySelector('#start_date').value;
+                    const endDate = document.querySelector('#end_date').value;
+                    console.log('Filter:', filter, 'Start Date:', startDate, 'End Date:', endDate);
                     loadDashboardData();
                 });
 
