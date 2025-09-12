@@ -47,86 +47,56 @@
                     {{-- Trạng thái đơn hàng --}}
                     <div>
                         <h5 class="mb-3">📌 Trạng thái đơn hàng</h5>
-                        <form id="orderStatusForm" method="POST"
-                            action="{{ route('admin.orders.updateStatus', $order->id) }}">
-                            @csrf
-                            @method('PUT')
-                            <div class="d-flex align-items-center gap-3">
-                                <select name="order_status" id="order_status_select" class="form-select w-auto">
-                                    @php
-                                        // Định nghĩa trực tiếp các giá trị enum và tên hiển thị tiếng Việt cho order_status
-                                        $orderStatuses = [
-                                            'Chưa xác nhận' => 'Chưa xác nhận',
-                                            'Xác nhận' => 'Xác nhận',
-                                            'Đang vận chuyển' => 'Đang vận chuyển',
-                                            'Giao hàng thành công' => 'Giao hàng thành công',
-                                            'Hủy đơn' => 'Hủy đơn',
-                                            'Đã nhận hàng' => 'Đã nhận hàng',
-                                        ];
-                                        // Lấy trạng thái hiện tại của đơn hàng từ đối tượng $order
-                                        $currentOrderStatus = $order->order_status;
+                        @php
+                            $orderStatuses = [
+                                'Chưa xác nhận' => 'Xác nhận',
+                                'Xác nhận' => 'Đang vận chuyển',
+                                'Đang vận chuyển' => 'Giao hàng thành công',
+                            ];
+                            $currentOrderStatus = $order->order_status;
+                            $nextStatus = $orderStatuses[$currentOrderStatus] ?? null;
 
-                                        // Xác định các trạng thái không thể hủy từ canBeCancelled() logic (trong Order model)
-                                        $cancellableStatuses = ['Chưa xác nhận', 'Xác nhận']; // Giả định từ Order model canBeCancelled()
-                                    @endphp
-                                    @foreach ($orderStatuses as $enumValue => $displayName)
-                                        @php
-                                            $isDisabled = false;
-                                            $isAlreadySelected = $currentOrderStatus === $enumValue;
+                            // Kiểm tra nếu là VNPAY và chưa thanh toán thì không cho chuyển sang Đang vận chuyển
+                            if (
+                                $order->payment_method_name === 'VNPAY' &&
+                                $order->payment_status !== 'paid' && // Nếu chưa thanh toán thì không cho chuyển sang Đang vận chuyển
+                                $currentOrderStatus === 'Xác nhận'
+                            ) {
+                                $nextStatus = null;
+                            }
+                        @endphp
 
-                                            // Logic để làm mờ các trạng thái lùi hoặc trạng thái không thể chuyển đến
-                                            $currentStatusIndex = array_search(
-                                                $currentOrderStatus,
-                                                array_keys($orderStatuses),
-                                            );
-                                            $enumValueIndex = array_search($enumValue, array_keys($orderStatuses));
-
-                                            // ✅ Luôn disable 'Đã nhận hàng' cho mọi trạng thái
-                                            if ($enumValue === 'Đã nhận hàng') {
-                                                $isDisabled = true;
-                                            }
-
-                                            // Không cho phép lùi trạng thái nếu không phải hủy đơn
-                                            if ($enumValue !== 'Hủy đơn' && $enumValueIndex < $currentStatusIndex) {
-                                                $isDisabled = true;
-                                            }
-
-                                            // Nếu trạng thái hiện tại là 'Giao hàng thành công' => chỉ cho chọn 'Đã nhận hàng'
-                                            if (
-                                                $currentOrderStatus === 'Giao hàng thành công' &&
-                                                $enumValue !== 'Đã nhận hàng'
-                                            ) {
-                                                $isDisabled = true;
-                                            }
-
-                                            // Nếu trạng thái hiện tại là 'Đã nhận hàng' => disable tất cả trừ chính nó
-                                            if (
-                                                $currentOrderStatus === 'Đã nhận hàng' &&
-                                                $enumValue !== 'Đã nhận hàng'
-                                            ) {
-                                                $isDisabled = true;
-                                            }
-
-                                            // Nếu trạng thái là 'Hủy đơn' nhưng đơn hàng không thể hủy
-                                            if (
-                                                $enumValue === 'Hủy đơn' &&
-                                                !in_array($currentOrderStatus, $cancellableStatuses)
-                                            ) {
-                                                $isDisabled = true;
-                                            }
-
-                                        @endphp
-                                        <option value="{{ $enumValue }}" {{ $isAlreadySelected ? 'selected' : '' }}
-                                            {{ $isDisabled ? 'disabled' : '' }}>
-                                            {{ $displayName }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <button type="submit" class="btn btn-sm btn-primary">
-                                    <i class="bi bi-arrow-repeat me-1"></i> Cập nhật
-                                </button>
+                        @if ($order->payment_method === 'VNPAY' && $order->payment_status !== 'paid' && $currentOrderStatus === 'Xác nhận')
+                            <div class="alert alert-warning mb-3 d-flex align-items-center">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                <span>Không thể chuyển sang trạng thái "Đang vận chuyển" khi đơn hàng VNPAY chưa được thanh
+                                    toán!</span>
                             </div>
-                        </form>
+                        @endif
+
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="badge bg-primary fs-6">{{ $currentOrderStatus }}</div>
+
+                            @if ($nextStatus && $currentOrderStatus !== 'Hủy đơn' && $currentOrderStatus !== 'Đã nhận hàng')
+                                <form class="d-inline" method="POST"
+                                    action="{{ route('admin.orders.updateStatus', $order->id) }}">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="order_status" value="{{ $nextStatus }}">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="bi bi-arrow-right-circle me-1"></i>
+                                        Chuyển sang {{ $nextStatus }}
+                                    </button>
+                                </form>
+                            @endif
+
+                            @if ($currentOrderStatus === 'Chưa xác nhận')
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelReasonModal">
+                                    <i class="bi bi-x-circle me-1"></i>
+                                    Hủy đơn
+                                </button>
+                            @endif
+                        </div>
 
                         @if ($order->order_status === 'Hủy đơn' && $order->cancel_reason)
                             <div class="mt-2 text-danger">
@@ -138,38 +108,59 @@
                     {{-- Trạng thái thanh toán --}}
                     <div>
                         <h5 class="mb-3">💳 Trạng thái thanh toán</h5>
-                        <form id="paymentStatusForm" method="POST"
-                            action="{{ route('admin.orders.updatePaymentStatus', $order->id) }}">
-                            @csrf
-                            @method('PUT')
-                            <div class="d-flex align-items-center gap-3">
-                                <select name="payment_status" class="form-select w-auto">
-                                    {{-- Lấy trạng thái thanh toán hiện tại --}}
-                                    @php
-                                        $currentPaymentStatus = $order->payment_status;
-                                        $paymentStatuses = [
-                                            'pending' => 'Chờ thanh toán',
-                                            'paid' => 'Đã thanh toán',
-                                            'failed' => 'Thanh toán thất bại',
-                                        ];
-                                    @endphp
-                                    @foreach ($paymentStatuses as $enumValue => $displayName)
-                                        <option value="{{ $enumValue }}"
-                                            {{ $currentPaymentStatus === $enumValue ? 'selected' : '' }}
-                                            {{-- Bạn có thể thêm logic disabled tại đây nếu cần (ví dụ: không cho chuyển từ 'paid' về 'pending') --}} {{-- Ví dụ: nếu đã thanh toán, không cho quay lại chờ thanh toán --}}
-                                            @if ($currentPaymentStatus === 'paid' && $enumValue === 'pending') disabled @endif>
-                                            {{ $displayName }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <button type="submit" class="btn btn-sm btn-secondary">
-                                    <i class="bi bi-arrow-repeat me-1"></i> Cập nhật
-                                </button>
+                        @php
+                            $paymentStatuses = [
+                                'pending' => ['next' => 'paid', 'display' => 'Chờ thanh toán'],
+                                'paid' => ['next' => null, 'display' => 'Đã thanh toán'],
+                                'failed' => ['next' => 'pending', 'display' => 'Thanh toán thất bại'],
+                            ];
+                            $currentPaymentStatus = $order->payment_status;
+                            $currentDisplayStatus = $paymentStatuses[$currentPaymentStatus]['display'];
+                            $nextStatus = $paymentStatuses[$currentPaymentStatus]['next'];
+                        @endphp
+
+                        <div class="d-flex align-items-center gap-3">
+                            <div
+                                class="badge {{ $currentPaymentStatus === 'paid' ? 'bg-success' : ($currentPaymentStatus === 'failed' ? 'bg-danger' : 'bg-warning') }} fs-6">
+                                {{ $currentDisplayStatus }}
                             </div>
-                        </form>
+
+                            @if ($nextStatus)
+                                <form class="d-inline" method="POST"
+                                    action="{{ route('admin.orders.updatePaymentStatus', $order->id) }}">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="payment_status" value="{{ $nextStatus }}">
+                                    <button type="submit"
+                                        class="btn {{ $nextStatus === 'paid' ? 'btn-success' : 'btn-primary' }}">
+                                        <i class="bi bi-arrow-right-circle me-1"></i>
+                                        Chuyển sang {{ $paymentStatuses[$nextStatus]['display'] }}
+                                    </button>
+                                </form>
+                            @endif
+
+                            @if ($currentPaymentStatus === 'pending')
+                                <form class="d-inline" method="POST"
+                                    action="{{ route('admin.orders.updatePaymentStatus', $order->id) }}">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="payment_status" value="failed">
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="bi bi-x-circle me-1"></i>
+                                        Đánh dấu thất bại
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
                     </div>
                 </div>
-
+                @if ($order->payment_method_name === 'VNPAY' && $order->payment_status !== 'paid')
+                    <div class="d-flex align-items-center mb-3 py-2 px-3"
+                        style="background-color: #fff3cd; border: 1px solid #ffeeba; border-radius: 4px;">
+                        <i class="bi bi-exclamation-circle text-warning me-2 fs-5"></i>
+                        <p class="mb-0">Đơn hàng VNPAY chưa được thanh toán</p>
+                    </div>
+                @endif
 
                 @php
                     $totalOrderAmount = 0;
@@ -253,11 +244,6 @@
                                             <td>
                                                 - {{ number_format($discountAmount, 0, ',', '.') }} VND
                                                 <br>
-                                                <p>
-                                                    {{-- Áp dụng cho tất cả sản phẩm: --}}
-                                                    {{-- Kiểm tra nếu discount tồn tại VÀ discount đó có thuộc tính applies_to_all_products là true --}}
-                                                    {{-- {{ optional($order->discount)->applies_to_all_products ? 'Có' : (optional($order->discount) ? 'Không' : 'N/A') }} --}}
-                                                </p>
                                             </td>
                                         @endif
                                         @if ($discountAmount <= 0)
@@ -327,20 +313,25 @@
         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="cancelReasonModalLabel">Xác nhận Hủy Đơn Hàng</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Bạn đang chọn hủy đơn hàng này. Vui lòng nhập lý do hủy:</p>
-                    <textarea class="form-control" id="cancel_reason_text" name="cancel_reason_modal" rows="3"
-                        placeholder="Nhập lý do hủy đơn hàng..."></textarea>
-                    <small id="cancelReasonError" class="text-danger d-none">Vui lòng nhập lý do hủy.</small>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-danger" id="confirmCancelOrderBtn">Xác nhận và Hủy Đơn</button>
-                </div>
+                <form method="POST" action="{{ route('admin.orders.updateStatus', $order->id) }}">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="order_status" value="Hủy đơn">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="cancelReasonModalLabel">Xác nhận Hủy Đơn Hàng</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Bạn đang chọn hủy đơn hàng này. Vui lòng nhập lý do hủy:</p>
+                        <textarea class="form-control" id="cancel_reason_text" name="cancel_reason" rows="3"
+                            placeholder="Nhập lý do hủy đơn hàng..." required></textarea>
+                        <small class="text-danger d-none" id="cancelReasonError">Vui lòng nhập lý do hủy.</small>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-danger">Xác nhận và Hủy Đơn</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
