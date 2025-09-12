@@ -27,7 +27,7 @@ class ChatController extends Controller
         $lowerUserMessage = strtolower($userMessage);
 
         $searchQuery = '';
-        $productKeywords = ['sản phẩm', 'làm từ', 'thân thiện môi trường', 'xanh', 'tái chế', 'hữu cơ', 'tre', 'vải canvas', 'bã mía', 'bàn chải', 'túi', 'hộp', 'đồ dùng', 'chăm sóc', 'nhà cửa', 'muốn biết về', 'giá', 'mua', 'bán'];
+        $productKeywords = ['sản phẩm', 'làm từ', 'thân thiện môi trường','xanh', 'tái chế', 'hữu cơ', 'tre', 'vải canvas', 'bã mía', 'bàn chải', 'túi', 'hộp', 'đồ dùng', 'chăm sóc', 'nhà cửa', 'tư vấn', 'tìm kiếm', 'muốn biết về', 'về', 'model', 'loại', 'giá', 'mua', 'bán', 'có không']; // Đây là danh sách các từ khóa về xe
 
         $allProductNamesInDb = Product::select('name')->get()->pluck('name')->map(function ($name) {
             return strtolower($name);
@@ -53,7 +53,7 @@ class ChatController extends Controller
             $searchQuery = $lowerUserMessage;
         }
 
-        $commonWords = ['tôi', 'bạn', 'là', 'có', 'cái', 'nào', 'gì', 'thế', 'này', 'đó', 'xin', 'chào', 'cảm ơn', 'hỏi', 'cho', 'biết', 'không', 'muốn', 'về'];
+        $commonWords = ['tôi', 'bạn', 'là', 'có', 'cái', 'nào', 'gì', 'thế', 'này', 'đó', 'xin', 'chào', 'cảm ơn', 'hỏi', 'cho', 'biết', 'không', 'muốn', 'về']; // Đây là danh sách các từ thông dụng
         $searchQueryParts = array_filter(preg_split('/\s+/', $searchQuery), function ($word) use ($commonWords) {
             return !in_array($word, $commonWords) && strlen($word) > 1;
         });
@@ -64,13 +64,11 @@ class ChatController extends Controller
 
         if (!empty($finalSearchQuery) && strlen($finalSearchQuery) > 2) {
             $productsFromDb = Product::select('id', 'name', 'slug', 'sort_des', 'description', 'quantity', 'date_of_entry', 'status', 'image', 'view')
-                ->where(function ($query) use ($keyword) {
-                    $query->where('products.name', 'like', "%{$keyword}%")
-                        ->orWhere('products.description', 'like', "%{$keyword}%");
-                })
+                ->where('name', 'like', '%' . $finalSearchQuery . '%')
                 ->orWhere('description', 'like', '%' . $finalSearchQuery . '%')
                 ->limit(3)
                 ->get();
+
             foreach ($productsFromDb as $product) {
                 $suggestedProducts[] = [
                     'id' => $product->id,
@@ -82,6 +80,8 @@ class ChatController extends Controller
             }
         }
         Log::info('Suggested Products from DB: ' . json_encode($suggestedProducts));
+        // --- Kết thúc tìm kiếm sản phẩm ---
+
 
         // --- Bước 2: Gọi Gemini API với prompt được điều chỉnh ---
         $promptForGemini = "Bạn là một trợ lý web bán hàng Green Home, bán các mặt hàng sản phẩm xanh, các sản phẩm làm từ chất liệu thân thiện môi trường. Trả lời câu hỏi của người dùng một cách NGẮN GỌN, TRỰC TIẾP và HỮU ÍCH (tối đa 2-3 câu). Nếu câu hỏi liên quan đến sản phẩm, hãy xác định tên sản phẩm và TRẢ LỜI NGẮN GỌN về sản phẩm đó, sau đó đề xuất người dùng xem chi tiết trên website. Tránh các câu hỏi phức tạp và không liên quan. Khéo léo từ chối và lái cuộc trò chuyện về các sản phẩm xanh. Nếu có sản phẩm hiển thị cho khách hàng, hãy trả lời về sản phẩm đó, không đưa ra các sản phẩm không có trong hệ thống tránh bị lỗi. Câu hỏi của người dùng: " . $userMessage;
@@ -120,6 +120,7 @@ class ChatController extends Controller
         $aiTextResponse = $geminiResponseData['candidates'][0]['content']['parts'][0]['text'] ?? 'Xin lỗi, tôi không thể xử lý yêu cầu này lúc này.';
         Log::info('Gemini AI Raw Response: ' . $aiTextResponse);
 
+        // --- Bước 3: Trả về phản hồi tổng hợp cho Frontend ---
         return response()->json([
             'ai_response' => $aiTextResponse,
             'suggested_products' => $suggestedProducts,
