@@ -18,6 +18,7 @@ class Order extends Model
         'shipping_phone',
         'shipping_address',
         'order_status', // Use 'order_status' directly
+        'delivery_at',
         'discount_code', // Đảm bảo fillable
         'discount_type',
         'discount_value', // Đảm bảo fillable
@@ -28,6 +29,10 @@ class Order extends Model
         'total_amount',
         'note',
         'cancel_reason',
+    ];
+
+    protected $casts = [
+        'delivery_at' => 'datetime',
     ];
 
     public function user()
@@ -42,6 +47,11 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public function refund()
+    {
+        return $this->hasOne(RefundTransaction::class);
+    }
+
 
 
     // Phương thức kiểm tra xem đơn hàng có thể bị hủy không
@@ -53,14 +63,20 @@ class Order extends Model
         return !in_array($this->order_status, $nonCancellableStatuses);
     }
 
-    // Phương thức kiểm tra xem đơn hàng có thể bị hủy không
+    // Dùng cái này
     public function canBeCancel()
     {
-        $nonCancellableStatuses = ['Đang vận chuyển', 'Giao hàng thành công', 'Hủy đơn', 'Đã nhận hàng'];
-
+        $nonCancellableStatuses = [
+            'Đang vận chuyển',
+            'Giao hàng thành công',
+            'Hủy đơn',
+            'Đã nhận hàng',
+            'Đã hoàn hàng', // thêm trạng thái này
+        ];
 
         return !in_array($this->order_status, $nonCancellableStatuses)
-            && $this->payment_status !== 'paid';
+            && $this->payment_status !== 'paid'
+            && $this->payment_status !== 'refunded'; // chặn khi đã hoàn tiền
     }
 
     // Phương thức kiểm tra xem đơn hàng có thể được thanh toán không

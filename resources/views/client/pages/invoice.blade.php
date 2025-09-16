@@ -7,7 +7,6 @@
 @endpush
 
 @section('content')
-
     @if (session('success'))
         <script>
             alert(@json(session('success')));
@@ -40,28 +39,11 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="cr-card cr-invoice max-width-1170">
-                        {{-- <div class="cr-card-header">
-                            <h4 class="cr-card-title">Invoice</h4>
-                            <div class="header-tools">
-                                <button class="cr-btn-primary m-r-5">Save</button>
-                                <button class="cr-btn-secondary">Print</button>
-                            </div>
-                        </div> --}}
                         <div class="cr-card-content card-default">
-
                             <div class="invoice-wrapper">
-
                                 <div class="row">
-                                    {{-- <div class="col-md-6 col-lg-3 col-sm-6">
-                                        <img src="{{ asset('assets_client/assets/img/logo/logo.png') }}" alt="logo">
-
-                                        <address>
-                                            <br> 321, Porigo alto, new st george church, Nr. Jogas garden, USA.
-                                        </address>
-                                    </div> --}}
                                     <div class="col-md-6 col-lg-4 col-sm-6">
                                         <p class="text-dark mb-2">Thông tin người đặt</p>
-
                                         <address>
                                             <span>{{ $user->name }}</span>
                                             <br> {{ $user->profile->address ?? ' ' }}
@@ -71,7 +53,6 @@
                                     </div>
                                     <div class="col-md-6 col-lg-4 col-sm-6">
                                         <p class="text-dark mb-2">Thông tin người nhận</p>
-
                                         <address>
                                             <span>{{ $order->shipping_name }}</span>
                                             <br> {{ $order->shipping_address }}
@@ -80,7 +61,6 @@
                                     </div>
                                     <div class="col-md-6 col-lg-4 col-sm-6">
                                         <p class="text-dark mb-2">Chi tiết</p>
-
                                         @php
                                             $paymentStatusMap = [
                                                 'pending' => ['Chờ thanh toán', 'secondary'],
@@ -91,7 +71,6 @@
                                                 $order->payment_status
                                             ] ?? ['Không rõ', 'dark'];
                                         @endphp
-
                                         <address>
                                             <div><span>Mã đơn hàng: </span> <span
                                                     class="text-dark">{{ $order->sku }}</span></div>
@@ -100,7 +79,6 @@
                                             <div>
                                                 <span>Trạng thái đơn hàng: </span>
                                                 <span class="badge bg-primary">{{ $order->order_status }}</span>
-                                                {{-- Nếu cần dịch thì tạo thêm map tương tự --}}
                                             </div>
                                             <div>
                                                 <span>Trạng thái thanh toán: </span>
@@ -108,7 +86,6 @@
                                             </div>
                                         </address>
                                     </div>
-
                                 </div>
                                 <div class="cr-chart-header">
                                     <div class="block">
@@ -118,17 +95,10 @@
                                     <div class="block">
                                         <h6>Tổng tiền</h6>
                                         <h5>{{ number_format($order->total_amount, 0, ',', '.') }} đ</h5>
-                                        </h5>
                                     </div>
-                                    {{-- <div class="block">
-                                        <h6>Quantity</h6>
-                                        <h5>30
-                                        </h5>
-                                    </div> --}}
                                     <div class="block">
                                         <h6>Ngày đặt</h6>
                                         <h5>{{ $order->created_at->format('H:i d/m/Y') }}</h5>
-                                        </h5>
                                     </div>
                                 </div>
                                 <div class="table-responsive tbl-800">
@@ -146,7 +116,6 @@
                                                     <th></th>
                                                 </tr>
                                             </thead>
-
                                             <tbody>
                                                 @foreach ($order->items as $index => $item)
                                                     <tr>
@@ -156,7 +125,6 @@
                                                                 src="{{ asset('storage/' . $item->product_image) }}"
                                                                 alt="product-image"
                                                                 style="width: 50px; height: 50px; object-fit: cover;">
-
                                                             <div>
                                                                 <div class="fw-semibold">{{ $item->product_name }}</div>
                                                                 @if (!empty($item->product_attribute))
@@ -165,9 +133,7 @@
                                                                     </div>
                                                                 @endif
                                                             </div>
-
                                                         </td>
-
                                                         <td>{{ number_format($item->unit_price, 0, ',', '.') }}đ </td>
                                                         <td>{{ $item->quantity }}</td>
                                                         <td>{{ number_format($item->unit_price * $item->quantity, 0, ',', '.') }}đ
@@ -186,16 +152,12 @@
                                                                 <span class="text-success"></span>
                                                             @endif
                                                         </td>
-
-
                                                     </tr>
                                                 @endforeach
-
                                             </tbody>
                                         </table>
                                     </div>
                                 </div>
-
                                 <div class="row justify-content-end inc-total">
                                     <div class="col-lg-8 order-lg-1 order-md-2 order-sm-2">
                                         <div class="note">
@@ -203,14 +165,12 @@
                                                 <label>Ghi chú:</label>
                                                 <p>{{ $order->note }}</p>
                                             @endif
-
                                             @if ($order->cancel_reason)
                                                 <label>Lý do hủy đơn:</label>
                                                 <p>{{ $order->cancel_reason }}</p>
                                             @endif
                                         </div>
                                     </div>
-
                                     <div class="col-lg-4 order-lg-2 order-md-1 order-sm-1">
                                         @php
                                             $productDiscount = $order->items->sum('discount_amount');
@@ -218,7 +178,6 @@
                                             $isProductDiscount = $productDiscount > 0;
                                             $isOrderDiscount = $orderDiscount > $productDiscount;
                                         @endphp
-
                                         <ul class="list-unstyled">
                                             <li class="mid pb-3 text-dark">Tổng tiền sản phẩm:
                                                 <span class="d-inline-block float-right text-default">
@@ -232,7 +191,6 @@
                                                     ) }}đ
                                                 </span>
                                             </li>
-
                                             @if ($isProductDiscount)
                                                 <li class="mid pb-3 text-dark">
                                                     Giảm giá theo sản phẩm: <br>(mã: {{ $order->discount_code }})
@@ -241,7 +199,6 @@
                                                     </span>
                                                 </li>
                                             @endif
-
                                             @if ($isOrderDiscount)
                                                 <li class="mid pb-3 text-dark">
                                                     Giảm giá toàn đơn: <br>(mã: {{ $order->discount_code }})
@@ -250,45 +207,80 @@
                                                     </span>
                                                 </li>
                                             @endif
-
-
-
                                             <li class="mid pb-3 text-dark">Phí vận chuyển:
                                                 <span class="d-inline-block float-right text-default">
                                                     {{ number_format($order->shipping_fee, 0, ',', '.') }}đ
                                                 </span>
                                             </li>
-
                                             <li class="text-dark">Tổng tiền đơn hàng:
                                                 <span class="d-inline-block float-right">
                                                     {{ number_format($order->total_amount, 0, ',', '.') }}đ
                                                 </span>
                                             </li>
-
                                         </ul>
                                         @if ($order->canBePay())
-                                            <li>
-                                                <a class="btn btn-info" href="{{ route('orders.payAgain', $order) }}">
-                                                    <i class="ri-refresh-line me-1"></i> Thanh toán lại
-                                                </a>
-                                            </li>
+                                            <a class="btn btn-info" href="{{ route('orders.payAgain', $order) }}">
+                                                <i class="ri-refresh-line me-1"></i> Thanh toán lại
+                                            </a>
                                         @endif
                                         @if ($order->order_status === 'Giao hàng thành công')
-                                            <li>
-                                                <form action="{{ route('orders.confirmReceived', $order) }}" method="POST"
-                                                    onsubmit="return confirm('Xác nhận bạn đã nhận được hàng cho đơn này?')">
-                                                    @csrf
-                                                    <button type="submit"
-                                                        class="btn btn-success btn-sm w-100 d-flex align-items-center">
-                                                        <i class="ri-check-double-line me-1"></i>
-                                                        Xác nhận đã nhận hàng
-                                                    </button>
-                                                </form>
-                                            </li>
+                                            <form action="{{ route('orders.confirmReceived', $order) }}" method="POST"
+                                                onsubmit="return confirm('Xác nhận bạn đã nhận được hàng cho đơn này?')">
+                                                @csrf
+                                                <button type="submit"
+                                                    class="btn btn-success btn-sm w-100 d-flex align-items-center mt-2">
+                                                    <i class="ri-check-double-line me-1"></i>
+                                                    Xác nhận đã nhận hàng
+                                                </button>
+                                            </form>
                                         @endif
-
+                                        @if (
+                                            $order->order_status === 'Đã nhận hàng' &&
+                                                $order->payment_status === 'paid' &&
+                                                $order->delivery_at !== null &&
+                                                $order->delivery_at->isPast() &&
+                                                $order->delivery_at->diffInDays(now()) < 3 &&
+                                                !$order->refund)
+                                            <button type="button" class="btn btn-danger btn-sm w-100 mt-2"
+                                                data-bs-toggle="modal" data-bs-target="#refundModal">
+                                                <i class="ri-refresh-line me-1"></i> Yêu cầu hoàn trả hàng
+                                            </button>
+                                        @elseif ($order->refund)
+                                            @php
+                                                $statusMap = [
+                                                    'pending' => ['Chờ xử lý', 'info'],
+                                                    'approved' => ['Đã phê duyệt', 'success'],
+                                                    'rejected' => ['Bị từ chối', 'danger'],
+                                                    'refund_pending' => ['Chờ hoàn tiền', 'warning'],
+                                                    'refunded' => ['Đã hoàn tiền', 'success'],
+                                                ];
+                                                $refundStatus = $order->refund->refund_status;
+                                                [$displayStatus, $statusClass] = $statusMap[$refundStatus] ?? [
+                                                    $refundStatus,
+                                                    'secondary',
+                                                ];
+                                            @endphp
+                                            <div class="alert alert-{{ $statusClass }} mt-2">
+                                                <strong>Trạng thái hoàn hàng:</strong> {{ $displayStatus }}
+                                                @if ($order->refund->admin_note)
+                                                    <br><strong>Ghi chú:</strong> {{ $order->refund->admin_note }}
+                                                @endif
+                                                @if ($refundStatus === 'refunded' && $order->refund->refund_proof_image)
+                                                    <br><strong>Ảnh minh chứng chuyển khoản:</strong>
+                                                    <br>
+                                                    <img src="{{ asset('storage/' . $order->refund->refund_proof_image) }}"
+                                                        alt="Minh chứng chuyển khoản"
+                                                        style="width: 150px; height: auto; border: 1px solid #ddd; border-radius: 5px;">
+                                                @endif
+                                            </div>
+                                            @if ($refundStatus === 'approved')
+                                                <button type="button" class="btn btn-primary btn-sm w-100 mt-2"
+                                                    data-bs-toggle="modal" data-bs-target="#bankInfoModal">
+                                                    <i class="ri-bank-line me-1"></i> Cung cấp thông tin tài khoản
+                                                </button>
+                                            @endif
+                                        @endif
                                     </div>
-
                                 </div>
                             </div>
                         </div>
@@ -298,7 +290,81 @@
         </div>
     </div>
 
-    {{-- Modal đánh giá sản phẩm --}}
+    <!-- Modal Yêu cầu hoàn trả -->
+    <div id="refundModal" class="modal fade" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Yêu cầu hoàn trả hàng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="refundForm" action="{{ route('refund.store') }}" method="POST"
+                        enctype="multipart/form-data">
+                        @csrf
+                        <input type="hidden" name="order_id" value="{{ $order->id }}">
+                        <div class="mb-3">
+                            <label for="refundReason" class="form-label">Lý do hoàn trả</label>
+                            <textarea name="refund_reason" id="refundReason" class="form-control" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="refundImage" class="form-label">Ảnh minh chứng (Tối đa 1 ảnh)</label>
+                            <input type="file" name="refund_image" id="refundImage" class="form-control"
+                                accept="image/*" onchange="validateImage(this)">
+                            <div id="imagePreview" class="mt-2"></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Gửi yêu cầu</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Cung cấp thông tin tài khoản -->
+    <div id="bankInfoModal" class="modal fade" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cung cấp thông tin tài khoản nhận tiền</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info mb-3">
+                        Số tiền được hoàn trả của bạn là {{ number_format($order->total_amount, 0, ',', '.') }} đ
+                    </div>
+                    <form id="bankInfoForm" action="{{ route('refund.updateBankInfo') }}" method="POST"
+                        enctype="multipart/form-data">
+                        @csrf
+                        <input type="hidden" name="refund_id" value="{{ $order->refund->id ?? '' }}">
+                        <div class="mb-3">
+                            <label for="accountName" class="form-label">Tên chủ tài khoản</label>
+                            <input type="text" name="refund_account_name" id="accountName" class="form-control"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="accountNumber" class="form-label">Số tài khoản</label>
+                            <input type="text" name="refund_account_number" id="accountNumber" class="form-control"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="bankName" class="form-label">Tên ngân hàng</label>
+                            <input type="text" name="refund_account_bank" id="bankName" class="form-control"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="qrCodeImage" class="form-label">Ảnh QR Code (Không bắt buộc)</label>
+                            <input type="file" name="refund_qr_image" id="qrCodeImage" class="form-control"
+                                accept="image/*" onchange="validateQrImage(this)">
+                            <div id="qrImagePreview" class="mt-2"></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Gửi thông tin</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal đánh giá sản phẩm -->
     <div id="reviewModal" class="modal fade" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -311,15 +377,11 @@
                         enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="order_item_id" id="orderItemId">
-
-                        <!-- Input tiêu đề -->
                         <div class="mb-3">
                             <label for="reviewTitle" class="form-label">Tiêu đề đánh giá</label>
                             <input type="text" name="title" id="reviewTitle" class="form-control"
                                 placeholder="Nhập tiêu đề đánh giá" required>
                         </div>
-
-                        <!-- Hàng sao -->
                         <div class="mb-3">
                             <label class="form-label">Số sao đánh giá</label>
                             <div id="starRating" class="d-flex">
@@ -331,21 +393,16 @@
                             </div>
                             <input type="hidden" name="rating" id="ratingValue" required>
                         </div>
-
-                        <!-- Nội dung đánh giá -->
                         <div class="mb-3">
                             <label for="reviewContent" class="form-label">Nội dung đánh giá</label>
                             <textarea name="content" id="reviewContent" class="form-control" rows="3" required></textarea>
                         </div>
-
-                        <!-- Hình ảnh -->
                         <div class="mb-3">
                             <label for="reviewImages" class="form-label">Hình ảnh (Tối đa 3 ảnh)</label>
                             <input type="file" name="images[]" id="reviewImages" class="form-control" multiple
                                 onchange="previewImages(this)">
                             <div id="imagePreviewContainer" class="mt-3"></div>
                         </div>
-
                         <button type="submit" class="btn btn-primary w-100">Gửi đánh giá</button>
                     </form>
                 </div>
@@ -356,35 +413,68 @@
 
 @push('scripts')
     <script>
+        function validateImage(input) {
+            if (input.files.length > 1) {
+                alert('Bạn chỉ được tải tối đa 1 ảnh.');
+                input.value = '';
+                document.getElementById('imagePreview').innerHTML = '';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.width = '100px';
+                img.style.height = '100px';
+                img.style.objectFit = 'cover';
+                img.style.border = '1px solid #ddd';
+                img.style.borderRadius = '5px';
+                document.getElementById('imagePreview').innerHTML = '';
+                document.getElementById('imagePreview').appendChild(img);
+            };
+            if (input.files[0]) reader.readAsDataURL(input.files[0]);
+        }
+
+        function validateQrImage(input) {
+            if (input.files.length > 1) {
+                alert('Bạn chỉ được tải tối đa 1 ảnh QR code.');
+                input.value = '';
+                document.getElementById('qrImagePreview').innerHTML = '';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.width = '100px';
+                img.style.height = '100px';
+                img.style.objectFit = 'cover';
+                img.style.border = '1px solid #ddd';
+                img.style.borderRadius = '5px';
+                document.getElementById('qrImagePreview').innerHTML = '';
+                document.getElementById('qrImagePreview').appendChild(img);
+            };
+            if (input.files[0]) reader.readAsDataURL(input.files[0]);
+        }
+
         function showReviewModal(orderItemId, productName, productAttribute = null) {
             document.getElementById('orderItemId').value = orderItemId;
-
             let modalTitle = `Đánh giá sản phẩm: ${productName}`;
             if (productAttribute) {
                 modalTitle += ` (Loại: ${productAttribute})`;
             }
-
             document.getElementById('reviewModal').querySelector('.modal-title').textContent = modalTitle;
             new bootstrap.Modal(document.getElementById('reviewModal')).show();
         }
 
-        function validateImageCount(input) {
-            if (input.files.length > 3) {
-                alert('Bạn chỉ được tải tối đa 3 ảnh.');
-                input.value = ''; // Reset input nếu vượt quá giới hạn
-            }
-        }
-
         function previewImages(input) {
             const container = document.getElementById('imagePreviewContainer');
-            container.innerHTML = ''; // Xóa nội dung cũ
-
+            container.innerHTML = '';
             if (input.files.length > 3) {
                 alert('Bạn chỉ được tải tối đa 3 ảnh.');
-                input.value = ''; // Reset input nếu vượt quá giới hạn
+                input.value = '';
                 return;
             }
-
             Array.from(input.files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -408,13 +498,13 @@
                 const starValue = parseInt(star.getAttribute('data-value'));
                 if (starValue <= value) {
                     star.classList.remove('text-muted');
-                    star.classList.add('text-warning'); // Đổi màu sao thành vàng
+                    star.classList.add('text-warning');
                 } else {
                     star.classList.remove('text-warning');
-                    star.classList.add('text-muted'); // Đổi màu sao thành xám
+                    star.classList.add('text-muted');
                 }
             });
-            document.getElementById('ratingValue').value = value; // Gán giá trị sao vào input ẩn
+            document.getElementById('ratingValue').value = value;
         }
     </script>
 @endpush

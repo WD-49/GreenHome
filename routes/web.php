@@ -8,11 +8,14 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
 use App\Http\Middleware\AdminMiddleware;
-use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\RefundController;
 // use Doctrine\DBAL\Schema\Index as DBALIndex;
 
-use App\Http\Controllers\admin\BlogController;
+use App\Http\Controllers\PaymentController;
 
+use Doctrine\DBAL\Schema\Index as DBALIndex;
+use App\Http\Controllers\admin\FaqController;
+use App\Http\Controllers\admin\BlogController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\admin\BrandController;
 use App\Http\Controllers\admin\OrderController;
@@ -21,19 +24,20 @@ use App\Http\Controllers\client\HomeController;
 use App\Http\Controllers\Client\ShopController;
 use App\Http\Controllers\admin\BannerController;
 use App\Http\Controllers\admin\ReviewController;
+
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\admin\CommentController;
+
 use App\Http\Controllers\Admin\WebInfoController;
 
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\admin\CategoryController;
-
 use App\Http\Controllers\admin\DiscountController;
-
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\client\ContactController;
 use App\Http\Controllers\Client\ProfileController;
+use App\Http\Controllers\client\SupportController;
 use App\Http\Controllers\admin\AttributeController;
 use App\Http\Controllers\admin\DashboardController;
 use App\Http\Controllers\client\CheckoutController;
@@ -50,13 +54,10 @@ use App\Http\Controllers\client\ProductClientController;
 use App\Http\Controllers\admin\Product\ProductController;
 use App\Http\Controllers\admin\Account\AccountAdminController;
 use App\Http\Controllers\admin\Account\AccountUsersController;
-use App\Http\Controllers\admin\FaqController;
 use App\Http\Controllers\admin\Product\ProductVariantController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\client\BlogController as ClientBlogController;
 use App\Http\Controllers\Client\DiscountController as ClientDiscountController;
-use App\Http\Controllers\client\SupportController;
-use Doctrine\DBAL\Schema\Index as DBALIndex;
 
 
 Route::get('/test-log', function () {
@@ -423,6 +424,13 @@ Route::prefix('admin')->middleware(AdminMiddleware::class)->name('admin.')->grou
         Route::put('{order}/cancel', [OrderController::class, 'cancel'])->name('cancel');
     });
 
+    Route::prefix('refunds')->name('refunds.')->group(function () {
+        Route::get('/', [RefundController::class, 'index'])->name('index');
+        Route::get('/refunds/{refund}', [RefundController::class, 'show'])->name('show');
+        Route::post('/update-status', [RefundController::class, 'updateStatus'])->name('update-status');
+    });
+
+
     // Hiển thị thông tin cấu hình website
     Route::get('/webinfor', [WebInfoController::class, 'show'])->name('web_info.show');
     Route::get('/webinfor/edit', [WebInfoController::class, 'edit'])->name('web_info.edit');
@@ -470,6 +478,11 @@ route::middleware('auth')->prefix('orders')->name('orders.')->group(function () 
         ->name('payAgain');
     Route::post('/{order}/confirm-received', [CheckoutController::class, 'confirmReceived'])
         ->name('confirmReceived');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::post('/refund/store', [RefundController::class, 'store'])->name('refund.store');
+    Route::post('/refund/update-bank-info', [RefundController::class, 'updateBankInfo'])->name('refund.updateBankInfo');
 });
 Route::post('/review/submit', [CheckoutController::class, 'submitReview'])->name('client.review.submit');
 
