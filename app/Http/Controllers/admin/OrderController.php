@@ -13,6 +13,7 @@ use App\Models\DiscountUsage;
 use App\Models\PaymentMethod;
 use App\Models\ProductVariant;
 use App\Models\DiscountProduct;
+use App\Models\RefundTransaction;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
@@ -29,7 +30,7 @@ class OrderController extends Controller
     protected function getOrderEnumStatuses()
     {
         // Các giá trị trạng thái đơn hàng
-        return ['Chưa xác nhận', 'Xác nhận', 'Đang vận chuyển', 'Giao hàng thành công', 'Hủy đơn', 'Đã nhận hàng'];
+        return ['Chưa xác nhận', 'Xác nhận', 'Đang vận chuyển', 'Giao hàng thành công', 'Hủy đơn', 'Đã nhận hàng', 'Đã hoàn hàng'];
     }
 
     /**
@@ -39,7 +40,7 @@ class OrderController extends Controller
     protected function getPaymentEnumStatuses()
     {
         // Các giá trị trạng thái thanh toán
-        return ['pending', 'paid', 'failed'];
+        return ['pending', 'paid', 'failed', 'refunded'];
     }
 
     /**
@@ -53,6 +54,7 @@ class OrderController extends Controller
             'pending' => 'Chờ thanh toán',
             'paid' => 'Đã thanh toán',
             'failed' => 'Thất bại',
+            'refunded' => 'Đã hoàn tiền',
         ][$status] ?? 'Không xác định';
     }
 
@@ -109,8 +111,15 @@ class OrderController extends Controller
             ->whereDate('created_at', now())
             ->count();
 
-        // Lấy kết quả phân trang, bao gồm cả những đơn hàng đã xóa mềm (nếu cần hiển thị)
-        // $orders = $query->withTrashed()->paginate(20)->withQueryString();
+        // Đếm số đơn hàng có yêu cầu hoàn tiền
+        $refundRequestsCount = Order::whereHas('refundTransactions')->count();
+
+        // Thêm eager loading cho refundTransactions
+        $query->with(['refundTransactions' => function($q) {
+            $q->latest(); // Sắp xếp theo thời gian mới nhất
+        }]);
+
+        // Lấy kết quả, bao gồm cả những đơn hàng đã xóa mềm
         $orders = $query->withTrashed()->get();
 
         // dd($orders);
@@ -119,7 +128,7 @@ class OrderController extends Controller
         $paymentMethods = PaymentMethod::all();
         $paymentStatuses = $this->getPaymentEnumStatuses();
 
-        return view('admin.orders.index', compact('orders', 'orderStatuses', 'paymentMethods', 'paymentStatuses', 'unconfirmedTodayCount'));
+        return view('admin.orders.index', compact('orders', 'orderStatuses', 'paymentMethods', 'paymentStatuses', 'unconfirmedTodayCount', 'refundRequestsCount'));
     }
 
     public function show($id)
@@ -201,13 +210,28 @@ class OrderController extends Controller
         }
 
         try {
+            DB::beginTransaction();
+
             $order->order_status = $newOrderStatus;
             if ($newOrderStatus === 'Hủy đơn') {
                 $order->cancel_reason = $request->input('cancel_reason');
+                
+                // Nếu đơn hàng đã thanh toán thì tự động tạo refund
+                if ($order->payment_status === 'paid') {
+                    // Tạo yêu cầu hoàn tiền tự động
+                    $refund = new RefundTransaction();
+                    $refund->order_id = $order->id;
+                    $refund->refund_cost = $order->total_amount;
+                    $refund->refund_reason = "Hoàn tiền tự động do hủy đơn đã thanh toán - " . $request->input('cancel_reason');
+                    $refund->refund_status = 'pending';
+                    $refund->save();
+                }
             } else {
                 $order->cancel_reason = null;
             }
             $order->save();
+            
+            DB::commit();
             $user = $order->user; // Giả sử Order có quan hệ với User
             if ($user) {
                 try {
@@ -229,6 +253,7 @@ class OrderController extends Controller
             // Trả về redirect thay vì JSON
             return redirect()->back()->with('success', 'Cập nhật trạng thái đơn hàng thành công!');
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error("Lỗi khi cập nhật trạng thái đơn hàng {$id}: " . $e->getMessage());
             return redirect()->back()->with('error', 'Đã xảy ra lỗi khi cập nhật trạng thái đơn hàng.');
         }
@@ -250,8 +275,15 @@ class OrderController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
+        if ($request->payment_status === 'refunded' && empty($request->input('refund_payment_reason'))) {
+            return redirect()->back()->withErrors(['refund_payment_reason' => 'Vui lòng nhập lý do hoàn tiền.'])->withInput();
+        }
+
         try {
             $order->payment_status = $request->payment_status;
+            if ($request->payment_status === 'refunded') {
+                $order->refund_payment_reason = $request->input('refund_payment_reason');
+            }
             $order->save();
 
             // Trả về redirect thay vì JSON

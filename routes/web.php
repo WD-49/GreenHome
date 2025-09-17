@@ -427,6 +427,7 @@ Route::prefix('admin')->middleware(AdminMiddleware::class)->name('admin.')->grou
     Route::prefix('refunds')->name('refunds.')->group(function () {
         Route::get('/', [RefundController::class, 'index'])->name('index');
         Route::get('/refunds/{refund}', [RefundController::class, 'show'])->name('show');
+        Route::post('/store', [RefundController::class, 'store'])->name('store');
         Route::post('/update-status', [RefundController::class, 'updateStatus'])->name('update-status');
     });
 
