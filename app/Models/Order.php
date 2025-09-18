@@ -32,15 +32,13 @@ class Order extends Model
     ];
 
     protected $casts = [
-        'delivery_at' => 'datetime',
+        'delivery_at' => 'datetime', // ngày giao hàng thành công
     ];
 
     public function user()
     {
-        return $this->belongsTo(User::class)->withTrashed(); // Thêm withTrashed nếu user có thể bị soft delete
+        return $this->belongsTo(User::class)->withTrashed();
     }
-
-
 
     public function items()
     {
@@ -50,6 +48,11 @@ class Order extends Model
     public function refund()
     {
         return $this->hasOne(RefundTransaction::class);
+    }
+
+    public function refundTransactions()
+    {
+        return $this->hasMany(RefundTransaction::class);
     }
 
 
@@ -71,12 +74,12 @@ class Order extends Model
             'Giao hàng thành công',
             'Hủy đơn',
             'Đã nhận hàng',
-            'Đã hoàn hàng', // thêm trạng thái này
+            'Đã hoàn hàng',
         ];
 
         return !in_array($this->order_status, $nonCancellableStatuses)
             && $this->payment_status !== 'paid'
-            && $this->payment_status !== 'refunded'; // chặn khi đã hoàn tiền
+            && $this->payment_status !== 'refunded'; // chặn hủy đơn nếu đã hoàn tiền
     }
 
     // Phương thức kiểm tra xem đơn hàng có thể được thanh toán không
@@ -85,7 +88,8 @@ class Order extends Model
         return $this->payment_method_name === 'VNPAY'
             && $this->payment_status === 'pending'
             && $this->order_status !== 'Hủy đơn'
-            && $this->order_status !== 'Chưa xác nhận';
+            && $this->order_status !== 'Chưa xác nhận'
+            && $this->order_status !== 'Đã hoàn hàng';
     }
 
     // Phương thức khôi phục trạng thái thanh toán
