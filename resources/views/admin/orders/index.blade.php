@@ -179,6 +179,7 @@
                                                         'pending' => 'Chờ thanh toán',
                                                         'paid' => 'Đã thanh toán',
                                                         'failed' => 'Thất bại',
+                                                        'refunded' => 'Đã hoàn tiền'
                                                     ][$paymentStatus] ?? 'Không xác định';
 
                                                 $paymentStatusBadgeClass = '';
