@@ -208,7 +208,7 @@ class OrderController extends Controller
                 $order->cancel_reason = null;
             }
             $order->save();
-            $user = $order->user; // Giả sử Order có quan hệ với User
+            $user = $order->user;
             if ($user) {
                 try {
                     $user->notify(new OrderStatusNotification($order, $newOrderStatus));

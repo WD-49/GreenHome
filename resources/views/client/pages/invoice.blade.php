@@ -66,6 +66,7 @@
                                                 'pending' => ['Chờ thanh toán', 'secondary'],
                                                 'paid' => ['Đã thanh toán', 'success'],
                                                 'failed' => ['Thanh toán thất bại', 'danger'],
+                                                'refunded' => ['Đã hoàn tiền', 'success'],
                                             ];
                                             [$paymentLabel, $paymentClass] = $paymentStatusMap[
                                                 $order->payment_status

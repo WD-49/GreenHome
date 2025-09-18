@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\RefundTransaction;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\RefundStatusNotification;
 
 class RefundController extends Controller
 {
@@ -117,7 +119,7 @@ class RefundController extends Controller
         // Xác định trạng thái hợp lệ tiếp theo
         $allowedTransitions = [
             'pending' => ['approved', 'rejected'],
-            'approved' => ['rejected'], // refund_pending được cập nhật tự động, không cho admin chọn
+            'approved' => ['rejected'],
             'refund_pending' => ['refunded', 'rejected'],
             'rejected' => [],
             'refunded' => [],
@@ -158,6 +160,11 @@ class RefundController extends Controller
         }
 
         $refund->update($data);
+
+        $user = $refund->order->user;
+        if ($user) {
+            Notification::send($user, new RefundStatusNotification($refund, $newStatus));
+        }
 
         return redirect()->back()->with('success', 'Trạng thái đã được cập nhật thành công.');
     }
