@@ -33,11 +33,29 @@
                 <p><strong>Ngày đặt:</strong> {{ $order->created_at->format('H:i d/m/Y') }}</p>
                 <p><strong>Phương thức thanh toán:</strong> {{ $order->payment_method_name }}</p>
                 <p><strong>Trạng thái:</strong>
-                    @php $badgeClass = ['Chưa xác nhận' => 'secondary', 'Xác nhận' => 'primary', 'Đang vận chuyển' => 'info', 'Giao hàng thành công' => 'success', 'Đã nhận hàng' => 'success', 'Đã hủy' => 'danger'][$order->order_status] ?? 'dark'; @endphp
+                    @php
+                        $badgeClass =
+                            [
+                                'Chưa xác nhận' => 'secondary',
+                                'Xác nhận' => 'primary',
+                                'Đang vận chuyển' => 'info',
+                                'Giao hàng thành công' => 'success',
+                                'Đã nhận hàng' => 'success',
+                                'Đã hủy' => 'danger',
+                                'Đã hoàn hàng' => 'success',
+                            ][$order->order_status] ?? 'dark';
+                    @endphp
                     <span class="badge bg-{{ $badgeClass }} status">{{ $order->order_status }}</span>
                 </p>
                 <p><strong>Thanh toán:</strong>
-                    @php [$payLabel, $payClass] = ['pending' => ['Chờ thanh toán', 'warning'], 'paid' => ['Đã thanh toán', 'success'], 'failed' => ['Thanh toán thất bại', 'danger']][$order->payment_status] ?? ['Không rõ', 'dark']; @endphp
+                    @php
+                        [$payLabel, $payClass] = [
+                            'pending' => ['Chờ thanh toán', 'warning'],
+                            'paid' => ['Đã thanh toán', 'success'],
+                            'failed' => ['Thanh toán thất bại', 'danger'],
+                            'refunded' => ['Đã hoàn tiền', 'success'], // Thêm case refunded
+                        ][$order->payment_status] ?? ['Không rõ', 'dark'];
+                    @endphp
                     <span class="badge bg-{{ $payClass }} status">{{ $payLabel }}</span>
                 </p>
             </div>
@@ -52,7 +70,7 @@
                                     class="ri-eye-line me-1"></i>Xem chi tiết</a></li>
                         @if ($order->canBeCancel())
                             <li><a class="dropdown-item text-danger" onclick="toggleCancelForm({{ $order->id }})"><i
-                                        class="ri-delete-bin-line me-1"></i>Huỷ đơn</a></li>
+                                        class="ri-delete-bin-line me-1"></i>Hủy đơn</a></li>
                         @endif
                     </ul>
                 </div>

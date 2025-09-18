@@ -475,7 +475,8 @@ class CheckoutController extends Controller
         }
 
         $order->update([
-            'order_status' => 'Đã nhận hàng'
+            'order_status' => 'Đã nhận hàng',
+            'delivery_at'  => now(),
         ]);
 
         return back()->with('success', 'Xác nhận đã nhận hàng thành công.');
