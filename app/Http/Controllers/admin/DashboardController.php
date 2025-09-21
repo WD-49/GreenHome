@@ -18,18 +18,30 @@ class DashboardController extends Controller
 
     public function index(Request $request)
     {
-        $filterData = $this->applyFilter($request, 'day');
+        $filterData = $this->applyFilter($request, 'month');
         $filter = $filterData['filter'];
         $startDate = $filterData['start_date'];
         $endDate = $filterData['end_date'];
 
-        return view('admin.dashboard', compact('filter', 'startDate', 'endDate'));
+        $startDateStr = match ($filter) {
+            'day' => $startDate->format('Y-m-d'),
+            'month' => $startDate->format('Y-m'),
+            'year' => $startDate->format('Y'),
+        };
+
+        $endDateStr = match ($filter) {
+            'day' => $endDate->format('Y-m-d'),
+            'month' => $endDate->format('Y-m'),
+            'year' => $endDate->format('Y'),
+        };
+
+        return view('admin.dashboard', compact('filter', 'startDateStr', 'endDateStr'));
     }
 
     public function getDashboardData(Request $request)
     {
         try {
-            $filterData = $this->applyFilter($request, 'day');
+            $filterData = $this->applyFilter($request, 'month');
             $filter = $filterData['filter'];
             $startDate = $filterData['start_date'];
             $endDate = $filterData['end_date'];
@@ -157,7 +169,8 @@ class DashboardController extends Controller
                     $order->payment_status_translated = [
                         'pending' => 'Chờ thanh toán',
                         'paid' => 'Đã thanh toán',
-                        'failed' => 'Thanh toán thất bại'
+                        'failed' => 'Thanh toán thất bại',
+                        'refunded' => 'Đã hoàn tiền'
                     ][$order->payment_status] ?? $order->payment_status;
                     return $order;
                 });

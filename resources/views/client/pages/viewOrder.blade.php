@@ -138,9 +138,7 @@
                                         {{ request()->query('status') == $status ? 'selected' : '' }}>{{ $status }}
                                     </option>
                                 @endforeach
-                                <option value="Đã hoàn hàng"
-                                    {{ request()->query('status') == 'Đã hoàn hàng' ? 'selected' : '' }}>Đã hoàn hàng
-                                </option>
+
                             </select>
                             <select id="payment-status" class="form-select">
                                 <option value="">Tất cả thanh toán</option>
