@@ -50,6 +50,9 @@
                                             <option value="rejected"
                                                 {{ request('status') === 'rejected' ? 'selected' : '' }}>
                                                 Bị từ chối</option>
+                                            <option value="account_invalid"
+                                                {{ request('status') === 'account_invalid' ? 'selected' : '' }}>
+                                                Tài khoản không hợp lệ</option>
                                         </select>
                                     </div>
                                     <div class="col-md-2">
@@ -91,7 +94,7 @@
                                         $statusMap = [
                                             'pending' => ['Chờ xử lý', 'bg-warning', 'Yêu cầu đang chờ xử lý'],
                                             'approved' => [
-                                                'Đã phê duyệt',
+                                                'Phê duyệt',
                                                 'bg-success',
                                                 'Yêu cầu hoàn hàng đã được phê duyệt, vui lòng cung cấp thông tin tài khoản để chúng tôi tiến hành hoàn tiền',
                                             ],
@@ -110,6 +113,11 @@
                                                 'bg-danger',
                                                 'Yêu cầu hoàn hàng bị từ chối vì không đủ điều kiện',
                                             ],
+                                            'account_invalid' => [
+                                                'Tài khoản không hợp lệ',
+                                                'bg-danger',
+                                                'Tài khoản ngân hàng không hợp lệ, vui lòng cung cấp lại.',
+                                            ],
                                         ];
                                         [$displayStatus, $statusClass, $defaultNote] = $statusMap[
                                             $refund->refund_status
@@ -119,8 +127,9 @@
                                         $allowedTransitions = [
                                             'pending' => ['approved', 'rejected'],
                                             'approved' => ['rejected'],
-                                            'refund_pending' => ['refunded', 'rejected'],
+                                            'refund_pending' => ['refunded', 'rejected', 'account_invalid'], // Thêm account_invalid từ refund_pending
                                             'rejected' => [],
+                                            'account_invalid' => ['rejected'], // Cho phép quay lại refund_pending nếu khách cập nhật lại, nhưng admin không chọn refund_pending
                                             'refunded' => [],
                                         ];
                                         $allowedStatuses = $allowedTransitions[$refund->refund_status] ?? [];
@@ -175,8 +184,8 @@
                                                                     Không có ảnh
                                                                 @endif
                                                             </p>
-                                                            <p><strong>Ngày yêu cầu:</strong>
-                                                                {{ $refund->created_at->format('H:i d/m/Y') }}</p>
+                                                            <p><strong>Ngày tạo:</strong>
+                                                                {{ $refund->created_at->format('d/m/Y H:i') }}</p>
                                                             <p><strong>Trạng thái:</strong> <span
                                                                     class="badge {{ $statusClass }}">{{ $displayStatus }}</span>
                                                             </p>
@@ -190,21 +199,21 @@
                                                                 {{ number_format($refund->refund_cost ?? 0, 0, ',', '.') }}
                                                                 đ</p>
                                                             <p><strong>Tài khoản ngân hàng:</strong><br>
-                                                                {{ $refund->refund_account_name ?? 'chưa cập nhật' }} -
-                                                                {{ $refund->refund_account_bank ?? 'chưa cập nhật' }}<br>
-                                                                Số TK:
-                                                                {{ $refund->refund_account_number ?? 'chưa cập nhật' }}
+                                                                {{ $refund->refund_account_name ?? 'N/A' }} -
+                                                                {{ $refund->refund_account_bank ?? 'N/A' }}<br>
+                                                                Số TK: {{ $refund->refund_account_number ?? 'N/A' }}
                                                             </p>
                                                             <p><strong>Ảnh QR Code:</strong><br>
                                                                 @if ($refund->refund_account_qr)
                                                                     <img src="{{ asset('storage/' . $refund->refund_account_qr) }}"
                                                                         alt="QR Code"
-                                                                        style="width: 250px; height: auto; border: 1px solid #ddd; border-radius: 5px;">
+                                                                        style="width: 150px; height: auto; border: 1px solid #ddd; border-radius: 5px;">
                                                                 @else
                                                                     Không có ảnh
                                                                 @endif
                                                             </p>
-
+                                                            <p><strong>Ngày yêu cầu hoàn tiền:</strong>
+                                                                {{ $refund->updated_at->format('d/m/Y H:i') }}</p>
                                                             <p><strong>Ảnh minh chứng chuyển khoản:</strong><br>
                                                                 @if ($refund->refund_proof_image)
                                                                     <img src="{{ asset('storage/' . $refund->refund_proof_image) }}"
@@ -214,12 +223,6 @@
                                                                     Không có ảnh
                                                                 @endif
                                                             </p>
-                                                            @if ($refund->refund_date)
-                                                                <p><strong>Ngày hoàn tất:</strong>
-
-                                                                    {{ $refund->refund_date->format('H:i d/m/Y') }}
-                                                                </p>
-                                                            @endif
                                                         </div>
                                                     </div>
                                                     <!-- Form cập nhật trạng thái -->
@@ -244,7 +247,7 @@
                                                             </select>
                                                         </div>
                                                         <div class="mb-3" id="proofImage_{{ $refund->id }}"
-                                                            style="display: none;">
+                                                            style="display: {{ $refund->refund_status === 'refunded' ? 'block' : 'none' }}">
                                                             <label class="form-label">Ảnh minh chứng chuyển khoản (bắt buộc
                                                                 khi hoàn tiền)</label>
                                                             <input type="file" name="refund_proof_image"

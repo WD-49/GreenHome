@@ -113,13 +113,18 @@
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">Danh sách đơn hàng</h5>
                         <div>
-                            {{-- <a href="{{ route('admin.orders.create') }}" class="btn btn-success shadow-sm">
-                                + Tạo đơn hàng
-                            </a> --}}
-                            <h3 class="btn btn-warning shadow-sm">
-                                <i class="fas fa-bell fa-lg text-warning"></i> Đơn hàng chưa xác nhận hôm nay:
-                                {{ $unconfirmedTodayCount }}
-                            </h3>
+                            <div class="d-flex gap-2">
+                                <h3 class="btn btn-warning shadow-sm">
+                                    <i class="fas fa-bell fa-lg text-warning"></i> Đơn hàng chưa xác nhận hôm nay:
+                                    {{ $unconfirmedTodayCount }}
+                                </h3>
+                                @if($refundRequestsCount > 0)
+                                <h3 class="btn btn-info shadow-sm">
+                                    <i class="fas fa-sync-alt fa-lg text-white"></i> Đơn có yêu cầu hoàn tiền:
+                                    {{ $refundRequestsCount }}
+                                </h3>
+                                @endif
+                            </div>
                         </div>
                     </div>
 
@@ -137,14 +142,21 @@
                                     <th>Ngày đặt</th>
                                     <th>Tổng tiền</th>
                                     <th>Phương thức</th>
-                                    <th>Trạng thái thanh toán</th> {{-- Cập nhật tiêu đề --}}
+                                    <th>Trạng thái thanh toán</th>
                                     <th>Trạng thái đơn hàng</th>
+                                    <th>Trạng thái hoàn tiền</th>
                                     <th>Hành động</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse ($orders as $index => $order)
-                                    <tr @if ($order->order_status === 'Chưa xác nhận') class="table-danger" @endif>
+                                    <tr 
+                                        @if ($order->order_status === 'Chưa xác nhận') 
+                                            class="table-danger"
+                                        @elseif ($order->refundTransactions && count($order->refundTransactions) > 0)
+                                            class="table-warning"
+                                        @endif
+                                    >
                                         <td>{{ $index + 1 }}</td>
                                         <td>#{{ $order->sku ?? $order->id }}</td>
                                         <td>{{ $order->user->name ?? 'N/A' }}</td>
@@ -167,6 +179,7 @@
                                                         'pending' => 'Chờ thanh toán',
                                                         'paid' => 'Đã thanh toán',
                                                         'failed' => 'Thất bại',
+                                                        'refunded' => 'Đã hoàn tiền'
                                                     ][$paymentStatus] ?? 'Không xác định';
 
                                                 $paymentStatusBadgeClass = '';
@@ -220,14 +233,44 @@
                                             </span>
                                         </td>
                                         <td>
+                                            @if ($order->refundTransactions && count($order->refundTransactions) > 0)
+                                                @php
+                                                    $latestRefund = $order->refundTransactions->sortByDesc('created_at')->first();
+                                                    $refundStatusClass = '';
+                                                    $refundStatusText = '';
+                                                    
+                                                    switch($latestRefund->refund_status) {
+                                                        case 'pending':
+                                                            $refundStatusClass = 'bg-warning text-dark';
+                                                            $refundStatusText = 'Chờ xử lý hoàn tiền';
+                                                            break;
+                                                        case 'approved':
+                                                            $refundStatusClass = 'bg-info';
+                                                            $refundStatusText = 'Đã duyệt hoàn tiền';
+                                                            break;
+                                                        case 'refunded':
+                                                            $refundStatusClass = 'bg-success';
+                                                            $refundStatusText = 'Đã hoàn tiền';
+                                                            break;
+                                                        case 'rejected':
+                                                            $refundStatusClass = 'bg-danger';
+                                                            $refundStatusText = 'Từ chối hoàn tiền';
+                                                            break;
+                                                        default:
+                                                            $refundStatusClass = 'bg-secondary';
+                                                            $refundStatusText = 'Không xác định';
+                                                    }
+                                                @endphp
+                                                <span class="badge rounded-pill {{ $refundStatusClass }}">
+                                                    {{ $refundStatusText }}
+                                                </span>
+                                            @else
+                                                <span class="text-muted">Không có</span>
+                                            @endif
+                                        </td>
+                                        <td>
                                             {{-- Các nút hành động trực tiếp --}}
                                             <div class="btn-group" role="group" aria-label="Order Actions">
-                                                {{-- Nút Sửa --}}
-                                                {{-- <a href="{{ route('admin.orders.edit', $order->id) }}"
-                                                    class="btn btn-action-sm btn-primary" title="Sửa">
-                                                    <i class="fas fa-edit"></i>
-                                                </a> --}}
-
                                                 {{-- Nút Xem chi tiết --}}
                                                 <a href="{{ route('admin.orders.show', $order->id) }}"
                                                     class="btn btn-action-sm btn-info" title="Xem chi tiết">
@@ -244,10 +287,6 @@
                                 @endforelse
                             </tbody>
                         </table>
-                        {{-- Laravel Pagination Links --}}
-                        {{-- <div class="d-flex justify-content-center mt-3">
-                            {{ $orders->links() }}
-                        </div> --}}
                     </div>
                 </div>
             </div>
@@ -308,10 +347,6 @@
     <script src="../../assets/libs/datatables.net-responsive-bs5/js/responsive.bootstrap5.min.js"></script>
     <script src="../../assets/libs/datatables.net-select/js/dataTables.select.min.js"></script>
     <script src="../../assets/libs/datatables.net-select-bs5/js/select.bootstrap5.min.js"></script>
-
-    {{-- <script src="../../assets/js/pages/datatable.init.js"></script> --}}
-
-    {{-- <script src="../../assets/js/app.js"></script> --}}
 
     <script>
         $(document).ready(function() {

@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\RefundTransaction;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\RefundStatusNotification;
 
 class RefundController extends Controller
 {
@@ -41,7 +43,7 @@ class RefundController extends Controller
             return redirect()->back()->with('error', 'Yêu cầu hoàn trả đã hết thời hạn (3 ngày) kể từ ngày giao hàng.');
         }
 
-        // Kiểm tra xem đã có yêu cầu refund nào cho order_id này chưa (theo cách 1)
+        // Kiểm tra xem đã có yêu cầu refund nào cho order_id này chưa 
         $existingRefund = RefundTransaction::where('order_id', $orderId)->first();
         if ($existingRefund) {
             if ($existingRefund->refund_status === 'rejected') {
@@ -101,7 +103,7 @@ class RefundController extends Controller
     {
         $request->validate([
             'refund_id' => 'required|exists:refund_transactions,id',
-            'status' => 'required|in:pending,approved,refunded,rejected', // Loại bỏ refund_pending
+            'status' => 'required|in:pending,approved,refunded,rejected,account_invalid', // Thêm account_invalid
             'admin_note' => 'nullable|string|max:1000',
             'refund_proof_image' => 'nullable|image|max:2048',
         ]);
@@ -118,8 +120,9 @@ class RefundController extends Controller
         $allowedTransitions = [
             'pending' => ['approved', 'rejected'],
             'approved' => ['rejected'], // refund_pending được cập nhật tự động, không cho admin chọn
-            'refund_pending' => ['refunded', 'rejected'],
+            'refund_pending' => ['refunded', 'rejected', 'account_invalid'], // Thêm account_invalid từ refund_pending
             'rejected' => [],
+            'account_invalid' => ['rejected', 'refund_pending'], // Cho phép quay lại refund_pending nếu khách cập nhật lại
             'refunded' => [],
         ];
 
@@ -153,11 +156,17 @@ class RefundController extends Controller
                 'refund_pending' => 'Yêu cầu hoàn tiền đang chờ xử lý',
                 'refunded' => 'Hoàn tiền đã được thực hiện',
                 'rejected' => 'Yêu cầu hoàn hàng bị từ chối',
+                'account_invalid' => 'Tài khoản ngân hàng không hợp lệ, vui lòng cung cấp lại.',
             ];
             $data['admin_note'] = $defaultNotes[$newStatus] ?? '';
         }
 
         $refund->update($data);
+
+        $user = $refund->order->user;
+        if ($user) {
+            Notification::send($user, new RefundStatusNotification($refund, $newStatus));
+        }
 
         return redirect()->back()->with('success', 'Trạng thái đã được cập nhật thành công.');
     }
@@ -169,7 +178,7 @@ class RefundController extends Controller
             'refund_account_name' => 'required|string|max:255',
             'refund_account_number' => 'required|string|max:50',
             'refund_account_bank' => 'required|string|max:255',
-            'refund_qr_image' => 'nullable|image|max:2048', // Không bắt buộc, tối đa 2MB
+            'refund_qr_image' => 'nullable|image|max:2048',
         ]);
 
         $refund = RefundTransaction::findOrFail($request->refund_id);
@@ -180,21 +189,25 @@ class RefundController extends Controller
         }
 
         // Kiểm tra trạng thái
-        if ($refund->refund_status !== 'approved') {
-            return redirect()->back()->with('error', 'Yêu cầu hoàn hàng chưa được phê duyệt.');
+        if (!in_array($refund->refund_status, ['approved', 'account_invalid'])) {
+            return redirect()->back()->with('error', 'Yêu cầu hoàn hàng không ở trạng thái cho phép cập nhật tài khoản.');
         }
 
         $data = [
-            'refund_status' => 'refund_pending',
-            'refund_cost' => $refund->order->total_amount,
             'refund_account_name' => $request->refund_account_name,
             'refund_account_number' => $request->refund_account_number,
             'refund_account_bank' => $request->refund_account_bank,
             'refund_status' => 'refund_pending',
-            'admin_note' => 'thông tin tài khoản đã được gửi, vui lòng chờ xử lý hoàn tiền',
         ];
 
-        // Xử lý ảnh QR code nếu có
+        // Gán refund_cost nếu trạng thái là approved
+        if ($refund->refund_status === 'approved') {
+            $data['refund_cost'] = $refund->order->total_amount;
+            $data['admin_note'] = 'Thông tin tài khoản đã được gửi, vui lòng chờ xử lý hoàn tiền.';
+        } else {
+            $data['admin_note'] = 'Đã cung cấp lại thông tin tài khoản sau khi tài khoản không hợp lệ.';
+        }
+
         if ($request->hasFile('refund_qr_image')) {
             $data['refund_account_qr'] = $request->file('refund_qr_image')->store('images/refunds', 'public');
         }
