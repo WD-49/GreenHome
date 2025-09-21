@@ -65,6 +65,12 @@ class RefundStatusNotification extends Notification
                 'icon' => 'fa fa-clock',
                 'type' => 'refund_processing',
             ],
+            'account_invalid' => [
+                'title' => 'Yêu cầu hoàn tiền cho đơn #' . $this->refund->order->sku . ' cần cung cấp lại tài khoản',
+                'message' => 'Tài khoản ngân hàng của bạn không hợp lệ. Vui lòng cung cấp lại thông tin tài khoản để chúng tôi tiến hành hoàn tiền.',
+                'icon' => 'fa fa-check-circle',
+                'type' => 'refund_processing',
+            ],
             'refunded' => [
                 'title' => 'Hoàn tiền cho đơn #' . $this->refund->order->sku . ' đã hoàn tất',
                 'message' => 'Hoàn tiền cho yêu cầu của bạn đã được thực hiện. Vui lòng kiểm tra tài khoản.',

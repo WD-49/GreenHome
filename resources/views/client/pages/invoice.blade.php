@@ -12,7 +12,6 @@
             alert(@json(session('success')));
         </script>
     @endif
-
     @if (session('error'))
         <script>
             alert(@json(session('error')));
@@ -25,7 +24,7 @@
                     <div class="col-lg-12">
                         <div class="cr-breadcrumb-title">
                             <h2>Đơn hàng: {{ $order->sku }}</h2>
-                            <span> <a href="{{ route('home') }}">Trang trủ</a>/<a href="{{ route('orders.list') }}">Đơn
+                            <span> <a href="{{ route('home') }}">Trang chủ</a>/<a href="{{ route('orders.list') }}">Đơn
                                     hàng</a> /
                                 Chi tiết đơn hàng</span>
                         </div>
@@ -178,6 +177,19 @@
                                             $orderDiscount = $order->discount_amount;
                                             $isProductDiscount = $productDiscount > 0;
                                             $isOrderDiscount = $orderDiscount > $productDiscount;
+                                            $statusMap = [
+                                                'pending' => ['Chờ xử lý', 'info'],
+                                                'approved' => ['Đã phê duyệt', 'success'],
+                                                'rejected' => ['Bị từ chối', 'danger'],
+                                                'refund_pending' => ['Chờ hoàn tiền', 'warning'],
+                                                'refunded' => ['Đã hoàn tiền', 'success'],
+                                                'account_invalid' => ['Tài khoản không hợp lệ', 'danger'],
+                                            ];
+                                            $refundStatus = $order->refund ? $order->refund->refund_status : null;
+                                            [$displayStatus, $statusClass] = $statusMap[$refundStatus] ?? [
+                                                'Không có yêu cầu hoàn hàng',
+                                                'secondary',
+                                            ];
                                         @endphp
                                         <ul class="list-unstyled">
                                             <li class="mid pb-3 text-dark">Tổng tiền sản phẩm:
@@ -239,7 +251,6 @@
                                             $order->order_status === 'Đã nhận hàng' &&
                                                 $order->payment_status === 'paid' &&
                                                 $order->delivery_at !== null &&
-                                                $order->delivery_at->isPast() &&
                                                 $order->delivery_at->diffInDays(now()) < 3 &&
                                                 !$order->refund)
                                             <button type="button" class="btn btn-danger btn-sm w-100 mt-2"
@@ -247,20 +258,6 @@
                                                 <i class="ri-refresh-line me-1"></i> Yêu cầu hoàn trả hàng
                                             </button>
                                         @elseif ($order->refund)
-                                            @php
-                                                $statusMap = [
-                                                    'pending' => ['Chờ xử lý', 'info'],
-                                                    'approved' => ['Đã phê duyệt', 'success'],
-                                                    'rejected' => ['Bị từ chối', 'danger'],
-                                                    'refund_pending' => ['Chờ hoàn tiền', 'warning'],
-                                                    'refunded' => ['Đã hoàn tiền', 'success'],
-                                                ];
-                                                $refundStatus = $order->refund->refund_status;
-                                                [$displayStatus, $statusClass] = $statusMap[$refundStatus] ?? [
-                                                    $refundStatus,
-                                                    'secondary',
-                                                ];
-                                            @endphp
                                             <div class="alert alert-{{ $statusClass }} mt-2">
                                                 <strong>Trạng thái hoàn hàng:</strong> {{ $displayStatus }}
                                                 @if ($order->refund->admin_note)
@@ -274,10 +271,11 @@
                                                         style="width: 150px; height: auto; border: 1px solid #ddd; border-radius: 5px;">
                                                 @endif
                                             </div>
-                                            @if ($refundStatus === 'approved')
+                                            @if (in_array($refundStatus, ['approved', 'account_invalid']))
                                                 <button type="button" class="btn btn-primary btn-sm w-100 mt-2"
                                                     data-bs-toggle="modal" data-bs-target="#bankInfoModal">
-                                                    <i class="ri-bank-line me-1"></i> Cung cấp thông tin tài khoản
+                                                    <i class="ri-bank-line me-1"></i> 
+                                                    {{ $refundStatus === 'account_invalid' ? 'Cung cấp lại thông tin tài khoản' : 'Cung cấp thông tin tài khoản' }}
                                                 </button>
                                             @endif
                                         @endif
@@ -326,7 +324,9 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Cung cấp thông tin tài khoản nhận tiền</h5>
+                    <h5 class="modal-title">
+                        {{ $order->refund && $order->refund->refund_status === 'account_invalid' ? 'Cung cấp lại thông tin tài khoản' : 'Cung cấp thông tin tài khoản' }}
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -340,23 +340,29 @@
                         <div class="mb-3">
                             <label for="accountName" class="form-label">Tên chủ tài khoản</label>
                             <input type="text" name="refund_account_name" id="accountName" class="form-control"
-                                required>
+                                value="{{ $order->refund->refund_account_name ?? '' }}" required>
                         </div>
                         <div class="mb-3">
                             <label for="accountNumber" class="form-label">Số tài khoản</label>
                             <input type="text" name="refund_account_number" id="accountNumber" class="form-control"
-                                required>
+                                value="{{ $order->refund->refund_account_number ?? '' }}" required>
                         </div>
                         <div class="mb-3">
                             <label for="bankName" class="form-label">Tên ngân hàng</label>
                             <input type="text" name="refund_account_bank" id="bankName" class="form-control"
-                                required>
+                                value="{{ $order->refund->refund_account_bank ?? '' }}" required>
                         </div>
                         <div class="mb-3">
                             <label for="qrCodeImage" class="form-label">Ảnh QR Code (Không bắt buộc)</label>
                             <input type="file" name="refund_qr_image" id="qrCodeImage" class="form-control"
                                 accept="image/*" onchange="validateQrImage(this)">
-                            <div id="qrImagePreview" class="mt-2"></div>
+                            <div id="qrImagePreview" class="mt-2">
+                                @if ($order->refund && $order->refund->refund_account_qr)
+                                    <img src="{{ asset('storage/' . $order->refund->refund_account_qr) }}"
+                                        alt="QR Code"
+                                        style="width: 100px; height: 100px; object-fit: cover; border: 1px solid #ddd; border-radius: 5px;">
+                                @endif
+                            </div>
                         </div>
                         <button type="submit" class="btn btn-primary w-100">Gửi thông tin</button>
                     </form>
