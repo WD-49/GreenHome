@@ -42,7 +42,7 @@
                             <div class="invoice-wrapper">
                                 <div class="row">
                                     <div class="col-md-6 col-lg-4 col-sm-6">
-                                        <p class="text-dark mb-2">Thông tin người đặt</p>
+                                        <p class="text-dark mb-2"><strong>Thông tin người đặt</strong></p>
                                         <address>
                                             <span>{{ $user->name }}</span>
                                             <br> {{ $user->profile->address ?? ' ' }}
@@ -51,7 +51,7 @@
                                         </address>
                                     </div>
                                     <div class="col-md-6 col-lg-4 col-sm-6">
-                                        <p class="text-dark mb-2">Thông tin người nhận</p>
+                                        <p class="text-dark mb-2"><strong>Thông tin người nhận</strong></p>
                                         <address>
                                             <span>{{ $order->shipping_name }}</span>
                                             <br> {{ $order->shipping_address }}
@@ -59,7 +59,7 @@
                                         </address>
                                     </div>
                                     <div class="col-md-6 col-lg-4 col-sm-6">
-                                        <p class="text-dark mb-2">Chi tiết</p>
+                                        <p class="text-dark mb-2"><strong>Chi tiết đơn hàng</strong></p>
                                         @php
                                             $paymentStatusMap = [
                                                 'pending' => ['Chờ thanh toán', 'secondary'],
@@ -89,15 +89,15 @@
                                 </div>
                                 <div class="cr-chart-header">
                                     <div class="block">
-                                        <h6>Đơn hàng</h6>
+                                        <h6><strong>Đơn hàng</strong></h6>
                                         <h5>{{ $order->sku }}</h5>
                                     </div>
                                     <div class="block">
-                                        <h6>Tổng tiền</h6>
+                                        <h6><strong>Tổng tiền</strong></h6>
                                         <h5>{{ number_format($order->total_amount, 0, ',', '.') }} đ</h5>
                                     </div>
                                     <div class="block">
-                                        <h6>Ngày đặt</h6>
+                                        <h6><strong>Ngày đặt</strong></h6>
                                         <h5>{{ $order->created_at->format('H:i d/m/Y') }}</h5>
                                     </div>
                                 </div>
@@ -106,13 +106,13 @@
                                         <table class="table-invoice table-striped" style="width:100%">
                                             <thead>
                                                 <tr>
-                                                    <th>#</th>
-                                                    <th>Sản phẩm</th>
-                                                    <th>giá đặt</th>
-                                                    <th>số lượng</th>
-                                                    <th>tổng tiền</th>
-                                                    <th>giảm giá</th>
-                                                    <th>Tổng tiền</th>
+                                                    <th><strong>#</strong></th>
+                                                    <th><strong>Sản Phẩm</strong></th>
+                                                    <th><strong>Giá Đặt</strong></th>
+                                                    <th><strong>Số Lượng</strong></th>
+                                                    <th><strong>Tổng Tiền</strong></th>
+                                                    <th><strong>Giảm Giá</strong></th>
+                                                    <th><strong>Tổng Tiền</strong></th>
                                                     <th></th>
                                                 </tr>
                                             </thead>
@@ -274,7 +274,7 @@
                                             @if (in_array($refundStatus, ['approved', 'account_invalid']))
                                                 <button type="button" class="btn btn-primary btn-sm w-100 mt-2"
                                                     data-bs-toggle="modal" data-bs-target="#bankInfoModal">
-                                                    <i class="ri-bank-line me-1"></i> 
+                                                    <i class="ri-bank-line me-1"></i>
                                                     {{ $refundStatus === 'account_invalid' ? 'Cung cấp lại thông tin tài khoản' : 'Cung cấp thông tin tài khoản' }}
                                                 </button>
                                             @endif
@@ -358,8 +358,7 @@
                                 accept="image/*" onchange="validateQrImage(this)">
                             <div id="qrImagePreview" class="mt-2">
                                 @if ($order->refund && $order->refund->refund_account_qr)
-                                    <img src="{{ asset('storage/' . $order->refund->refund_account_qr) }}"
-                                        alt="QR Code"
+                                    <img src="{{ asset('storage/' . $order->refund->refund_account_qr) }}" alt="QR Code"
                                         style="width: 100px; height: 100px; object-fit: cover; border: 1px solid #ddd; border-radius: 5px;">
                                 @endif
                             </div>
