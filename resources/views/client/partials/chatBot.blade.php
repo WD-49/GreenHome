@@ -734,14 +734,14 @@
     const userInput = document.getElementById('user-input');
     const typingIndicator = document.querySelector('.typing-indicator');
 
-    // Chat History Management
+    // Lưu đoạn hội thoại vào localStorage
     let chatHistory = localStorage.getItem('greenHomeChatHistory') ?
         JSON.parse(localStorage.getItem('greenHomeChatHistory')) : [];
-    const MAX_HISTORY = 20; // Giảm số lượng lịch sử để tăng performance
+    const MAX_HISTORY = 20; // Tối đa chỉ lưu 20 tin nhắn
 
-    // Initialize chat
+    // Sự kiện gửi tin nhắn
     function initializeChat() {
-        // Load chat history (chỉ load 10 tin nhắn gần nhất)
+        // load 10 tin nhắn gần nhất
         const recentHistory = chatHistory.slice(-10);
         recentHistory.forEach(message => {
             appendMessage(message.type, message.content, message.products, false);
@@ -751,7 +751,7 @@
         }
     }
 
-    // Toggle chatbot visibility
+    // Lưu tin nhắn vào lịch sử
     function toggleChatbot() {
         if (chatbotContainer.style.display === 'flex') {
             chatbotContainer.style.display = 'none';
@@ -766,7 +766,7 @@
         }
     }
 
-    // Send quick reply
+    // Gửi phản hồi nhanh
     function sendQuickReply(message) {
         userInput.value = message;
         handleUserMessage(message);
@@ -852,6 +852,7 @@
         // trackChatInteraction('bot_response', data.ai_response.length);
     }
 
+    // Lưu tin nhắn vào lịch sử với giới hạn
     function handleError(error) {
         console.error('Chat Error:', error);
 
@@ -1290,6 +1291,16 @@
         clearChatHistory,
         trackProductView
     };
+
+    // Tự động xóa đoạn chat sau 24 giờ không hoạt động
+    setInterval(() => {
+        const now = new Date();
+        chatHistory = chatHistory.filter(msg => {
+            const msgTime = new Date(msg.timestamp);
+            return (now - msgTime) < 24 * 60 * 60 * 1000; // 24 hours
+        });
+        localStorage.setItem('greenHomeChatHistory', JSON.stringify(chatHistory)); // Cập nhật lại lịch sử
+    }, 60 * 60 * 1000); // Kiểm tra mỗi giờ
 </script>
 
 <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.6.2/dist/dotlottie-wc.js" type="module"></script>

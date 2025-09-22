@@ -497,7 +497,7 @@ TUYỆT ĐỐI KHÔNG được gợi ý sản phẩm cụ thể trong lời chà
                     $prompt = $basePrompt . "
 TÌNH HUỐNG: Khách hàng tìm sản phẩm - CÓ sản phẩm phù hợp
 YÊU CẦU: 
-- Trả lời về các sản phẩm CÓ TRONG DANH SÁCH PHÙHỢP ở trên
+- Trả lời về các sản phẩm CÓ TRONG DANH SÁCH PHÙ HỢP ở trên
 - Nhấn mạnh đặc điểm thân thiện môi trường
 - Mời khách xem chi tiết sản phẩm hiển thị bên dưới
 - PHẢI nói rõ tên sản phẩm và ID";
