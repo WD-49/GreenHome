@@ -62,6 +62,9 @@
                             $currentOrderStatus = $order->order_status;
                             $nextStatus = $orderStatuses[$currentOrderStatus] ?? null;
 
+                            // Đổi text hiển thị
+                            $displayOrderStatus = $currentOrderStatus === 'Đã nhận hàng' ? 'Hoàn tất đơn hàng' : $currentOrderStatus;
+
                             // Kiểm tra nếu là VNPAY và chưa thanh toán thì không cho chuyển sang Đang vận chuyển
                             if (
                                 $order->payment_method_name === 'VNPAY' &&
@@ -81,7 +84,8 @@
                         @endif
 
                         <div class="d-flex align-items-center gap-3">
-                            <div class="badge bg-primary fs-6">{{ $currentOrderStatus }}</div>
+                            {{-- <div class="badge bg-primary fs-6">{{ $currentOrderStatus }}</div> --}}
+                            <div class="badge bg-secondary fs-6">{{ $displayOrderStatus }}</div>
 
                             @if ($nextStatus && $currentOrderStatus !== 'Hủy đơn' && $currentOrderStatus !== 'Đã nhận hàng')
                                 <form class="d-inline" method="POST"
@@ -423,7 +427,8 @@
                                 Đã tồn tại yêu cầu hoàn tiền cho đơn hàng này
                             </div>
                         @endif
-                    </div><br><hr>
+                    </div><br>
+                    <hr>
                 @else
                     {{-- <p class="text-muted">Chưa có yêu cầu hoàn tiền nào cho đơn hàng này.</p>
                     <div class="d-flex align-items-center mb-3 py-2 px-3"

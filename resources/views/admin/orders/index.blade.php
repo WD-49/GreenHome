@@ -118,11 +118,11 @@
                                     <i class="fas fa-bell fa-lg text-warning"></i> Đơn hàng chưa xác nhận hôm nay:
                                     {{ $unconfirmedTodayCount }}
                                 </h3>
-                                @if($refundRequestsCount > 0)
-                                <h3 class="btn btn-info shadow-sm">
-                                    <i class="fas fa-sync-alt fa-lg text-white"></i> Đơn có yêu cầu hoàn tiền:
-                                    {{ $refundRequestsCount }}
-                                </h3>
+                                @if ($refundRequestsCount > 0)
+                                    <h3 class="btn btn-info shadow-sm">
+                                        <i class="fas fa-sync-alt fa-lg text-white"></i> Đơn có yêu cầu hoàn tiền:
+                                        {{ $refundRequestsCount }}
+                                    </h3>
                                 @endif
                             </div>
                         </div>
@@ -150,13 +150,10 @@
                             </thead>
                             <tbody>
                                 @forelse ($orders as $index => $order)
-                                    <tr 
-                                        @if ($order->order_status === 'Chưa xác nhận') 
-                                            class="table-danger"
+                                    <tr
+                                        @if ($order->order_status === 'Chưa xác nhận') class="table-danger"
                                         @elseif ($order->refundTransactions && count($order->refundTransactions) > 0)
-                                            class="table-warning"
-                                        @endif
-                                    >
+                                            class="table-warning" @endif>
                                         <td>{{ $index + 1 }}</td>
                                         <td>#{{ $order->sku ?? $order->id }}</td>
                                         <td>{{ $order->user->name ?? 'N/A' }}</td>
@@ -179,7 +176,7 @@
                                                         'pending' => 'Chờ thanh toán',
                                                         'paid' => 'Đã thanh toán',
                                                         'failed' => 'Thất bại',
-                                                        'refunded' => 'Đã hoàn tiền'
+                                                        'refunded' => 'Đã hoàn tiền',
                                                     ][$paymentStatus] ?? 'Không xác định';
 
                                                 $paymentStatusBadgeClass = '';
@@ -229,17 +226,19 @@
                                                 }
                                             @endphp
                                             <span class="badge rounded-pill {{ $orderStatusBadgeClass }}">
-                                                {{ $orderStatus ?? 'Chưa cập nhật' }}
+                                                {{ $orderStatus === 'Đã nhận hàng' ? 'Hoàn tất đơn hàng' : $orderStatus ?? 'Chưa cập nhật' }}
                                             </span>
                                         </td>
                                         <td>
                                             @if ($order->refundTransactions && count($order->refundTransactions) > 0)
                                                 @php
-                                                    $latestRefund = $order->refundTransactions->sortByDesc('created_at')->first();
+                                                    $latestRefund = $order->refundTransactions
+                                                        ->sortByDesc('created_at')
+                                                        ->first();
                                                     $refundStatusClass = '';
                                                     $refundStatusText = '';
-                                                    
-                                                    switch($latestRefund->refund_status) {
+
+                                                    switch ($latestRefund->refund_status) {
                                                         case 'pending':
                                                             $refundStatusClass = 'bg-warning text-dark';
                                                             $refundStatusText = 'Chờ xử lý hoàn tiền';
