@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\WebInfo;
 use Illuminate\Http\Request;
 use App\Models\RefundTransaction;
 use Illuminate\Support\Facades\Auth;
@@ -120,7 +121,7 @@ class RefundController extends Controller
         $allowedTransitions = [
             'pending' => ['approved', 'rejected'],
             'approved' => ['rejected'], // refund_pending được cập nhật tự động, không cho admin chọn
-            'refund_pending' => ['refunded', 'rejected', 'account_invalid'], // Thêm account_invalid từ refund_pending
+            'refund_pending' => ['refunded', 'account_invalid'], // Thêm account_invalid từ refund_pending
             'rejected' => [],
             'account_invalid' => ['rejected', 'refund_pending'], // Cho phép quay lại refund_pending nếu khách cập nhật lại
             'refunded' => [],
@@ -181,6 +182,8 @@ class RefundController extends Controller
             'refund_qr_image' => 'nullable|image|max:2048',
         ]);
 
+        $shippingFee = WebInfo::where('key', 'delivery_cost')->first()->value;
+
         $refund = RefundTransaction::findOrFail($request->refund_id);
 
         // Kiểm tra quyền sở hữu
@@ -200,9 +203,11 @@ class RefundController extends Controller
             'refund_status' => 'refund_pending',
         ];
 
+
+
         // Gán refund_cost nếu trạng thái là approved
         if ($refund->refund_status === 'approved') {
-            $data['refund_cost'] = $refund->order->total_amount;
+            $data['refund_cost'] = $refund->order->total_amount - $shippingFee;
             $data['admin_note'] = 'Thông tin tài khoản đã được gửi, vui lòng chờ xử lý hoàn tiền.';
         } else {
             $data['admin_note'] = 'Đã cung cấp lại thông tin tài khoản sau khi tài khoản không hợp lệ.';

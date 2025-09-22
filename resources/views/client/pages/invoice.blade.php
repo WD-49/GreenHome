@@ -330,8 +330,11 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    @php
+                        $refund_cost = $order->total_amount - $shippingFee;
+                    @endphp
                     <div class="alert alert-info mb-3">
-                        Số tiền được hoàn trả của bạn là {{ number_format($order->total_amount, 0, ',', '.') }} đ
+                        Số tiền được hoàn trả của bạn là {{ number_format($refund_cost, 0, ',', '.') }} đ
                     </div>
                     <form id="bankInfoForm" action="{{ route('refund.updateBankInfo') }}" method="POST"
                         enctype="multipart/form-data">

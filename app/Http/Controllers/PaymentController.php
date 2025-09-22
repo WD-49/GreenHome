@@ -109,7 +109,6 @@ class PaymentController extends Controller
                     // Gửi email hóa đơn
                     try {
                         if ($order->user) {
-                            Mail::to($order->user->email)->queue(new OrderInvoiceMail($order, $order->user));
                             Log::info('Đã xếp hàng gửi email hóa đơn', [
                                 'order_id' => $order->id,
                                 'sku' => $order->sku,
