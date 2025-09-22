@@ -243,6 +243,10 @@
                                                             $statusClass = 'bg-primary';
                                                             $statusText = 'Đã duyệt';
                                                             break;
+                                                        case 'account_invalid' :
+                                                            $statusClass = 'bg-danger';
+                                                            $statusText = 'Tài khoản không hợp lệ';
+                                                            break;
                                                         case 'refund_pending':
                                                             $statusClass = 'bg-info';
                                                             $statusText = 'Đang hoàn tiền';
@@ -372,11 +376,10 @@
                                                         <option value="rejected">Từ chối yêu cầu</option>
                                                     @elseif ($refund->refund_status === 'approved')
                                                         <option value="approved" selected>Đã duyệt</option>
-                                                        <option value="rejected">Từ chối yêu cầu</option>
                                                     @elseif ($refund->refund_status === 'refund_pending')
                                                         <option value="refund_pending" selected>Đang hoàn tiền</option>
                                                         <option value="refunded">Đã hoàn tiền</option>
-                                                        <option value="rejected">Từ chối yêu cầu</option>
+                                                        <option value="account_invalid">Tài khoản không hợp lệ</option>
                                                     @elseif ($refund->refund_status === 'refunded')
                                                         <option value="refunded" selected>Đã hoàn tiền</option>
                                                     @elseif ($refund->refund_status === 'rejected')
