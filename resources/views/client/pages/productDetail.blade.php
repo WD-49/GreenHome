@@ -57,6 +57,19 @@
                 height: 280px;
                 object-fit: cover;
             }
+
+            .vehicle-detail-banner .banner-slider .slider-for {
+                height: auto;
+                /* bỏ cố định */
+            }
+
+            .vehicle-detail-banner .banner-slider .slider-for img {
+                width: 100%;
+                height: auto;
+                max-height: 600px;
+                /* tùy ý */
+                object-fit: contain;
+            }
         </style>
     @endpush
     <!-- Breadcrumb -->
@@ -221,7 +234,6 @@
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#review"
-
                                     type="button" role="tab">Đánh giá</button>
                             </li>
                             <li class="nav-item" role="presentation">
