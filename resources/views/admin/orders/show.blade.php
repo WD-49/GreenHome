@@ -62,6 +62,9 @@
                             $currentOrderStatus = $order->order_status;
                             $nextStatus = $orderStatuses[$currentOrderStatus] ?? null;
 
+                            // Đổi text hiển thị
+                            $displayOrderStatus = $currentOrderStatus === 'Đã nhận hàng' ? 'Hoàn tất đơn hàng' : $currentOrderStatus;
+
                             // Kiểm tra nếu là VNPAY và chưa thanh toán thì không cho chuyển sang Đang vận chuyển
                             if (
                                 $order->payment_method_name === 'VNPAY' &&
@@ -81,7 +84,8 @@
                         @endif
 
                         <div class="d-flex align-items-center gap-3">
-                            <div class="badge bg-primary fs-6">{{ $currentOrderStatus }}</div>
+                            {{-- <div class="badge bg-primary fs-6">{{ $currentOrderStatus }}</div> --}}
+                            <div class="badge bg-secondary fs-6">{{ $displayOrderStatus }}</div>
 
                             @if ($nextStatus && $currentOrderStatus !== 'Hủy đơn' && $currentOrderStatus !== 'Đã nhận hàng')
                                 <form class="d-inline" method="POST"
@@ -239,6 +243,10 @@
                                                             $statusClass = 'bg-primary';
                                                             $statusText = 'Đã duyệt';
                                                             break;
+                                                        case 'account_invalid' :
+                                                            $statusClass = 'bg-danger';
+                                                            $statusText = 'Tài khoản không hợp lệ';
+                                                            break;
                                                         case 'refund_pending':
                                                             $statusClass = 'bg-info';
                                                             $statusText = 'Đang hoàn tiền';
@@ -368,11 +376,10 @@
                                                         <option value="rejected">Từ chối yêu cầu</option>
                                                     @elseif ($refund->refund_status === 'approved')
                                                         <option value="approved" selected>Đã duyệt</option>
-                                                        <option value="rejected">Từ chối yêu cầu</option>
                                                     @elseif ($refund->refund_status === 'refund_pending')
                                                         <option value="refund_pending" selected>Đang hoàn tiền</option>
                                                         <option value="refunded">Đã hoàn tiền</option>
-                                                        <option value="rejected">Từ chối yêu cầu</option>
+                                                        <option value="account_invalid">Tài khoản không hợp lệ</option>
                                                     @elseif ($refund->refund_status === 'refunded')
                                                         <option value="refunded" selected>Đã hoàn tiền</option>
                                                     @elseif ($refund->refund_status === 'rejected')
@@ -423,7 +430,8 @@
                                 Đã tồn tại yêu cầu hoàn tiền cho đơn hàng này
                             </div>
                         @endif
-                    </div><br><hr>
+                    </div><br>
+                    <hr>
                 @else
                     {{-- <p class="text-muted">Chưa có yêu cầu hoàn tiền nào cho đơn hàng này.</p>
                     <div class="d-flex align-items-center mb-3 py-2 px-3"
