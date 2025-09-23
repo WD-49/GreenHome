@@ -18,6 +18,7 @@ class Order extends Model
         'shipping_phone',
         'shipping_address',
         'order_status', // Use 'order_status' directly
+        'delivery_at',
         'discount_code', // Đảm bảo fillable
         'discount_type',
         'discount_value', // Đảm bảo fillable
@@ -30,16 +31,28 @@ class Order extends Model
         'cancel_reason',
     ];
 
+    protected $casts = [
+        'delivery_at' => 'datetime', // ngày giao hàng thành công
+    ];
+
     public function user()
     {
-        return $this->belongsTo(User::class)->withTrashed(); // Thêm withTrashed nếu user có thể bị soft delete
+        return $this->belongsTo(User::class)->withTrashed();
     }
-
-
 
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function refund()
+    {
+        return $this->hasOne(RefundTransaction::class);
+    }
+
+    public function refundTransactions()
+    {
+        return $this->hasMany(RefundTransaction::class);
     }
 
 
@@ -53,14 +66,20 @@ class Order extends Model
         return !in_array($this->order_status, $nonCancellableStatuses);
     }
 
-    // Phương thức kiểm tra xem đơn hàng có thể bị hủy không
+    // Dùng cái này
     public function canBeCancel()
     {
-        $nonCancellableStatuses = ['Đang vận chuyển', 'Giao hàng thành công', 'Hủy đơn', 'Đã nhận hàng'];
-
+        $nonCancellableStatuses = [
+            'Đang vận chuyển',
+            'Giao hàng thành công',
+            'Hủy đơn',
+            'Đã nhận hàng',
+            'Đã hoàn hàng',
+        ];
 
         return !in_array($this->order_status, $nonCancellableStatuses)
-            && $this->payment_status !== 'paid';
+            && $this->payment_status !== 'paid'
+            && $this->payment_status !== 'refunded'; // chặn hủy đơn nếu đã hoàn tiền
     }
 
     // Phương thức kiểm tra xem đơn hàng có thể được thanh toán không
@@ -69,7 +88,8 @@ class Order extends Model
         return $this->payment_method_name === 'VNPAY'
             && $this->payment_status === 'pending'
             && $this->order_status !== 'Hủy đơn'
-            && $this->order_status !== 'Chưa xác nhận';
+            && $this->order_status !== 'Chưa xác nhận'
+            && $this->order_status !== 'Đã hoàn hàng';
     }
 
     // Phương thức khôi phục trạng thái thanh toán

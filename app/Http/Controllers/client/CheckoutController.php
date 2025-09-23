@@ -362,7 +362,7 @@ class CheckoutController extends Controller
             return redirect()->route('orders.list')->with('error', 'Bạn không có quyền xem đơn hàng này.');
         }
 
-        $order->load('items.review');
+        $order->load('items.review', 'refund');
 
         return view('client.pages.invoice', compact('order', 'user'));
     }
@@ -475,7 +475,8 @@ class CheckoutController extends Controller
         }
 
         $order->update([
-            'order_status' => 'Đã nhận hàng'
+            'order_status' => 'Đã nhận hàng',
+            'delivery_at'  => now(),
         ]);
 
         return back()->with('success', 'Xác nhận đã nhận hàng thành công.');

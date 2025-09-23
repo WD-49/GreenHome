@@ -8,8 +8,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.css">
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
     {{-- Thông báo cho Login Google, Fb --}}
     <div class="toast-container position-fixed top-0 end-0 p-3">
@@ -86,14 +84,18 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label for="start_date">Từ ngày</label>
-                            <input type="date" name="start_date" id="start_date" class="form-control"
-                                value="{{ $startDate->format('Y-m-d') }}">
+                            <label for="start_date">Từ
+                                {{ $filter == 'day' ? 'ngày' : ($filter == 'month' ? 'tháng' : 'năm') }}</label>
+                            <input type="{{ $filter == 'day' ? 'date' : ($filter == 'month' ? 'month' : 'number') }}"
+                                name="start_date" id="start_date" class="form-control" value="{{ $startDateStr }}"
+                                {{ $filter == 'year' ? 'min="' . (now()->year - 20) . '" max="' . now()->year . '"' : '' }}>
                         </div>
                         <div class="col-md-3">
-                            <label for="end_date">Đến ngày</label>
-                            <input type="date" name="end_date" id="end_date" class="form-control"
-                                value="{{ $endDate->format('Y-m-d') }}">
+                            <label for="end_date">Đến
+                                {{ $filter == 'day' ? 'ngày' : ($filter == 'month' ? 'tháng' : 'năm') }}</label>
+                            <input type="{{ $filter == 'day' ? 'date' : ($filter == 'month' ? 'month' : 'number') }}"
+                                name="end_date" id="end_date" class="form-control" value="{{ $endDateStr }}"
+                                {{ $filter == 'year' ? 'min="' . (now()->year - 20) . '" max="' . now()->year . '"' : '' }}>
                         </div>
                         <div class="col-md-3 align-self-end">
                             <button type="submit" class="btn btn-primary">Lọc</button>
@@ -103,11 +105,11 @@
                         Chọn loại bộ lọc:
                         <span id="filter-hint">
                             @if ($filter == 'day')
-                                Tối đa 31 ngày
+                                30 ngày gần nhất (tối đa 31 ngày)
                             @elseif ($filter == 'month')
-                                Tối đa 12 tháng
+                                12 tháng trong năm nay (tối đa 12 tháng)
                             @else
-                                Tối đa 10 năm
+                                10 năm tính từ năm nay (tối đa 10 năm)
                             @endif
                         </span>
                     </p>
@@ -118,20 +120,20 @@
         <!-- Thông báo lỗi -->
         <div id="error-alert" class="alert alert-danger d-none" role="alert"></div>
 
-        <!-- 4 Card Thống kê -->
+        <!-- 4 Card Thống kê (Hàng trên: Đơn hàng, Đơn hàng đã hoàn thành, Đơn hàng đã hoàn tiền) -->
         <div class="row g-3 mb-3">
-            <div class="col-md-3 col-xl-3">
+            <div class="col-md-4 col-xl-4">
                 <div class="card border-primary shadow-sm">
                     <div class="card-body text-center">
                         <i class="bi bi-cart fs-3 text-primary mb-2"></i>
-                        <div class="fs-14 mb-2 text-muted">Đơn hàng</div>
+                        <div class="fs-14 mb-2 text-muted">Tổng đơn hàng</div>
                         <div class="fs-24 fw-semibold text-primary" id="new-orders-total">0</div>
                         <div id="new-orders-empty" class="text-muted mt-2 d-none">Không có dữ liệu</div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-3 col-xl-3">
+            <div class="col-md-4 col-xl-4">
                 <div class="card border-primary shadow-sm">
                     <div class="card-body text-center">
                         <i class="bi bi-check-circle fs-3 text-primary mb-2"></i>
@@ -142,7 +144,21 @@
                 </div>
             </div>
 
-            <div class="col-md-3 col-xl-3">
+            <div class="col-md-4 col-xl-4">
+                <div class="card border-primary shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-arrow-return-left fs-3 text-primary mb-2"></i>
+                        <div class="fs-14 mb-2 text-muted">Đơn hàng đã hoàn tiền</div>
+                        <div class="fs-24 fw-semibold text-primary" id="refunded-orders-total">0</div>
+                        <div id="refunded-orders-empty" class="text-muted mt-2 d-none">Không có dữ liệu</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3 Card Thống kê (Hàng dưới: Doanh thu, Tổng tiền hoàn, Khách hàng mới) -->
+        <div class="row g-3 mb-3">
+            <div class="col-md-4 col-xl-4">
                 <div class="card border-primary shadow-sm">
                     <div class="card-body text-center">
                         <i class="bi bi-currency-exchange fs-3 text-primary mb-2"></i>
@@ -153,11 +169,22 @@
                 </div>
             </div>
 
-            <div class="col-md-3 col-xl-3">
+            <div class="col-md-4 col-xl-4">
+                <div class="card border-primary shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-wallet fs-3 text-primary mb-2"></i>
+                        <div class="fs-14 mb-2 text-muted">Tổng tiền đã hoàn</div>
+                        <div class="fs-24 fw-semibold text-primary" id="total-refunded-total">0 ₫</div>
+                        <div id="total-refunded-empty" class="text-muted mt-2 d-none">Không có dữ liệu</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-xl-4">
                 <div class="card border-primary shadow-sm">
                     <div class="card-body text-center">
                         <i class="bi bi-people fs-3 text-primary mb-2"></i>
-                        <div class="fs-14 mb-2 text-muted">Khách hàng mới</div>
+                        <div class="fs-14 mb-2 text-muted">Người dùng</div>
                         <div class="fs-24 fw-semibold text-primary" id="new-users-total">0</div>
                         <div id="new-users-empty" class="text-muted mt-2 d-none">Không có dữ liệu</div>
                     </div>
@@ -284,36 +311,57 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                // Khởi tạo Flatpickr
-                flatpickr('#start_date, #end_date', {
-                    dateFormat: 'Y-m-d',
-                    maxDate: 'today',
-                    onChange: (selectedDates, dateStr, instance) => {
-                        if (instance.element.id === 'start_date') {
-                            const endPicker = document.querySelector('#end_date')._flatpickr;
-                            const filter = document.querySelector('#filter').value;
-                            const maxDate = new Date(selectedDates[0]);
-
-                            if (filter === 'day') {
-                                maxDate.setDate(maxDate.getDate() + 31);
-                            } else if (filter === 'month') {
-                                maxDate.setFullYear(maxDate.getFullYear() + 1);
-                            } else {
-                                maxDate.setFullYear(maxDate.getFullYear() + 10);
-                            }
-                            endPicker.set('minDate', selectedDates[0]);
-                            endPicker.set('maxDate', maxDate);
-                        }
-                    }
-                });
-
                 // Cập nhật hint khi thay đổi bộ lọc
                 const filterSelect = document.querySelector('#filter');
                 const filterHint = document.querySelector('#filter-hint');
+                const startLabel = document.querySelector('label[for="start_date"]');
+                const endLabel = document.querySelector('label[for="end_date"]');
+                const startInput = document.querySelector('#start_date');
+                const endInput = document.querySelector('#end_date');
+                const currentYear = new Date().getFullYear();
+
                 filterSelect.addEventListener('change', () => {
-                    if (filterSelect.value === 'day') filterHint.textContent = 'Tối đa 31 ngày';
-                    else if (filterSelect.value === 'month') filterHint.textContent = 'Tối đa 12 tháng';
-                    else filterHint.textContent = 'Tối đa 10 năm';
+                    const filterValue = filterSelect.value;
+                    let hintText = '';
+                    let typeText = '';
+                    let inputType = '';
+
+                    if (filterValue === 'day') {
+                        hintText = '30 ngày gần nhất (tối đa 31 ngày)';
+                        typeText = 'ngày';
+                        inputType = 'date';
+                    } else if (filterValue === 'month') {
+                        hintText = '12 tháng trong năm nay (tối đa 12 tháng)';
+                        typeText = 'tháng';
+                        inputType = 'month';
+                    } else {
+                        hintText = '10 năm tính từ năm nay (tối đa 10 năm)';
+                        typeText = 'năm';
+                        inputType = 'number';
+                    }
+
+                    filterHint.textContent = hintText;
+                    startLabel.textContent = `Từ ${typeText}`;
+                    endLabel.textContent = `Đến ${typeText}`;
+                    startInput.type = inputType;
+                    endInput.type = inputType;
+
+                    if (filterValue === 'year') {
+                        startInput.min = currentYear - 20;
+                        startInput.max = currentYear;
+                        endInput.min = currentYear - 20;
+                        endInput.max = currentYear;
+                    } else {
+                        startInput.removeAttribute('min');
+                        startInput.removeAttribute('max');
+                        endInput.removeAttribute('min');
+                        endInput.removeAttribute('max');
+                    }
+
+                    // Clear values to use defaults
+                    startInput.value = '';
+                    endInput.value = '';
+
                     document.querySelector('#filter-form').submit();
                 });
 
@@ -331,7 +379,7 @@
                     }
 
                     // Tính toán chiều rộng biểu đồ dựa trên số lượng nhãn
-                    const chartWidth = filter === 'day' ? Math.max(100, labels.length * 50) + '%' : '100%';
+                    const chartWidth = filter === 'day' ? Math.max(100, labels.length * 10) + '%' : '100%';
 
                     const options = {
                         series: [{
@@ -341,14 +389,14 @@
                         chart: {
                             type: 'line',
                             height: 350,
-                            width: chartWidth, // Động rộng dựa trên số nhãn
+                            width: chartWidth,
                             zoom: {
-                                enabled: filter === 'day', // Chỉ bật zoom khi lọc theo ngày
+                                enabled: filter === 'day',
                                 type: 'x',
                                 autoScaleYaxis: true
                             },
                             toolbar: {
-                                show: filter === 'day', // Chỉ hiển thị toolbar khi lọc theo ngày
+                                show: filter === 'day',
                                 tools: {
                                     zoom: true,
                                     zoomin: true,
@@ -358,7 +406,7 @@
                                 }
                             },
                             animations: {
-                                enabled: filter === 'day', // Tắt animation cho tháng/năm để tránh flicker
+                                enabled: filter === 'day',
                                 easing: 'easeinout',
                                 speed: 800,
                                 animateGradually: {
@@ -383,10 +431,10 @@
                             enabled: false
                         },
                         xaxis: {
-                            type: 'category', // Explicitly set to category for string labels
+                            type: 'category',
                             categories: labels,
                             labels: {
-                                rotate: 0, // Không xoay nhãn cho mọi kiểu lọc
+                                rotate: 0,
                                 rotateAlways: false,
                                 trim: false,
                                 style: {
@@ -404,7 +452,7 @@
                                 tickAmount: filter === 'day' ? Math.ceil(labels.length / 5) : undefined
                             },
                             scrollbar: {
-                                enabled: filter === 'day' // Thanh cuộn chỉ bật khi lọc theo ngày
+                                enabled: filter === 'day'
                             }
                         },
                         yaxis: {
@@ -420,19 +468,19 @@
                         tooltip: {
                             enabled: true,
                             shared: false,
-                            intersect: false, // Tắt intersect để hover dễ dàng hơn
-                            followCursor: true, // Tooltip theo con trỏ để mượt mà
+                            intersect: false,
+                            followCursor: true,
                             fixed: {
-                                enabled: filter !== 'day', // Cố định tooltip cho tháng/năm
+                                enabled: filter !== 'day',
                                 position: 'topRight',
                                 offsetX: 0,
                                 offsetY: 0
                             },
                             onDatasetHover: {
-                                highlightDataSeries: false // Tắt highlight để giảm flicker
+                                highlightDataSeries: false
                             },
                             marker: {
-                                show: filter === 'day' // Tắt marker cho tháng/năm
+                                show: filter === 'day'
                             },
                             x: {
                                 show: true,
@@ -441,13 +489,13 @@
                                 }) {
                                     const date = labels[dataPointIndex];
                                     if (!date) return '';
-                                    return filter === 'year' ? date :
-                                        filter === 'month' ? date :
-                                        new Date(date).toLocaleDateString('vi-VN', {
-                                            day: '2-digit',
-                                            month: '2-digit',
-                                            year: 'numeric'
-                                        });
+                                    if (filter === 'year') return date;
+                                    if (filter === 'month') return date;
+                                    return new Date(date).toLocaleDateString('vi-VN', {
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: 'numeric'
+                                    });
                                 }
                             },
                             y: {
@@ -510,7 +558,12 @@
                         document.querySelector('#sales-total').textContent = data.sales?.total ?? 0;
                         document.querySelector('#revenue-total').textContent = Number(data.revenue?.total ?? 0)
                             .toLocaleString('vi-VN') + ' ₫';
+                        document.querySelector('#total-refunded-total').textContent = Number(data.total_refunded
+                                ?.total ?? 0)
+                            .toLocaleString('vi-VN') + ' ₫';
                         document.querySelector('#new-users-total').textContent = data.new_users?.total ?? 0;
+                        document.querySelector('#refunded-orders-total').textContent = data.refunded_orders
+                            ?.total ?? 0;
 
                         // Cập nhật thông báo dữ liệu trống
                         document.querySelector('#new-orders-empty').classList.toggle('d-none', !data.new_orders
@@ -518,8 +571,12 @@
                         document.querySelector('#sales-empty').classList.toggle('d-none', !data.sales?.empty);
                         document.querySelector('#revenue-empty').classList.toggle('d-none', !data.revenue
                             ?.empty);
+                        document.querySelector('#total-refunded-empty').classList.toggle('d-none', !data
+                            .total_refunded?.empty);
                         document.querySelector('#new-users-empty').classList.toggle('d-none', !data.new_users
                             ?.empty);
+                        document.querySelector('#refunded-orders-empty').classList.toggle('d-none', !data
+                            .refunded_orders?.empty);
 
                         // Chuyển dữ liệu doanh thu sang số
                         const revenueData = data.revenue?.data.map(Number) ?? [];
@@ -611,12 +668,14 @@
                                     'Đang vận chuyển': 'text-primary',
                                     'Giao hàng thành công': 'text-success',
                                     'Hủy đơn': 'text-danger',
-                                    'Đã nhận hàng': 'text-success'
+                                    'Đã nhận hàng': 'text-success',
+                                    'Đã hoàn hàng': 'text-warning'
                                 } [order.order_status] || 'text-muted';
                                 const paymentStatusClass = {
                                     'pending': 'text-warning',
                                     'paid': 'text-success',
-                                    'failed': 'text-danger'
+                                    'failed': 'text-danger',
+                                    'refunded': 'text-info'
                                 } [order.payment_status] || 'text-muted';
                                 currentOrdersTbody.innerHTML += `
     <tr>
@@ -628,7 +687,7 @@
         </td>
         <td>${Number(order.total_amount || 0).toLocaleString('vi-VN')} ₫</td>
         <td colspan="2">
-            <p class="mb-0 ${orderStatusClass}">${order.order_status || 'N/A'}</p>
+            <p class="mb-0 ${orderStatusClass}">${order.order_status === 'Đã nhận hàng' ? 'Hoàn tất đơn hàng' : order.order_status || 'N/A'}</p>
         </td>
         <td colspan="2">
             <p class="mb-0 ${paymentStatusClass}">${order.payment_status_translated || 'N/A'}</p>
@@ -654,6 +713,10 @@
                 // Gọi API khi form submit
                 document.querySelector('#filter-form').addEventListener('submit', (e) => {
                     e.preventDefault();
+                    const filter = document.querySelector('#filter').value;
+                    const startDate = document.querySelector('#start_date').value;
+                    const endDate = document.querySelector('#end_date').value;
+                    console.log('Filter:', filter, 'Start Date:', startDate, 'End Date:', endDate);
                     loadDashboardData();
                 });
 

@@ -135,9 +135,11 @@
                                 <option value="">Tất cả trạng thái</option>
                                 @foreach ($statuses as $status)
                                     <option value="{{ $status }}"
-                                        {{ request()->query('status') == $status ? 'selected' : '' }}>{{ $status }}
+                                        {{ request()->query('status') == $status ? 'selected' : '' }}>
+                                        {{ $status == 'Đã nhận hàng' ? 'Hoàn tất đơn hàng' : $status }}
                                     </option>
                                 @endforeach
+
                             </select>
                             <select id="payment-status" class="form-select">
                                 <option value="">Tất cả thanh toán</option>
@@ -157,6 +159,10 @@
                                                 Thanh toán thất bại
                                             @break
 
+                                            @case('refunded')
+                                                Đã hoàn tiền
+                                            @break
+
                                             @default
                                                 Không rõ
                                         @endswitch
@@ -170,7 +176,7 @@
                                     value="{{ request()->query('end_date') }}">
                             </div>
                             <button id="apply-filter" class="btn btn-success mt-2 w-100">Áp dụng</button>
-                            <button id="reset-filter" class="btn btn-primary mt-2 w-100">Làm mới</button>
+                            <button id="reset-filter" class="btn btn-primary mt-2 w-100">Làm mới</button>
                         </div>
                     </div>
                 </div>
@@ -243,9 +249,20 @@
                                     <p><strong>Ngày đặt:</strong> {{ $order->created_at->format('H:i d/m/Y') }}</p>
                                     <p><strong>Phương thức thanh toán:</strong> {{ $order->payment_method_name }}</p>
                                     <p><strong>Trạng thái:</strong>
-                                        @php $badgeClass = ['Chưa xác nhận' => 'secondary', 'Xác nhận' => 'primary', 'Đang vận chuyển' => 'info', 'Giao hàng thành công' => 'success', 'Đã nhận hàng' => 'success', 'Đã hủy' => 'danger'][$order->order_status] ?? 'dark'; @endphp
+                                        @php
+                                            $badgeClass =
+                                                [
+                                                    'Chưa xác nhận' => 'secondary',
+                                                    'Xác nhận' => 'primary',
+                                                    'Đang vận chuyển' => 'info',
+                                                    'Giao hàng thành công' => 'success',
+                                                    'Đã nhận hàng' => 'success',
+                                                    'Đã hủy' => 'danger',
+                                                    'Đã hoàn hàng' => 'success', // Thêm trạng thái Đã hoàn hàng
+                                                ][$order->order_status] ?? 'dark';
+                                        @endphp
                                         <span
-                                            class="badge bg-{{ $badgeClass }} status">{{ $order->order_status }}</span>
+                                            class="badge bg-{{ $badgeClass }} status">{{ $order->order_status == 'Đã nhận hàng' ? 'Đơn hàng hoàn tất' : $order->order_status }}</span>
                                     </p>
                                     <p><strong>Thanh toán:</strong>
                                         @php
@@ -262,6 +279,10 @@
                                                 case 'failed':
                                                     $paymentLabel = 'Thanh toán thất bại';
                                                     $badgeClass = 'danger';
+                                                    break;
+                                                case 'refunded':
+                                                    $paymentLabel = 'Đã hoàn tiền';
+                                                    $badgeClass = 'success';
                                                     break;
                                                 default:
                                                     $paymentLabel = 'Không rõ';
@@ -285,7 +306,7 @@
                                             @if ($order->canBeCancel())
                                                 <li><a class="dropdown-item text-danger"
                                                         onclick="toggleCancelForm({{ $order->id }})"><i
-                                                            class="ri-delete-bin-line me-1"></i>Huỷ đơn</a></li>
+                                                            class="ri-delete-bin-line me-1"></i>Hủy đơn</a></li>
                                             @endif
                                         </ul>
                                     </div>
@@ -391,22 +412,12 @@
 
             // Reset bộ lọc
             document.getElementById('reset-filter').addEventListener('click', function() {
-                let url = new URL(window.location);
-                url.searchParams.delete('sku');
-                url.searchParams.delete('status');
-                url.searchParams.delete('payment');
-                url.searchParams.delete('start_date');
-                url.searchParams.delete('end_date');
-                url.searchParams.set('sort', 'newest');
-                url.searchParams.delete('page');
-
                 document.getElementById('order-sku').value = '';
                 document.getElementById('order-status').value = '';
                 document.getElementById('payment-status').value = '';
                 document.getElementById('start-date').value = '';
                 document.getElementById('end-date').value = '';
-
-                fetchOrders(url.toString());
+                window.location.href = '{{ route('orders.list') }}'; // Reload trang gốc, xóa hết params
             });
 
             // Xử lý phân trang
