@@ -93,7 +93,7 @@
 
                     </li>
                     <li>
-                        <a class='tp-link' href="{{ route('admin.refunds.index') }}">yêu cầu hoàn hàng</a>
+                        <a class='tp-link' href="{{ route('admin.refunds.index') }}">Yêu cầu hoàn hàng</a>
 
                     </li>
                     <li>
