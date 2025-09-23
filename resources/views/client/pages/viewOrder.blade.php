@@ -135,7 +135,8 @@
                                 <option value="">Tất cả trạng thái</option>
                                 @foreach ($statuses as $status)
                                     <option value="{{ $status }}"
-                                        {{ request()->query('status') == $status ? 'selected' : '' }}>{{ $status }}
+                                        {{ request()->query('status') == $status ? 'selected' : '' }}>
+                                        {{ $status == 'Đã nhận hàng' ? 'Hoàn tất đơn hàng' : $status }}
                                     </option>
                                 @endforeach
 
@@ -261,7 +262,7 @@
                                                 ][$order->order_status] ?? 'dark';
                                         @endphp
                                         <span
-                                            class="badge bg-{{ $badgeClass }} status">{{ $order->order_status }}</span>
+                                            class="badge bg-{{ $badgeClass }} status">{{ $order->order_status == 'Đã nhận hàng' ? 'Đơn hàng hoàn tất' : $order->order_status }}</span>
                                     </p>
                                     <p><strong>Thanh toán:</strong>
                                         @php

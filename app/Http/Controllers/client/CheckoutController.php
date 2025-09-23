@@ -361,11 +361,10 @@ class CheckoutController extends Controller
         if ($order->user_id !== $user->id) {
             return redirect()->route('orders.list')->with('error', 'Bạn không có quyền xem đơn hàng này.');
         }
-        $shippingFee = WebInfo::where('key', 'delivery_cost')->first()->value;
 
         $order->load('items.review', 'refund');
 
-        return view('client.pages.invoice', compact('order', 'user', 'shippingFee'));
+        return view('client.pages.invoice', compact('order', 'user'));
     }
 
     public function cancel($sku)

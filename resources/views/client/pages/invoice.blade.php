@@ -78,7 +78,8 @@
                                             </div>
                                             <div>
                                                 <span>Trạng thái đơn hàng: </span>
-                                                <span class="badge bg-primary">{{ $order->order_status }}</span>
+                                                <span
+                                                    class="badge bg-primary">{{ $order->order_status == 'Đã nhận hàng' ? 'Đơn hàng hoàn tất' : $order->order_status }}</span>
                                             </div>
                                             <div>
                                                 <span>Trạng thái thanh toán: </span>
@@ -331,7 +332,7 @@
                 </div>
                 <div class="modal-body">
                     @php
-                        $refund_cost = $order->total_amount - $shippingFee;
+                        $refund_cost = $order->total_amount - $order->shipping_fee;
                     @endphp
                     <div class="alert alert-info mb-3">
                         Số tiền được hoàn trả của bạn là {{ number_format($refund_cost, 0, ',', '.') }} đ

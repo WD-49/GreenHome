@@ -127,7 +127,7 @@
                                         $allowedTransitions = [
                                             'pending' => ['approved', 'rejected'],
                                             'approved' => ['rejected'],
-                                            'refund_pending' => ['refunded', 'rejected', 'account_invalid'], // Thêm account_invalid từ refund_pending
+                                            'refund_pending' => ['refunded', 'account_invalid'], // Thêm account_invalid từ refund_pending
                                             'rejected' => [],
                                             'account_invalid' => ['rejected'], // Cho phép quay lại refund_pending nếu khách cập nhật lại, nhưng admin không chọn refund_pending
                                             'refunded' => [],
@@ -199,9 +199,10 @@
                                                                 {{ number_format($refund->refund_cost ?? 0, 0, ',', '.') }}
                                                                 đ</p>
                                                             <p><strong>Tài khoản ngân hàng:</strong><br>
-                                                                {{ $refund->refund_account_name ?? 'N/A' }} -
-                                                                {{ $refund->refund_account_bank ?? 'N/A' }}<br>
-                                                                Số TK: {{ $refund->refund_account_number ?? 'N/A' }}
+                                                                {{ $refund->refund_account_name ?? '' }} -
+                                                                {{ $refund->refund_account_bank ?? 'chưa cung cấp' }}<br>
+                                                                Số TK:
+                                                                {{ $refund->refund_account_number ?? 'chưa cung cấp' }}
                                                             </p>
                                                             <p><strong>Ảnh QR Code:</strong><br>
                                                                 @if ($refund->refund_account_qr)

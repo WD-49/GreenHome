@@ -120,20 +120,20 @@
         <!-- Thông báo lỗi -->
         <div id="error-alert" class="alert alert-danger d-none" role="alert"></div>
 
-        <!-- 4 Card Thống kê -->
+        <!-- 4 Card Thống kê (Hàng trên: Đơn hàng, Đơn hàng đã hoàn thành, Đơn hàng đã hoàn tiền) -->
         <div class="row g-3 mb-3">
-            <div class="col-md-3 col-xl-3">
+            <div class="col-md-4 col-xl-4">
                 <div class="card border-primary shadow-sm">
                     <div class="card-body text-center">
                         <i class="bi bi-cart fs-3 text-primary mb-2"></i>
-                        <div class="fs-14 mb-2 text-muted">Đơn hàng</div>
+                        <div class="fs-14 mb-2 text-muted">Tổng đơn hàng</div>
                         <div class="fs-24 fw-semibold text-primary" id="new-orders-total">0</div>
                         <div id="new-orders-empty" class="text-muted mt-2 d-none">Không có dữ liệu</div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-3 col-xl-3">
+            <div class="col-md-4 col-xl-4">
                 <div class="card border-primary shadow-sm">
                     <div class="card-body text-center">
                         <i class="bi bi-check-circle fs-3 text-primary mb-2"></i>
@@ -144,7 +144,21 @@
                 </div>
             </div>
 
-            <div class="col-md-3 col-xl-3">
+            <div class="col-md-4 col-xl-4">
+                <div class="card border-primary shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-arrow-return-left fs-3 text-primary mb-2"></i>
+                        <div class="fs-14 mb-2 text-muted">Đơn hàng đã hoàn tiền</div>
+                        <div class="fs-24 fw-semibold text-primary" id="refunded-orders-total">0</div>
+                        <div id="refunded-orders-empty" class="text-muted mt-2 d-none">Không có dữ liệu</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3 Card Thống kê (Hàng dưới: Doanh thu, Tổng tiền hoàn, Khách hàng mới) -->
+        <div class="row g-3 mb-3">
+            <div class="col-md-4 col-xl-4">
                 <div class="card border-primary shadow-sm">
                     <div class="card-body text-center">
                         <i class="bi bi-currency-exchange fs-3 text-primary mb-2"></i>
@@ -155,11 +169,22 @@
                 </div>
             </div>
 
-            <div class="col-md-3 col-xl-3">
+            <div class="col-md-4 col-xl-4">
+                <div class="card border-primary shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-wallet fs-3 text-primary mb-2"></i>
+                        <div class="fs-14 mb-2 text-muted">Tổng tiền đã hoàn</div>
+                        <div class="fs-24 fw-semibold text-primary" id="total-refunded-total">0 ₫</div>
+                        <div id="total-refunded-empty" class="text-muted mt-2 d-none">Không có dữ liệu</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-xl-4">
                 <div class="card border-primary shadow-sm">
                     <div class="card-body text-center">
                         <i class="bi bi-people fs-3 text-primary mb-2"></i>
-                        <div class="fs-14 mb-2 text-muted">Khách hàng mới</div>
+                        <div class="fs-14 mb-2 text-muted">Người dùng</div>
                         <div class="fs-24 fw-semibold text-primary" id="new-users-total">0</div>
                         <div id="new-users-empty" class="text-muted mt-2 d-none">Không có dữ liệu</div>
                     </div>
@@ -533,7 +558,12 @@
                         document.querySelector('#sales-total').textContent = data.sales?.total ?? 0;
                         document.querySelector('#revenue-total').textContent = Number(data.revenue?.total ?? 0)
                             .toLocaleString('vi-VN') + ' ₫';
+                        document.querySelector('#total-refunded-total').textContent = Number(data.total_refunded
+                                ?.total ?? 0)
+                            .toLocaleString('vi-VN') + ' ₫';
                         document.querySelector('#new-users-total').textContent = data.new_users?.total ?? 0;
+                        document.querySelector('#refunded-orders-total').textContent = data.refunded_orders
+                            ?.total ?? 0;
 
                         // Cập nhật thông báo dữ liệu trống
                         document.querySelector('#new-orders-empty').classList.toggle('d-none', !data.new_orders
@@ -541,8 +571,12 @@
                         document.querySelector('#sales-empty').classList.toggle('d-none', !data.sales?.empty);
                         document.querySelector('#revenue-empty').classList.toggle('d-none', !data.revenue
                             ?.empty);
+                        document.querySelector('#total-refunded-empty').classList.toggle('d-none', !data
+                            .total_refunded?.empty);
                         document.querySelector('#new-users-empty').classList.toggle('d-none', !data.new_users
                             ?.empty);
+                        document.querySelector('#refunded-orders-empty').classList.toggle('d-none', !data
+                            .refunded_orders?.empty);
 
                         // Chuyển dữ liệu doanh thu sang số
                         const revenueData = data.revenue?.data.map(Number) ?? [];
@@ -635,7 +669,7 @@
                                     'Giao hàng thành công': 'text-success',
                                     'Hủy đơn': 'text-danger',
                                     'Đã nhận hàng': 'text-success',
-                                    'Đã hoàn hàng': 'text-primary'
+                                    'Đã hoàn hàng': 'text-warning'
                                 } [order.order_status] || 'text-muted';
                                 const paymentStatusClass = {
                                     'pending': 'text-warning',
@@ -653,7 +687,7 @@
         </td>
         <td>${Number(order.total_amount || 0).toLocaleString('vi-VN')} ₫</td>
         <td colspan="2">
-            <p class="mb-0 ${orderStatusClass}">${order.order_status || 'N/A'}</p>
+            <p class="mb-0 ${orderStatusClass}">${order.order_status === 'Đã nhận hàng' ? 'Hoàn tất đơn hàng' : order.order_status || 'N/A'}</p>
         </td>
         <td colspan="2">
             <p class="mb-0 ${paymentStatusClass}">${order.payment_status_translated || 'N/A'}</p>

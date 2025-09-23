@@ -182,7 +182,6 @@ class RefundController extends Controller
             'refund_qr_image' => 'nullable|image|max:2048',
         ]);
 
-        $shippingFee = WebInfo::where('key', 'delivery_cost')->first()->value;
 
         $refund = RefundTransaction::findOrFail($request->refund_id);
 
@@ -207,7 +206,7 @@ class RefundController extends Controller
 
         // Gán refund_cost nếu trạng thái là approved
         if ($refund->refund_status === 'approved') {
-            $data['refund_cost'] = $refund->order->total_amount - $shippingFee;
+            $data['refund_cost'] = $refund->order->total_amount - $refund->order->shipping_fee;
             $data['admin_note'] = 'Thông tin tài khoản đã được gửi, vui lòng chờ xử lý hoàn tiền.';
         } else {
             $data['admin_note'] = 'Đã cung cấp lại thông tin tài khoản sau khi tài khoản không hợp lệ.';

@@ -64,11 +64,33 @@ class DashboardController extends Controller
                 ->orderByRaw($groupBy)
                 ->get();
 
-            // Revenue
-            $revenue = Order::selectRaw("{$groupBy} as date, SUM(total_amount) as total")
+            // Refunded Orders
+            $refundedOrders = Order::selectRaw("{$groupBy} as date, COUNT(*) as count")
                 ->whereBetween('created_at', [$startDate, $endDate])
-                ->where('order_status', 'Đã nhận hàng')
-                ->where('payment_status', 'paid')
+                ->where('order_status', 'Đã hoàn hàng')
+                ->where('payment_status', 'refunded')
+                ->groupByRaw($groupBy)
+                ->orderByRaw($groupBy)
+                ->get();
+
+            // Revenue
+            $revenue = Order::selectRaw("{$groupBy} as date, SUM(
+                CASE 
+                    WHEN order_status = 'Đã nhận hàng' AND payment_status = 'paid' THEN total_amount 
+                    WHEN order_status = 'Đã hoàn hàng' AND payment_status = 'refunded' THEN shipping_fee 
+                    ELSE 0 
+                END
+            ) as total")
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->groupByRaw($groupBy)
+                ->orderByRaw($groupBy)
+                ->get();
+
+            // Total Refunded
+            $totalRefunded = DB::table('refund_transactions')
+                ->selectRaw("{$groupBy} as date, SUM(refund_cost) as total")
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->where('refund_status', 'refunded')
                 ->groupByRaw($groupBy)
                 ->orderByRaw($groupBy)
                 ->get();
@@ -120,7 +142,7 @@ class DashboardController extends Controller
                     'product_variants.image'
                 )
                 ->orderByDesc('sold')
-                ->limit(4)
+                ->limit(5)
                 ->get();
 
             // Top Rated Products
@@ -180,18 +202,24 @@ class DashboardController extends Controller
             $newOrdersData = [];
             $salesData = [];
             $revenueData = [];
+            $totalRefundedData = [];
             $newUsersData = [];
+            $refundedOrdersData = [];
 
             foreach ($labels as $label) {
                 $newOrderRecord = $newOrders->where('date', $label['key'])->first();
                 $salesRecord = $sales->where('date', $label['key'])->first();
                 $revenueRecord = $revenue->where('date', $label['key'])->first();
+                $totalRefundedRecord = $totalRefunded->where('date', $label['key'])->first();
                 $newUsersRecord = $newUsers->where('date', $label['key'])->first();
+                $refundedOrdersRecord = $refundedOrders->where('date', $label['key'])->first();
 
                 $newOrdersData[] = $newOrderRecord ? $newOrderRecord->count : 0;
                 $salesData[] = $salesRecord ? $salesRecord->count : 0;
                 $revenueData[] = $revenueRecord ? $revenueRecord->total : 0;
+                $totalRefundedData[] = $totalRefundedRecord ? $totalRefundedRecord->total : 0;
                 $newUsersData[] = $newUsersRecord ? $newUsersRecord->count : 0;
+                $refundedOrdersData[] = $refundedOrdersRecord ? $refundedOrdersRecord->count : 0;
             }
 
             $data = [
@@ -211,10 +239,20 @@ class DashboardController extends Controller
                     'data' => $revenueData,
                     'empty' => $revenue->isEmpty(),
                 ],
+                'total_refunded' => [
+                    'total' => $totalRefunded->sum('total') ?? 0,
+                    'data' => $totalRefundedData,
+                    'empty' => $totalRefunded->isEmpty(),
+                ],
                 'new_users' => [
                     'total' => $newUsers->sum('count') ?? 0,
                     'data' => $newUsersData,
                     'empty' => $newUsers->isEmpty(),
+                ],
+                'refunded_orders' => [
+                    'total' => $refundedOrders->sum('count') ?? 0,
+                    'data' => $refundedOrdersData,
+                    'empty' => $refundedOrders->isEmpty(),
                 ],
                 'top_customers' => $topCustomers->toArray(),
                 'top_selling_products' => $topSellingProducts->toArray(),
